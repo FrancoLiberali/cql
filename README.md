@@ -6,7 +6,7 @@ Backend and Distribution as a Service
 
 To build the project: 
 
-- Install go v1.18
+- [Install go](https://go.dev/dl/#go1.18.4) v1.18
 - Install project dependencies
 ```
 go get
@@ -30,7 +30,6 @@ badaas
 ├ features             ⇨ Contains all the e2e tests.
 ├ resources            ⇨ Contains all the applications resources, like constants or other.
 ├ router               ⇨ Contains the route definitions for application.
-└ vendor               ⇨ Contains all application dependencies
 ```
 
 ### E2E testing
@@ -56,7 +55,7 @@ We use [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as guideline f
 
 Steps to release:
 - Create a new branch labeled `release/vX.Y.Z` from the latest `main`.
-- Improve the version number in `package.json`, `package-lock.json`, `changelog.md` and `resources/api.go`.
+- Improve the version number in `changelog.md` and `resources/api.go`.
 - Verify the content of the `changelog.md`.
 - Commit the modifications with the label `Release version X.Y.Z`.
 - Create a pull request on github for this branch into `main`.
