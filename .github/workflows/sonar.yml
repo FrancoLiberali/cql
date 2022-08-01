@@ -1,0 +1,33 @@
+name: Build
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  sonarcloud:
+    name: SonarCloud
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Install dependencies
+        run: go get
+      - name: Run build
+        run: go build -race
+      - name: Run server
+        run: ./badaas 2>&1 | tee app.log &
+      - name: Run test
+        run:  go test $(go list ./... | grep -v /vendor/) -coverprofile=coverage.out
+      - name: Check race condition
+        run: '! grep -q "WARNING: DATA RACE" app.log'
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
