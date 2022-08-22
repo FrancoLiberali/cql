@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -35,14 +34,14 @@ func (t *TestContext) storeResponseInContext(response *http.Response) {
 
 func (t *TestContext) assertStatusCode(_ context.Context, expectedStatusCode int) error {
 	if t.statusCode != expectedStatusCode {
-		return errors.New(fmt.Sprintf("expect status code %d but is %d", expectedStatusCode, t.statusCode))
+		return fmt.Errorf("expect status code %d but is %d", expectedStatusCode, t.statusCode)
 	}
 	return nil
 }
 func (t *TestContext) assertResponseFieldIsEquals(field string, expectedValue string) error {
 	value := t.json[field].(string)
 	if !assertValue(value, expectedValue) {
-		return errors.New(fmt.Sprintf("expect response field %s is %s but is %s", field, expectedValue, value))
+		return fmt.Errorf("expect response field %s is %s but is %s", field, expectedValue, value)
 	}
 	return nil
 }
