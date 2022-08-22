@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 )
@@ -24,7 +24,7 @@ func (t *TestContext) requestGET(url string) error {
 func (t *TestContext) storeResponseInContext(response *http.Response) {
 	t.statusCode = response.StatusCode
 
-	buffer, err := ioutil.ReadAll(response.Body)
+	buffer, err := io.ReadAll(response.Body)
 	if err != nil {
 		log.Panic(err)
 	}
