@@ -1,0 +1,24 @@
+# DEVELOPMENT ONLY, DO NOT USE FOR PRODUCTION
+version: '3.5'
+
+services:
+  db:
+    build: db/.
+    ports:
+      - "26257:26257"
+      - "8080:8080" # Web based dashboard
+    volumes:
+      - "${PWD}/_temp/cockroach-data/crdb:/cockroach/cockroach-data"
+    environment:
+      - COCKROACH_USER=root
+      - COCKROACH_DB=badaas_db
+
+  api:
+    build:
+      context: ./../..
+      dockerfile: ./scripts/e2e/api/Dockerfile
+    ports:
+      - "8000:8000"
+    restart: always
+    # depends_on:
+    #   - db
