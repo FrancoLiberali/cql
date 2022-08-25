@@ -1,21 +1,26 @@
 package controllers
 
 import (
-	"github.com/bitly/go-simplejson"
-	"github.com/ditrit/badaas/resources"
+	"encoding/json"
 	"net/http"
+
+	"github.com/ditrit/badaas/persistence/models"
+	"github.com/ditrit/badaas/resources"
 )
 
 // Info controller, return json with status and version of api.
 func Info(response http.ResponseWriter, _ *http.Request) {
-	json := simplejson.New()
-	json.Set("status", "OK")
-	json.Set("version", resources.Version)
 
-	response.WriteHeader(http.StatusOK)
-	payload, _ := json.MarshalJSON()
+	infos := models.BadaasServerInfo{
+		Status:  "OK",
+		Version: resources.Version,
+	}
 
-	response.WriteHeader(http.StatusOK)
+	payload, err := json.Marshal(&infos)
+	if err != nil {
+		http.Error(response, "error while marshaling response", http.StatusInternalServerError)
+	}
+
 	response.Header().Set("Content-Type", "application/json")
 	response.Write(payload)
 }
