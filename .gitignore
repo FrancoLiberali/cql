@@ -28,3 +28,6 @@ node*
 
 # binary output
 badaas
+
+# temporary directories
+_temp
