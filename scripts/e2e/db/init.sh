@@ -12,7 +12,7 @@ echo "******************************* Creating user"
 
 echo "******************************* Init database"
 echo "*******************************  |=> Creating init.sql"
-COCKROACH_DB = root
+
 cat > init.sql <<EOF
 -- Create Database
 CREATE DATABASE IF NOT EXISTS ${COCKROACH_DB} ;
