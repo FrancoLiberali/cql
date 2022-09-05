@@ -26,10 +26,13 @@ This is the default directory structure we use for the project:
 
 ```
 badaas
+├ commands             ⇨ Contains all the CLI commands.
+├ configuration        ⇨ Contains configuration holders.
 ├ controllers          ⇨ Contains all the web controllers.
 ├ features             ⇨ Contains all the e2e tests.
 ├ resources            ⇨ Contains all the applications resources, like constants or other.
 ├ router               ⇨ Contains the route definitions for application.
+├ scripts              ⇨ Contains shell scripts, the Docker files and docker-compose files for e2e test.
 ```
 
 ### E2E testing
@@ -38,12 +41,9 @@ We use [godog](https://github.com/cucumber/godog) to run all e2e tests.
 
 To execute E2E tests :
 
-```
-# Build the project
-go build
-
-# Run the application
-./badaas
+```bash
+# Build containers and launch db and api .
+docker compose -f "scripts/e2e/docker-compose.yml" up --build
 
 # In another process, run the test
 go test
