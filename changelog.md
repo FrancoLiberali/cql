@@ -13,5 +13,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Setup e2e test solution (cucumber + docker).
 - Setup Docker based build system.
 - Add default api endpoint `info`
+- Setup command based pattern using verdeter
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased
