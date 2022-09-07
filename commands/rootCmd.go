@@ -2,39 +2,43 @@ package commands
 
 import (
 	"fmt"
-	"log"
 	"net/http"
-	"time"
 
+	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/router"
 	"github.com/ditrit/verdeter"
 	"github.com/ditrit/verdeter/validators"
-	"github.com/spf13/viper"
 )
+
+// Run the http server for badaas
+func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
+	// configuration holder for the http server
+	// get the config value with the correct types by using the method on this struct
+	httpServerConfig := configuration.NewHTTPServerConfiguration()
+
+	router := router.SetupRouter()
+
+	address := fmt.Sprintf("%s:%d",
+		httpServerConfig.GetHost(),
+		httpServerConfig.GetPort(),
+	)
+	srv := &http.Server{
+		Handler: router,
+		Addr:    address,
+
+		WriteTimeout: httpServerConfig.GetMaxTimout(),
+		ReadTimeout:  httpServerConfig.GetMaxTimout(),
+	}
+
+	fmt.Printf("Ready to serve at %s\n", address)
+	return srv.ListenAndServe()
+}
 
 var rootCfg = verdeter.NewVerdeterCommand(
 	"badaas",
-
 	"Backend and Distribution as a Service",
-
 	`Badaas stands for Backend and Distribution as a Service.`,
-
-	func(cfg *verdeter.VerdeterCommand, args []string) error {
-		router := router.SetupRouter()
-
-		address := fmt.Sprintf("%s:%d", viper.Get("host"), viper.GetInt("port"))
-		srv := &http.Server{
-			Handler: router,
-			Addr:    address,
-
-			WriteTimeout: time.Duration(viper.GetInt("max_timeout")) * time.Second,
-			ReadTimeout:  time.Duration(viper.GetInt("max_timeout")) * time.Second,
-		}
-
-		fmt.Printf("Ready to serve at %s\n", address)
-		log.Fatal(srv.ListenAndServe())
-		return nil
-	},
+	runHTTPServer,
 )
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -48,18 +52,6 @@ func init() {
 
 	rootCfg.GKey("config_path", verdeter.IsStr, "", "Path to the config file/directory")
 	rootCfg.SetDefault("config_path", ".")
-	rootCfg.SetNormalize("config_path", func(val interface{}) interface{} {
-		strval, ok := val.(string)
-		if ok && strval != "" {
-			lastChar := strval[len(strval)-1:]
-			if lastChar != "/" {
-				return strval + "/"
-			}
-			return strval
-		}
-
-		return nil
-	})
 
 	rootCfg.GKey("max_timeout", verdeter.IsInt, "", "maximum timeout (in second)")
 	rootCfg.SetDefault("max_timeout", 15)
