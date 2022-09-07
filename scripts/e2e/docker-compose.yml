@@ -20,5 +20,8 @@ services:
     ports:
       - "8000:8000"
     restart: always
-    # depends_on:
-    #   - db
+    # environment:
+      # - BADAAS_PORT=8000
+      # - BADAAS_MAX_TIMOUT= 15 # in seconds
+    depends_on:
+      - db

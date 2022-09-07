@@ -1,0 +1,3 @@
+port: 8000
+host: "" # listening on all interfaces
+max_timeout: 15 # in seconds
