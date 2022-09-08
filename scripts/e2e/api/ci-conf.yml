@@ -1,3 +1,11 @@
 port: 8000
 host: "0.0.0.0" # listening on all interfaces
 max_timeout: 15 # in seconds
+
+database:
+  host: e2e-db-1
+  port: 26257
+  sslmode: disable
+  username: root
+  password: postres
+  name: badaas_db
