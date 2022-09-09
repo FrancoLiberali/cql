@@ -1,3 +1,25 @@
-port: 8000
+# The address to bind badaas to.
 host: "" # listening on all interfaces
+
+# The port badaas should use.
+port: 8000
+
+# The maximum timout for read/write ops.
 max_timeout: 15 # in seconds
+
+# The settings for the database.
+database:
+  # The host of the database server.
+  host: e2e-db-1
+
+  # The port of the database server.
+  port: 26257
+
+  # The sslmode of the connection to the database server.
+  sslmode: disable
+
+  # The username of the account on the database server
+  username: root
+
+  # The password of the account on the database server
+  password: postres
