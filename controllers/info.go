@@ -1,26 +1,19 @@
 package controllers
 
 import (
-	"encoding/json"
 	"net/http"
 
-	"github.com/ditrit/badaas/persistence/models"
+	"github.com/ditrit/badaas/persistence/models/dto"
 	"github.com/ditrit/badaas/resources"
+	"github.com/ditrit/badaas/services/httperrors"
 )
 
-// Info controller, return json with status and version of api.
-func Info(response http.ResponseWriter, _ *http.Request) {
+// Return the badaas server informations
+func Info(response http.ResponseWriter, r *http.Request) (any, httperrors.HTTPError) {
 
-	infos := models.BadaasServerInfo{
+	infos := &dto.DTOBadaasServerInfo{
 		Status:  "OK",
 		Version: resources.Version,
 	}
-
-	payload, err := json.Marshal(&infos)
-	if err != nil {
-		http.Error(response, "error while marshaling response", http.StatusInternalServerError)
-	}
-
-	response.Header().Set("Content-Type", "application/json")
-	response.Write(payload)
+	return infos, nil
 }
