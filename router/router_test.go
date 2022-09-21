@@ -2,12 +2,11 @@ package router
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSetupRouter(t *testing.T) {
 	router := SetupRouter()
-
-	if router == nil {
-		t.Error("function SetupRouter should return instantiate router")
-	}
+	assert.NotNil(t, router)
 }
