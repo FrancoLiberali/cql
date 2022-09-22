@@ -1,11 +1,12 @@
-# The address to bind badaas to.
-host: "" # listening on all interfaces
+server:
+  # The address to bind badaas to.
+  host: "" # listening on all interfaces
 
-# The port badaas should use.
-port: 8000
+  # The port badaas should use.
+  port: 8000
 
-# The maximum timout for read/write ops.
-max_timeout: 15 # in seconds
+  # The maximum timout for read/write ops.
+  timeout: 15 # in seconds
 
 # The settings for the database.
 database:
@@ -23,3 +24,8 @@ database:
 
   # The password of the account on the database server
   password: postres
+
+logger:
+  mode: prod
+  request:
+    template: "Receive {{method}} request on {{url}}"
