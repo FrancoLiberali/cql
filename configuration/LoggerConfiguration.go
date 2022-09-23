@@ -14,3 +14,8 @@ func NewLoggerConfiguration() *LoggerConfiguration {
 func (lc *LoggerConfiguration) GetMode() string {
 	return viper.GetString("logger.mode")
 }
+
+// Return the template string for logging request
+func (lc *LoggerConfiguration) GetRequestTemplate() string {
+	return viper.GetString("logger.request.template")
+}

@@ -9,6 +9,8 @@ import (
 
 var LoggerConfigurationString = `logger:
   mode: prod
+  request:
+    template: "{proto} {method} {url}"
 `
 
 func TestLoggerConfigurationNewLoggerConfiguration(t *testing.T) {
@@ -19,4 +21,10 @@ func TestLoggerConfigurationLoggerGetMode(t *testing.T) {
 	setupViperEnvironment(LoggerConfigurationString)
 	LoggerConfiguration := configuration.NewLoggerConfiguration()
 	assert.Equal(t, "prod", LoggerConfiguration.GetMode())
+}
+
+func TestLoggerConfigurationLoggerRequestTemplate(t *testing.T) {
+	setupViperEnvironment(LoggerConfigurationString)
+	LoggerConfiguration := configuration.NewLoggerConfiguration()
+	assert.Equal(t, "{proto} {method} {url}", LoggerConfiguration.GetRequestTemplate())
 }
