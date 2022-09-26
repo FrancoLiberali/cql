@@ -49,11 +49,12 @@ jobs:
           timeout: 20
       - name: Run test
         run:  go test $(go list ./... | grep -v /vendor/) -coverprofile=coverage.out -v
+      - name: Get logs 
+        if: always()
+        run: docker compose -f "scripts/e2e/docker-compose.yml" logs --no-color 2>&1 | tee app.log &
       - name: Stop containers
         if: always()
         run: docker compose -f "scripts/e2e/docker-compose.yml" down
-      - name: Get logs 
-        run: docker compose -f "scripts/e2e/docker-compose.yml" logs --no-color 2>&1 | tee app.log &
       - uses: actions/upload-artifact@v3
         with:
           name: docker-compose-e2e-logs
