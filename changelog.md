@@ -17,5 +17,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add an http error handling mecanism
 - Add a json controller
 - Add a dto package
+- The tasks in the CI are ran in parallel.
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased
