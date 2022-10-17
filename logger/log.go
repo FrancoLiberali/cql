@@ -35,6 +35,6 @@ func initLogger(mode string) error {
 
 // Initialize zap global logger instance
 func InitLoggerFromConf() error {
-	loggerConfiguration := configuration.NewLoggerConfiguration()
+	loggerConfiguration := configuration.Get().LoggerConfiguration
 	return initLogger(loggerConfiguration.GetMode())
 }
