@@ -5,10 +5,27 @@ import (
 
 	"github.com/ditrit/badaas/logger"
 	"github.com/ditrit/badaas/persistence/registry"
+	"github.com/ditrit/badaas/persistence/repository"
 	"github.com/ditrit/badaas/router"
+	"github.com/ditrit/badaas/services/session"
+	"github.com/ditrit/badaas/services/userservice"
 	"github.com/ditrit/verdeter"
 	"go.uber.org/zap"
 )
+
+// Create a super admin user and exit with code 1 on error
+func createSuperAdminUser() {
+	logg := zap.L().Sugar()
+	_, err := userservice.NewUser("superadmin", "superadmin@badaas.test", "1234")
+	if err != nil {
+		if repository.ErrAlreadyExists == err {
+			logg.Debugf("The superadmin user already exists in database")
+		} else {
+			logg.Fatalf("failed to save the super admin %w", err)
+		}
+	}
+
+}
 
 // Run the http server for badaas
 func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
@@ -28,6 +45,14 @@ func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
 	}
 	registry.ReplaceGlobals(registryInstance)
 	zap.L().Info("The datastorage layer is initialized")
+
+	createSuperAdminUser()
+
+	err = session.Init()
+	if err != nil {
+		zap.L().Sugar().Fatalf("An error happened while initializing the session service (ERROR=%s)", err.Error())
+	}
+	zap.L().Info("The session service is initialized")
 
 	// create server
 	srv := createServerFromConfiguration(router)
@@ -50,6 +75,8 @@ func Execute() {
 }
 
 func init() {
+	rootCfg.Initialize()
+
 	rootCfg.GKey("config_path", verdeter.IsStr, "", "Path to the config file/directory")
 	rootCfg.SetDefault("config_path", ".")
 

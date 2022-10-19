@@ -2,6 +2,10 @@ server:
   port: 8000
   host: "0.0.0.0" # listening on all interfaces
   timeout: 15 # in seconds
+  pagination:
+    page: 
+      max: 10
+
 
 database:
   host: e2e-db-1
@@ -12,6 +16,6 @@ database:
   name: badaas_db
 
 logger:
-  mode: prod
+  mode: dev
   request:
     template: "Receive {{method}} request on {{url}}"

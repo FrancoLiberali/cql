@@ -17,9 +17,9 @@ func createServerFromConfiguration(router http.Handler) *http.Server {
 }
 
 // Create the server from the configuration holder and the http handler
-func createServerFromConfigurationHolder(router http.Handler, httpServerConfig *configuration.HTTPServerConfiguration) *http.Server {
+func createServerFromConfigurationHolder(router http.Handler, httpServerConfig configuration.HTTPServerConfiguration) *http.Server {
 	address := addrFromConf(httpServerConfig.GetHost(), httpServerConfig.GetPort())
-	timeout := httpServerConfig.GetMaxTimout()
+	timeout := httpServerConfig.GetMaxTimeout()
 	return createServer(router, address, timeout, timeout)
 }
 

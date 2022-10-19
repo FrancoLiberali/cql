@@ -8,9 +8,10 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var HTTPServerConfigurationString = `port: 8000
-host: "0.0.0.0" # listening on all interfaces
-max_timeout: 15 # in seconds
+var HTTPServerConfigurationString = `server:
+  port: 8000
+  host: "0.0.0.0" # listening on all interfaces
+  max_timeout: 15 # in seconds
 `
 
 func TestHTTPServerConfigurationNewHttpServerConfiguration(t *testing.T) {
@@ -31,5 +32,5 @@ func TestHTTPServerConfigurationGetHost(t *testing.T) {
 func TestHTTPServerConfigurationGetMaxTimeout(t *testing.T) {
 	setupViperEnvironment(HTTPServerConfigurationString)
 	HTTPServerConfiguration := configuration.NewHTTPServerConfiguration()
-	assert.Equal(t, time.Duration(15*time.Second), HTTPServerConfiguration.GetMaxTimout())
+	assert.Equal(t, time.Duration(15*time.Second), HTTPServerConfiguration.GetMaxTimeout())
 }

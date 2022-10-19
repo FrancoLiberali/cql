@@ -1,18 +1,14 @@
-package db
+package gormdatabase
 
 import (
 	"fmt"
 
 	"github.com/ditrit/badaas/configuration"
+	"github.com/ditrit/badaas/persistence/gormdatabase/gormzap"
+	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
-
-// the list of models (eg tables for the database) to use in migrations.
-var listOfDatabaseTables = []any{}
-
-// Database instance for the whole app
-var localDB *gorm.DB
 
 // Create the dsn string from the configuration
 func createDsnFromConf() string {
@@ -36,43 +32,38 @@ func createDsn(host, username, password, sslmode, dbname string, port int) strin
 }
 
 // Initialize the database with the configuration loaded by verdeter.
-func InitializeDBFromConf() error {
+func InitializeDBFromConf() (*gorm.DB, error) {
 	dsn := createDsnFromConf()
 	return InitializeDBFromDsn(dsn)
 }
 
 // Initialize the database with the dsn string
-func InitializeDBFromDsn(dsn string) error {
-	var err error
-	localDB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+func InitializeDBFromDsn(dsn string) (*gorm.DB, error) {
+	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		Logger: gormzap.New(zap.L()),
+	})
 
 	if err != nil {
-		return fmt.Errorf("can't create the gorm.DB (%w)", err)
+		return nil, err
 	}
 
-	rawDB, err := localDB.DB()
+	rawDB, err := database.DB()
 	if err != nil {
-		return fmt.Errorf("the database was not initialized correctly (%w)", err)
+		return nil, err
 	}
 	// ping the underlying database
 	err = rawDB.Ping()
 	if err != nil {
-		return fmt.Errorf("can't ping the database (%w)", err)
+		return nil, err
+	}
+	return database, nil
+}
+
+// Migrate the database using gorm [https://gorm.io/docs/migration.html#Auto-Migration]
+func AutoMigrate(database *gorm.DB, listOfDatabaseTables ...any) error {
+	err := database.AutoMigrate(listOfDatabaseTables...)
+	if err != nil {
+		return err
 	}
 	return nil
-}
-
-// Return the database.
-//
-// Panics if the database is nil.
-func GetDB() *gorm.DB {
-	if localDB == nil {
-		panic("the Database was de-allocated")
-	}
-	return localDB
-}
-
-func AutoMigrate() error {
-	db := GetDB()
-	return db.AutoMigrate(listOfDatabaseTables...)
 }

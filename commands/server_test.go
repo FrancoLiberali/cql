@@ -30,7 +30,7 @@ func Test_createServer(t *testing.T) {
 func TestCreateServerFromConfigurationHolder(t *testing.T) {
 	handl := http.NewServeMux()
 
-	srv := createServerFromConfigurationHolder(handl, &configuration.HTTPServerConfiguration{})
+	srv := createServerFromConfigurationHolder(handl, configuration.NewHTTPServerConfiguration())
 	assert.NotNil(t, srv)
 
 }

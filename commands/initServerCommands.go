@@ -18,4 +18,9 @@ func initServerCommands(cfg *verdeter.VerdeterCommand) {
 	cfg.GKey(serverPortKey, verdeter.IsInt, "p", "Port to bind (default is 8000)")
 	cfg.SetValidator(serverPortKey, validators.CheckTCPHighPort)
 	cfg.SetDefault(serverPortKey, 8000)
+
+	paginationMaxElemPerPage := "server.pagination.page.max"
+	cfg.GKey(paginationMaxElemPerPage, verdeter.IsUint, "", "The max number of records returned per page")
+	cfg.SetDefault(paginationMaxElemPerPage, 100)
+
 }
