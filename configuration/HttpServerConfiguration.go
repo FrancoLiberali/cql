@@ -15,6 +15,7 @@ type HTTPServerConfiguration interface {
 	GetMaxTimeout() time.Duration
 }
 
+// Concrete implementation of the HTTPServerConfiguration interface
 type hTTPServerConfigurationImpl struct {
 	host    string
 	port    int
@@ -23,38 +24,38 @@ type hTTPServerConfigurationImpl struct {
 
 // Instantiate a new configuration holder for the http server
 func NewHTTPServerConfiguration() HTTPServerConfiguration {
-	hsc := new(hTTPServerConfigurationImpl)
-	hsc.Reload()
-	return hsc
+	httpServerConfiguration := new(hTTPServerConfigurationImpl)
+	httpServerConfiguration.Reload()
+	return httpServerConfiguration
+}
+
+// Reload HTTP Server configuration
+func (httpServerConfiguration *hTTPServerConfigurationImpl) Reload() {
+	httpServerConfiguration.host = viper.GetString("server.host")
+	httpServerConfiguration.port = viper.GetInt("server.port")
+	httpServerConfiguration.timeout = intToSecond(viper.GetInt("server.max_timeout"))
 }
 
 // Return the host addr
-func (hsc *hTTPServerConfigurationImpl) Reload() {
-	hsc.host = viper.GetString("server.host")
-	hsc.port = viper.GetInt("server.port")
-	hsc.timeout = intToSecond(viper.GetInt("server.max_timeout"))
-}
-
-// Return the host addr
-func (hsc *hTTPServerConfigurationImpl) GetHost() string {
-	return hsc.host
+func (httpServerConfiguration *hTTPServerConfigurationImpl) GetHost() string {
+	return httpServerConfiguration.host
 }
 
 // Return the port number
-func (hsc *hTTPServerConfigurationImpl) GetPort() int {
-	return hsc.port
+func (httpServerConfiguration *hTTPServerConfigurationImpl) GetPort() int {
+	return httpServerConfiguration.port
 }
 
 // Return the maximum timout for read and write
-func (hsc *hTTPServerConfigurationImpl) GetMaxTimeout() time.Duration {
-	return hsc.timeout
+func (httpServerConfiguration *hTTPServerConfigurationImpl) GetMaxTimeout() time.Duration {
+	return httpServerConfiguration.timeout
 }
 
 // Return the host addr
-func (hsc *hTTPServerConfigurationImpl) Log() {
+func (httpServerConfiguration *hTTPServerConfigurationImpl) Log() {
 	zap.L().Info("HTTP Server configuration",
-		zap.String("host", hsc.host),
-		zap.Int("port", hsc.port),
-		zap.Duration("timeout", hsc.timeout),
+		zap.String("host", httpServerConfiguration.host),
+		zap.Int("port", httpServerConfiguration.port),
+		zap.Duration("timeout", httpServerConfiguration.timeout),
 	)
 }

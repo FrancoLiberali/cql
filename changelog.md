@@ -19,5 +19,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a dto package
 - The tasks in the CI are ran in parallel.
 - Add a Generic CRUD Repository
+- Add a configuration structure containing all the configuration holder.
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased

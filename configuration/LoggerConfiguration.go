@@ -1,21 +1,47 @@
 package configuration
 
-import "github.com/spf13/viper"
+import (
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
+)
 
 // Hold the configuration values for the logger
-type LoggerConfiguration struct{}
+type LoggerConfiguration interface {
+	ConfigurationHolder
+	GetMode() string
+	GetRequestTemplate() string
+}
+
+// Concrete implementation of the LoggerConfiguration interface
+type loggerConfigurationImpl struct {
+	mode, requestTemplate string
+}
 
 // Instantiate a new configuration holder for the logger
-func NewLoggerConfiguration() *LoggerConfiguration {
-	return &LoggerConfiguration{}
+func NewLoggerConfiguration() LoggerConfiguration {
+	loggerConfiguration := new(loggerConfigurationImpl)
+	loggerConfiguration.Reload()
+	return loggerConfiguration
+}
+
+func (loggerConfiguration *loggerConfigurationImpl) Reload() {
+	loggerConfiguration.mode = viper.GetString("logger.mode")
+	loggerConfiguration.requestTemplate = viper.GetString("logger.request.template")
 }
 
 // Return the mode of the logger
-func (lc *LoggerConfiguration) GetMode() string {
-	return viper.GetString("logger.mode")
+func (loggerConfiguration *loggerConfigurationImpl) GetMode() string {
+	return loggerConfiguration.mode
 }
 
 // Return the template string for logging request
-func (lc *LoggerConfiguration) GetRequestTemplate() string {
-	return viper.GetString("logger.request.template")
+func (loggerConfiguration *loggerConfigurationImpl) GetRequestTemplate() string {
+	return loggerConfiguration.requestTemplate
+}
+
+func (loggerConfiguration *loggerConfigurationImpl) Log() {
+	zap.L().Info("Database configuration",
+		zap.String("mode", loggerConfiguration.mode),
+		zap.String("requestTemplate", loggerConfiguration.requestTemplate),
+	)
 }

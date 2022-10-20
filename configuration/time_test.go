@@ -8,33 +8,22 @@ import (
 )
 
 func TestIntToSecond(t *testing.T) {
-	testCases := []struct {
-		desc     string
-		seconds  int
-		duration time.Duration
-	}{
-		{
-			desc:     "20 secondes",
-			seconds:  20,
-			duration: time.Duration(20 * time.Second),
-		}, {
-			desc:     "-5 seconds",
-			seconds:  -5,
-			duration: time.Duration(-5 * time.Second),
-		}, {
-			desc:     "3600	seconds",
-			seconds:  3600,
-			duration: time.Duration(time.Hour),
-		},
-	}
-	for _, tC := range testCases {
-		t.Run(tC.desc, func(t *testing.T) {
-			assert.Equal(
-				t,
-				intToSecond(tC.seconds),
-				tC.duration,
-				"the duration should be equals",
-			)
-		})
-	}
+	assert.Equal(
+		t,
+		intToSecond(20),
+		time.Duration(20*time.Second),
+		"the duration should be equals",
+	)
+	assert.Equal(
+		t,
+		intToSecond(-5),
+		time.Duration(-5*time.Second),
+		"the duration should be equals",
+	)
+	assert.Equal(
+		t,
+		intToSecond(3600),
+		time.Duration(time.Hour),
+		"the duration should be equals",
+	)
 }

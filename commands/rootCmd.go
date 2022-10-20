@@ -3,6 +3,7 @@ package commands
 import (
 	"log"
 
+	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/logger"
 	"github.com/ditrit/badaas/persistence/registry"
 	"github.com/ditrit/badaas/router"
@@ -12,10 +13,13 @@ import (
 
 // Run the http server for badaas
 func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
+	conf := configuration.NewConfiguration()
+	configuration.ReplaceGlobals(conf)
 	err := logger.InitLoggerFromConf()
 	if err != nil {
 		log.Fatalf("An error happened while initializing logger (ERROR=%s)", err.Error())
 	}
+	configuration.Get().Log()
 
 	zap.L().Info("The logger is initialiazed")
 
