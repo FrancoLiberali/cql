@@ -7,13 +7,20 @@ import (
 )
 
 // Default router of badaas, initialize all routes.
-func SetupRouter() *mux.Router {
+func SetupRouter(
+	//middlewares
+	jsonController middlewares.JSONController,
+	middlewareLogger middlewares.MiddlewareLogger,
+
+	// controllers
+	informationController controllers.InformationController,
+) *mux.Router {
 	router := mux.NewRouter()
-	router.Use(middlewares.CreateLoggerMiddleware())
+	router.Use(middlewareLogger.Handle)
 
 	router.HandleFunc(
 		"/info",
-		middlewares.JSONController(controllers.Info),
+		jsonController.Wrap(informationController.Info),
 	).Methods("GET")
 
 	return router
