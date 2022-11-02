@@ -10,7 +10,7 @@ func initLoggerCommands(cfg *verdeter.VerdeterCommand) {
 	loggerModeKey := "logger.mode"
 	cfg.GKey(loggerModeKey, verdeter.IsStr, "", "The logger mode (default to \"prod\")")
 	cfg.SetDefault(loggerModeKey, "prod")
-	cfg.SetValidator(loggerModeKey, validators.AuthorizedValues("authorized values", "prod", "dev"))
+	cfg.AddValidator(loggerModeKey, validators.AuthorizedValues("authorized values", "prod", "dev"))
 
 	loggerRequestTemplateKey := "logger.request.template"
 	cfg.GKey(loggerRequestTemplateKey, verdeter.IsStr, "", "Template message for all request logs")
