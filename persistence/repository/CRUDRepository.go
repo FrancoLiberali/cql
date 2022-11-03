@@ -2,14 +2,9 @@ package repository
 
 import (
 	"github.com/Masterminds/squirrel"
+	"github.com/ditrit/badaas/httperrors"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/pagination"
-	"github.com/ditrit/badaas/services/httperrors"
-)
-
-var (
-	// HTTP Error record already exists
-	ErrAlreadyExists = httperrors.NewErrorNotFound("model instance", "the model instance is not in the database")
 )
 
 // Generic CRUD Repository
