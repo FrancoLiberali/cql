@@ -3,7 +3,7 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/ditrit/badaas/services/httperrors"
+	"github.com/ditrit/badaas/httperrors"
 )
 
 // This handler return a Marshable object and/or an [github.com/ditrit/badaas/services/httperrors.HTTPError]
