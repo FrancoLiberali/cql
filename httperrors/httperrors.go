@@ -16,7 +16,7 @@ type HTTPError interface {
 	ToJSON() string
 
 	// Write the error to the http response
-	Write(httpResponse http.ResponseWriter)
+	Write(httpResponse http.ResponseWriter, logger *zap.Logger)
 
 	// do we log the error
 	Log() bool
@@ -29,17 +29,6 @@ type HTTPErrorImpl struct {
 	Message     string
 	GolangError error
 	toLog       bool
-}
-
-// HTTPError constructor
-func NewHTTPError(status int, err string, message string, golangError error, toLog bool) HTTPError {
-	return &HTTPErrorImpl{
-		Status:      status,
-		Err:         err,
-		Message:     message,
-		GolangError: golangError,
-		toLog:       toLog,
-	}
 }
 
 // Convert an HTTPError to a json string
@@ -64,20 +53,31 @@ func (httpError *HTTPErrorImpl) Log() bool {
 }
 
 // Write the HTTPError to the [http.ResponseWriter] passed as argument.
-func (httpError *HTTPErrorImpl) Write(httpResponse http.ResponseWriter) {
-	if httpError.toLog {
-		logHTTPError(httpError)
+func (httpError *HTTPErrorImpl) Write(httpResponse http.ResponseWriter, logger *zap.Logger) {
+	if httpError.toLog && logger != nil {
+		logHTTPError(httpError, logger)
 	}
 	http.Error(httpResponse, httpError.ToJSON(), httpError.Status)
 }
 
-func logHTTPError(httpError *HTTPErrorImpl) {
-	zap.L().Info(
+func logHTTPError(httpError *HTTPErrorImpl, logger *zap.Logger) {
+	logger.Info(
 		"http error",
 		zap.String("error", httpError.Err),
 		zap.String("msg", httpError.Message),
 		zap.Int("status", httpError.Status),
 	)
+}
+
+// HTTPError constructor
+func NewHTTPError(status int, err string, message string, golangError error, toLog bool) HTTPError {
+	return &HTTPErrorImpl{
+		Status:      status,
+		Err:         err,
+		Message:     message,
+		GolangError: golangError,
+		toLog:       toLog,
+	}
 }
 
 // A contructor for an HttpError "Not Found"

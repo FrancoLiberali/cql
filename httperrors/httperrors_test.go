@@ -9,9 +9,13 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/ditrit/badaas/httperrors"
 	"github.com/ditrit/badaas/persistence/models/dto"
-	"github.com/ditrit/badaas/services/httperrors"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 func TestTojson(t *testing.T) {
@@ -34,7 +38,6 @@ func TestTojson(t *testing.T) {
 	assert.Equal(t, err, content["err"].(string))
 	assert.Equal(t, message, content["msg"].(string))
 	assert.Equal(t, http.StatusText(http.StatusBadRequest), content["status"].(string))
-
 	assert.True(t, error.Log())
 }
 
@@ -43,8 +46,8 @@ func TestLog(t *testing.T) {
 	assert.True(t, error.Log())
 	error = httperrors.NewHTTPError(http.StatusBadRequest, "err", "message", nil, false)
 	assert.False(t, error.Log())
-
 }
+
 func TestError(t *testing.T) {
 	error := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
 	assert.Contains(t, error.Error(), error.ToJSON())
@@ -53,7 +56,7 @@ func TestError(t *testing.T) {
 func TestWrite(t *testing.T) {
 	res := httptest.NewRecorder()
 	error := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
-	error.Write(res)
+	error.Write(res, zap.L())
 	bodyBytes, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, bodyBytes)
@@ -61,6 +64,26 @@ func TestWrite(t *testing.T) {
 	// can't use assert.Contains because it only support strings
 	assert.True(t,
 		bytes.Contains(bodyBytes, originalBytes))
+}
+
+func TestLogger(t *testing.T) {
+	// creating logger
+	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
+	observedLogger := zap.New(observedZapCore)
+
+	res := httptest.NewRecorder()
+	error := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
+	error.Write(res, observedLogger)
+
+	require.Equal(t, 1, observedLogs.Len())
+	log := observedLogs.All()[0]
+	assert.Equal(t, "http error", log.Message)
+	require.Len(t, log.Context, 3)
+	assert.ElementsMatch(t, []zap.Field{
+		{Key: "error", Type: zapcore.StringType, String: "Error while parsing json"},
+		{Key: "msg", Type: zapcore.StringType, String: "The request body was malformed"},
+		{Key: "status", Type: zapcore.Int64Type, Integer: http.StatusBadRequest},
+	}, log.Context)
 }
 
 func TestNewErrorNotFound(t *testing.T) {
@@ -73,7 +96,6 @@ func TestNewErrorNotFound(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusText(http.StatusNotFound), dto.Status)
 	assert.Equal(t, fmt.Sprintf("%s not found", ressourceName), dto.Error)
-
 }
 
 func TestNewInternalServerError(t *testing.T) {
@@ -94,5 +116,4 @@ func TestNewUnauthorizedError(t *testing.T) {
 	err := json.Unmarshal([]byte(error.ToJSON()), &dto)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusText(http.StatusUnauthorized), dto.Status)
-
 }
