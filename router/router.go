@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/ditrit/badaas/controllers"
 	"github.com/ditrit/badaas/router/middlewares"
 	"github.com/gorilla/mux"
@@ -14,7 +16,7 @@ func SetupRouter(
 
 	// controllers
 	informationController controllers.InformationController,
-) *mux.Router {
+) http.Handler {
 	router := mux.NewRouter()
 	router.Use(middlewareLogger.Handle)
 
