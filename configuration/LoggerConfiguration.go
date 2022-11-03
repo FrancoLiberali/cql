@@ -39,8 +39,9 @@ func (loggerConfiguration *loggerConfigurationImpl) GetRequestTemplate() string 
 	return loggerConfiguration.requestTemplate
 }
 
-func (loggerConfiguration *loggerConfigurationImpl) Log() {
-	zap.L().Info("Database configuration",
+// Log the values provided by the configuration holder
+func (loggerConfiguration *loggerConfigurationImpl) Log(logger *zap.Logger) {
+	logger.Info("Logger configuration",
 		zap.String("mode", loggerConfiguration.mode),
 		zap.String("requestTemplate", loggerConfiguration.requestTemplate),
 	)

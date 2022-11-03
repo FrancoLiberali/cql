@@ -6,6 +6,10 @@ import (
 
 	"github.com/ditrit/badaas/configuration"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 var HTTPServerConfigurationString = `server:
@@ -33,4 +37,24 @@ func TestHTTPServerConfigurationGetMaxTimeout(t *testing.T) {
 	setupViperEnvironment(HTTPServerConfigurationString)
 	HTTPServerConfiguration := configuration.NewHTTPServerConfiguration()
 	assert.Equal(t, time.Duration(15*time.Second), HTTPServerConfiguration.GetMaxTimeout())
+}
+
+func TestHTTPServerConfigurationLog(t *testing.T) {
+	setupViperEnvironment(HTTPServerConfigurationString)
+	// creating logger
+	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
+	observedLogger := zap.New(observedZapCore)
+
+	HTTPServerConfiguration := configuration.NewHTTPServerConfiguration()
+	HTTPServerConfiguration.Log(observedLogger)
+
+	require.Equal(t, 1, observedLogs.Len())
+	log := observedLogs.All()[0]
+	assert.Equal(t, "HTTP Server configuration", log.Message)
+	require.Len(t, log.Context, 3)
+	assert.ElementsMatch(t, []zap.Field{
+		{Key: "port", Type: zapcore.Int64Type, Integer: 8000},
+		{Key: "host", Type: zapcore.StringType, String: "0.0.0.0"},
+		{Key: "timeout", Type: zapcore.DurationType, Integer: int64(time.Duration(time.Second * 15))},
+	}, log.Context)
 }

@@ -28,13 +28,14 @@ func (paginationConfiguration *paginationConfigurationImpl) GetMaxElemPerPage() 
 	return paginationConfiguration.pagesNb
 }
 
-func (paginationConfiguration *paginationConfigurationImpl) Log() {
-	zap.L().Info("Pagination configuration",
-		zap.Uint("maxelemPerPage", paginationConfiguration.pagesNb),
-	)
-}
-
 // Reload pagination configuration
 func (paginationConfiguration *paginationConfigurationImpl) Reload() {
 	paginationConfiguration.pagesNb = viper.GetUint("server.pagination.page.max")
+}
+
+// Log the values provided by the configuration holder
+func (paginationConfiguration *paginationConfigurationImpl) Log(logger *zap.Logger) {
+	logger.Info("Pagination configuration",
+		zap.Uint("maxelemPerPage", paginationConfiguration.pagesNb),
+	)
 }
