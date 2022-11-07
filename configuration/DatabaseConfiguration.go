@@ -73,8 +73,9 @@ func (databaseConfiguration *databaseConfigurationImpl) GetSSLMode() string {
 	return databaseConfiguration.sslmode
 }
 
-func (databaseConfiguration *databaseConfigurationImpl) Log() {
-	zap.L().Info("Database configuration",
+// Log the values provided by the configuration holder
+func (databaseConfiguration *databaseConfigurationImpl) Log(logger *zap.Logger) {
+	logger.Info("Database configuration",
 		zap.Int("port", databaseConfiguration.port),
 		zap.String("host", databaseConfiguration.host),
 		zap.String("dbName", databaseConfiguration.dbName),

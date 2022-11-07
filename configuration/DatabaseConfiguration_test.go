@@ -7,6 +7,10 @@ import (
 	"github.com/ditrit/badaas/configuration"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
+	"go.uber.org/zap/zaptest/observer"
 )
 
 var databaseConfigurationString = `
@@ -70,4 +74,26 @@ func TestDatabaseConfigurationGetDBName(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, "badaas_db", databaseConfiguration.GetDBName())
+}
+
+func TestDatabaseConfigurationLog(t *testing.T) {
+	setupViperEnvironment(databaseConfigurationString)
+	// creating logger
+	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
+	observedLogger := zap.New(observedZapCore)
+	databaseConfiguration := configuration.NewDatabaseConfiguration()
+	databaseConfiguration.Log(observedLogger)
+
+	require.Equal(t, 1, observedLogs.Len())
+	log := observedLogs.All()[0]
+	assert.Equal(t, "Database configuration", log.Message)
+	require.Len(t, log.Context, 6)
+	assert.ElementsMatch(t, []zap.Field{
+		{Key: "port", Type: zapcore.Int64Type, Integer: 26257},
+		{Key: "host", Type: zapcore.StringType, String: "e2e-db-1"},
+		{Key: "dbName", Type: zapcore.StringType, String: "badaas_db"},
+		{Key: "username", Type: zapcore.StringType, String: "root"},
+		{Key: "password", Type: zapcore.StringType, String: "postgres"},
+		{Key: "sslmode", Type: zapcore.StringType, String: "disable"},
+	}, log.Context)
 }

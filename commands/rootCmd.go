@@ -1,43 +1,45 @@
 package commands
 
 import (
-	"log"
+	"net/http"
 
 	"github.com/ditrit/badaas/configuration"
+	"github.com/ditrit/badaas/controllers"
 	"github.com/ditrit/badaas/logger"
-	"github.com/ditrit/badaas/persistence/registry"
 	"github.com/ditrit/badaas/router"
 	"github.com/ditrit/verdeter"
+	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 	"go.uber.org/zap"
 )
 
 // Run the http server for badaas
 func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
-	conf := configuration.NewConfiguration()
-	configuration.ReplaceGlobals(conf)
-	err := logger.InitLoggerFromConf()
-	if err != nil {
-		log.Fatalf("An error happened while initializing logger (ERROR=%s)", err.Error())
+	fx.New(
+		// Modules
+		configuration.ConfigurationModule,
+		router.RouterModule,
+		controllers.ControllerModule,
+		logger.LoggerModule,
+
+		// logger for fx
+		fx.Provide(fxLogger),
+
+		fx.Provide(NewHTTPServer),
+
+		// Finally: we invoke the newly created server
+		fx.Invoke(func(*http.Server) { /* we need this function to be empty*/ }),
+	).Run()
+	return nil
+}
+
+func fxLogger(logger *zap.Logger, loggerConfiguration configuration.LoggerConfiguration) fx.Option {
+	if loggerConfiguration.GetMode() == "dev" {
+		return fx.WithLogger(func(log *zap.Logger) fxevent.Logger {
+			return &fxevent.ZapLogger{Logger: log}
+		})
 	}
-	configuration.Get().Log()
-
-	zap.L().Info("The logger is initialiazed")
-
-	// create router
-	router := router.SetupRouter()
-
-	registryInstance, err := registry.FactoryRegistry(registry.GormDataStore)
-	if err != nil {
-		zap.L().Sugar().Fatalf("An error happened while initializing datastorage layer (ERROR=%s)", err.Error())
-	}
-	registry.ReplaceGlobals(registryInstance)
-	zap.L().Info("The datastorage layer is initialized")
-
-	// create server
-	srv := createServerFromConfiguration(router)
-
-	zap.L().Sugar().Infof("Ready to serve at %s\n", srv.Addr)
-	return srv.ListenAndServe()
+	return fx.NopLogger
 }
 
 var rootCfg = verdeter.NewVerdeterCommand(

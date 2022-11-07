@@ -5,14 +5,14 @@ import (
 
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/persistence/gormdatabase/gormzap"
+	"github.com/ditrit/badaas/persistence/models"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 // Create the dsn string from the configuration
-func createDsnFromConf() string {
-	databaseConfiguration := configuration.NewDatabaseConfiguration()
+func createDsnFromConf(databaseConfiguration configuration.DatabaseConfiguration) string {
 	dsn := createDsn(
 		databaseConfiguration.GetHost(),
 		databaseConfiguration.GetUsername(),
@@ -31,16 +31,25 @@ func createDsn(host, username, password, sslmode, dbname string, port int) strin
 	)
 }
 
-// Initialize the database with the configuration loaded by verdeter.
-func InitializeDBFromConf() (*gorm.DB, error) {
-	dsn := createDsnFromConf()
-	return InitializeDBFromDsn(dsn)
+// Initialize the database with using the database configuration
+func InitializeDBFromConf(logger *zap.Logger, databaseConfiguration configuration.DatabaseConfiguration) (*gorm.DB, error) {
+	dsn := createDsnFromConf(databaseConfiguration)
+	db, err := initializeDBFromDsn(dsn, logger)
+	if err != nil {
+		return nil, err
+	}
+	err = autoMigrate(db, models.ListOfTables)
+	if err != nil {
+		return nil, err
+	}
+	logger.Info("The database connection was successfully initialized")
+	return db, nil
 }
 
 // Initialize the database with the dsn string
-func InitializeDBFromDsn(dsn string) (*gorm.DB, error) {
+func initializeDBFromDsn(dsn string, logger *zap.Logger) (*gorm.DB, error) {
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
-		Logger: gormzap.New(zap.L()),
+		Logger: gormzap.New(logger),
 	})
 
 	if err != nil {
@@ -60,7 +69,7 @@ func InitializeDBFromDsn(dsn string) (*gorm.DB, error) {
 }
 
 // Migrate the database using gorm [https://gorm.io/docs/migration.html#Auto-Migration]
-func AutoMigrate(database *gorm.DB, listOfDatabaseTables ...any) error {
+func autoMigrate(database *gorm.DB, listOfDatabaseTables []any) error {
 	err := database.AutoMigrate(listOfDatabaseTables...)
 	if err != nil {
 		return err

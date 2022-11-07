@@ -51,9 +51,9 @@ func (httpServerConfiguration *hTTPServerConfigurationImpl) GetMaxTimeout() time
 	return httpServerConfiguration.timeout
 }
 
-// Return the host addr
-func (httpServerConfiguration *hTTPServerConfigurationImpl) Log() {
-	zap.L().Info("HTTP Server configuration",
+// Log the values provided by the configuration holder
+func (httpServerConfiguration *hTTPServerConfigurationImpl) Log(logger *zap.Logger) {
+	logger.Info("HTTP Server configuration",
 		zap.String("host", httpServerConfiguration.host),
 		zap.Int("port", httpServerConfiguration.port),
 		zap.Duration("timeout", httpServerConfiguration.timeout),

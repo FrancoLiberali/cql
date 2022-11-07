@@ -12,11 +12,10 @@ const (
 	DevelopmentLogger = "dev"
 )
 
-// Initialize zap global logger instance
-func initLogger(mode string) error {
+// Return a configured logger
+func NewLogger(conf configuration.LoggerConfiguration) *zap.Logger {
 	var config zap.Config
-	var err error
-	if mode == ProductionLogger {
+	if conf.GetMode() == ProductionLogger {
 		config = zap.NewProductionConfig()
 		log.Printf("Log mode use: %s\n", ProductionLogger)
 
@@ -27,14 +26,9 @@ func initLogger(mode string) error {
 	}
 	config.DisableStacktrace = true
 	logger, err := config.Build()
-	if err == nil {
-		zap.ReplaceGlobals(logger)
+	if err != nil {
+		panic(err)
 	}
-	return err
-}
-
-// Initialize zap global logger instance
-func InitLoggerFromConf() error {
-	loggerConfiguration := configuration.Get().LoggerConfiguration
-	return initLogger(loggerConfiguration.GetMode())
+	logger.Info("The logger was successfully initialized")
+	return logger
 }
