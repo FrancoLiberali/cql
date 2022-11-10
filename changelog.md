@@ -21,5 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a Generic CRUD Repository
 - Add a configuration structure containing all the configuration holder.
 - Refactor codebase to use the DI framework uber-go/fx. Now all services and controllers relies on interfaces.
+- Add an generic ID to the repository interface
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased

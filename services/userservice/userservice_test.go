@@ -20,7 +20,7 @@ func TestNewUserService(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
 	userRespositoryMock.On("Create", mock.Anything).Return(nil)
 	userService := userservice.NewUserService(observedLogger, userRespositoryMock)
 	user, err := userService.NewUser("bob", "bob@email.com", "1234")
@@ -46,7 +46,7 @@ func TestNewUserServiceDatabaseError(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
 	userRespositoryMock.On(
 		"Create", mock.Anything,
 	).Return(
@@ -66,7 +66,7 @@ func TestNewUserServiceEmailNotValid(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
 
 	userService := userservice.NewUserService(observedLogger, userRespositoryMock)
 	user, err := userService.NewUser("bob", "bob@", "1234")

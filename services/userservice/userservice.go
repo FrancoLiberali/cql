@@ -20,14 +20,14 @@ var _ UserService = (*userServiceImpl)(nil)
 
 // The UserService concrete implementation
 type userServiceImpl struct {
-	userRepository repository.CRUDRepository[models.User]
+	userRepository repository.CRUDRepository[models.User, uint]
 	logger         *zap.Logger
 }
 
 // UserService constructor
 func NewUserService(
 	logger *zap.Logger,
-	userRepository repository.CRUDRepository[models.User],
+	userRepository repository.CRUDRepository[models.User, uint],
 ) UserService {
 	return &userServiceImpl{
 		logger:         logger,
