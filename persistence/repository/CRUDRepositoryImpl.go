@@ -23,27 +23,27 @@ func DatabaseError(message string, golangError error) httperrors.HTTPError {
 }
 
 // Implementation of the Generic CRUD Repository
-type CRUDRepositoryImpl[T models.Tabler] struct {
-	CRUDRepository[T]
+type CRUDRepositoryImpl[T models.Tabler, ID any] struct {
+	CRUDRepository[T, ID]
 	gormDatabase *gorm.DB
 	logger       *zap.Logger
 }
 
 // Contructor of the Generic CRUD Repository
-func NewCRUDRepository[T models.Tabler](database *gorm.DB, logger *zap.Logger) CRUDRepository[T] {
-	return &CRUDRepositoryImpl[T]{gormDatabase: database, logger: logger}
+func NewCRUDRepository[T models.Tabler, ID any](database *gorm.DB, logger *zap.Logger) CRUDRepository[T, ID] {
+	return &CRUDRepositoryImpl[T, ID]{gormDatabase: database, logger: logger}
 }
 
 // Run the function passed as parameter, if it returns the error and rollback the transaction.
 // If no error is returned, it commits the transaction and return the interface{} value.
-func (repository *CRUDRepositoryImpl[T]) Transaction(transactionFunction func(CRUDRepository[T]) (any, error)) (any, error) {
+func (repository *CRUDRepositoryImpl[T, ID]) Transaction(transactionFunction func(CRUDRepository[T, ID]) (any, error)) (any, error) {
 	transaction := repository.gormDatabase.Begin()
 	defer func() {
 		if recoveredError := recover(); recoveredError != nil {
 			transaction.Rollback()
 		}
 	}()
-	returnValue, err := transactionFunction(&CRUDRepositoryImpl[T]{gormDatabase: transaction})
+	returnValue, err := transactionFunction(&CRUDRepositoryImpl[T, ID]{gormDatabase: transaction})
 	if err != nil {
 		transaction.Rollback()
 		return nil, err
@@ -52,7 +52,7 @@ func (repository *CRUDRepositoryImpl[T]) Transaction(transactionFunction func(CR
 }
 
 // Create an entity of a Model
-func (repository *CRUDRepositoryImpl[T]) Create(entity *T) httperrors.HTTPError {
+func (repository *CRUDRepositoryImpl[T, ID]) Create(entity *T) httperrors.HTTPError {
 	err := repository.gormDatabase.Create(entity).Error
 	if err != nil {
 		if gormdatabase.IsDuplicateKeyError(err) {
@@ -72,7 +72,7 @@ func (repository *CRUDRepositoryImpl[T]) Create(entity *T) httperrors.HTTPError 
 }
 
 // Delete an entity of a Model
-func (repository *CRUDRepositoryImpl[T]) Delete(entity *T) httperrors.HTTPError {
+func (repository *CRUDRepositoryImpl[T, ID]) Delete(entity *T) httperrors.HTTPError {
 	err := repository.gormDatabase.Delete(entity).Error
 	if err != nil {
 		return DatabaseError(
@@ -84,7 +84,7 @@ func (repository *CRUDRepositoryImpl[T]) Delete(entity *T) httperrors.HTTPError 
 }
 
 // Save an entity of a Model
-func (repository *CRUDRepositoryImpl[T]) Save(entity *T) httperrors.HTTPError {
+func (repository *CRUDRepositoryImpl[T, ID]) Save(entity *T) httperrors.HTTPError {
 	err := repository.gormDatabase.Save(entity).Error
 	if err != nil {
 		return DatabaseError(
@@ -96,12 +96,12 @@ func (repository *CRUDRepositoryImpl[T]) Save(entity *T) httperrors.HTTPError {
 }
 
 // Get an entity of a Model By ID
-func (repository *CRUDRepositoryImpl[T]) GetByID(id uint) (*T, httperrors.HTTPError) {
+func (repository *CRUDRepositoryImpl[T, ID]) GetByID(id ID) (*T, httperrors.HTTPError) {
 	var entity T
 	transaction := repository.gormDatabase.First(&entity, "id = ?", id)
 	if transaction.Error != nil {
 		return nil, DatabaseError(
-			fmt.Sprintf("could not get %s by id %d", entity.TableName(), id),
+			fmt.Sprintf("could not get %s by id %v", entity.TableName(), id),
 			transaction.Error,
 		)
 	}
@@ -109,7 +109,7 @@ func (repository *CRUDRepositoryImpl[T]) GetByID(id uint) (*T, httperrors.HTTPEr
 }
 
 // Get all entities of a Model
-func (repository *CRUDRepositoryImpl[T]) GetAll(sortOptions ...pagination.SortOption) ([]*T, httperrors.HTTPError) {
+func (repository *CRUDRepositoryImpl[T, ID]) GetAll(sortOptions ...pagination.SortOption) ([]*T, httperrors.HTTPError) {
 	var entities []*T
 	transaction := repository.gormDatabase
 	for _, sortOption := range sortOptions {
@@ -127,7 +127,7 @@ func (repository *CRUDRepositoryImpl[T]) GetAll(sortOptions ...pagination.SortOp
 }
 
 // Count entities of a models
-func (repository *CRUDRepositoryImpl[T]) Count(filters squirrel.Sqlizer) (uint, httperrors.HTTPError) {
+func (repository *CRUDRepositoryImpl[T, ID]) Count(filters squirrel.Sqlizer) (uint, httperrors.HTTPError) {
 	whereClause, values, httpError := repository.compileSQL(filters)
 	if httpError != nil {
 		return 0, httpError
@@ -136,7 +136,7 @@ func (repository *CRUDRepositoryImpl[T]) Count(filters squirrel.Sqlizer) (uint, 
 }
 
 // Count the number of record that match the where clause with the provided values on the db
-func (repository *CRUDRepositoryImpl[T]) count(whereClause string, values []interface{}) (uint, httperrors.HTTPError) {
+func (repository *CRUDRepositoryImpl[T, ID]) count(whereClause string, values []interface{}) (uint, httperrors.HTTPError) {
 	var entity *T
 	var count int64
 	transaction := repository.gormDatabase.Model(entity).Where(whereClause, values).Count(&count)
@@ -151,7 +151,7 @@ func (repository *CRUDRepositoryImpl[T]) count(whereClause string, values []inte
 }
 
 // Find entities of a Model
-func (repository *CRUDRepositoryImpl[T]) Find(
+func (repository *CRUDRepositoryImpl[T, ID]) Find(
 	filters squirrel.Sqlizer,
 	page pagination.Paginator,
 	sortOptions ...pagination.SortOption,
@@ -207,7 +207,7 @@ func (repository *CRUDRepositoryImpl[T]) Find(
 }
 
 // compile the sql where clause
-func (repository *CRUDRepositoryImpl[T]) compileSQL(filters squirrel.Sqlizer) (string, []interface{}, httperrors.HTTPError) {
+func (repository *CRUDRepositoryImpl[T, ID]) compileSQL(filters squirrel.Sqlizer) (string, []interface{}, httperrors.HTTPError) {
 	compiledSQLString, values, err := filters.ToSql()
 	if err != nil {
 		return "", []interface{}{}, httperrors.NewInternalServerError(
