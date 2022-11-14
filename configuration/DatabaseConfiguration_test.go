@@ -3,6 +3,7 @@ package configuration_test
 import (
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/ditrit/badaas/configuration"
 	"github.com/spf13/viper"
@@ -21,6 +22,9 @@ database:
   username: root
   password: postgres
   name: badaas_db
+  init:
+    retry: 10
+    retryTime: 5
 `
 
 // Set the viper global instance config to the content of the string passed as argument
@@ -76,6 +80,18 @@ func TestDatabaseConfigurationGetDBName(t *testing.T) {
 	assert.Equal(t, "badaas_db", databaseConfiguration.GetDBName())
 }
 
+func TestDatabaseConfigurationGetRetryTime(t *testing.T) {
+	setupViperEnvironment(databaseConfigurationString)
+	databaseConfiguration := configuration.NewDatabaseConfiguration()
+	assert.Equal(t, time.Duration(5*time.Second), databaseConfiguration.GetRetryTime())
+}
+
+func TestDatabaseConfigurationGetRetry(t *testing.T) {
+	setupViperEnvironment(databaseConfigurationString)
+	databaseConfiguration := configuration.NewDatabaseConfiguration()
+	assert.Equal(t, uint(10), databaseConfiguration.GetRetry())
+}
+
 func TestDatabaseConfigurationLog(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
 	// creating logger
@@ -87,9 +103,11 @@ func TestDatabaseConfigurationLog(t *testing.T) {
 	require.Equal(t, 1, observedLogs.Len())
 	log := observedLogs.All()[0]
 	assert.Equal(t, "Database configuration", log.Message)
-	require.Len(t, log.Context, 6)
+	require.Len(t, log.Context, 8)
 	assert.ElementsMatch(t, []zap.Field{
 		{Key: "port", Type: zapcore.Int64Type, Integer: 26257},
+		{Key: "retry", Type: zapcore.Uint64Type, Integer: 10},
+		{Key: "retryTime", Type: zapcore.Uint64Type, Integer: 5},
 		{Key: "host", Type: zapcore.StringType, String: "e2e-db-1"},
 		{Key: "dbName", Type: zapcore.StringType, String: "badaas_db"},
 		{Key: "username", Type: zapcore.StringType, String: "root"},
