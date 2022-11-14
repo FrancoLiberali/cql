@@ -33,7 +33,7 @@ func createDsn(host, username, password, sslmode, dbname string, port int) strin
 }
 
 // Initialize the database with using the database configuration
-func InitializeDBFromConf(logger *zap.Logger, databaseConfiguration configuration.DatabaseConfiguration) (*gorm.DB, error) {
+func CreateDatabaseConnectionFromConfiguration(logger *zap.Logger, databaseConfiguration configuration.DatabaseConfiguration) (*gorm.DB, error) {
 	dsn := createDsnFromConf(databaseConfiguration)
 	var err error
 	var database *gorm.DB
