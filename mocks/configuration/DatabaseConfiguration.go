@@ -3,7 +3,10 @@
 package mocks
 
 import (
+	time "time"
+
 	mock "github.com/stretchr/testify/mock"
+
 	zap "go.uber.org/zap"
 )
 
@@ -63,6 +66,34 @@ func (_m *DatabaseConfiguration) GetPort() int {
 		r0 = rf()
 	} else {
 		r0 = ret.Get(0).(int)
+	}
+
+	return r0
+}
+
+// GetRetry provides a mock function with given fields:
+func (_m *DatabaseConfiguration) GetRetry() uint {
+	ret := _m.Called()
+
+	var r0 uint
+	if rf, ok := ret.Get(0).(func() uint); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(uint)
+	}
+
+	return r0
+}
+
+// GetRetryTime provides a mock function with given fields:
+func (_m *DatabaseConfiguration) GetRetryTime() time.Duration {
+	ret := _m.Called()
+
+	var r0 time.Duration
+	if rf, ok := ret.Get(0).(func() time.Duration); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(time.Duration)
 	}
 
 	return r0
