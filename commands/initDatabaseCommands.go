@@ -26,4 +26,12 @@ func initDatabaseCommands(cfg *verdeter.VerdeterCommand) {
 	databaseSslmodeKey := "database.sslmode"
 	cfg.GKey(databaseSslmodeKey, verdeter.IsStr, "", "The sslmode to use when connecting to the database server")
 	cfg.SetRequired(databaseSslmodeKey)
+
+	databaseRetryKey := "database.init.retry"
+	cfg.GKey(databaseRetryKey, verdeter.IsUint, "", "The number of times badaas tries to establish a connection with the database")
+	cfg.SetDefault(databaseRetryKey, uint(10))
+
+	databaseRetryDurationKey := "database.init.retryTime"
+	cfg.GKey(databaseRetryDurationKey, verdeter.IsUint, "", "The duration in seconds badaas wait between connection attempts")
+	cfg.SetDefault(databaseRetryDurationKey, uint(5))
 }
