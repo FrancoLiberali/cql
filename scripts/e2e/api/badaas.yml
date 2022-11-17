@@ -14,6 +14,9 @@ database:
   username: root
   password: postres
   name: badaas_db
+  init:
+    retry: 10
+    retryTime: 5
 
 logger:
   mode: dev

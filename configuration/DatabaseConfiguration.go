@@ -1,6 +1,8 @@
 package configuration
 
 import (
+	"time"
+
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -14,16 +16,20 @@ type DatabaseConfiguration interface {
 	GetUsername() string
 	GetPassword() string
 	GetSSLMode() string
+	GetRetry() uint
+	GetRetryTime() time.Duration
 }
 
 // Concrete implementation of the DatabaseConfiguration interface
 type databaseConfigurationImpl struct {
-	port     int
-	host     string
-	dbName   string
-	username string
-	password string
-	sslmode  string
+	port      int
+	host      string
+	dbName    string
+	username  string
+	password  string
+	sslmode   string
+	retry     uint
+	retryTime uint
 }
 
 // Instantiate a new configuration holder for the database connection
@@ -41,6 +47,8 @@ func (databaseConfiguration *databaseConfigurationImpl) Reload() {
 	databaseConfiguration.username = viper.GetString("database.username")
 	databaseConfiguration.password = viper.GetString("database.password")
 	databaseConfiguration.sslmode = viper.GetString("database.sslmode")
+	databaseConfiguration.retry = viper.GetUint("database.init.retry")
+	databaseConfiguration.retryTime = viper.GetUint("database.init.retryTime")
 }
 
 // Return the port of the database server
@@ -73,6 +81,16 @@ func (databaseConfiguration *databaseConfigurationImpl) GetSSLMode() string {
 	return databaseConfiguration.sslmode
 }
 
+// Return the number of retries for the database connection
+func (databaseConfiguration *databaseConfigurationImpl) GetRetry() uint {
+	return databaseConfiguration.retry
+}
+
+// Return the waiting time between the database connections in seconds
+func (databaseConfiguration *databaseConfigurationImpl) GetRetryTime() time.Duration {
+	return intToSecond(int(databaseConfiguration.retryTime))
+}
+
 // Log the values provided by the configuration holder
 func (databaseConfiguration *databaseConfigurationImpl) Log(logger *zap.Logger) {
 	logger.Info("Database configuration",
@@ -82,5 +100,7 @@ func (databaseConfiguration *databaseConfigurationImpl) Log(logger *zap.Logger) 
 		zap.String("username", databaseConfiguration.username),
 		zap.String("password", databaseConfiguration.password),
 		zap.String("sslmode", databaseConfiguration.sslmode),
+		zap.Uint("retry", databaseConfiguration.retry),
+		zap.Uint("retryTime", databaseConfiguration.retryTime),
 	)
 }

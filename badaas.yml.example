@@ -29,6 +29,15 @@ database:
 
   # The password of the account on the database server
   password: postres
+  
+  # The settings for the initialization of the database
+  init:
+
+    # Number of time badaas will try to establish a connection to the database
+    retry: 10
+
+    # Waiting time between connection
+    retryTime: 5
 
 logger:
   mode: prod

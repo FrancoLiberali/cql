@@ -62,6 +62,8 @@ func NewHTTPServer(
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
+			// Flush the logger
+			logger.Sync()
 			return srv.Shutdown(ctx)
 		},
 	})

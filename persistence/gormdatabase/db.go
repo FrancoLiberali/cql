@@ -2,6 +2,7 @@ package gormdatabase
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/persistence/gormdatabase/gormzap"
@@ -32,18 +33,23 @@ func createDsn(host, username, password, sslmode, dbname string, port int) strin
 }
 
 // Initialize the database with using the database configuration
-func InitializeDBFromConf(logger *zap.Logger, databaseConfiguration configuration.DatabaseConfiguration) (*gorm.DB, error) {
+func CreateDatabaseConnectionFromConfiguration(logger *zap.Logger, databaseConfiguration configuration.DatabaseConfiguration) (*gorm.DB, error) {
 	dsn := createDsnFromConf(databaseConfiguration)
-	db, err := initializeDBFromDsn(dsn, logger)
-	if err != nil {
-		return nil, err
+	var err error
+	var database *gorm.DB
+	for numberRetry := uint(0); numberRetry < databaseConfiguration.GetRetry(); numberRetry++ {
+		database, err = initializeDBFromDsn(dsn, logger)
+		if err == nil {
+			logger.Sugar().Debugf("Database connection is active")
+			break
+		}
+		logger.Sugar().Debugf("Database connection failed with error %q", err.Error())
+		logger.Sugar().Debugf("Retrying database connection %d/%d in %s",
+			numberRetry+1, databaseConfiguration.GetRetry(), databaseConfiguration.GetRetryTime().String())
+		time.Sleep(databaseConfiguration.GetRetryTime())
 	}
-	err = autoMigrate(db, models.ListOfTables)
-	if err != nil {
-		return nil, err
-	}
-	logger.Info("The database connection was successfully initialized")
-	return db, nil
+	return database, err
+
 }
 
 // Initialize the database with the dsn string
@@ -56,12 +62,12 @@ func initializeDBFromDsn(dsn string, logger *zap.Logger) (*gorm.DB, error) {
 		return nil, err
 	}
 
-	rawDB, err := database.DB()
+	rawDatabase, err := database.DB()
 	if err != nil {
 		return nil, err
 	}
 	// ping the underlying database
-	err = rawDB.Ping()
+	err = rawDatabase.Ping()
 	if err != nil {
 		return nil, err
 	}
@@ -74,5 +80,15 @@ func autoMigrate(database *gorm.DB, listOfDatabaseTables []any) error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// Run the automigration
+func AutoMigrate(logger *zap.Logger, database *gorm.DB) error {
+	err := autoMigrate(database, models.ListOfTables)
+	if err != nil {
+		return err
+	}
+	logger.Info("The database connection was successfully initialized")
 	return nil
 }
