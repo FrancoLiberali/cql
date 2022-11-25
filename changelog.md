@@ -23,5 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactor codebase to use the DI framework uber-go/fx. Now all services and controllers relies on interfaces.
 - Add an generic ID to the repository interface
 - Add a retry mecanism for the database connection
+- Add `init` flag to migrate database and create admin user.
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased
