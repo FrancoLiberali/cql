@@ -41,15 +41,20 @@ func CreateDatabaseConnectionFromConfiguration(logger *zap.Logger, databaseConfi
 		database, err = initializeDBFromDsn(dsn, logger)
 		if err == nil {
 			logger.Sugar().Debugf("Database connection is active")
-			break
+			err = AutoMigrate(logger, database)
+			if err != nil {
+				logger.Error("migration failed")
+				return nil, err
+			}
+			logger.Info("AutoMigration was executed successfully")
+			return database, err
 		}
 		logger.Sugar().Debugf("Database connection failed with error %q", err.Error())
 		logger.Sugar().Debugf("Retrying database connection %d/%d in %s",
 			numberRetry+1, databaseConfiguration.GetRetry(), databaseConfiguration.GetRetryTime().String())
 		time.Sleep(databaseConfiguration.GetRetryTime())
 	}
-	return database, err
-
+	return nil, err
 }
 
 // Initialize the database with the dsn string
@@ -89,6 +94,5 @@ func AutoMigrate(logger *zap.Logger, database *gorm.DB) error {
 	if err != nil {
 		return err
 	}
-	logger.Info("The database connection was successfully initialized")
 	return nil
 }

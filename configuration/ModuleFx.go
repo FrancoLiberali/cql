@@ -9,4 +9,5 @@ var ConfigurationModule = fx.Module(
 	fx.Provide(NewHTTPServerConfiguration),
 	fx.Provide(NewLoggerConfiguration),
 	fx.Provide(NewPaginationConfiguration),
+	fx.Provide(NewInitializationConfiguration),
 )
