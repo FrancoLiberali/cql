@@ -1,12 +1,15 @@
 package main
 
 import (
+	"net/http"
+	"net/http/cookiejar"
+	"os"
+	"testing"
+	"time"
+
 	"github.com/cucumber/godog"
 	"github.com/cucumber/godog/colors"
 	"github.com/spf13/pflag"
-	"net/http"
-	"os"
-	"testing"
 )
 
 type TestContext struct {
@@ -36,9 +39,18 @@ func TestMain(m *testing.M) {
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	t := &TestContext{}
-	t.httpClient = &http.Client{}
+	jar, err := cookiejar.New(nil)
+	if err != nil {
+		panic(err)
+	}
+	t.httpClient = &http.Client{
+		Transport: http.DefaultTransport,
+		Timeout:   time.Duration(5 * time.Second),
+		Jar:       jar,
+	}
 
 	ctx.Step(`^I request "(.+)"$`, t.requestGET)
 	ctx.Step(`^I expect status code is "(\d+)"$`, t.assertStatusCode)
 	ctx.Step(`^I expect response field "(.+)" is "(.+)"$`, t.assertResponseFieldIsEquals)
+	ctx.Step(`^I request "(.+)" with method "(.+)" with json$`, t.requestWithJson)
 }
