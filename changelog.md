@@ -24,5 +24,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add an generic ID to the repository interface
 - Add a retry mecanism for the database connection
 - Add `init` flag to migrate database and create admin user.
+- Add a CONTRIBUTING.md and a documentation file for configuration (configuration.md)
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased
