@@ -1,0 +1,61 @@
+# The settings for the database.
+database:
+  # The host of the database server. 
+  # (mandatory)
+  host: e2e-db-1
+
+  # The port of the database server. 
+  # (mandatory)
+  port: 26257
+
+  # The sslmode of the connection to the database server. 
+  # (mandatory)
+  sslmode: disable
+
+  # The username of the account on the database server. 
+  # (mandatory)
+  username: root
+
+  # The password of the account on the database server.
+  # (mandatory)
+  password: postgres
+
+  # The settings for the initialization of the database server. 
+  init:
+    # Number of time badaas will try to establish a connection to the database server.
+    # default (10)
+    retry: 10
+
+    # Waiting time between connection, in seconds.
+    # default (5)
+    retryTime: 5
+
+# The settings for the http server.
+server:
+  # The address to bind badaas to.
+  # default ("0.0.0.0")
+  host: "" 
+
+  # The port badaas should use.
+  # default (8000)
+  port: 8000
+
+  # The maximum timeout for the http server in seconds.
+  # default (15)
+  timeout: 15 
+
+  # The settings for the pagination.
+  pagination:
+    page:
+      # The maximum number of record per page 
+      # default (100)
+      max: 100
+
+# The settings for the logger.
+logger:
+  # Either `dev` or `prod`
+  # default (`prod`)
+  mode: prod
+  request:
+    # Change the log emitted when badaas receives a request on a valid endpoint.
+    template: "Receive {{method}} request on {{url}}"

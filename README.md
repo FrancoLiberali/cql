@@ -1,84 +1,99 @@
-# badaas
+# BADAAS: Backend And Distribution As A Service
 
-Backend and Distribution as a Service
+Badaas enables the effortless construction of ***distributed, resilient, highly available and secure applications by design***, while ensuring very simple deployment and management (NoOps). 
 
-## Build
+Badaas provides several key features:
 
-To build the project: 
+- **Authentification**: Badaas can authentify users using its internal authentification scheme or externally by using protocols such as OIDC, SAML, Oauth2...
+- **Habilitation**: On a resource access, Badaas will check if the user is authorized using a RBAC model.
+- **Distribution**: Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset). 
+- **Persistence**: Applicative objects are persisted as well as user files. Those resources are shared accross the clusters to increase resiliency.
+- **Querying Resources**: Resources are accessible via a REST API.
+- **Posix complient**: Badaas strives towards being a good unix citizen and respecting commonly accepted norms. (see [Configuration](#configuration))
+- **Advanced logs management**: Badaas provides an interface to interact with the logs produced by the clusters. Logs are formated in json by default.
+
+To quickly get badaas up and running, please head to the [miniblog tutorial](<!-- TODO: link the miniblog tutorial here -->)
+
+- [Quickstart](#quickstart)
+  - [Docker install](#docker-install)
+  - [Install from sources](#install-from-sources)
+    - [Prerequisites](#prerequisites)
+    - [Configuration](#configuration)
+- [Contributing](#contributing)
+- [Licence](#licence)
+
+## Quickstart
+
+You can either use the [Docker Install](#docker-install) or build it from source .
+
+## Docker install
+
+You can build the image using `docker build -t badaas .` since we don't have an official docker image yet.
+
+## Install from sources
+
+### Prerequisites
+
+Get the sources of the project, either by visiting the [releases](https://github.com/ditrit/badaas/releases) page and downloading an archive or clone the main branch (please be aware that is it not a stable version).
+
+To build the project:
 
 - [Install go](https://go.dev/dl/#go1.18.4) v1.18
 - Install project dependencies
-```
-go get
-```
-- Run build command
-```
-go build
-```
-
-Once all is done, you have a binary `badaas` at the root of the project.
-
-## Development
-
-### Directory structure
-
-This is the default directory structure we use for the project:
-
-```
-badaas
-├ commands             ⇨ Contains all the CLI commands.
-├ configuration        ⇨ Contains configuration holders.
-├ controllers          ⇨ Contains all the web controllers.
-├ features             ⇨ Contains all the e2e tests.
-├ resources            ⇨ Contains all the applications resources, like constants or other.
-├ router               ⇨ Contains the route definitions for application.
-├ scripts              ⇨ Contains shell scripts, the Docker files and docker-compose files for e2e test.
-```
-
-### E2E testing
-
-We use [godog](https://github.com/cucumber/godog) to run all e2e tests.
-
-To execute E2E tests :
 
 ```bash
-# Build containers and launch db and api .
-docker compose -f "scripts/e2e/docker-compose.yml" up --build
-
-# In another process, run the test
-go test
+go get
 ```
 
-### How to release
+- Run build command
 
-We use [Semantic Versioning](https://semver.org/spec/v2.0.0.html) as guideline for the version management.
+```bash
+go build .
+```
 
-Steps to release:
-- Create a new branch labeled `release/vX.Y.Z` from the latest `main`.
-- Improve the version number in `changelog.md` and `resources/api.go`.
-- Verify the content of the `changelog.md`.
-- Commit the modifications with the label `Release version X.Y.Z`.
-- Create a pull request on github for this branch into `main`.
-- Once the pull request validated and merged, tag the `main` branch with `vX.Y.Z`
-- After the tag is pushed, make the release on the tag in GitHub
+Well done, you have a binary `badaas` at the root of the project.
 
-### Git: Default branch
+Then you can launch Badaas directly with:
 
-The default branch is main. Direct commit on it is forbidden. The only way to update the application is through pull request.
+```bash
+export BADAAS_DATABASE_PORT=<complete>
+export BADAAS_DATABASE_HOST=<complete>
+export BADAAS_DATABASE_DBNAME=<complete>
+export BADAAS_DATABASE_SSLMODE=<complete>
+export BADAAS_DATABASE_USERNAME=<complete>
+export BADAAS_DATABASE_PASSWORD=<complete>
+./badaas 
+```
 
-Release tag are only done on the `main` branch.
+### Configuration
 
-### Git: Branch naming policy
+Badaas use [verdeter](https://github.com/ditrit/verdeter) to manage it's configuration. So Badaas is POSIX complient by default.
 
-`[BRANCH_TYPE]/[BRANCH_NAME]`
+Badaas can be configured using environment variables, configuration files or CLI flags.
+CLI flags take priority on the environment variables and the environment variables take priority on the content of the configuration file.
 
-* `BRANCH_TYPE` is a prefix to describe the purpose of the branch. Accepted prefixes are:
-    * `feature`, used for feature development
-    * `bugfix`, used for bug fix
-    * `improvement`, used for refacto
-    * `library`, used for updating library
-    * `prerelease`, used for preparing the branch for the release
-    * `release`, used for releasing project
-    * `hotfix`, used for applying a hotfix on main
-    * `poc`, used for proof of concept 
-* `BRANCH_NAME` is managed by this regex: `[a-z0-9._-]` (`_` is used as space character).
+As an exemple we will define the `database.port` configuration key using the 3 methods:
+
+- Using a CLI flag: `--database.port=1222`
+- Using an environment variable: `export BADAAS_DATABASE_PORT=1222` (*dots are replaced by underscores*)
+- Using a config file (in YAML here):
+
+    ```yml
+    # /etc/badaas/badaas.yml
+    database:
+        port: 1222
+    ```
+
+The config file can be placed at `/etc/badaas/badaas.yml` or `$HOME/.config/badaas/badaas.yml` or in the same folder as the badaas binary `./badaas.yml`.
+
+If needed, the location can be overridden using the config key `config_path`.
+
+***For a full overview of the configuration keys: please head to the [configuration documentation](./configuration.md).***
+
+# Contributing
+
+See [this section](./CONTRIBUTING.md).
+
+# Licence
+
+Badaas is Licenced under the [Mozilla Public License Version 2.0](./LICENSE).
