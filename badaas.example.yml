@@ -59,3 +59,21 @@ logger:
   request:
     # Change the log emitted when badaas receives a request on a valid endpoint.
     template: "Receive {{method}} request on {{url}}"
+
+# The settings for session service
+# This section contains some good defaults, don't change thoses value unless you need to.
+session:
+  # The duration of a user session, in seconds
+  # Default (14400) equal to 4 hours
+  duration: 14400
+  # The refresh interval in seconds. Badaas refresh it's internal session cache periodically.
+  # Default (30)
+  pullInterval: 30
+
+# The settings for the first run.
+default:
+  # The admin settings for the first run
+  admin:
+    # The admin password for the first run. Won't change is the admin user already exists.
+    password: admin
+    
