@@ -5,12 +5,14 @@ import (
 	"net/http"
 
 	"github.com/Masterminds/squirrel"
+	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/httperrors"
 	"github.com/ditrit/badaas/persistence/gormdatabase"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/pagination"
 	"go.uber.org/zap"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 // Return a database error
@@ -25,18 +27,27 @@ func DatabaseError(message string, golangError error) httperrors.HTTPError {
 // Implementation of the Generic CRUD Repository
 type CRUDRepositoryImpl[T models.Tabler, ID any] struct {
 	CRUDRepository[T, ID]
-	gormDatabase *gorm.DB
-	logger       *zap.Logger
+	gormDatabase            *gorm.DB
+	logger                  *zap.Logger
+	paginationConfiguration configuration.PaginationConfiguration
 }
 
 // Contructor of the Generic CRUD Repository
-func NewCRUDRepository[T models.Tabler, ID any](database *gorm.DB, logger *zap.Logger) CRUDRepository[T, ID] {
-	return &CRUDRepositoryImpl[T, ID]{gormDatabase: database, logger: logger}
+func NewCRUDRepository[T models.Tabler, ID any](
+	database *gorm.DB,
+	logger *zap.Logger,
+	paginationConfiguration configuration.PaginationConfiguration,
+) CRUDRepository[T, ID] {
+	return &CRUDRepositoryImpl[T, ID]{
+		gormDatabase:            database,
+		logger:                  logger,
+		paginationConfiguration: paginationConfiguration,
+	}
 }
 
 // Run the function passed as parameter, if it returns the error and rollback the transaction.
 // If no error is returned, it commits the transaction and return the interface{} value.
-func (repository *CRUDRepositoryImpl[T, ID]) Transaction(transactionFunction func(CRUDRepository[T, ID]) (any, error)) (any, error) {
+func (repository *CRUDRepositoryImpl[T, ID]) Transaction(transactionFunction func(CRUDRepository[T, ID]) (any, error)) (any, httperrors.HTTPError) {
 	transaction := repository.gormDatabase.Begin()
 	defer func() {
 		if recoveredError := recover(); recoveredError != nil {
@@ -46,9 +57,13 @@ func (repository *CRUDRepositoryImpl[T, ID]) Transaction(transactionFunction fun
 	returnValue, err := transactionFunction(&CRUDRepositoryImpl[T, ID]{gormDatabase: transaction})
 	if err != nil {
 		transaction.Rollback()
-		return nil, err
+		return nil, DatabaseError("transaction failed", err)
 	}
-	return returnValue, transaction.Commit().Error
+	err = transaction.Commit().Error
+	if err != nil {
+		return nil, DatabaseError("transaction failed to commit", err)
+	}
+	return returnValue, nil
 }
 
 // Create an entity of a Model
@@ -109,11 +124,11 @@ func (repository *CRUDRepositoryImpl[T, ID]) GetByID(id ID) (*T, httperrors.HTTP
 }
 
 // Get all entities of a Model
-func (repository *CRUDRepositoryImpl[T, ID]) GetAll(sortOptions ...pagination.SortOption) ([]*T, httperrors.HTTPError) {
+func (repository *CRUDRepositoryImpl[T, ID]) GetAll(sortOption SortOption) ([]*T, httperrors.HTTPError) {
 	var entities []*T
 	transaction := repository.gormDatabase
-	for _, sortOption := range sortOptions {
-		transaction = transaction.Order(sortOption.ToClause())
+	if sortOption != nil {
+		transaction = transaction.Order(buildClauseFromSortOption(sortOption))
 	}
 	transaction.Find(&entities)
 	if transaction.Error != nil {
@@ -124,6 +139,11 @@ func (repository *CRUDRepositoryImpl[T, ID]) GetAll(sortOptions ...pagination.So
 		)
 	}
 	return entities, nil
+}
+
+// Build a gorm order clause from a SortOption
+func buildClauseFromSortOption(sortOption SortOption) clause.OrderByColumn {
+	return clause.OrderByColumn{Column: clause.Column{Name: sortOption.Column()}, Desc: sortOption.Desc()}
 }
 
 // Count entities of a models
@@ -154,7 +174,7 @@ func (repository *CRUDRepositoryImpl[T, ID]) count(whereClause string, values []
 func (repository *CRUDRepositoryImpl[T, ID]) Find(
 	filters squirrel.Sqlizer,
 	page pagination.Paginator,
-	sortOptions ...pagination.SortOption,
+	sortOption SortOption,
 ) (*pagination.Page[T], httperrors.HTTPError) {
 	transaction := repository.gormDatabase.Begin()
 	defer func() {
@@ -169,9 +189,7 @@ func (repository *CRUDRepositoryImpl[T, ID]) Find(
 	if httpError != nil {
 		return nil, httpError
 	}
-	if page == nil {
-		transaction = transaction.Where(whereClause, values...).Find(&instances)
-	} else {
+	if page != nil {
 		transaction = transaction.
 			Offset(
 				int((page.Offset() - 1) * page.Limit()),
@@ -179,9 +197,11 @@ func (repository *CRUDRepositoryImpl[T, ID]) Find(
 			Limit(
 				int(page.Limit()),
 			)
+	} else {
+		page = pagination.NewPaginator(0, repository.paginationConfiguration.GetMaxElemPerPage())
 	}
-	for _, sortOption := range sortOptions {
-		transaction = transaction.Order(sortOption.ToClause())
+	if sortOption != nil {
+		transaction = transaction.Order(buildClauseFromSortOption(sortOption))
 	}
 	transaction = transaction.Where(whereClause, values...).Find(&instances)
 	if transaction.Error != nil {
