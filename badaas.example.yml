@@ -69,9 +69,9 @@ session:
   # The refresh interval in seconds. Badaas refresh it's internal session cache periodically.
   # Default (30)
   pullInterval: 30
-  # The refresh interval in seconds. Badaas refresh it's internal session cache periodically.
-  # Default (30)
-  rollInterval: 30
+  # The duration in which the user can renew it's session by making a request.
+  # Default (3600) equal to 1 hour
+  rollDuration: 3600
 
 # The settings for the first run.
 default:

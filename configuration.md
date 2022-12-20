@@ -120,7 +120,19 @@ default:
 ## Session management
 
 You can change the way the session service handle user sessions.
-Session are extended if the user made a request to badaas in the last quarter of the session duration. The session duration and the refresh intervall of the cache can be changed. They contains some good defaults.
+Session are extended if the user made a request to badaas in the "roll duration". The session duration and the refresh interval of the cache can be changed. They contains some good defaults.
+
+Please see the diagram below to see what is the roll duration relative to the session duration.
+
+
+```txt
+     |   session duration                        |
+     |<----------------------------------------->|
+ ----|-------------------------|-----------------|----> time
+     |                         |                 |
+                               |<--------------->|
+                                  roll duration
+```
 
 ```yml
 # The settings for session service
@@ -132,4 +144,7 @@ session:
   # The refresh interval in seconds. Badaas refresh it's internal session cache periodically.
   # Default (30)
   pullInterval: 30
+  # The duration in which the user can renew it's session by making a request.
+  # Default (3600) equal to 1 hour
+  rollDuration: 3600
 ```
