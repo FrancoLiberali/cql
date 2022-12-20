@@ -5,7 +5,8 @@ go 1.18
 require (
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/cucumber/godog v0.12.5
-	github.com/ditrit/verdeter v0.3.0
+	github.com/ditrit/verdeter v0.3.1
+	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jackc/pgconn v1.13.0
 	github.com/magiconair/properties v1.8.6
@@ -25,7 +26,7 @@ require (
 	github.com/cucumber/messages-go/v16 v16.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fsnotify/fsnotify v1.5.4 // indirect
-	github.com/gofrs/uuid v4.3.0+incompatible // indirect
+	github.com/gofrs/uuid v4.0.0+incompatible // indirect
 	github.com/goph/emperror v0.17.2 // indirect
 	github.com/hashicorp/go-immutable-radix v1.3.1 // indirect
 	github.com/hashicorp/go-memdb v1.3.3 // indirect
