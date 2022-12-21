@@ -9,6 +9,7 @@ import (
 	"github.com/ditrit/badaas/logger"
 	"github.com/ditrit/badaas/persistence"
 	"github.com/ditrit/badaas/router"
+	"github.com/ditrit/badaas/services/sessionservice"
 	"github.com/ditrit/badaas/services/userservice"
 	"github.com/ditrit/verdeter"
 	"go.uber.org/fx"
@@ -27,6 +28,7 @@ func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
 		persistence.PersistanceModule,
 
 		fx.Provide(userservice.NewUserService),
+		fx.Provide(sessionservice.NewSessionService),
 		// logger for fx
 		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: logger}
@@ -81,4 +83,5 @@ func init() {
 	initLoggerCommands(rootCfg)
 	initDatabaseCommands(rootCfg)
 	initInitialisationCommands(rootCfg)
+	initSessionCommands(rootCfg)
 }

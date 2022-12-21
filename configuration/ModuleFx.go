@@ -10,4 +10,5 @@ var ConfigurationModule = fx.Module(
 	fx.Provide(NewLoggerConfiguration),
 	fx.Provide(NewPaginationConfiguration),
 	fx.Provide(NewInitializationConfiguration),
+	fx.Provide(NewSessionConfiguration),
 )
