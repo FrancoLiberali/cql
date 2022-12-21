@@ -7,6 +7,13 @@ import (
 	"go.uber.org/zap"
 )
 
+// The config keys regarding the session handling settings
+const (
+	SessionDurationKey     string = "session.duration"
+	SessionPullIntervalKey string = "session.pullInterval"
+	SessionRollIntervalKey string = "session.rollDuration"
+)
+
 // Hold the configuration values to handle the sessions
 type SessionConfiguration interface {
 	ConfigurationHolder
@@ -46,9 +53,9 @@ func (sessionConfiguration *sessionConfigurationImpl) GetRollDuration() time.Dur
 
 // Reload session configuration
 func (sessionConfiguration *sessionConfigurationImpl) Reload() {
-	sessionConfiguration.sessionDuration = intToSecond(int(viper.GetUint("session.duration")))
-	sessionConfiguration.pullInterval = intToSecond(int(viper.GetUint("session.pullInterval")))
-	sessionConfiguration.rollDuration = intToSecond(int(viper.GetUint("session.rollDuration")))
+	sessionConfiguration.sessionDuration = intToSecond(int(viper.GetUint(SessionDurationKey)))
+	sessionConfiguration.pullInterval = intToSecond(int(viper.GetUint(SessionPullIntervalKey)))
+	sessionConfiguration.rollDuration = intToSecond(int(viper.GetUint(SessionRollIntervalKey)))
 }
 
 // Log the values provided by the configuration holder

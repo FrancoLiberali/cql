@@ -7,6 +7,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// The config keys regarding the http server settings
+const (
+	ServerTimeoutKey               string = "server.timeout"
+	ServerHostKey                  string = "server.host"
+	ServerPortKey                  string = "server.port"
+	ServerPaginationMaxElemPerPage string = "server.pagination.page.max"
+)
+
 // Hold the configuration values for the http server
 type HTTPServerConfiguration interface {
 	ConfigurationHolder
@@ -31,9 +39,9 @@ func NewHTTPServerConfiguration() HTTPServerConfiguration {
 
 // Reload HTTP Server configuration
 func (httpServerConfiguration *hTTPServerConfigurationImpl) Reload() {
-	httpServerConfiguration.host = viper.GetString("server.host")
-	httpServerConfiguration.port = viper.GetInt("server.port")
-	httpServerConfiguration.timeout = intToSecond(viper.GetInt("server.max_timeout"))
+	httpServerConfiguration.host = viper.GetString(ServerHostKey)
+	httpServerConfiguration.port = viper.GetInt(ServerPortKey)
+	httpServerConfiguration.timeout = intToSecond(viper.GetInt(ServerTimeoutKey))
 }
 
 // Return the host addr

@@ -7,6 +7,18 @@ import (
 	"go.uber.org/zap"
 )
 
+// The config keys regarding the database settings
+const (
+	DatabasePortKey          string = "database.port"
+	DatabaseHostKey          string = "database.host"
+	DatabaseNameKey          string = "database.name"
+	DatabaseUsernameKey      string = "database.username"
+	DatabasePasswordKey      string = "database.password"
+	DatabaseSslmodeKey       string = "database.sslmode"
+	DatabaseRetryKey         string = "database.init.retry"
+	DatabaseRetryDurationKey string = "database.init.retryTime"
+)
+
 // Hold the configuration values for the database connection
 type DatabaseConfiguration interface {
 	ConfigurationHolder
@@ -41,14 +53,14 @@ func NewDatabaseConfiguration() DatabaseConfiguration {
 
 // Reload database configuration
 func (databaseConfiguration *databaseConfigurationImpl) Reload() {
-	databaseConfiguration.port = viper.GetInt("database.port")
-	databaseConfiguration.host = viper.GetString("database.host")
-	databaseConfiguration.dbName = viper.GetString("database.name")
-	databaseConfiguration.username = viper.GetString("database.username")
-	databaseConfiguration.password = viper.GetString("database.password")
-	databaseConfiguration.sslmode = viper.GetString("database.sslmode")
-	databaseConfiguration.retry = viper.GetUint("database.init.retry")
-	databaseConfiguration.retryTime = viper.GetUint("database.init.retryTime")
+	databaseConfiguration.port = viper.GetInt(DatabasePortKey)
+	databaseConfiguration.host = viper.GetString(DatabaseHostKey)
+	databaseConfiguration.dbName = viper.GetString(DatabaseNameKey)
+	databaseConfiguration.username = viper.GetString(DatabaseUsernameKey)
+	databaseConfiguration.password = viper.GetString(DatabasePasswordKey)
+	databaseConfiguration.sslmode = viper.GetString(DatabaseSslmodeKey)
+	databaseConfiguration.retry = viper.GetUint(DatabaseRetryKey)
+	databaseConfiguration.retryTime = viper.GetUint(DatabaseRetryDurationKey)
 }
 
 // Return the port of the database server

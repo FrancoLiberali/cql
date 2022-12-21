@@ -5,6 +5,11 @@ import (
 	"go.uber.org/zap"
 )
 
+// The config keys regarding the initialization settings
+const (
+	InitializationDefaultAdminPasswordKey string = "default.admin.password"
+)
+
 // Hold the configuration values for the initialization
 type InitializationConfiguration interface {
 	ConfigurationHolder
@@ -25,7 +30,7 @@ func NewInitializationConfiguration() InitializationConfiguration {
 
 // Reload the InitializationConfiguration
 func (initializationConfiguration *initializationConfigurationIml) Reload() {
-	initializationConfiguration.adminPassword = viper.GetString("default.admin.password")
+	initializationConfiguration.adminPassword = viper.GetString(InitializationDefaultAdminPasswordKey)
 }
 
 // Log the values provided by the configuration holder
