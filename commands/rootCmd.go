@@ -2,7 +2,6 @@ package commands
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/controllers"
@@ -40,24 +39,6 @@ func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
 		fx.Invoke(func(*http.Server) { /* we need this function to be empty*/ }),
 		fx.Invoke(createSuperUser),
 	).Run()
-	return nil
-}
-
-// create a super user
-func createSuperUser(
-	config configuration.InitializationConfiguration,
-	logger *zap.Logger,
-	userService userservice.UserService,
-) error {
-	// Create a super admin user and exit with code 1 on error
-	_, err := userService.NewUser("admin", "admin-no-reply@badaas.com", config.GetAdminPassword())
-	if err != nil {
-		if !strings.Contains(err.Error(), "already exist in database") {
-			logger.Sugar().Fatalf("failed to save the super admin %w", err)
-			return err
-		}
-		logger.Sugar().Infof("The superadmin user already exists in database")
-	}
 	return nil
 }
 
