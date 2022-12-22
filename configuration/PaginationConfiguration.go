@@ -30,7 +30,7 @@ func (paginationConfiguration *paginationConfigurationImpl) GetMaxElemPerPage() 
 
 // Reload pagination configuration
 func (paginationConfiguration *paginationConfigurationImpl) Reload() {
-	paginationConfiguration.pagesNb = viper.GetUint("server.pagination.page.max")
+	paginationConfiguration.pagesNb = viper.GetUint(ServerPaginationMaxElemPerPage)
 }
 
 // Log the values provided by the configuration holder

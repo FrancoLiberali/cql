@@ -5,6 +5,12 @@ import (
 	"go.uber.org/zap"
 )
 
+// The config keys regarding the logger settings
+const (
+	LoggerModeKey            string = "logger.mode"
+	LoggerRequestTemplateKey string = "logger.request.template"
+)
+
 // Hold the configuration values for the logger
 type LoggerConfiguration interface {
 	ConfigurationHolder
@@ -25,8 +31,8 @@ func NewLoggerConfiguration() LoggerConfiguration {
 }
 
 func (loggerConfiguration *loggerConfigurationImpl) Reload() {
-	loggerConfiguration.mode = viper.GetString("logger.mode")
-	loggerConfiguration.requestTemplate = viper.GetString("logger.request.template")
+	loggerConfiguration.mode = viper.GetString(LoggerModeKey)
+	loggerConfiguration.requestTemplate = viper.GetString(LoggerRequestTemplateKey)
 }
 
 // Return the mode of the logger

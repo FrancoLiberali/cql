@@ -15,7 +15,7 @@ import (
 var HTTPServerConfigurationString = `server:
   port: 8000
   host: "0.0.0.0" # listening on all interfaces
-  max_timeout: 15 # in seconds
+  timeout: 15 # in seconds
 `
 
 func TestHTTPServerConfigurationNewHttpServerConfiguration(t *testing.T) {
