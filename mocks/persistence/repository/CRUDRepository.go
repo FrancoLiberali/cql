@@ -76,19 +76,12 @@ func (_m *CRUDRepository[T, ID]) Delete(_a0 *T) httperrors.HTTPError {
 }
 
 // Find provides a mock function with given fields: _a0, _a1, _a2
-func (_m *CRUDRepository[T, ID]) Find(_a0 squirrel.Sqlizer, _a1 pagination.Paginator, _a2 ...pagination.SortOption) (*pagination.Page[T], httperrors.HTTPError) {
-	_va := make([]interface{}, len(_a2))
-	for _i := range _a2 {
-		_va[_i] = _a2[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, _a0, _a1)
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+func (_m *CRUDRepository[T, ID]) Find(_a0 squirrel.Sqlizer, _a1 pagination.Paginator, _a2 repository.SortOption) (*pagination.Page[T], httperrors.HTTPError) {
+	ret := _m.Called(_a0, _a1, _a2)
 
 	var r0 *pagination.Page[T]
-	if rf, ok := ret.Get(0).(func(squirrel.Sqlizer, pagination.Paginator, ...pagination.SortOption) *pagination.Page[T]); ok {
-		r0 = rf(_a0, _a1, _a2...)
+	if rf, ok := ret.Get(0).(func(squirrel.Sqlizer, pagination.Paginator, repository.SortOption) *pagination.Page[T]); ok {
+		r0 = rf(_a0, _a1, _a2)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*pagination.Page[T])
@@ -96,8 +89,8 @@ func (_m *CRUDRepository[T, ID]) Find(_a0 squirrel.Sqlizer, _a1 pagination.Pagin
 	}
 
 	var r1 httperrors.HTTPError
-	if rf, ok := ret.Get(1).(func(squirrel.Sqlizer, pagination.Paginator, ...pagination.SortOption) httperrors.HTTPError); ok {
-		r1 = rf(_a0, _a1, _a2...)
+	if rf, ok := ret.Get(1).(func(squirrel.Sqlizer, pagination.Paginator, repository.SortOption) httperrors.HTTPError); ok {
+		r1 = rf(_a0, _a1, _a2)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(httperrors.HTTPError)
@@ -108,18 +101,12 @@ func (_m *CRUDRepository[T, ID]) Find(_a0 squirrel.Sqlizer, _a1 pagination.Pagin
 }
 
 // GetAll provides a mock function with given fields: _a0
-func (_m *CRUDRepository[T, ID]) GetAll(_a0 ...pagination.SortOption) ([]*T, httperrors.HTTPError) {
-	_va := make([]interface{}, len(_a0))
-	for _i := range _a0 {
-		_va[_i] = _a0[_i]
-	}
-	var _ca []interface{}
-	_ca = append(_ca, _va...)
-	ret := _m.Called(_ca...)
+func (_m *CRUDRepository[T, ID]) GetAll(_a0 repository.SortOption) ([]*T, httperrors.HTTPError) {
+	ret := _m.Called(_a0)
 
 	var r0 []*T
-	if rf, ok := ret.Get(0).(func(...pagination.SortOption) []*T); ok {
-		r0 = rf(_a0...)
+	if rf, ok := ret.Get(0).(func(repository.SortOption) []*T); ok {
+		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*T)
@@ -127,8 +114,8 @@ func (_m *CRUDRepository[T, ID]) GetAll(_a0 ...pagination.SortOption) ([]*T, htt
 	}
 
 	var r1 httperrors.HTTPError
-	if rf, ok := ret.Get(1).(func(...pagination.SortOption) httperrors.HTTPError); ok {
-		r1 = rf(_a0...)
+	if rf, ok := ret.Get(1).(func(repository.SortOption) httperrors.HTTPError); ok {
+		r1 = rf(_a0)
 	} else {
 		if ret.Get(1) != nil {
 			r1 = ret.Get(1).(httperrors.HTTPError)
@@ -180,7 +167,7 @@ func (_m *CRUDRepository[T, ID]) Save(_a0 *T) httperrors.HTTPError {
 }
 
 // Transaction provides a mock function with given fields: fn
-func (_m *CRUDRepository[T, ID]) Transaction(fn func(repository.CRUDRepository[T, ID]) (interface{}, error)) (interface{}, error) {
+func (_m *CRUDRepository[T, ID]) Transaction(fn func(repository.CRUDRepository[T, ID]) (interface{}, error)) (interface{}, httperrors.HTTPError) {
 	ret := _m.Called(fn)
 
 	var r0 interface{}
@@ -192,11 +179,13 @@ func (_m *CRUDRepository[T, ID]) Transaction(fn func(repository.CRUDRepository[T
 		}
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(func(repository.CRUDRepository[T, ID]) (interface{}, error)) error); ok {
+	var r1 httperrors.HTTPError
+	if rf, ok := ret.Get(1).(func(func(repository.CRUDRepository[T, ID]) (interface{}, error)) httperrors.HTTPError); ok {
 		r1 = rf(fn)
 	} else {
-		r1 = ret.Error(1)
+		if ret.Get(1) != nil {
+			r1 = ret.Get(1).(httperrors.HTTPError)
+		}
 	}
 
 	return r0, r1

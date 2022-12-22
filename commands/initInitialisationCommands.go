@@ -6,7 +6,7 @@ import (
 
 func initInitialisationCommands(cfg *verdeter.VerdeterCommand) {
 
-	cfg.GKey("default.admin.password", verdeter.IsBool, "",
+	cfg.GKey("default.admin.password", verdeter.IsStr, "",
 		"Set the default admin password is the admin user is not created yet.")
 	cfg.SetDefault("default.admin.password", "admin")
 }

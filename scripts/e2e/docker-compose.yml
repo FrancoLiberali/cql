@@ -7,8 +7,6 @@ services:
     ports:
       - "26257:26257"
       - "8080:8080" # Web based dashboard
-    volumes:
-      - "${PWD}/_temp/cockroach-data/crdb:/cockroach/cockroach-data"
     environment:
       - COCKROACH_USER=root
       - COCKROACH_DB=badaas_db

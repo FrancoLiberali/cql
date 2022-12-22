@@ -6,7 +6,7 @@ Badaas provides several key features:
 
 - **Authentification**: Badaas can authentify users using its internal authentification scheme or externally by using protocols such as OIDC, SAML, Oauth2...
 - **Habilitation**: On a resource access, Badaas will check if the user is authorized using a RBAC model.
-- **Distribution**: Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset). 
+- **Distribution**: Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset).
 - **Persistence**: Applicative objects are persisted as well as user files. Those resources are shared accross the clusters to increase resiliency.
 - **Querying Resources**: Resources are accessible via a REST API.
 - **Posix complient**: Badaas strives towards being a good unix citizen and respecting commonly accepted norms. (see [Configuration](#configuration))
@@ -15,10 +15,10 @@ Badaas provides several key features:
 To quickly get badaas up and running, please head to the [miniblog tutorial](<!-- TODO: link the miniblog tutorial here -->)
 
 - [Quickstart](#quickstart)
-  - [Docker install](#docker-install)
-  - [Install from sources](#install-from-sources)
-    - [Prerequisites](#prerequisites)
-    - [Configuration](#configuration)
+- [Docker install](#docker-install)
+- [Install from sources](#install-from-sources)
+  - [Prerequisites](#prerequisites)
+  - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [Licence](#licence)
 
@@ -90,10 +90,10 @@ If needed, the location can be overridden using the config key `config_path`.
 
 ***For a full overview of the configuration keys: please head to the [configuration documentation](./configuration.md).***
 
-# Contributing
+## Contributing
 
 See [this section](./CONTRIBUTING.md).
 
-# Licence
+## Licence
 
 Badaas is Licenced under the [Mozilla Public License Version 2.0](./LICENSE).

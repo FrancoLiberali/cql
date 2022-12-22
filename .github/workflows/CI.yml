@@ -23,12 +23,13 @@ jobs:
     needs: [branch-naming-rules]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '^1.18'
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
       - name: Run test
         run:  go test $(go list ./... | sed 1d) -coverprofile=coverage.out -v
       - uses: actions/upload-artifact@v3
@@ -41,12 +42,13 @@ jobs:
     needs: [branch-naming-rules]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '^1.18'
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
       
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v3
@@ -61,12 +63,13 @@ jobs:
     needs: [unit-tests, check-style]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '^1.18'
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
       - name: Start containers
         run: docker compose -f "scripts/e2e/docker-compose.yml" up -d --build
       - name: Wait for API server to be up

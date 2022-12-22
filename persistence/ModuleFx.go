@@ -20,5 +20,6 @@ var PersistanceModule = fx.Module(
 	fx.Provide(gormdatabase.CreateDatabaseConnectionFromConfiguration),
 
 	//repositories
+	fx.Provide(repository.NewCRUDRepository[models.Session, uint]),
 	fx.Provide(repository.NewCRUDRepository[models.User, uint]),
 )

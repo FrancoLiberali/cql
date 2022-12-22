@@ -1,16 +1,5 @@
 package pagination
 
-import "gorm.io/gorm/clause"
-
-type SortOption struct {
-	Column string
-	Desc   bool
-}
-
-func (op *SortOption) ToClause() clause.OrderByColumn {
-	return clause.OrderByColumn{Column: clause.Column{Name: op.Column}, Desc: op.Desc}
-}
-
 // Handle pagination
 type Paginator interface {
 	Offset() uint

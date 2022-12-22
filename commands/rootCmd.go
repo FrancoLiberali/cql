@@ -2,13 +2,13 @@ package commands
 
 import (
 	"net/http"
-	"strings"
 
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/controllers"
 	"github.com/ditrit/badaas/logger"
 	"github.com/ditrit/badaas/persistence"
 	"github.com/ditrit/badaas/router"
+	"github.com/ditrit/badaas/services/sessionservice"
 	"github.com/ditrit/badaas/services/userservice"
 	"github.com/ditrit/verdeter"
 	"go.uber.org/fx"
@@ -27,6 +27,7 @@ func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
 		persistence.PersistanceModule,
 
 		fx.Provide(userservice.NewUserService),
+		fx.Provide(sessionservice.NewSessionService),
 		// logger for fx
 		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: logger}
@@ -38,24 +39,6 @@ func runHTTPServer(cfg *verdeter.VerdeterCommand, args []string) error {
 		fx.Invoke(func(*http.Server) { /* we need this function to be empty*/ }),
 		fx.Invoke(createSuperUser),
 	).Run()
-	return nil
-}
-
-// create a super user
-func createSuperUser(
-	config configuration.InitializationConfiguration,
-	logger *zap.Logger,
-	userService userservice.UserService,
-) error {
-	// Create a super admin user and exit with code 1 on error
-	_, err := userService.NewUser("admin", "admin-no-reply@badaas.com", config.GetAdminPassword())
-	if err != nil {
-		if !strings.Contains(err.Error(), "already exist in database") {
-			logger.Sugar().Fatalf("failed to save the super admin %w", err)
-			return err
-		}
-		logger.Sugar().Infof("The superadmin user already exists in database")
-	}
 	return nil
 }
 
@@ -81,4 +64,5 @@ func init() {
 	initLoggerCommands(rootCfg)
 	initDatabaseCommands(rootCfg)
 	initInitialisationCommands(rootCfg)
+	initSessionCommands(rootCfg)
 }

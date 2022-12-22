@@ -11,9 +11,12 @@ In this documentation file, we will mainly focus our attention on config files b
 
 The config file can be formated in any syntax that [github.com/spf13/viper](https://github.com/spf13/viper) supports but we will only use YAML syntax in our docs.
 
-- [Database](#database)
-- [Logger](#logger)
-- [HTTP Server](#http-server)
+- [Configuration](#configuration)
+  - [Database](#database)
+  - [Logger](#logger)
+  - [HTTP Server](#http-server)
+  - [Default values](#default-values)
+  - [Session management](#session-management)
 
 ## Database
 
@@ -99,4 +102,49 @@ server:
       # The maximum number of record per page 
       # default (100)
       max: 100
+```
+
+## Default values
+
+The section allow to change some settings for the first run.
+
+```yml
+# The settings for the first run.
+default:
+  # The admin settings for the first run
+  admin:
+    # The admin password for the first run. Won't change is the admin user already exists.
+    password: admin
+```
+
+## Session management
+
+You can change the way the session service handle user sessions.
+Session are extended if the user made a request to badaas in the "roll duration". The session duration and the refresh interval of the cache can be changed. They contains some good defaults.
+
+Please see the diagram below to see what is the roll duration relative to the session duration.
+
+
+```txt
+     |   session duration                        |
+     |<----------------------------------------->|
+ ----|-------------------------|-----------------|----> time
+     |                         |                 |
+                               |<--------------->|
+                                  roll duration
+```
+
+```yml
+# The settings for session service
+# This section contains some good defaults, don't change thoses value unless you need to.
+session:
+  # The duration of a user session, in seconds
+  # Default (14400) equal to 4 hours
+  duration: 14400
+  # The refresh interval in seconds. Badaas refresh it's internal session cache periodically.
+  # Default (30)
+  pullInterval: 30
+  # The duration in which the user can renew it's session by making a request.
+  # Default (3600) equal to 1 hour
+  rollDuration: 3600
 ```

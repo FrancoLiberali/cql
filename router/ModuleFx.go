@@ -12,6 +12,8 @@ var RouterModule = fx.Module(
 	fx.Provide(middlewares.NewJSONController),
 	fx.Provide(middlewares.NewMiddlewareLogger),
 
+	fx.Provide(middlewares.NewAuthenticationMiddleware),
+
 	// create router
 	fx.Provide(SetupRouter),
 )
