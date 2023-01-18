@@ -23,6 +23,8 @@ Feature: Login as superadmin using the basic authentification
       | email    | admin-no-reply@badaas.com | string |
       | password | admin                     | string |
     Then I expect status code is "200"
+    And I expect response field "username" is "admin"
+    And I expect response field "email" is "admin-no-reply@badaas.com"
 
   Scenario: Should be an error if we try to logout without login first
     When I request "/logout"

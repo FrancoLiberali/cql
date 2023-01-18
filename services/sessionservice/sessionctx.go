@@ -9,7 +9,7 @@ import (
 
 // The session claims passed in the request context
 type SessionClaims struct {
-	UserID      uint
+	UserID      uuid.UUID
 	SessionUUID uuid.UUID
 }
 
@@ -30,7 +30,7 @@ func SetSessionClaimsContext(ctx context.Context, sessionClaims *SessionClaims) 
 func makeSessionClaims(session *models.Session) *SessionClaims {
 	return &SessionClaims{
 		UserID:      session.UserID,
-		SessionUUID: session.UUID,
+		SessionUUID: session.ID,
 	}
 }
 

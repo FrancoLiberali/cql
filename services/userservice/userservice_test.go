@@ -9,6 +9,7 @@ import (
 	"github.com/ditrit/badaas/persistence/models/dto"
 	"github.com/ditrit/badaas/persistence/pagination"
 	"github.com/ditrit/badaas/services/userservice"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -22,7 +23,7 @@ func TestNewUserService(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uuid.UUID](t)
 	userRespositoryMock.On("Create", mock.Anything).Return(nil)
 	userService := userservice.NewUserService(observedLogger, userRespositoryMock)
 	user, err := userService.NewUser("bob", "bob@email.com", "1234")
@@ -48,7 +49,7 @@ func TestNewUserServiceDatabaseError(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uuid.UUID](t)
 	userRespositoryMock.On(
 		"Create", mock.Anything,
 	).Return(
@@ -68,7 +69,7 @@ func TestNewUserServiceEmailNotValid(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uuid.UUID](t)
 
 	userService := userservice.NewUserService(observedLogger, userRespositoryMock)
 	user, err := userService.NewUser("bob", "bob@", "1234")
@@ -84,7 +85,7 @@ func TestGetUser(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uuid.UUID](t)
 	userService := userservice.NewUserService(observedLogger, userRespositoryMock)
 	userRespositoryMock.On(
 		"Create", mock.Anything,
@@ -120,7 +121,7 @@ func TestGetUserNoUserFound(t *testing.T) {
 	observedZapCore, _ := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uuid.UUID](t)
 	userService := userservice.NewUserService(observedLogger, userRespositoryMock)
 	userRespositoryMock.On(
 		"Find", mock.Anything, nil, nil,
@@ -140,7 +141,7 @@ func TestGetUserNotCorrect(t *testing.T) {
 	observedZapCore, _ := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uuid.UUID](t)
 	userRespositoryMock.On(
 		"Create", mock.Anything,
 	).Return(
@@ -168,7 +169,7 @@ func TestGetUserEmpty(t *testing.T) {
 	observedZapCore, _ := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uint](t)
+	userRespositoryMock := repositorymocks.NewCRUDRepository[models.User, uuid.UUID](t)
 	userRespositoryMock.On(
 		"Create", mock.Anything,
 	).Return(

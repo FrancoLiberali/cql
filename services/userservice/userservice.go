@@ -10,6 +10,7 @@ import (
 	"github.com/ditrit/badaas/persistence/repository"
 	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
 	validator "github.com/ditrit/badaas/validators"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
@@ -24,14 +25,14 @@ var _ UserService = (*userServiceImpl)(nil)
 
 // The UserService concrete implementation
 type userServiceImpl struct {
-	userRepository repository.CRUDRepository[models.User, uint]
+	userRepository repository.CRUDRepository[models.User, uuid.UUID]
 	logger         *zap.Logger
 }
 
 // UserService constructor
 func NewUserService(
 	logger *zap.Logger,
-	userRepository repository.CRUDRepository[models.User, uint],
+	userRepository repository.CRUDRepository[models.User, uuid.UUID],
 ) UserService {
 	return &userServiceImpl{
 		logger:         logger,
@@ -60,7 +61,7 @@ func (userService *userServiceImpl) NewUser(username, email, password string) (*
 	return u, nil
 }
 
-// Get user if the email and password provided are correct, return an error if not. 
+// Get user if the email and password provided are correct, return an error if not.
 func (userService *userServiceImpl) GetUser(userLoginDTO dto.UserLoginDTO) (*models.User, httperrors.HTTPError) {
 	users, herr := userService.userRepository.Find(squirrel.Eq{"email": userLoginDTO.Email}, nil, nil)
 	if herr != nil {

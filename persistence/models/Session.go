@@ -9,8 +9,7 @@ import (
 // Represent a user session
 type Session struct {
 	BaseModel
-	UUID      uuid.UUID `gorm:"unique;not null"`
-	UserID    uint      `gorm:"not null"`
+	UserID    uuid.UUID `gorm:"not null"`
 	ExpiresAt time.Time `gorm:"not null"`
 }
 

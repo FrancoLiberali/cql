@@ -68,7 +68,12 @@ func (basicAuthController *basicAuthentificationController) BasicLoginHandler(w 
 		return nil, herr
 
 	}
-	return nil, nil
+
+	return dto.DTOLoginSuccess{
+		Email:    user.Email,
+		ID:       user.ID.String(),
+		Username: user.Username,
+	}, nil
 }
 
 // Log Out the user

@@ -11,6 +11,7 @@ import (
 	mocksUserService "github.com/ditrit/badaas/mocks/services/userservice"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/models/dto"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
@@ -136,10 +137,12 @@ func Test_BasicLoginHandler_LoginSuccess(t *testing.T) {
 	)
 	userService := mocksUserService.NewUserService(t)
 	user := &models.User{
-		BaseModel: models.BaseModel{},
-		Username:  "bob",
-		Email:     "bob@email.com",
-		Password:  []byte("hash of 1234"),
+		BaseModel: models.BaseModel{
+			ID: uuid.Nil,
+		},
+		Username: "bob",
+		Email:    "bob@email.com",
+		Password: []byte("hash of 1234"),
 	}
 	userService.
 		On("GetUser", loginJSONStruct).
@@ -157,5 +160,9 @@ func Test_BasicLoginHandler_LoginSuccess(t *testing.T) {
 
 	payload, err := controller.BasicLoginHandler(response, request)
 	assert.NoError(t, err)
-	assert.Nil(t, payload)
+	assert.Equal(t, payload, dto.DTOLoginSuccess{
+		Email:    "bob@email.com",
+		ID:       user.ID.String(),
+		Username: user.Username,
+	})
 }
