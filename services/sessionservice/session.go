@@ -36,7 +36,7 @@ var _ SessionService = (*sessionServiceImpl)(nil)
 
 // The SessionService concrete interface
 type sessionServiceImpl struct {
-	sessionRepository    repository.CRUDRepository[models.Session, uint]
+	sessionRepository    repository.CRUDRepository[models.Session, uuid.UUID]
 	cache                map[uuid.UUID]*models.Session
 	mutex                sync.Mutex
 	logger               *zap.Logger
@@ -46,7 +46,7 @@ type sessionServiceImpl struct {
 // The SessionService constructor
 func NewSessionService(
 	logger *zap.Logger,
-	sessionRepository repository.CRUDRepository[models.Session, uint],
+	sessionRepository repository.CRUDRepository[models.Session, uuid.UUID],
 	sessionConfiguration configuration.SessionConfiguration,
 ) SessionService {
 	sessionService := &sessionServiceImpl{
@@ -60,9 +60,8 @@ func NewSessionService(
 }
 
 // Create a new session
-func newSession(userID uint, sessionDuration time.Duration) *models.Session {
+func newSession(userID uuid.UUID, sessionDuration time.Duration) *models.Session {
 	return &models.Session{
-		UUID:      uuid.New(),
 		UserID:    userID,
 		ExpiresAt: time.Now().Add(sessionDuration),
 	}
@@ -105,8 +104,8 @@ func (sessionService *sessionServiceImpl) add(session *models.Session) httperror
 	if herr != nil {
 		return herr
 	}
-	sessionService.cache[session.UUID] = session
-	sessionService.logger.Debug("Added session", zap.String("uuid", session.UUID.String()))
+	sessionService.cache[session.ID] = session
+	sessionService.logger.Debug("Added session", zap.String("uuid", session.ID.String()))
 	return nil
 }
 
@@ -135,7 +134,7 @@ func (sessionService *sessionServiceImpl) pullFromDB() {
 	}
 	newSessionCache := make(map[uuid.UUID]*models.Session)
 	for _, sessionFromDatabase := range sessionsFromDatabase {
-		newSessionCache[sessionFromDatabase.UUID] = sessionFromDatabase
+		newSessionCache[sessionFromDatabase.ID] = sessionFromDatabase
 	}
 	sessionService.cache = newSessionCache
 	sessionService.logger.Debug(
@@ -173,7 +172,7 @@ func (sessionService *sessionServiceImpl) removeExpired() {
 func (sessionService *sessionServiceImpl) delete(session *models.Session) httperrors.HTTPError {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
-	sessionUUID := session.UUID
+	sessionUUID := session.ID
 	err := sessionService.sessionRepository.Delete(session)
 	if err != nil {
 		return httperrors.NewInternalServerError(
@@ -188,9 +187,9 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 
 // Roll a session. If the session is close to expiration, extend its duration.
 func (sessionService *sessionServiceImpl) RollSession(sessionUUID uuid.UUID) httperrors.HTTPError {
-	session := sessionService.get(sessionUUID)
-	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
 	rollInterval := sessionService.sessionConfiguration.GetRollDuration()
+	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
+	session := sessionService.get(sessionUUID)
 	if session == nil {
 		// no session to roll, no error
 		return nil
@@ -207,8 +206,8 @@ func (sessionService *sessionServiceImpl) RollSession(sessionUUID uuid.UUID) htt
 			return herr
 		}
 		sessionService.logger.Warn("Rolled session",
-			zap.Uint("userID", session.UserID),
-			zap.String("sessionID", session.UUID.String()))
+			zap.String("userID", session.UserID.String()),
+			zap.String("sessionID", session.ID.String()))
 	}
 	return nil
 }
@@ -221,7 +220,7 @@ func (sessionService *sessionServiceImpl) LogUserIn(user *models.User, response 
 	if err != nil {
 		return err
 	}
-	CreateAndSetAccessTokenCookie(response, session.UUID.String())
+	CreateAndSetAccessTokenCookie(response, session.ID.String())
 	return nil
 }
 

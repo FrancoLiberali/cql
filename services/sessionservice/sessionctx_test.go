@@ -10,10 +10,10 @@ import (
 
 func TestSessionCtx(t *testing.T) {
 	ctx := context.Background()
-	sessionClaims := &SessionClaims{uint(12), uuid.New()}
+	sessionClaims := &SessionClaims{uuid.Nil, uuid.New()}
 	ctx = SetSessionClaimsContext(ctx, sessionClaims)
 	claims := GetSessionClaimsFromContext(ctx)
-	assert.Equal(t, uint(12), claims.UserID)
+	assert.Equal(t, uuid.Nil, claims.UserID)
 }
 
 func TestSessionCtxPanic(t *testing.T) {
