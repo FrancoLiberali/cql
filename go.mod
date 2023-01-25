@@ -5,12 +5,13 @@ go 1.18
 require (
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/cucumber/godog v0.12.5
-	github.com/ditrit/verdeter v0.3.1
+	github.com/ditrit/verdeter v0.4.0
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jackc/pgconn v1.13.0
 	github.com/magiconair/properties v1.8.6
 	github.com/noirbizarre/gonja v0.0.0-20200629003239-4d051fd0be61
+	github.com/spf13/cobra v1.5.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.13.0
 	github.com/stretchr/testify v1.8.1
@@ -53,7 +54,6 @@ require (
 	github.com/sirupsen/logrus v1.9.0 // indirect
 	github.com/spf13/afero v1.9.2 // indirect
 	github.com/spf13/cast v1.5.0 // indirect
-	github.com/spf13/cobra v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
 	github.com/subosito/gotenv v1.4.1 // indirect
