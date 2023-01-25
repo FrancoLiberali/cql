@@ -29,5 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a basic authentification controller.
 - Now config keys are only declared once with constants in the `configuration/` package.
 - Add a dto that is returned on a successful login.
+- Update verdeter to version v0.4.0
+
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased
