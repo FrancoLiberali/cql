@@ -93,8 +93,10 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible/go.mod h1:E3ru+11k8xSBh+hMPgOLZmtrrCbhqsmaPHjLKYnJCaQ=
 github.com/dgryski/go-sip13 v0.0.0-20181026042036-e10d5fee7954/go.mod h1:vAd38F8PWV+bWy6jNmig1y/TA+kYO4g3RSRF0IAv0no=
-github.com/ditrit/verdeter v0.3.1 h1:BP0Y/o7+ejxdwpXDcgyW3cuJWuGEkW64YZ7AfeDWyo8=
-github.com/ditrit/verdeter v0.3.1/go.mod h1:feh/iol3vfiJ5p8qxMq3OeerSSClAq4D2To5ZUfRHgE=
+github.com/ditrit/verdeter v0.3.2-0.20230118160022-0caba70148cd h1:r2NABj0IHkzEtp4ZGaKpWNxsWAhjQU4ezxyELvXObrk=
+github.com/ditrit/verdeter v0.3.2-0.20230118160022-0caba70148cd/go.mod h1:sKpWuOvYqNabLN4aNXqeBhcWpt7nf0frwqk0B5M6ax0=
+github.com/ditrit/verdeter v0.4.0 h1:DzEOFauuXEGNQYP6OgYtHwEyb3w9riem99u0xE/l7+o=
+github.com/ditrit/verdeter v0.4.0/go.mod h1:sKpWuOvYqNabLN4aNXqeBhcWpt7nf0frwqk0B5M6ax0=
 github.com/envoyproxy/go-control-plane v0.9.0/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.1-0.20191026205805-5f8ba28d4473/go.mod h1:YTl/9mNaCwkRvm6d1a2C3ymFceY/DCBVvsKhRF0iEA4=
 github.com/envoyproxy/go-control-plane v0.9.4/go.mod h1:6rpuAdCZL397s3pYoYcLgu1mIlRU8Am5FuJP05cCM98=
