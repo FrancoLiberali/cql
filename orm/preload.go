@@ -31,3 +31,11 @@ func VerifyPointerWithIDLoaded[TModel Model, TID ModelID](id TID, toVerify *TMod
 
 	return toVerify, nil
 }
+
+func VerifyCollectionLoaded[T Model](collection *[]T) ([]T, error) {
+	if collection == nil {
+		return nil, ErrRelationNotLoaded
+	}
+
+	return *collection, nil
+}

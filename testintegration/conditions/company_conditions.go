@@ -40,5 +40,9 @@ func CompanyName(operator orm.Operator[string]) orm.WhereCondition[models.Compan
 		Operator:        operator,
 	}
 }
+func CompanyPreloadSellers(nestedPreloads ...orm.IJoinCondition[models.Seller]) orm.Condition[models.Company] {
+	return orm.NewCollectionPreloadCondition[models.Company, models.Seller]("Sellers", nestedPreloads)
+}
 
 var CompanyPreloadAttributes = orm.NewPreloadCondition[models.Company](companyNameFieldID)
+var CompanyPreloadRelations = []orm.Condition[models.Company]{CompanyPreloadSellers()}

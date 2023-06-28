@@ -50,6 +50,7 @@ func TestBaDaaSORM(t *testing.T) {
 
 		// create crud services for models
 		orm.GetCRUDServiceModule[models.Seller](),
+		orm.GetCRUDServiceModule[models.Company](),
 		orm.GetCRUDServiceModule[models.Product](),
 		orm.GetCRUDServiceModule[models.Sale](),
 		orm.GetCRUDServiceModule[models.City](),

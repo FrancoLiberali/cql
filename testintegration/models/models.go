@@ -25,7 +25,7 @@ type Company struct {
 	orm.UUIDModel
 
 	Name    string
-	Sellers []Seller // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
+	Sellers *[]Seller // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
 }
 
 func (m Company) Equal(other Company) bool {
@@ -87,12 +87,25 @@ func (m Product) Equal(other Product) bool {
 	return m.ID == other.ID
 }
 
+type University struct {
+	orm.UUIDModel
+
+	Name string
+}
+
+func (m University) Equal(other University) bool {
+	return m.ID == other.ID
+}
+
 type Seller struct {
 	orm.UUIDModel
 
 	Name      string
 	Company   *Company
 	CompanyID *orm.UUID // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
+
+	University   *University
+	UniversityID *orm.UUID
 }
 
 type Sale struct {

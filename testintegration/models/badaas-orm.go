@@ -15,6 +15,9 @@ func (m Child) GetParent2() (*Parent2, error) {
 func (m City) GetCountry() (*Country, error) {
 	return orm.VerifyPointerWithIDLoaded[Country](m.CountryID, m.Country)
 }
+func (m Company) GetSellers() ([]Seller, error) {
+	return orm.VerifyCollectionLoaded[Seller](m.Sellers)
+}
 func (m Country) GetCapital() (*City, error) {
 	return orm.VerifyStructLoaded[City](&m.Capital)
 }
@@ -38,4 +41,7 @@ func (m Sale) GetSeller() (*Seller, error) {
 }
 func (m Seller) GetCompany() (*Company, error) {
 	return orm.VerifyPointerLoaded[Company](m.CompanyID, m.Company)
+}
+func (m Seller) GetUniversity() (*University, error) {
+	return orm.VerifyPointerLoaded[University](m.UniversityID, m.University)
 }

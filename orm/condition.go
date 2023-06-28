@@ -18,7 +18,10 @@ var (
 	DeletedAtFieldID = FieldIdentifier{Field: deletedAtField}
 )
 
-var ErrEmptyConditions = errors.New("condition must have at least one inner condition")
+var (
+	ErrEmptyConditions     = errors.New("condition must have at least one inner condition")
+	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
+)
 
 type Table struct {
 	Name    string
@@ -234,6 +237,58 @@ func NewPreloadCondition[T Model](fields ...FieldIdentifier) PreloadCondition[T]
 	}
 }
 
+// Condition used to the preload a collection of models of a model
+type CollectionPreloadCondition[T1 Model, T2 Model] struct {
+	CollectionField string
+	NestedPreloads  []IJoinCondition[T2]
+}
+
+//nolint:unused // see inside
+func (condition CollectionPreloadCondition[T1, T2]) interfaceVerificationMethod(_ T1) {
+	// This method is necessary to get the compiler to verify
+	// that an object is of type Condition[T1]
+}
+
+func (condition CollectionPreloadCondition[T1, T2]) ApplyTo(query *gorm.DB, _ Table) (*gorm.DB, error) {
+	if len(condition.NestedPreloads) == 0 {
+		return query.Preload(condition.CollectionField), nil
+	}
+
+	return query.Preload(
+		condition.CollectionField,
+		func(db *gorm.DB) *gorm.DB {
+			preloadsAsCondition := pie.Map(
+				condition.NestedPreloads,
+				func(joinCondition IJoinCondition[T2]) Condition[T2] {
+					return joinCondition
+				},
+			)
+
+			query, err := applyConditionsToQuery[T2](db, preloadsAsCondition)
+			if err != nil {
+				_ = db.AddError(err)
+				return db
+			}
+
+			return query
+		},
+	), nil
+}
+
+// Condition used to the preload a collection of models of a model
+func NewCollectionPreloadCondition[T1 Model, T2 Model](collectionField string, nestedPreloads []IJoinCondition[T2]) Condition[T1] {
+	if pie.Any(nestedPreloads, func(nestedPreload IJoinCondition[T2]) bool {
+		return !nestedPreload.makesPreload() || nestedPreload.makesFilter()
+	}) {
+		return NewInvalidCondition[T1](ErrOnlyPreloadsAllowed)
+	}
+
+	return CollectionPreloadCondition[T1, T2]{
+		CollectionField: collectionField,
+		NestedPreloads:  nestedPreloads,
+	}
+}
+
 // Condition that verifies the value of a field,
 // using the Operator
 type FieldCondition[TObject Model, TAtribute any] struct {
@@ -285,6 +340,9 @@ type IJoinCondition[T Model] interface {
 
 	// Returns true if this condition or any nested condition makes a preload
 	makesPreload() bool
+
+	// Returns true if the condition of nay nested condition applies a filter (has where conditions)
+	makesFilter() bool
 }
 
 // Condition that joins with other table
@@ -308,6 +366,17 @@ func (condition JoinCondition[T1, T2]) makesPreload() bool {
 
 	return t2PreloadCondition != nil || pie.Any(joinConditions, func(cond IJoinCondition[T2]) bool {
 		return cond.makesPreload()
+	})
+}
+
+// Returns true if the condition of nay nested condition applies a filter (has where conditions)
+//
+//nolint:unused // is used
+func (condition JoinCondition[T1, T2]) makesFilter() bool {
+	whereConditions, joinConditions, _ := divideConditionsByType(condition.Conditions)
+
+	return len(whereConditions) != 0 || pie.Any(joinConditions, func(cond IJoinCondition[T2]) bool {
+		return cond.makesFilter()
 	})
 }
 
