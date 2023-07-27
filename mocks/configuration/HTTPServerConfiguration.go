@@ -15,6 +15,20 @@ type HTTPServerConfiguration struct {
 	mock.Mock
 }
 
+// GetAddr provides a mock function with given fields:
+func (_m *HTTPServerConfiguration) GetAddr() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // GetHost provides a mock function with given fields:
 func (_m *HTTPServerConfiguration) GetHost() string {
 	ret := _m.Called()

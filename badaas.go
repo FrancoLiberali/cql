@@ -1,4 +1,4 @@
-package main
+package badaas
 
 import (
 	"net/http"
@@ -12,17 +12,45 @@ import (
 	"github.com/ditrit/badaas/logger"
 	"github.com/ditrit/badaas/persistence"
 	"github.com/ditrit/badaas/router"
-	"github.com/ditrit/badaas/services/sessionservice"
-	"github.com/ditrit/badaas/services/userservice"
+	"github.com/ditrit/badaas/services"
 	"github.com/ditrit/verdeter"
 )
 
-// Badaas application, run a http-server on 8000.
-func main() {
+var BaDaaS = BaDaaSInitializer{}
+
+type BaDaaSInitializer struct {
+	modules []fx.Option
+}
+
+// Allows to select which modules provided by badaas must be added to the application
+func (badaas *BaDaaSInitializer) AddModules(modules ...fx.Option) *BaDaaSInitializer {
+	badaas.modules = append(badaas.modules, modules...)
+
+	return badaas
+}
+
+// Allows to provide constructors to the application
+// so that the constructed objects will be available via dependency injection
+func (badaas *BaDaaSInitializer) Provide(constructors ...any) *BaDaaSInitializer {
+	badaas.modules = append(badaas.modules, fx.Provide(constructors...))
+
+	return badaas
+}
+
+// Allows to invoke functions when the application starts.
+// They can take advantage of dependency injection
+func (badaas *BaDaaSInitializer) Invoke(funcs ...any) *BaDaaSInitializer {
+	badaas.modules = append(badaas.modules, fx.Invoke(funcs...))
+
+	return badaas
+}
+
+// Start the application
+func (badaas BaDaaSInitializer) Start() {
 	rootCommand := verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 		Use:   "badaas",
 		Short: "BaDaaS",
-		Run:   runHTTPServer,
+		Run:   badaas.runHTTPServer,
 	})
 
 	err := configuration.NewCommandInitializer(configuration.NewKeySetter()).Init(rootCommand)
@@ -34,24 +62,28 @@ func main() {
 }
 
 // Run the http server for badaas
-func runHTTPServer(cmd *cobra.Command, args []string) {
-	fx.New(
-		// Modules
+func (badaas BaDaaSInitializer) runHTTPServer(cmd *cobra.Command, args []string) {
+	modules := []fx.Option{
+		// internal modules
 		configuration.ConfigurationModule,
 		router.RouterModule,
 		logger.LoggerModule,
 		persistence.PersistanceModule,
+		services.ServicesModule,
 
-		fx.Provide(userservice.NewUserService),
-		fx.Provide(sessionservice.NewSessionService),
 		// logger for fx
 		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger {
 			return &fxevent.ZapLogger{Logger: logger}
 		}),
 
+		// create httpServer
 		fx.Provide(newHTTPServer),
-
 		// Finally: we invoke the newly created server
 		fx.Invoke(func(*http.Server) { /* we need this function to be empty*/ }),
+	}
+
+	fx.New(
+		// add modules selected by user
+		append(modules, badaas.modules...)...,
 	).Run()
 }

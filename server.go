@@ -1,15 +1,15 @@
-package main
+package badaas
 
 // This file holds functions needed by the badaas rootCommand,
 // those functions help in creating the http.Server.
 
 import (
 	"context"
-	"fmt"
 	"net"
 	"net/http"
-	"time"
 
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 
@@ -17,41 +17,39 @@ import (
 )
 
 // Create the server from the configuration holder and the http handler
-func createServerFromConfigurationHolder(router http.Handler, httpServerConfig configuration.HTTPServerConfiguration) *http.Server {
-	address := addrFromConf(httpServerConfig.GetHost(), httpServerConfig.GetPort())
+func createServer(handler http.Handler, httpServerConfig configuration.HTTPServerConfiguration) *http.Server {
 	timeout := httpServerConfig.GetMaxTimeout()
-	return createServer(router, address, timeout, timeout)
-}
 
-// Create an http server
-func createServer(router http.Handler, address string, writeTimeout, readTimeout time.Duration) *http.Server {
-	srv := &http.Server{
-		Handler: router,
-		Addr:    address,
+	return &http.Server{
+		Handler: handler,
+		Addr:    httpServerConfig.GetAddr(),
 
-		WriteTimeout: writeTimeout,
-		ReadTimeout:  readTimeout,
+		WriteTimeout: timeout,
+		ReadTimeout:  timeout,
 	}
-	return srv
-}
-
-// Create the addr string for the http.Server
-// returns "<host>:<port>"
-func addrFromConf(host string, port int) string {
-	address := fmt.Sprintf("%s:%d",
-		host,
-		port,
-	)
-	return address
 }
 
 func newHTTPServer(
 	lc fx.Lifecycle,
 	logger *zap.Logger,
-	router http.Handler,
+	router *mux.Router,
 	httpServerConfig configuration.HTTPServerConfiguration,
 ) *http.Server {
-	srv := createServerFromConfigurationHolder(router, httpServerConfig)
+	handler := handlers.CORS(
+		handlers.AllowedMethods([]string{"GET", "POST", "DELETE", "PUT", "OPTIONS"}),
+		handlers.AllowedHeaders([]string{
+			"Accept", "Content-Type", "Content-Length",
+			"Accept-Encoding", "X-CSRF-Token", "Authorization",
+			"Access-Control-Request-Headers", "Access-Control-Request-Method",
+			"Connection", "Host", "Origin", "User-Agent", "Referer",
+			"Cache-Control", "X-header",
+		}),
+		handlers.AllowedOrigins([]string{"*"}),
+		handlers.AllowCredentials(),
+		handlers.MaxAge(0),
+	)(router)
+
+	srv := createServer(handler, httpServerConfig)
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			ln, err := net.Listen("tcp", srv.Addr)
@@ -64,9 +62,10 @@ func newHTTPServer(
 		},
 		OnStop: func(ctx context.Context) error {
 			// Flush the logger
-			logger.Sync()
+			_ = logger.Sync()
 			return srv.Shutdown(ctx)
 		},
 	})
+
 	return srv
 }
