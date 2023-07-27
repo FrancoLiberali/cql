@@ -10,11 +10,16 @@ import (
 	"github.com/ditrit/badaas/services/userservice"
 )
 
-// ControllerModule for fx
-var ControllerModule = fx.Module(
-	"controllers",
+var InfoControllerModule = fx.Module(
+	"infoController",
 	fx.Provide(NewInfoController),
+	fx.Invoke(AddInfoRoutes),
+)
+
+var AuthControllerModule = fx.Module(
+	"authController",
 	fx.Provide(NewBasicAuthenticationController),
+	fx.Invoke(AddAuthRoutes),
 	fx.Invoke(createSuperUser),
 )
 

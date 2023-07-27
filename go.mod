@@ -3,6 +3,7 @@ module github.com/ditrit/badaas
 go 1.18
 
 require (
+	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/Masterminds/squirrel v1.5.3
 	github.com/cucumber/godog v0.12.5
 	github.com/ditrit/verdeter v0.4.0

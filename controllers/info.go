@@ -3,34 +3,40 @@ package controllers
 import (
 	"net/http"
 
+	"github.com/Masterminds/semver/v3"
 	"github.com/ditrit/badaas/httperrors"
-	"github.com/ditrit/badaas/persistence/models/dto"
-	"github.com/ditrit/badaas/resources"
 )
 
 // The information controller
 type InformationController interface {
-	// Return the badaas server informations
+	// Return the badaas server information
 	Info(response http.ResponseWriter, r *http.Request) (any, httperrors.HTTPError)
 }
 
 // check interface compliance
 var _ InformationController = (*infoControllerImpl)(nil)
 
-// The InformationController constructor
-func NewInfoController() InformationController {
-	return &infoControllerImpl{}
+// The concrete implementation of the InformationController
+type infoControllerImpl struct {
+	Version *semver.Version
 }
 
-// The concrete implementation of the InformationController
-type infoControllerImpl struct{}
-
-// Return the badaas server informations
-func (*infoControllerImpl) Info(response http.ResponseWriter, r *http.Request) (any, httperrors.HTTPError) {
-
-	infos := &dto.DTOBadaasServerInfo{
-		Status:  "OK",
-		Version: resources.Version,
+// The InformationController constructor
+func NewInfoController(version *semver.Version) InformationController {
+	return &infoControllerImpl{
+		Version: version,
 	}
-	return infos, nil
+}
+
+// Return the badaas server information
+func (c *infoControllerImpl) Info(response http.ResponseWriter, r *http.Request) (any, httperrors.HTTPError) {
+	return &BadaasServerInfo{
+		Status:  "OK",
+		Version: c.Version.String(),
+	}, nil
+}
+
+type BadaasServerInfo struct {
+	Status  string `json:"status"`
+	Version string `json:"version"`
 }

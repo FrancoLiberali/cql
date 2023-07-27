@@ -8,12 +8,10 @@ import (
 // RouterModule for fx
 var RouterModule = fx.Module(
 	"router",
+	fx.Provide(NewRouter),
 	// middlewares
 	fx.Provide(middlewares.NewJSONController),
 	fx.Provide(middlewares.NewMiddlewareLogger),
-
 	fx.Provide(middlewares.NewAuthenticationMiddleware),
-
-	// create router
-	fx.Provide(SetupRouter),
+	fx.Invoke(middlewares.AddLoggerMiddleware),
 )
