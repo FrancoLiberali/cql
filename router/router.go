@@ -3,20 +3,21 @@ package router
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
+
 	"github.com/ditrit/badaas/controllers"
 	"github.com/ditrit/badaas/router/middlewares"
-	"github.com/gorilla/mux"
 )
 
 // Default router of badaas, initialize all routes.
 func SetupRouter(
-	//middlewares
+	// middlewares
 	jsonController middlewares.JSONController,
 	middlewareLogger middlewares.MiddlewareLogger,
 	authenticationMiddleware middlewares.AuthenticationMiddleware,
 
 	// controllers
-	basicAuthentificationController controllers.BasicAuthentificationController,
+	basicAuthenticationController controllers.BasicAuthenticationController,
 	informationController controllers.InformationController,
 ) http.Handler {
 	router := mux.NewRouter()
@@ -29,14 +30,14 @@ func SetupRouter(
 	router.HandleFunc(
 		"/login",
 		jsonController.Wrap(
-			basicAuthentificationController.BasicLoginHandler,
+			basicAuthenticationController.BasicLoginHandler,
 		),
 	).Methods("POST")
 
 	protected := router.PathPrefix("").Subrouter()
 	protected.Use(authenticationMiddleware.Handle)
 
-	protected.HandleFunc("/logout", jsonController.Wrap(basicAuthentificationController.Logout)).Methods("GET")
+	protected.HandleFunc("/logout", jsonController.Wrap(basicAuthenticationController.Logout)).Methods("GET")
 
 	return router
 }

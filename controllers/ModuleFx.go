@@ -6,5 +6,5 @@ import "go.uber.org/fx"
 var ControllerModule = fx.Module(
 	"controllers",
 	fx.Provide(NewInfoController),
-	fx.Provide(NewBasicAuthentificationController),
+	fx.Provide(NewBasicAuthenticationController),
 )

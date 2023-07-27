@@ -68,7 +68,7 @@ This is the directory structure we use for the project:
   - `/db/` : Contains the Dockerfile to build a developpement version of CockroachDB.
 - `services/` *(Go code)*: Contains the Dockerfile to build a developpement version of CockroachDB.
   - `/auth/protocols/`: Contains the implementations of authentication clients for differents protocols. 
-    - `/basicauth/` *(Go code)*: Handle the authentification using email/password.
+    - `/basicauth/` *(Go code)*: Handle the authentication using email/password.
     - `/oidc/` *(Go code)*: Handle the authentication via Open-ID Connect.
   - `/sessionservice/` *(Go code)*: Handle sessions and their lifecycle.
   - `/userservice/` *(Go code)*: Handle users.

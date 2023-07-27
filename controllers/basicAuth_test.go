@@ -24,7 +24,7 @@ func Test_BasicLoginHandler_MalformedRequest(t *testing.T) {
 	userService := mocksUserService.NewUserService(t)
 	sessionService := mocksSessionService.NewSessionService(t)
 
-	controller := controllers.NewBasicAuthentificationController(
+	controller := controllers.NewBasicAuthenticationController(
 		logger,
 		userService,
 		sessionService,
@@ -55,7 +55,7 @@ func Test_BasicLoginHandler_UserNotFound(t *testing.T) {
 		Return(nil, httperrors.AnError)
 	sessionService := mocksSessionService.NewSessionService(t)
 
-	controller := controllers.NewBasicAuthentificationController(
+	controller := controllers.NewBasicAuthenticationController(
 		logger,
 		userService,
 		sessionService,
@@ -107,7 +107,7 @@ func Test_BasicLoginHandler_LoginFailed(t *testing.T) {
 		On("LogUserIn", user, response).
 		Return(httperrors.AnError)
 
-	controller := controllers.NewBasicAuthentificationController(
+	controller := controllers.NewBasicAuthenticationController(
 		logger,
 		userService,
 		sessionService,
@@ -152,7 +152,7 @@ func Test_BasicLoginHandler_LoginSuccess(t *testing.T) {
 		On("LogUserIn", user, response).
 		Return(nil)
 
-	controller := controllers.NewBasicAuthentificationController(
+	controller := controllers.NewBasicAuthenticationController(
 		logger,
 		userService,
 		sessionService,

@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add `init` flag to migrate database and create admin user.
 - Add a CONTRIBUTING.md and a documentation file for configuration (configuration.md)
 - Add a session services.
-- Add a basic authentification controller.
+- Add a basic authentication controller.
 - Now config keys are only declared once with constants in the `configuration/` package.
 - Add a dto that is returned on a successful login.
 - Update verdeter to version v0.4.0

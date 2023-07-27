@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	NotAuthenticated = httperrors.NewUnauthorizedError("Authentification Error", "not authenticated")
+	NotAuthenticated = httperrors.NewUnauthorizedError("Authentication Error", "not authenticated")
 )
 
 // The authentication middleware

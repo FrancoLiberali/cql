@@ -228,7 +228,7 @@ func (sessionService *sessionServiceImpl) LogUserIn(user *models.User, response 
 func (sessionService *sessionServiceImpl) LogUserOut(sessionClaims *SessionClaims, response http.ResponseWriter) httperrors.HTTPError {
 	session := sessionService.get(sessionClaims.SessionUUID)
 	if session == nil {
-		return httperrors.NewUnauthorizedError("Authentification Error", "not authenticated")
+		return httperrors.NewUnauthorizedError("Authentication Error", "not authenticated")
 	}
 	err := sessionService.delete(session)
 	if err != nil {

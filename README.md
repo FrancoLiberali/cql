@@ -4,7 +4,7 @@ Badaas enables the effortless construction of ***distributed, resilient, highly 
 
 Badaas provides several key features:
 
-- **Authentification**: Badaas can authentify users using its internal authentification scheme or externally by using protocols such as OIDC, SAML, Oauth2...
+- **Authentication**: Badaas can authenticate users using its internal authentication scheme or externally by using protocols such as OIDC, SAML, Oauth2...
 - **Habilitation**: On a resource access, Badaas will check if the user is authorized using a RBAC model.
 - **Distribution**: Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset).
 - **Persistence**: Applicative objects are persisted as well as user files. Those resources are shared accross the clusters to increase resiliency.
