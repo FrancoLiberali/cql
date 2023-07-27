@@ -1,21 +1,22 @@
-package commands
+package controllers
 
 import (
 	"errors"
 	"testing"
 
-	mocks "github.com/ditrit/badaas/mocks/configuration"
-	mockUserServices "github.com/ditrit/badaas/mocks/services/userservice"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+
+	mocksConfiguration "github.com/ditrit/badaas/mocks/configuration"
+	mockUserServices "github.com/ditrit/badaas/mocks/services/userservice"
 )
 
 func TestCreateSuperUser(t *testing.T) {
 	core, _ := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
-	initializationConfig := mocks.NewInitializationConfiguration(t)
+	initializationConfig := mocksConfiguration.NewInitializationConfiguration(t)
 	initializationConfig.On("GetAdminPassword").Return("adminpassword")
 	userService := mockUserServices.NewUserService(t)
 	userService.
@@ -32,7 +33,7 @@ func TestCreateSuperUser(t *testing.T) {
 func TestCreateSuperUser_UserExists(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
-	initializationConfig := mocks.NewInitializationConfiguration(t)
+	initializationConfig := mocksConfiguration.NewInitializationConfiguration(t)
 	initializationConfig.On("GetAdminPassword").Return("adminpassword")
 	userService := mockUserServices.NewUserService(t)
 	userService.
@@ -51,7 +52,7 @@ func TestCreateSuperUser_UserExists(t *testing.T) {
 func TestCreateSuperUser_UserServiceError(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
-	initializationConfig := mocks.NewInitializationConfiguration(t)
+	initializationConfig := mocksConfiguration.NewInitializationConfiguration(t)
 	initializationConfig.On("GetAdminPassword").Return("adminpassword")
 	userService := mockUserServices.NewUserService(t)
 	userService.
