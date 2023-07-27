@@ -110,7 +110,7 @@ func (sessionService *sessionServiceImpl) add(session *models.Session) httperror
 }
 
 // Initialize the session service
-func (sessionService *sessionServiceImpl) init() error {
+func (sessionService *sessionServiceImpl) init() {
 	sessionService.cache = make(map[uuid.UUID]*models.Session)
 	go func() {
 		for {
@@ -121,7 +121,6 @@ func (sessionService *sessionServiceImpl) init() error {
 			)
 		}
 	}()
-	return nil
 }
 
 // Get all sessions and save them in cache
