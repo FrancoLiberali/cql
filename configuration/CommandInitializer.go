@@ -26,6 +26,7 @@ func NewCommandInitializer(keySetter KeySetter) CommandInitializer {
 			DefaultV: ".",
 		},
 	}
+	keys = append(keys, getDatabaseConfigurationKeys()...)
 
 	return commandInitializerImpl{
 		KeySetter: keySetter,

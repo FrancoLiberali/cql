@@ -33,6 +33,9 @@ database:
   # (mandatory)
   port: 26257
 
+  # The name of the database to use. 
+  name: badaas_db
+
   # The sslmode of the connection to the database server. 
   # (mandatory)
   sslmode: disable
