@@ -1,14 +1,15 @@
-package commands
+package main
 
-// This files holds the tests for the commands/server.go file.
+// This files holds the tests for the server.go file.
 
 import (
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/ditrit/badaas/configuration"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ditrit/badaas/configuration"
 )
 
 func Test_addrFromConf(t *testing.T) {
@@ -16,6 +17,7 @@ func Test_addrFromConf(t *testing.T) {
 	addr := addrFromConf("192.168.236.222", 25100)
 	assert.Equal(t, expected, addr)
 }
+
 func Test_createServer(t *testing.T) {
 	handl := http.NewServeMux()
 	timeout := time.Duration(time.Second)
@@ -32,5 +34,4 @@ func TestCreateServerFromConfigurationHolder(t *testing.T) {
 
 	srv := createServerFromConfigurationHolder(handl, configuration.NewHTTPServerConfiguration())
 	assert.NotNil(t, srv)
-
 }

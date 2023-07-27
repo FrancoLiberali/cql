@@ -1,6 +1,7 @@
-package commands
+package main
 
-// This file holds functions needed by the badaas rootCommand, thoses functions help in creating the http.Server.
+// This file holds functions needed by the badaas rootCommand,
+// those functions help in creating the http.Server.
 
 import (
 	"context"
@@ -44,7 +45,7 @@ func addrFromConf(host string, port int) string {
 	return address
 }
 
-func NewHTTPServer(
+func newHTTPServer(
 	lc fx.Lifecycle,
 	logger *zap.Logger,
 	router http.Handler,
