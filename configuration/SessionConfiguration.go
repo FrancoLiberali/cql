@@ -3,6 +3,7 @@ package configuration
 import (
 	"time"
 
+	"github.com/ditrit/badaas/utils"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -53,9 +54,9 @@ func (sessionConfiguration *sessionConfigurationImpl) GetRollDuration() time.Dur
 
 // Reload session configuration
 func (sessionConfiguration *sessionConfigurationImpl) Reload() {
-	sessionConfiguration.sessionDuration = intToSecond(int(viper.GetUint(SessionDurationKey)))
-	sessionConfiguration.pullInterval = intToSecond(int(viper.GetUint(SessionPullIntervalKey)))
-	sessionConfiguration.rollDuration = intToSecond(int(viper.GetUint(SessionRollIntervalKey)))
+	sessionConfiguration.sessionDuration = utils.IntToSecond(int(viper.GetUint(SessionDurationKey)))
+	sessionConfiguration.pullInterval = utils.IntToSecond(int(viper.GetUint(SessionPullIntervalKey)))
+	sessionConfiguration.rollDuration = utils.IntToSecond(int(viper.GetUint(SessionRollIntervalKey)))
 }
 
 // Log the values provided by the configuration holder
