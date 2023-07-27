@@ -28,6 +28,7 @@ func NewCommandInitializer(keySetter KeySetter) CommandInitializer {
 	}
 	keys = append(keys, getDatabaseConfigurationKeys()...)
 	keys = append(keys, getSessionConfigurationKeys()...)
+	keys = append(keys, getInitializationConfigurationKeys()...)
 
 	return commandInitializerImpl{
 		KeySetter: keySetter,
