@@ -1,0 +1,18 @@
+# DEVELOPMENT ONLY, DO NOT USE FOR PRODUCTION
+version: '3.5'
+
+services:
+  api:
+    container_name: "badaas-test-api"
+    build:
+      context: ../..
+      dockerfile: ./docker/test_api/Dockerfile
+    image: badaas-test-api
+    volumes:
+      - ../..:/badaas:ro
+    entrypoint: go run /badaas/test_e2e/test_api.go --config_path /badaas/docker/test_api/badaas.yml
+    ports:
+      - "8000:8000"
+    restart: always
+    depends_on:
+      - db

@@ -3,16 +3,15 @@ server:
   host: "0.0.0.0" # listening on all interfaces
   timeout: 15 # in seconds
   pagination:
-    page: 
+    page:
       max: 10
 
-
 database:
-  host: e2e-db-1
+  host: badaas-test-db
   port: 26257
   sslmode: disable
   username: root
-  password: postres
+  password: postgres
   name: badaas_db
   init:
     retry: 10
