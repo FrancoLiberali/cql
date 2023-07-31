@@ -1,8 +1,10 @@
 package models
 
+import "github.com/ditrit/badaas/orm"
+
 // Represents a user
 type User struct {
-	BaseModel
+	orm.UUIDModel
 	Username string `gorm:"not null"`
 	Email    string `gorm:"unique;not null"`
 

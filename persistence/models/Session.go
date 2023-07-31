@@ -3,14 +3,22 @@ package models
 import (
 	"time"
 
-	"github.com/google/uuid"
+	"github.com/ditrit/badaas/orm"
 )
 
 // Represent a user session
 type Session struct {
-	BaseModel
-	UserID    uuid.UUID `gorm:"not null"`
+	orm.UUIDModel
+	UserID    orm.UUID  `gorm:"not null"`
 	ExpiresAt time.Time `gorm:"not null"`
+}
+
+// Create a new session
+func NewSession(userID orm.UUID, sessionDuration time.Duration) *Session {
+	return &Session{
+		UserID:    userID,
+		ExpiresAt: time.Now().Add(sessionDuration),
+	}
 }
 
 // Return true is expired

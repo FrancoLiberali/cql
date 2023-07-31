@@ -3,15 +3,14 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/ditrit/badaas/httperrors"
-	"github.com/ditrit/badaas/services/sessionservice"
-	"github.com/google/uuid"
 	"go.uber.org/zap"
+
+	"github.com/ditrit/badaas/httperrors"
+	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/services/sessionservice"
 )
 
-var (
-	NotAuthenticated = httperrors.NewUnauthorizedError("Authentication Error", "not authenticated")
-)
+var NotAuthenticated = httperrors.NewUnauthorizedError("Authentication Error", "not authenticated")
 
 // The authentication middleware
 type AuthenticationMiddleware interface {
@@ -43,7 +42,8 @@ func (authenticationMiddleware *authenticationMiddleware) Handle(next http.Handl
 			NotAuthenticated.Write(response, authenticationMiddleware.logger)
 			return
 		}
-		extractedUUID, err := uuid.Parse(accessTokenCookie.Value)
+
+		extractedUUID, err := orm.ParseUUID(accessTokenCookie.Value)
 		if err != nil {
 			NotAuthenticated.Write(response, authenticationMiddleware.logger)
 			return

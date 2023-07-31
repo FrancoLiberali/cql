@@ -5,16 +5,17 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zaptest/observer"
+
 	"github.com/ditrit/badaas/controllers"
 	"github.com/ditrit/badaas/httperrors"
 	mocksSessionService "github.com/ditrit/badaas/mocks/services/sessionservice"
 	mocksUserService "github.com/ditrit/badaas/mocks/services/userservice"
+	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/models/dto"
-	"github.com/google/uuid"
-	"github.com/stretchr/testify/assert"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest/observer"
 )
 
 func Test_BasicLoginHandler_MalformedRequest(t *testing.T) {
@@ -39,7 +40,6 @@ func Test_BasicLoginHandler_MalformedRequest(t *testing.T) {
 	payload, err := controller.BasicLoginHandler(response, request)
 	assert.Equal(t, controllers.HTTPErrRequestMalformed, err)
 	assert.Nil(t, payload)
-
 }
 
 func Test_BasicLoginHandler_UserNotFound(t *testing.T) {
@@ -73,7 +73,6 @@ func Test_BasicLoginHandler_UserNotFound(t *testing.T) {
 	payload, err := controller.BasicLoginHandler(response, request)
 	assert.Error(t, err)
 	assert.Nil(t, payload)
-
 }
 
 func Test_BasicLoginHandler_LoginFailed(t *testing.T) {
@@ -94,7 +93,7 @@ func Test_BasicLoginHandler_LoginFailed(t *testing.T) {
 	)
 	userService := mocksUserService.NewUserService(t)
 	user := &models.User{
-		BaseModel: models.BaseModel{},
+		UUIDModel: orm.UUIDModel{},
 		Username:  "bob",
 		Email:     "bob@email.com",
 		Password:  []byte("hash of 1234"),
@@ -116,7 +115,6 @@ func Test_BasicLoginHandler_LoginFailed(t *testing.T) {
 	payload, err := controller.BasicLoginHandler(response, request)
 	assert.Error(t, err)
 	assert.Nil(t, payload)
-
 }
 
 func Test_BasicLoginHandler_LoginSuccess(t *testing.T) {
@@ -137,8 +135,8 @@ func Test_BasicLoginHandler_LoginSuccess(t *testing.T) {
 	)
 	userService := mocksUserService.NewUserService(t)
 	user := &models.User{
-		BaseModel: models.BaseModel{
-			ID: uuid.Nil,
+		UUIDModel: orm.UUIDModel{
+			ID: orm.NilUUID,
 		},
 		Username: "bob",
 		Email:    "bob@email.com",

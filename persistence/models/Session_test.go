@@ -4,9 +4,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ditrit/badaas/persistence/models"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/persistence/models"
 )
+
+func TestNewSession(t *testing.T) {
+	sessionInstance := models.NewSession(orm.NilUUID, time.Second)
+	assert.NotNil(t, sessionInstance)
+	assert.Equal(t, orm.NilUUID, sessionInstance.UserID)
+}
 
 func TestExpired(t *testing.T) {
 	sessionInstance := &models.Session{
