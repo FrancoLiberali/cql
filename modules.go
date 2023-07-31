@@ -1,4 +1,4 @@
-package controllers
+package badaas
 
 import (
 	"strings"
@@ -7,19 +7,33 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ditrit/badaas/configuration"
+	"github.com/ditrit/badaas/controllers"
+	"github.com/ditrit/badaas/router"
+	"github.com/ditrit/badaas/router/middlewares"
+	"github.com/ditrit/badaas/services"
 	"github.com/ditrit/badaas/services/userservice"
 )
 
-var InfoControllerModule = fx.Module(
-	"infoController",
-	fx.Provide(NewInfoController),
-	fx.Invoke(AddInfoRoutes),
+var InfoModule = fx.Module(
+	"info",
+	// controller
+	fx.Provide(controllers.NewInfoController),
+	// routes
+	fx.Invoke(router.AddInfoRoutes),
 )
 
-var AuthControllerModule = fx.Module(
-	"authController",
-	fx.Provide(NewBasicAuthenticationController),
-	fx.Invoke(AddAuthRoutes),
+var AuthModule = fx.Module(
+	"auth",
+	// service
+	services.AuthServiceModule,
+
+	// controller
+	fx.Provide(controllers.NewBasicAuthenticationController),
+
+	// routes
+	fx.Provide(middlewares.NewAuthenticationMiddleware),
+	fx.Invoke(router.AddAuthRoutes),
+
 	fx.Invoke(createSuperUser),
 )
 
@@ -38,5 +52,6 @@ func createSuperUser(
 		}
 		logger.Sugar().Infof("The superadmin user already exists in database")
 	}
+
 	return nil
 }

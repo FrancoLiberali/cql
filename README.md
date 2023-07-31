@@ -54,8 +54,8 @@ You are free to choose which badaas functionalities you wish to use. To add them
 ```go
 func main() {
   badaas.BaDaaS.AddModules(
-    controllers.InfoControllerModule,
-    controllers.AuthControllerModule,
+    badaas.InfoModule,
+    badaas.AuthModule,
   ).Provide(
     NewAPIVersion,
   ).Start()
@@ -111,14 +111,14 @@ Once you have defined the functionalities of your project (the `/hello` route in
 
 ### Provided functionalities
 
-#### InfoControllerModule
+#### InfoModule
 
-`InfoControllerModule` adds the path `/info`, where the api version will be answered. To set the version you want to be responded you must provide a function that returns it:
+`InfoModule` adds the path `/info`, where the api version will be answered. To set the version you want to be responded you must provide a function that returns it:
 
 ```go
 func main() {
   badaas.BaDaaS.AddModules(
-    controllers.InfoControllerModule,
+    badaas.InfoModule,
   ).Provide(
     NewAPIVersion,
   ).Start()
@@ -129,14 +129,14 @@ func NewAPIVersion() *semver.Version {
 }
 ```
 
-#### AuthControllerModule
+#### AuthModule
 
-`AuthControllerModule` adds `/login` and `/logout`, which allow us to add authentication to our application in a simple way:
+`AuthModule` adds `/login` and `/logout`, which allow us to add authentication to our application in a simple way:
 
 ```go
 func main() {
   badaas.BaDaaS.AddModules(
-    controllers.AuthControllerModule,
+    badaas.AuthModule,
   ).Start()
 }
 ```

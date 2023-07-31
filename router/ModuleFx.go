@@ -1,8 +1,9 @@
 package router
 
 import (
-	"github.com/ditrit/badaas/router/middlewares"
 	"go.uber.org/fx"
+
+	"github.com/ditrit/badaas/router/middlewares"
 )
 
 // RouterModule for fx
@@ -12,6 +13,5 @@ var RouterModule = fx.Module(
 	// middlewares
 	fx.Provide(middlewares.NewJSONController),
 	fx.Provide(middlewares.NewMiddlewareLogger),
-	fx.Provide(middlewares.NewAuthenticationMiddleware),
 	fx.Invoke(middlewares.AddLoggerMiddleware),
 )

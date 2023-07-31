@@ -1,15 +1,16 @@
-package controllers
+package router
 
 import (
 	"github.com/gorilla/mux"
 
+	"github.com/ditrit/badaas/controllers"
 	"github.com/ditrit/badaas/router/middlewares"
 )
 
 func AddInfoRoutes(
 	router *mux.Router,
 	jsonController middlewares.JSONController,
-	infoController InformationController,
+	infoController controllers.InformationController,
 ) {
 	router.HandleFunc(
 		"/info",
@@ -24,7 +25,7 @@ func AddInfoRoutes(
 func AddAuthRoutes(
 	router *mux.Router,
 	authenticationMiddleware middlewares.AuthenticationMiddleware,
-	basicAuthenticationController BasicAuthenticationController,
+	basicAuthenticationController controllers.BasicAuthenticationController,
 	jsonController middlewares.JSONController,
 ) {
 	router.HandleFunc(

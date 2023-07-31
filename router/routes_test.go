@@ -1,4 +1,4 @@
-package controllers
+package router
 
 import (
 	"net/http"
@@ -10,9 +10,9 @@ import (
 	"github.com/stretchr/testify/mock"
 	"go.uber.org/zap"
 
+	"github.com/ditrit/badaas/controllers"
 	mockControllers "github.com/ditrit/badaas/mocks/controllers"
 	mockMiddlewares "github.com/ditrit/badaas/mocks/router/middlewares"
-	"github.com/ditrit/badaas/router"
 	"github.com/ditrit/badaas/router/middlewares"
 )
 
@@ -20,9 +20,9 @@ var logger, _ = zap.NewDevelopment()
 
 func TestAddInfoRoutes(t *testing.T) {
 	jsonController := middlewares.NewJSONController(logger)
-	informationController := NewInfoController(semver.MustParse("1.0.1"))
+	informationController := controllers.NewInfoController(semver.MustParse("1.0.1"))
 
-	router := router.NewRouter()
+	router := NewRouter()
 	AddInfoRoutes(
 		router,
 		jsonController,
@@ -51,7 +51,7 @@ func TestAddLoginRoutes(t *testing.T) {
 
 	authenticationMiddleware := mockMiddlewares.NewAuthenticationMiddleware(t)
 
-	router := router.NewRouter()
+	router := NewRouter()
 	AddAuthRoutes(
 		router,
 		authenticationMiddleware,

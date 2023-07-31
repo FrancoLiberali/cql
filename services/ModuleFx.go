@@ -3,12 +3,27 @@ package services
 import (
 	"go.uber.org/fx"
 
+	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/services/sessionservice"
 	"github.com/ditrit/badaas/services/userservice"
 )
 
-var ServicesModule = fx.Module(
-	"services",
+var AuthServiceModule = fx.Module(
+	"authService",
+	// models
+	fx.Provide(getAuthModels),
+
+	// services
 	fx.Provide(userservice.NewUserService),
 	fx.Provide(sessionservice.NewSessionService),
 )
+
+func getAuthModels() orm.GetModelsResult {
+	return orm.GetModelsResult{
+		Models: []any{
+			models.Session{},
+			models.User{},
+		},
+	}
+}
