@@ -12,9 +12,9 @@ type User struct {
 	Password []byte `gorm:"not null"`
 }
 
-// Return the pluralized table name
-//
-// Satisfie the Tabler interface
-func (User) TableName() string {
-	return "users"
+func UserEmailCondition(email string) orm.Condition[User] {
+	return orm.WhereCondition[User]{
+		Field: "email",
+		Value: email,
+	}
 }

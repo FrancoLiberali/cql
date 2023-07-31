@@ -34,7 +34,3 @@ func TestCanBeRolled(t *testing.T) {
 	time.Sleep(400 * time.Millisecond)
 	assert.True(t, sessionInstance.CanBeRolled(sessionDuration))
 }
-
-func TestTableName(t *testing.T) {
-	assert.Equal(t, "sessions", models.Session{}.TableName())
-}

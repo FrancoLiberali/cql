@@ -30,10 +30,3 @@ func (session *Session) IsExpired() bool {
 func (session *Session) CanBeRolled(rollInterval time.Duration) bool {
 	return time.Now().After(session.ExpiresAt.Add(-rollInterval))
 }
-
-// Return the pluralized table name
-//
-// Satisfie the Tabler interface
-func (Session) TableName() string {
-	return "sessions"
-}
