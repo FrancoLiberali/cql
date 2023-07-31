@@ -1,8 +1,13 @@
+install_dependencies:
+	go install gotest.tools/gotestsum@latest
+	go install github.com/vektra/mockery/v2@v2.20.0
+	go install github.com/ditrit/badaas-cli@latest
+
 lint:
 	golangci-lint run
 
 test_unit:
-	go test ./... -v
+	gotestsum --format pkgname ./...
 
 test_e2e:
 	docker compose -f "docker/test_db/docker-compose.yml" -f "docker/test_api/docker-compose.yml" up -d

@@ -51,12 +51,21 @@ jobs:
         with:
           go-version: '^1.18'
           cache: true
+      - name: Install gotestsum
+        run: go install gotest.tools/gotestsum@latest
       - name: Run unit tests
-        run:  go test ./... -coverprofile=coverage_unit.out -v
+        run: gotestsum --junitfile unit-tests.xml ./... -coverpkg=./... -coverprofile=coverage_unit.out
       - uses: actions/upload-artifact@v3
         with:
           name: coverage_unit
           path: coverage_unit.out
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: always() # run this step even if previous steps failed
+        with:
+          name: Unit Tests Report  # Name of the check run which will be created
+          path: unit-tests.xml     # Path to test results
+          reporter: java-junit     # Format of test results
 
   e2e-tests:
     name: E2E Tests
