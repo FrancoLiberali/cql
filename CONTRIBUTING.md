@@ -64,6 +64,7 @@ This is the directory structure we use for the project:
 - `test_e2e/`: Contains all the feature and steps for e2e tests.
 - `testintegration/`: Contains all the integration tests.
 - `logger/` *(Go code)*: Contains the logger creation logic. Please don't call it from your own services and code, use the dependency injection system.
+- `orm/` *(Go code)*: Contains the code of the orm used by badaas.
 - `persistance/` *(Go code)*:
   - `gormdatabase/` *(Go code)*: Contains the logic to create a <https://gorm.io> database. Also contains a go package named `gormzap`: it is a compatibility layer between *gorm.io/gorm* and *github.com/uber-go/zap*.
   - `models/` *(Go code)*: Contains the models (for a structure to me considered a valid model, it has to embed `badaas/orm.UUIDModel` or `badaas/orm.UIntModel`).

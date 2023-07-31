@@ -2,22 +2,28 @@
 
 Badaas enables the effortless construction of ***distributed, resilient, highly available and secure applications by design***, while ensuring very simple deployment and management (NoOps).
 
-Badaas provides several key features:
+> **Warning**
+> BaDaaS is still under development. Each of its components can have a different state of evolution that you can consult in [Features and components](#features-and-components)
 
-- **Authentication**: Badaas can authenticate users using its internal authentication scheme or externally by using protocols such as OIDC, SAML, Oauth2...
-- **Authorization**: On resource access, Badaas will check if the user is authorized using a RBAC model.
-- **Distribution**: Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset).
-- **Persistence**: Applicative objects are persisted as well as user files. Those resources are shared across the clusters to increase resiliency.
-- **Querying Resources**: Resources are accessible via a REST API.
-- **Posix compliant**: Badaas strives towards being a good unix citizen and respecting commonly accepted norms. (see [Configuration](#configuration))
-- **Advanced logs management**: Badaas provides an interface to interact with the logs produced by the clusters. Logs are formatted in json by default.
-
+- [Features and components](#features-and-components)
 - [Quickstart](#quickstart)
   - [Example](#example)
   - [Step-by-step instructions](#step-by-step-instructions)
 - [Configuration](#configuration)
 - [Contributing](#contributing)
 - [License](#license)
+
+## Features and components
+
+Badaas provides several key features, each provided by a component that can be used independently and has a different state of evolution:
+
+- **Authentication**(unstable): Badaas can authenticate users using its internal authentication scheme or externally by using protocols such as OIDC, SAML, Oauth2...
+- **Authorization**(wip_unstable): On resource access, Badaas will check if the user is authorized using a RBAC model.
+- **Distribution**(todo): Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset).
+- **Persistence**(wip_unstable): Applicative objects are persisted as well as user files. Those resources are shared across the clusters to increase resiliency. To achieve this, BaDaaS uses the [BaDaaS ORM](https://github.com/ditrit/badaas/orm) component.
+- **Querying Resources**(unstable): Resources are accessible via a REST API.
+- **Posix compliant**(stable): Badaas strives towards being a good unix citizen and respecting commonly accepted norms. (see [Configuration](#configuration))
+- **Advanced logs management**(todo): Badaas provides an interface to interact with the logs produced by the clusters. Logs are formatted in json by default.
 
 ## Quickstart
 
