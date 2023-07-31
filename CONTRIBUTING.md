@@ -3,7 +3,8 @@
 - [Tests](#tests)
   - [Dependencies](#dependencies)
   - [Unit tests](#unit-tests)
-  - [Feature tests (of end to end tests)](#feature-tests-of-end-to-end-tests)
+  - [Integration tests](#integration-tests)
+  - [Feature tests (of end to end tests)](#feature-tests-or-end-to-end-tests)
 - [Logger](#logger)
 - [Directory structure](#directory-structure)
 - [Git](#git)
@@ -27,7 +28,15 @@ To run them, please run:
 make test_unit
 ```
 
-### Feature tests (of end to end tests)
+### Integration tests
+
+Integration tests have a database and the dependency injection system.
+
+```sh
+make test_integration
+```
+
+### Feature tests (or end to end tests)
 
 We use docker to run a Badaas instance in combination with one node of CockroachDB.
 
@@ -53,6 +62,7 @@ This is the directory structure we use for the project:
   - `test_db/` : Contains the Dockerfile to build a development/test version of CockroachDB.
   - `test_api/` : Contains files to build a development/test version of the api.
 - `test_e2e/`: Contains all the feature and steps for e2e tests.
+- `testintegration/`: Contains all the integration tests.
 - `logger/` *(Go code)*: Contains the logger creation logic. Please don't call it from your own services and code, use the dependency injection system.
 - `persistance/` *(Go code)*:
   - `gormdatabase/` *(Go code)*: Contains the logic to create a <https://gorm.io> database. Also contains a go package named `gormzap`: it is a compatibility layer between *gorm.io/gorm* and *github.com/uber-go/zap*.
