@@ -4,6 +4,7 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap"
@@ -103,8 +104,8 @@ func Test_BasicLoginHandler_LoginFailed(t *testing.T) {
 		Return(user, nil)
 	sessionService := mocksSessionService.NewSessionService(t)
 	sessionService.
-		On("LogUserIn", user, response).
-		Return(httperrors.AnError)
+		On("LogUserIn", user).
+		Return(nil, httperrors.AnError)
 
 	controller := controllers.NewBasicAuthenticationController(
 		logger,
@@ -147,8 +148,8 @@ func Test_BasicLoginHandler_LoginSuccess(t *testing.T) {
 		Return(user, nil)
 	sessionService := mocksSessionService.NewSessionService(t)
 	sessionService.
-		On("LogUserIn", user, response).
-		Return(nil)
+		On("LogUserIn", user).
+		Return(models.NewSession(user.ID, time.Duration(5)), nil)
 
 	controller := controllers.NewBasicAuthenticationController(
 		logger,

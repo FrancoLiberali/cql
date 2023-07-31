@@ -3,8 +3,6 @@
 package mocks
 
 import (
-	http "net/http"
-
 	httperrors "github.com/ditrit/badaas/httperrors"
 	mock "github.com/stretchr/testify/mock"
 
@@ -46,29 +44,39 @@ func (_m *SessionService) IsValid(sessionUUID orm.UUID) (bool, *sessionservice.S
 	return r0, r1
 }
 
-// LogUserIn provides a mock function with given fields: user, response
-func (_m *SessionService) LogUserIn(user *models.User, response http.ResponseWriter) httperrors.HTTPError {
-	ret := _m.Called(user, response)
+// LogUserIn provides a mock function with given fields: user
+func (_m *SessionService) LogUserIn(user *models.User) (*models.Session, error) {
+	ret := _m.Called(user)
 
-	var r0 httperrors.HTTPError
-	if rf, ok := ret.Get(0).(func(*models.User, http.ResponseWriter) httperrors.HTTPError); ok {
-		r0 = rf(user, response)
+	var r0 *models.Session
+	var r1 error
+	if rf, ok := ret.Get(0).(func(*models.User) (*models.Session, error)); ok {
+		return rf(user)
+	}
+	if rf, ok := ret.Get(0).(func(*models.User) *models.Session); ok {
+		r0 = rf(user)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(httperrors.HTTPError)
+			r0 = ret.Get(0).(*models.Session)
 		}
 	}
 
-	return r0
+	if rf, ok := ret.Get(1).(func(*models.User) error); ok {
+		r1 = rf(user)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
-// LogUserOut provides a mock function with given fields: sessionClaims, response
-func (_m *SessionService) LogUserOut(sessionClaims *sessionservice.SessionClaims, response http.ResponseWriter) httperrors.HTTPError {
-	ret := _m.Called(sessionClaims, response)
+// LogUserOut provides a mock function with given fields: sessionClaims
+func (_m *SessionService) LogUserOut(sessionClaims *sessionservice.SessionClaims) httperrors.HTTPError {
+	ret := _m.Called(sessionClaims)
 
 	var r0 httperrors.HTTPError
-	if rf, ok := ret.Get(0).(func(*sessionservice.SessionClaims, http.ResponseWriter) httperrors.HTTPError); ok {
-		r0 = rf(sessionClaims, response)
+	if rf, ok := ret.Get(0).(func(*sessionservice.SessionClaims) httperrors.HTTPError); ok {
+		r0 = rf(sessionClaims)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(httperrors.HTTPError)

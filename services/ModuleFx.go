@@ -13,6 +13,9 @@ var AuthServiceModule = fx.Module(
 	"authService",
 	// models
 	fx.Provide(getAuthModels),
+	// repositories
+	fx.Provide(orm.NewCRUDRepository[models.Session, orm.UUID]),
+	fx.Provide(orm.NewCRUDRepository[models.User, orm.UUID]),
 
 	// services
 	fx.Provide(userservice.NewUserService),
