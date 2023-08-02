@@ -444,6 +444,26 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsAreConnectedByAnd()
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }
 
+func (ts *WhereConditionsIntTestSuite) TestOr() {
+	match1 := ts.createProduct("match", 2, 0, false, nil)
+	match2 := ts.createProduct("match", 3, 0, false, nil)
+	match3 := ts.createProduct("match_3", 3, 0, false, nil)
+
+	ts.createProduct("not_match", 1, 0, false, nil)
+	ts.createProduct("not_match", 4, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		orm.Or(
+			conditions.ProductInt(orm.Eq(2)),
+			conditions.ProductInt(orm.Eq(3)),
+			conditions.ProductString(orm.Eq("match_3")),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
+}
+
 func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsDifferentOperators() {
 	match1 := ts.createProduct("match", 1, 0.0, true, nil)
 	match2 := ts.createProduct("match", 1, 0.0, true, nil)

@@ -242,3 +242,7 @@ func divideConditionsByType[T any](
 func And[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
 	return NewConnectionCondition("AND", conditions...)
 }
+
+func Or[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
+	return NewConnectionCondition("OR", conditions...)
+}
