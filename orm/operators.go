@@ -17,3 +17,8 @@ func NotEq[T any](value T) Operator[T] {
 func Lt[T any](value T) Operator[T] {
 	return NewValueOperator[T]("<", value)
 }
+
+// LessThanOrEqualTo
+func LtOrEq[T any](value T) Operator[T] {
+	return NewValueOperator[T]("<=", value)
+}
