@@ -9,6 +9,7 @@ func Eq[T any](value T) Operator[T] {
 }
 
 // NotEqualTo
+// IsDistinct must be used in cases where value can be NULL
 func NotEq[T any](value T) Operator[T] {
 	return NewValueOperator[T]("<>", value)
 }
@@ -68,4 +69,8 @@ func IsUnknown() PredicateOperator[bool] {
 
 func IsNotUnknown() PredicateOperator[bool] {
 	return NewPredicateOperator[bool]("IS NOT UNKNOWN")
+}
+
+func IsDistinct[T any](value T) ValueOperator[T] {
+	return NewValueOperator[T]("IS DISTINCT FROM", value)
 }
