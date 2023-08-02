@@ -53,3 +53,7 @@ func IsTrue() PredicateOperator[bool] {
 func IsNotTrue() PredicateOperator[bool] {
 	return NewPredicateOperator[bool]("IS NOT TRUE")
 }
+
+func IsFalse() PredicateOperator[bool] {
+	return NewPredicateOperator[bool]("IS FALSE")
+}
