@@ -427,3 +427,48 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsOnUIntModel() {
 
 	EqualList(&ts.Suite, []*models.Brand{match}, entities)
 }
+
+func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsAreConnectedByAnd() {
+	match := ts.createProduct("match", 3, 0, false, nil)
+	ts.createProduct("not_match", 5, 0, false, nil)
+	ts.createProduct("not_match", 1, 0, false, nil)
+	ts.createProduct("not_match", 2, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductInt(orm.GtOrEq(3)),
+		conditions.ProductInt(orm.LtOrEq(4)),
+		conditions.ProductString(orm.Eq("match")),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}
+
+func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsDifferentOperators() {
+	match1 := ts.createProduct("match", 1, 0.0, true, nil)
+	match2 := ts.createProduct("match", 1, 0.0, true, nil)
+
+	ts.createProduct("not_match", 1, 0.0, true, nil)
+	ts.createProduct("match", 2, 0.0, true, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductString(orm.Eq("match")),
+		conditions.ProductInt(orm.Lt(2)),
+		conditions.ProductBool(orm.NotEq(false)),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
+func (ts *WhereConditionsIntTestSuite) TestEmptyConnectionConditionMakesNothing() {
+	match1 := ts.createProduct("match", 1, 0.0, true, nil)
+	match2 := ts.createProduct("match", 1, 0.0, true, nil)
+
+	entities, err := ts.crudProductService.Query(
+		orm.And[models.Product](),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}

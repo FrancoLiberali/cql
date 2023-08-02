@@ -2,7 +2,9 @@ package orm
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 )
 
@@ -32,6 +34,57 @@ type WhereCondition[T any] interface {
 	// Returns true if the DeletedAt column if affected by the condition
 	// If no condition affects the DeletedAt, the verification that it's null will be added automatically
 	affectsDeletedAt() bool
+}
+
+// Condition that connects multiple conditions.
+// Example: condition1 AND condition2
+type ConnectionCondition[T any] struct {
+	Connector  string
+	Conditions []WhereCondition[T]
+}
+
+//nolint:unused // see inside
+func (condition ConnectionCondition[T]) interfaceVerificationMethod(_ T) {
+	// This method is necessary to get the compiler to verify
+	// that an object is of type Condition[T]
+}
+
+func (condition ConnectionCondition[T]) ApplyTo(query *gorm.DB, tableName string) (*gorm.DB, error) {
+	return applyWhereCondition[T](condition, query, tableName)
+}
+
+func (condition ConnectionCondition[T]) GetSQL(query *gorm.DB, tableName string) (string, []any, error) {
+	sqlStrings := []string{}
+	values := []any{}
+
+	for _, internalCondition := range condition.Conditions {
+		internalSQLString, internalValues, err := internalCondition.GetSQL(query, tableName)
+		if err != nil {
+			return "", nil, err
+		}
+
+		sqlStrings = append(sqlStrings, internalSQLString)
+
+		values = append(values, internalValues...)
+	}
+
+	return strings.Join(sqlStrings, " "+condition.Connector+" "), values, nil
+}
+
+//nolint:unused // is used
+func (condition ConnectionCondition[T]) affectsDeletedAt() bool {
+	return pie.Any(condition.Conditions, func(internalCondition WhereCondition[T]) bool {
+		return internalCondition.affectsDeletedAt()
+	})
+}
+
+// Condition that connects multiple conditions.
+// Example: condition1 AND condition2
+func NewConnectionCondition[T any](connector string, conditions ...WhereCondition[T]) WhereCondition[T] {
+	return ConnectionCondition[T]{
+		Connector:  connector,
+		Conditions: conditions,
+	}
 }
 
 // Condition that verifies the value of a field,
@@ -120,23 +173,18 @@ func (condition JoinCondition[T1, T2]) ApplyTo(query *gorm.DB, previousTableName
 	whereConditions, joinConditions := divideConditionsByType(condition.Conditions)
 
 	// apply WhereConditions to join in "on" clause
-	conditionsValues := []any{}
-	isDeletedAtConditionPresent := false
-	for _, condition := range whereConditions {
-		if condition.affectsDeletedAt() {
-			isDeletedAtConditionPresent = true
-		}
+	connectionCondition := And(whereConditions...)
 
-		sql, values, err := condition.GetSQL(query, nextTableName)
-		if err != nil {
-			return nil, err
-		}
-
-		joinQuery += " AND " + sql
-		conditionsValues = append(conditionsValues, values...)
+	onQuery, onValues, err := connectionCondition.GetSQL(query, nextTableName)
+	if err != nil {
+		return nil, err
 	}
 
-	if !isDeletedAtConditionPresent {
+	if onQuery != "" {
+		joinQuery += " AND " + onQuery
+	}
+
+	if !connectionCondition.affectsDeletedAt() {
 		joinQuery += fmt.Sprintf(
 			" AND %s.deleted_at IS NULL",
 			nextTableName,
@@ -144,7 +192,7 @@ func (condition JoinCondition[T1, T2]) ApplyTo(query *gorm.DB, previousTableName
 	}
 
 	// add the join to the query
-	query = query.Joins(joinQuery, conditionsValues...)
+	query = query.Joins(joinQuery, onValues...)
 
 	// apply nested joins
 	for _, joinCondition := range joinConditions {
@@ -177,13 +225,20 @@ func divideConditionsByType[T any](
 	conditions []Condition[T],
 ) (thisEntityConditions []WhereCondition[T], joinConditions []Condition[T]) {
 	for _, condition := range conditions {
-		switch typedCondition := condition.(type) {
-		case WhereCondition[T]:
+		typedCondition, ok := condition.(WhereCondition[T])
+		if ok {
 			thisEntityConditions = append(thisEntityConditions, typedCondition)
-		default:
-			joinConditions = append(joinConditions, typedCondition)
+		} else {
+			joinConditions = append(joinConditions, condition)
 		}
 	}
 
 	return
+}
+
+// Logical Operators
+// ref: https://www.postgresql.org/docs/current/functions-logical.html
+
+func And[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
+	return NewConnectionCondition("AND", conditions...)
 }
