@@ -7,3 +7,8 @@ package orm
 func Eq[T any](value T) Operator[T] {
 	return NewValueOperator[T]("=", value)
 }
+
+// NotEqualTo
+func NotEq[T any](value T) Operator[T] {
+	return NewValueOperator[T]("<>", value)
+}
