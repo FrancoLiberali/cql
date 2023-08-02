@@ -65,3 +65,7 @@ func IsNotFalse() PredicateOperator[bool] {
 func IsUnknown() PredicateOperator[bool] {
 	return NewPredicateOperator[bool]("IS UNKNOWN")
 }
+
+func IsNotUnknown() PredicateOperator[bool] {
+	return NewPredicateOperator[bool]("IS NOT UNKNOWN")
+}
