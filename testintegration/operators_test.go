@@ -352,3 +352,18 @@ func (ts *OperatorsIntTestSuite) TestIsDistinct() {
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
+
+func (ts *OperatorsIntTestSuite) TestIsNotDistinct() {
+	match := ts.createProduct("match", 3, 0, false, nil)
+	ts.createProduct("not_match", 4, 0, false, nil)
+	ts.createProduct("not_match", 2, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductInt(
+			orm.IsNotDistinct(3),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}

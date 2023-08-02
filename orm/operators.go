@@ -4,6 +4,7 @@ package orm
 // ref: https://www.postgresql.org/docs/current/functions-comparison.html
 
 // EqualTo
+// IsNotDistinct must be used in cases where value can be NULL
 func Eq[T any](value T) Operator[T] {
 	return NewValueOperator[T]("=", value)
 }
@@ -73,4 +74,8 @@ func IsNotUnknown() PredicateOperator[bool] {
 
 func IsDistinct[T any](value T) ValueOperator[T] {
 	return NewValueOperator[T]("IS DISTINCT FROM", value)
+}
+
+func IsNotDistinct[T any](value T) ValueOperator[T] {
+	return NewValueOperator[T]("IS NOT DISTINCT FROM", value)
 }
