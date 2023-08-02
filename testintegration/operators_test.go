@@ -183,3 +183,37 @@ func (ts *OperatorsIntTestSuite) TestIsNullNullableTypes() {
 
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }
+
+func (ts *OperatorsIntTestSuite) TestIsNotNullPointers() {
+	int1 := 1
+	match := ts.createProduct("match", 0, 0, false, &int1)
+	ts.createProduct("not_match", 0, 0, false, nil)
+	ts.createProduct("not_match", 0, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductIntPointer(
+			orm.IsNotNull[int](),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestIsNotNullNullableTypes() {
+	match := ts.createProduct("match", 0, 0, false, nil)
+	match.NullFloat = sql.NullFloat64{Valid: true, Float64: 6}
+	err := ts.db.Save(match).Error
+	ts.Nil(err)
+
+	ts.createProduct("not_match", 0, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductNullFloat(
+			orm.IsNotNull[float64](),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}

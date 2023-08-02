@@ -39,3 +39,7 @@ func GtOrEq[T any](value T) Operator[T] {
 func IsNull[T any]() PredicateOperator[T] {
 	return NewPredicateOperator[T]("IS NULL")
 }
+
+func IsNotNull[T any]() PredicateOperator[T] {
+	return NewPredicateOperator[T]("IS NOT NULL")
+}
