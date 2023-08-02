@@ -85,3 +85,7 @@ func IsNotDistinct[T any](value T) ValueOperator[T] {
 func ArrayIn[T any](values ...T) ValueOperator[T] {
 	return NewValueOperator[T]("IN", values)
 }
+
+func ArrayNotIn[T any](values ...T) ValueOperator[T] {
+	return NewValueOperator[T]("NOT IN", values)
+}

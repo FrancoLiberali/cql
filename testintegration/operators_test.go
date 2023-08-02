@@ -384,3 +384,20 @@ func (ts *OperatorsIntTestSuite) TestArrayIn() {
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
+
+func (ts *OperatorsIntTestSuite) TestArrayNotIn() {
+	match1 := ts.createProduct("s1", 0, 0, false, nil)
+	match2 := ts.createProduct("s2", 0, 0, false, nil)
+
+	ts.createProduct("ns1", 0, 0, false, nil)
+	ts.createProduct("ns2", 0, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductString(
+			orm.ArrayNotIn("ns1", "ns2"),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
