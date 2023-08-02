@@ -4,86 +4,91 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func ProductId(v orm.UUID) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "ID",
-		Value: v,
+func ProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func ProductCreatedAt(v time.Time) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "CreatedAt",
-		Value: v,
+func ProductCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func ProductUpdatedAt(v time.Time) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "UpdatedAt",
-		Value: v,
+func ProductUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func ProductDeletedAt(v gorm.DeletedAt) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "DeletedAt",
-		Value: v,
+func ProductDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func ProductString(v string) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Column: "string_something_else",
-		Value:  v,
+func ProductString(operator orm.Operator[string]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, string]{
+		Column:   "string_something_else",
+		Operator: operator,
 	}
 }
-func ProductInt(v int) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "Int",
-		Value: v,
+func ProductInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, int]{
+		Field:    "Int",
+		Operator: operator,
 	}
 }
-func ProductIntPointer(v int) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "IntPointer",
-		Value: v,
+func ProductIntPointer(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, int]{
+		Field:    "IntPointer",
+		Operator: operator,
 	}
 }
-func ProductFloat(v float64) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "Float",
-		Value: v,
+func ProductFloat(operator orm.Operator[float64]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, float64]{
+		Field:    "Float",
+		Operator: operator,
 	}
 }
-func ProductBool(v bool) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "Bool",
-		Value: v,
+func ProductNullFloat(operator orm.Operator[float64]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, float64]{
+		Field:    "NullFloat",
+		Operator: operator,
 	}
 }
-func ProductByteArray(v []uint8) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "ByteArray",
-		Value: v,
+func ProductBool(operator orm.Operator[bool]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, bool]{
+		Field:    "Bool",
+		Operator: operator,
 	}
 }
-func ProductMultiString(v models.MultiString) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "MultiString",
-		Value: v,
+func ProductByteArray(operator orm.Operator[[]uint8]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, []uint8]{
+		Field:    "ByteArray",
+		Operator: operator,
 	}
 }
-func ProductEmbeddedInt(v int) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
-		Field: "EmbeddedInt",
-		Value: v,
+func ProductMultiString(operator orm.Operator[models.MultiString]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, models.MultiString]{
+		Field:    "MultiString",
+		Operator: operator,
 	}
 }
-func ProductGormEmbeddedInt(v int) orm.WhereCondition[models.Product] {
-	return orm.WhereCondition[models.Product]{
+func ProductEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, int]{
+		Field:    "EmbeddedInt",
+		Operator: operator,
+	}
+}
+func ProductGormEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, int]{
 		ColumnPrefix: "gorm_embedded_",
 		Field:        "Int",
-		Value:        v,
+		Operator:     operator,
 	}
 }

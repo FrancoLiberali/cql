@@ -4,43 +4,42 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func SellerId(v orm.UUID) orm.WhereCondition[models.Seller] {
-	return orm.WhereCondition[models.Seller]{
-		Field: "ID",
-		Value: v,
+func SellerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Seller] {
+	return orm.FieldCondition[models.Seller, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func SellerCreatedAt(v time.Time) orm.WhereCondition[models.Seller] {
-	return orm.WhereCondition[models.Seller]{
-		Field: "CreatedAt",
-		Value: v,
+func SellerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Seller] {
+	return orm.FieldCondition[models.Seller, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func SellerUpdatedAt(v time.Time) orm.WhereCondition[models.Seller] {
-	return orm.WhereCondition[models.Seller]{
-		Field: "UpdatedAt",
-		Value: v,
+func SellerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Seller] {
+	return orm.FieldCondition[models.Seller, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func SellerDeletedAt(v gorm.DeletedAt) orm.WhereCondition[models.Seller] {
-	return orm.WhereCondition[models.Seller]{
-		Field: "DeletedAt",
-		Value: v,
+func SellerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Seller] {
+	return orm.FieldCondition[models.Seller, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func SellerName(v string) orm.WhereCondition[models.Seller] {
-	return orm.WhereCondition[models.Seller]{
-		Field: "Name",
-		Value: v,
+func SellerName(operator orm.Operator[string]) orm.WhereCondition[models.Seller] {
+	return orm.FieldCondition[models.Seller, string]{
+		Field:    "Name",
+		Operator: operator,
 	}
 }
-func SellerCompanyId(v orm.UUID) orm.WhereCondition[models.Seller] {
-	return orm.WhereCondition[models.Seller]{
-		Field: "CompanyID",
-		Value: v,
+func SellerCompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Seller] {
+	return orm.FieldCondition[models.Seller, orm.UUID]{
+		Field:    "CompanyID",
+		Operator: operator,
 	}
 }

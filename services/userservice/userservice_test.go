@@ -99,7 +99,7 @@ func TestGetUser(t *testing.T) {
 
 	require.NoError(t, err)
 	userRepositoryMock.On(
-		"QueryOne", gormDB, models.UserEmailCondition("bob@email.com"),
+		"QueryOne", gormDB, models.UserEmailCondition(orm.Eq("bob@email.com")),
 	).Return(
 		user,
 		nil,
@@ -127,7 +127,7 @@ func TestGetUserNoUserFound(t *testing.T) {
 	userRepositoryMock := ormMocks.NewCRUDRepository[models.User, orm.UUID](t)
 	userService := userservice.NewUserService(observedLogger, userRepositoryMock, gormDB)
 	userRepositoryMock.On(
-		"QueryOne", gormDB, models.UserEmailCondition("bobnotfound@email.com"),
+		"QueryOne", gormDB, models.UserEmailCondition(orm.Eq("bobnotfound@email.com")),
 	).Return(
 		&models.User{},
 		orm.ErrObjectNotFound,
@@ -154,7 +154,7 @@ func TestGetUserWrongPassword(t *testing.T) {
 
 	require.NoError(t, err)
 	userRepositoryMock.On(
-		"QueryOne", gormDB, models.UserEmailCondition("bob@email.com"),
+		"QueryOne", gormDB, models.UserEmailCondition(orm.Eq("bob@email.com")),
 	).Return(
 		user,
 		nil,

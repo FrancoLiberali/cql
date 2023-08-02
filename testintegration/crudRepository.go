@@ -55,13 +55,19 @@ func (ts *CRUDRepositoryIntTestSuite) TestGetByIDReturnsEntityIfIDMatch() {
 
 func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct(0)
-	_, err := ts.crudProductRepository.QueryOne(ts.db, conditions.ProductInt(1))
+	_, err := ts.crudProductRepository.QueryOne(
+		ts.db,
+		conditions.ProductInt(orm.Eq(1)),
+	)
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
 
 func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsEntityIfConditionsMatch() {
 	product := ts.createProduct(1)
-	productReturned, err := ts.crudProductRepository.QueryOne(ts.db, conditions.ProductInt(1))
+	productReturned, err := ts.crudProductRepository.QueryOne(
+		ts.db,
+		conditions.ProductInt(orm.Eq(1)),
+	)
 	ts.Nil(err)
 
 	assert.DeepEqual(ts.T(), product, productReturned)
@@ -70,7 +76,10 @@ func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsEntityIfConditionsMatch
 func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsErrorIfMoreThanOneMatchConditions() {
 	ts.createProduct(0)
 	ts.createProduct(0)
-	_, err := ts.crudProductRepository.QueryOne(ts.db, conditions.ProductInt(0))
+	_, err := ts.crudProductRepository.QueryOne(
+		ts.db,
+		conditions.ProductInt(orm.Eq(0)),
+	)
 	ts.Error(err, orm.ErrMoreThanOneObjectFound)
 }
 

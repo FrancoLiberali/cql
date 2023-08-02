@@ -21,24 +21,47 @@ type Condition[T any] interface {
 	interfaceVerificationMethod(T)
 }
 
-type WhereCondition[T any] struct {
+// Conditions that can be used in a where clause
+// (or in a on of a join)
+type WhereCondition[T any] interface {
+	Condition[T]
+
+	// Get the sql string and values to use in the query
+	GetSQL(query *gorm.DB, tableName string) (string, []any, error)
+
+	// Returns true if the DeletedAt column if affected by the condition
+	// If no condition affects the DeletedAt, the verification that it's null will be added automatically
+	affectsDeletedAt() bool
+}
+
+// Condition that verifies the value of a field,
+// using the Operator
+type FieldCondition[TObject any, TAtribute any] struct {
 	Field        string
 	Column       string
 	ColumnPrefix string
-	Value        any
+	Operator     Operator[TAtribute]
 }
 
-func (condition WhereCondition[T]) interfaceVerificationMethod(t T) {
+//nolint:unused // see inside
+func (condition FieldCondition[TObject, TAtribute]) interfaceVerificationMethod(_ TObject) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
 
 // Returns a gorm Where condition that can be used
 // to filter that the Field as a value of Value
-func (condition WhereCondition[T]) ApplyTo(query *gorm.DB, tableName string) (*gorm.DB, error) {
-	sql, values := condition.GetSQL(query, tableName)
+func (condition FieldCondition[TObject, TAtribute]) ApplyTo(query *gorm.DB, tableName string) (*gorm.DB, error) {
+	return applyWhereCondition[TObject](condition, query, tableName)
+}
 
-	if condition.Field == DeletedAtField {
+func applyWhereCondition[T any](condition WhereCondition[T], query *gorm.DB, tableName string) (*gorm.DB, error) {
+	sql, values, err := condition.GetSQL(query, tableName)
+	if err != nil {
+		return nil, err
+	}
+
+	if condition.affectsDeletedAt() {
 		query = query.Unscoped()
 	}
 
@@ -48,20 +71,24 @@ func (condition WhereCondition[T]) ApplyTo(query *gorm.DB, tableName string) (*g
 	), nil
 }
 
-func (condition WhereCondition[T]) GetSQL(query *gorm.DB, tableName string) (string, []any) {
+//nolint:unused // is used
+func (condition FieldCondition[TObject, TAtribute]) affectsDeletedAt() bool {
+	return condition.Field == DeletedAtField
+}
+
+func (condition FieldCondition[TObject, TAtribute]) GetSQL(query *gorm.DB, tableName string) (string, []any, error) {
 	columnName := condition.Column
 	if columnName == "" {
 		columnName = query.NamingStrategy.ColumnName(tableName, condition.Field)
 	}
-	columnName = condition.ColumnPrefix + columnName
 
-	return fmt.Sprintf(
-		"%s.%s = ?",
-		tableName,
-		columnName,
-	), []any{condition.Value}
+	// add column prefix and table name once we know the column name
+	columnName = tableName + "." + condition.ColumnPrefix + columnName
+
+	return condition.Operator.ToSQL(columnName)
 }
 
+// Condition that joins with other table
 type JoinCondition[T1 any, T2 any] struct {
 	T1Field    string
 	T2Field    string
@@ -96,10 +123,15 @@ func (condition JoinCondition[T1, T2]) ApplyTo(query *gorm.DB, previousTableName
 	conditionsValues := []any{}
 	isDeletedAtConditionPresent := false
 	for _, condition := range whereConditions {
-		if condition.Field == DeletedAtField {
+		if condition.affectsDeletedAt() {
 			isDeletedAtConditionPresent = true
 		}
-		sql, values := condition.GetSQL(query, nextTableName)
+
+		sql, values, err := condition.GetSQL(query, nextTableName)
+		if err != nil {
+			return nil, err
+		}
+
 		joinQuery += " AND " + sql
 		conditionsValues = append(conditionsValues, values...)
 	}
