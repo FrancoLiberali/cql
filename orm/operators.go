@@ -43,6 +43,11 @@ func Between[T any](v1 T, v2 T) Operator[T] {
 	return newBetweenOperator("BETWEEN", v1, v2)
 }
 
+// Equivalent to NOT (v1 < value < v2)
+func NotBetween[T any](v1 T, v2 T) Operator[T] {
+	return newBetweenOperator("NOT BETWEEN", v1, v2)
+}
+
 func newBetweenOperator[T any](sqlOperator string, v1 T, v2 T) Operator[T] {
 	operator := NewValueOperator[T](sqlOperator, v1)
 	return operator.AddOperation("AND", v2)
