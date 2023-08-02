@@ -115,3 +115,19 @@ func (ts *OperatorsIntTestSuite) TestLtOrEq() {
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
+
+func (ts *OperatorsIntTestSuite) TestGt() {
+	match1 := ts.createProduct("match", 3, 0, false, nil)
+	match2 := ts.createProduct("match", 4, 0, false, nil)
+	ts.createProduct("not_match", 1, 0, false, nil)
+	ts.createProduct("not_match", 2, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductInt(
+			orm.Gt(2),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}

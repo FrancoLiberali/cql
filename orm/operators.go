@@ -22,3 +22,8 @@ func Lt[T any](value T) Operator[T] {
 func LtOrEq[T any](value T) Operator[T] {
 	return NewValueOperator[T]("<=", value)
 }
+
+// GreaterThan
+func Gt[T any](value T) Operator[T] {
+	return NewValueOperator[T](">", value)
+}
