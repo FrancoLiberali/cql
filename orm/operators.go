@@ -38,6 +38,16 @@ func GtOrEq[T any](value T) Operator[T] {
 // Comparison Predicates
 // refs: https://www.postgresql.org/docs/current/functions-comparison.html#FUNCTIONS-COMPARISON-PRED-TABLE
 
+// Equivalent to v1 < value < v2
+func Between[T any](v1 T, v2 T) Operator[T] {
+	return newBetweenOperator("BETWEEN", v1, v2)
+}
+
+func newBetweenOperator[T any](sqlOperator string, v1 T, v2 T) Operator[T] {
+	operator := NewValueOperator[T](sqlOperator, v1)
+	return operator.AddOperation("AND", v2)
+}
+
 func IsNull[T any]() PredicateOperator[T] {
 	return NewPredicateOperator[T]("IS NULL")
 }
