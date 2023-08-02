@@ -535,6 +535,20 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsDifferentOperators(
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
 
+func (ts *WhereConditionsIntTestSuite) TestUnsafeCondition() {
+	match1 := ts.createProduct("match", 1, 0.0, true, nil)
+	match2 := ts.createProduct("match", 1, 0.0, true, nil)
+
+	ts.createProduct("not_match", 2, 0.0, true, nil)
+
+	entities, err := ts.crudProductService.Query(
+		orm.NewUnsafeCondition[models.Product]("%s.int = ?", []any{1}),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
 func (ts *WhereConditionsIntTestSuite) TestEmptyConnectionConditionMakesNothing() {
 	match1 := ts.createProduct("match", 1, 0.0, true, nil)
 	match2 := ts.createProduct("match", 1, 0.0, true, nil)

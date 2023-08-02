@@ -285,6 +285,44 @@ func divideConditionsByType[T any](
 	return
 }
 
+// Condition that can be used to express conditions that are not supported (yet?) by BaDORM
+// Example: table1.columnX = table2.columnY
+type UnsafeCondition[T any] struct {
+	SQLCondition string
+	Values       []any
+}
+
+//nolint:unused // see inside
+func (condition UnsafeCondition[T]) interfaceVerificationMethod(_ T) {
+	// This method is necessary to get the compiler to verify
+	// that an object is of type Condition[T]
+}
+
+func (condition UnsafeCondition[T]) ApplyTo(query *gorm.DB, tableName string) (*gorm.DB, error) {
+	return applyWhereCondition[T](condition, query, tableName)
+}
+
+func (condition UnsafeCondition[T]) GetSQL(_ *gorm.DB, tableName string) (string, []any, error) {
+	return fmt.Sprintf(
+		condition.SQLCondition,
+		tableName,
+	), condition.Values, nil
+}
+
+//nolint:unused // is used
+func (condition UnsafeCondition[T]) affectsDeletedAt() bool {
+	return false
+}
+
+// Condition that can be used to express conditions that are not supported (yet?) by BaDORM
+// Example: table1.columnX = table2.columnY
+func NewUnsafeCondition[T any](condition string, values []any) UnsafeCondition[T] {
+	return UnsafeCondition[T]{
+		SQLCondition: condition,
+		Values:       values,
+	}
+}
+
 // Condition used to returns an error when the query is executed
 type InvalidCondition[T any] struct {
 	Err error

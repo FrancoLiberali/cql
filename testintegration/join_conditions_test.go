@@ -354,6 +354,31 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsMultipleTimes() {
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
 
+func (ts *WhereConditionsIntTestSuite) TestJoinWithUnsafeCondition() {
+	product1 := ts.createProduct("", 0, 0.0, false, nil)
+	product2 := ts.createProduct("", 0, 0.0, false, nil)
+
+	company1 := ts.createCompany("ditrit")
+	company2 := ts.createCompany("orness")
+
+	seller1 := ts.createSeller("ditrit", company1)
+	seller2 := ts.createSeller("agustin", company2)
+
+	match := ts.createSale(0, product1, seller1)
+	ts.createSale(0, product2, seller2)
+
+	entities, err := ts.crudSaleService.Query(
+		conditions.SaleSeller(
+			conditions.SellerCompany(
+				orm.NewUnsafeCondition[models.Company]("%s.name = sellers_sales.name", []any{}),
+			),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{match}, entities)
+}
+
 func (ts *WhereConditionsIntTestSuite) TestJoinWithEmptyConnectionConditionMakesNothing() {
 	product1 := ts.createProduct("", 1, 0.0, false, nil)
 	product2 := ts.createProduct("", 2, 0.0, false, nil)
