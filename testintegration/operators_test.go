@@ -147,3 +147,39 @@ func (ts *OperatorsIntTestSuite) TestGtOrEq() {
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
+
+func (ts *OperatorsIntTestSuite) TestIsNullPointers() {
+	match := ts.createProduct("match", 0, 0, false, nil)
+	int1 := 1
+	int2 := 2
+
+	ts.createProduct("not_match", 0, 0, false, &int1)
+	ts.createProduct("not_match", 0, 0, false, &int2)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductIntPointer(
+			orm.IsNull[int](),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestIsNullNullableTypes() {
+	match := ts.createProduct("match", 0, 0, false, nil)
+
+	notMatch := ts.createProduct("not_match", 0, 0, false, nil)
+	notMatch.NullFloat = sql.NullFloat64{Valid: true, Float64: 6}
+	err := ts.db.Save(notMatch).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductNullFloat(
+			orm.IsNull[float64](),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}

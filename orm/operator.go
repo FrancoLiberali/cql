@@ -1,5 +1,7 @@
 package orm
 
+import "fmt"
+
 type Operator[T any] interface {
 	// Transform the Operator to a SQL string and a list of values to use in the query
 	// columnName is used by the operator to determine which is the objective column.
@@ -58,4 +60,25 @@ func (operator *ValueOperator[T]) AddOperation(sqlOperator string, value any) Va
 	)
 
 	return *operator
+}
+
+// Operator that verifies a predicate
+// Example: value IS TRUE
+type PredicateOperator[T any] struct {
+	SQLOperator string
+}
+
+func (operator PredicateOperator[T]) InterfaceVerificationMethod(_ T) {
+	// This method is necessary to get the compiler to verify
+	// that an object is of type Operator[T]
+}
+
+func (operator PredicateOperator[T]) ToSQL(columnName string) (string, []any, error) {
+	return fmt.Sprintf("%s %s", columnName, operator.SQLOperator), []any{}, nil
+}
+
+func NewPredicateOperator[T any](sqlOperator string) PredicateOperator[T] {
+	return PredicateOperator[T]{
+		SQLOperator: sqlOperator,
+	}
 }

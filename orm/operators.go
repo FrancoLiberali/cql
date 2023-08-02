@@ -32,3 +32,10 @@ func Gt[T any](value T) Operator[T] {
 func GtOrEq[T any](value T) Operator[T] {
 	return NewValueOperator[T](">=", value)
 }
+
+// Comparison Predicates
+// refs: https://www.postgresql.org/docs/current/functions-comparison.html#FUNCTIONS-COMPARISON-PRED-TABLE
+
+func IsNull[T any]() PredicateOperator[T] {
+	return NewPredicateOperator[T]("IS NULL")
+}

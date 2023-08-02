@@ -341,7 +341,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfByteArrayEmpty() {
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }
 
-func (ts *WhereConditionsIntTestSuite) TestQueryWithConditionOfCustomType() {
+func (ts *WhereConditionsIntTestSuite) TestConditionOfCustomType() {
 	match := ts.createProduct("match", 1, 0, false, nil)
 	notMatch1 := ts.createProduct("not_match", 2, 0, false, nil)
 	ts.createProduct("not_match", 2, 0, false, nil)
@@ -393,6 +393,23 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationTypeOptionalWithVa
 
 	entities, err := ts.crudSaleService.Query(
 		conditions.SaleSellerId(orm.Eq(seller1.ID)),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{match}, entities)
+}
+
+func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationTypeOptionalByNil() {
+	product1 := ts.createProduct("", 0, 0.0, false, nil)
+	product2 := ts.createProduct("", 0, 0.0, false, nil)
+
+	seller2 := ts.createSeller("agustin", nil)
+
+	match := ts.createSale(0, product1, nil)
+	ts.createSale(0, product2, seller2)
+
+	entities, err := ts.crudSaleService.Query(
+		conditions.SaleSellerId(orm.IsNull[orm.UUID]()),
 	)
 	ts.Nil(err)
 
