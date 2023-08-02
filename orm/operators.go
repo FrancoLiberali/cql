@@ -43,3 +43,9 @@ func IsNull[T any]() PredicateOperator[T] {
 func IsNotNull[T any]() PredicateOperator[T] {
 	return NewPredicateOperator[T]("IS NOT NULL")
 }
+
+// Boolean Comparison Predicates
+
+func IsTrue() PredicateOperator[bool] {
+	return NewPredicateOperator[bool]("IS TRUE")
+}
