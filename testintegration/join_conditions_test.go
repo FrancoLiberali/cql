@@ -370,3 +370,12 @@ func (ts *WhereConditionsIntTestSuite) TestJoinWithEmptyConnectionConditionMakes
 
 	EqualList(&ts.Suite, []*models.Sale{match1, match2}, entities)
 }
+
+func (ts *WhereConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturnsError() {
+	_, err := ts.crudSaleService.Query(
+		conditions.SaleProduct(
+			orm.Not[models.Product](),
+		),
+	)
+	ts.ErrorIs(err, orm.ErrEmptyConditions)
+}

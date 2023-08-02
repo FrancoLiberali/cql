@@ -444,6 +444,39 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsAreConnectedByAnd()
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }
 
+func (ts *WhereConditionsIntTestSuite) TestNot() {
+	match1 := ts.createProduct("match", 1, 0, false, nil)
+	match2 := ts.createProduct("match", 3, 0, false, nil)
+
+	ts.createProduct("not_match", 2, 0, false, nil)
+	ts.createProduct("not_match", 2, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		orm.Not(conditions.ProductInt(orm.Eq(2))),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
+func (ts *WhereConditionsIntTestSuite) TestNotWithMultipleConditionsAreConnectedByAnd() {
+	match1 := ts.createProduct("match", 1, 0, false, nil)
+	match2 := ts.createProduct("match", 5, 0, false, nil)
+
+	ts.createProduct("not_match", 2, 0, false, nil)
+	ts.createProduct("not_match", 3, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		orm.Not(
+			conditions.ProductInt(orm.Gt(1)),
+			conditions.ProductInt(orm.Lt(4)),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
 func (ts *WhereConditionsIntTestSuite) TestOr() {
 	match1 := ts.createProduct("match", 2, 0, false, nil)
 	match2 := ts.createProduct("match", 3, 0, false, nil)
@@ -457,6 +490,27 @@ func (ts *WhereConditionsIntTestSuite) TestOr() {
 			conditions.ProductInt(orm.Eq(2)),
 			conditions.ProductInt(orm.Eq(3)),
 			conditions.ProductString(orm.Eq("match_3")),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
+}
+
+func (ts *WhereConditionsIntTestSuite) TestNotOr() {
+	match1 := ts.createProduct("match", 1, 0, false, nil)
+	match2 := ts.createProduct("match", 5, 0, false, nil)
+	match3 := ts.createProduct("match", 4, 0, false, nil)
+
+	ts.createProduct("not_match", 2, 0, false, nil)
+	ts.createProduct("not_match_string", 3, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		orm.Not[models.Product](
+			orm.Or(
+				conditions.ProductInt(orm.Eq(2)),
+				conditions.ProductString(orm.Eq("not_match_string")),
+			),
 		),
 	)
 	ts.Nil(err)
@@ -491,4 +545,11 @@ func (ts *WhereConditionsIntTestSuite) TestEmptyConnectionConditionMakesNothing(
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
+func (ts *WhereConditionsIntTestSuite) TestEmptyContainerConditionReturnsError() {
+	_, err := ts.crudProductService.Query(
+		orm.Not[models.Product](),
+	)
+	ts.ErrorIs(err, orm.ErrEmptyConditions)
 }

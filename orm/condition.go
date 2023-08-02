@@ -1,6 +1,7 @@
 package orm
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 
@@ -9,6 +10,8 @@ import (
 )
 
 const DeletedAtField = "DeletedAt"
+
+var ErrEmptyConditions = errors.New("condition must have at least one inner condition")
 
 type Condition[T any] interface {
 	// Applies the condition to the "query"
@@ -34,6 +37,52 @@ type WhereCondition[T any] interface {
 	// Returns true if the DeletedAt column if affected by the condition
 	// If no condition affects the DeletedAt, the verification that it's null will be added automatically
 	affectsDeletedAt() bool
+}
+
+// Condition that contains a internal condition.
+// Example: NOT (internal condition)
+type ContainerCondition[T any] struct {
+	ConnectionCondition WhereCondition[T]
+	Prefix              string
+}
+
+//nolint:unused // see inside
+func (condition ContainerCondition[T]) interfaceVerificationMethod(_ T) {
+	// This method is necessary to get the compiler to verify
+	// that an object is of type Condition[T]
+}
+
+func (condition ContainerCondition[T]) ApplyTo(query *gorm.DB, tableName string) (*gorm.DB, error) {
+	return applyWhereCondition[T](condition, query, tableName)
+}
+
+func (condition ContainerCondition[T]) GetSQL(query *gorm.DB, tableName string) (string, []any, error) {
+	sqlString, values, err := condition.ConnectionCondition.GetSQL(query, tableName)
+	if err != nil {
+		return "", nil, err
+	}
+
+	sqlString = condition.Prefix + " (" + sqlString + ")"
+
+	return sqlString, values, nil
+}
+
+//nolint:unused // is used
+func (condition ContainerCondition[T]) affectsDeletedAt() bool {
+	return condition.ConnectionCondition.affectsDeletedAt()
+}
+
+// Condition that contains a internal condition.
+// Example: NOT (internal condition)
+func NewContainerCondition[T any](prefix string, conditions ...WhereCondition[T]) WhereCondition[T] {
+	if len(conditions) == 0 {
+		return NewInvalidCondition[T](ErrEmptyConditions)
+	}
+
+	return ContainerCondition[T]{
+		Prefix:              prefix,
+		ConnectionCondition: And(conditions...),
+	}
 }
 
 // Condition that connects multiple conditions.
@@ -236,6 +285,37 @@ func divideConditionsByType[T any](
 	return
 }
 
+// Condition used to returns an error when the query is executed
+type InvalidCondition[T any] struct {
+	Err error
+}
+
+//nolint:unused // see inside
+func (condition InvalidCondition[T]) interfaceVerificationMethod(_ T) {
+	// This method is necessary to get the compiler to verify
+	// that an object is of type Condition[T]
+}
+
+func (condition InvalidCondition[T]) ApplyTo(_ *gorm.DB, _ string) (*gorm.DB, error) {
+	return nil, condition.Err
+}
+
+func (condition InvalidCondition[T]) GetSQL(_ *gorm.DB, _ string) (string, []any, error) {
+	return "", nil, condition.Err
+}
+
+//nolint:unused // is used
+func (condition InvalidCondition[T]) affectsDeletedAt() bool {
+	return false
+}
+
+// Condition used to returns an error when the query is executed
+func NewInvalidCondition[T any](err error) InvalidCondition[T] {
+	return InvalidCondition[T]{
+		Err: err,
+	}
+}
+
 // Logical Operators
 // ref: https://www.postgresql.org/docs/current/functions-logical.html
 
@@ -245,4 +325,8 @@ func And[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
 
 func Or[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
 	return NewConnectionCondition("OR", conditions...)
+}
+
+func Not[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
+	return NewContainerCondition("NOT", conditions...)
 }
