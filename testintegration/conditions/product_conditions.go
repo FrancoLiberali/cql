@@ -67,6 +67,12 @@ func ProductBool(operator orm.Operator[bool]) orm.WhereCondition[models.Product]
 		Operator: operator,
 	}
 }
+func ProductNullBool(operator orm.Operator[bool]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, bool]{
+		Field:    "NullBool",
+		Operator: operator,
+	}
+}
 func ProductByteArray(operator orm.Operator[[]uint8]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, []uint8]{
 		Field:    "ByteArray",

@@ -72,6 +72,7 @@ type Product struct {
 	Float       float64
 	NullFloat   sql.NullFloat64
 	Bool        bool
+	NullBool    sql.NullBool
 	ByteArray   []byte
 	MultiString MultiString
 	ToBeEmbedded
