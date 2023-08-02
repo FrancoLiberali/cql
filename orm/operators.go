@@ -12,3 +12,8 @@ func Eq[T any](value T) Operator[T] {
 func NotEq[T any](value T) Operator[T] {
 	return NewValueOperator[T]("<>", value)
 }
+
+// LessThan
+func Lt[T any](value T) Operator[T] {
+	return NewValueOperator[T]("<", value)
+}
