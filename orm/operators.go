@@ -79,3 +79,9 @@ func IsDistinct[T any](value T) ValueOperator[T] {
 func IsNotDistinct[T any](value T) ValueOperator[T] {
 	return NewValueOperator[T]("IS NOT DISTINCT FROM", value)
 }
+
+// Row and Array Comparisons
+
+func ArrayIn[T any](values ...T) ValueOperator[T] {
+	return NewValueOperator[T]("IN", values)
+}
