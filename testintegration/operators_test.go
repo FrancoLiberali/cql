@@ -291,3 +291,26 @@ func (ts *OperatorsIntTestSuite) TestIsNotFalse() {
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
+
+func (ts *OperatorsIntTestSuite) TestIsUnknown() {
+	match := ts.createProduct("match", 0, 0, false, nil)
+
+	notMatch1 := ts.createProduct("match", 0, 0, false, nil)
+	notMatch1.NullBool = sql.NullBool{Valid: true, Bool: true}
+	err := ts.db.Save(notMatch1).Error
+	ts.Nil(err)
+
+	notMatch2 := ts.createProduct("not_match", 0, 0, false, nil)
+	notMatch2.NullBool = sql.NullBool{Valid: true, Bool: false}
+	err = ts.db.Save(notMatch2).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductNullBool(
+			orm.IsUnknown(),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}
