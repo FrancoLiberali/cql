@@ -401,3 +401,37 @@ func (ts *OperatorsIntTestSuite) TestArrayNotIn() {
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
+
+func (ts *OperatorsIntTestSuite) TestLike() {
+	match1 := ts.createProduct("basd", 0, 0, false, nil)
+	match2 := ts.createProduct("cape", 0, 0, false, nil)
+
+	ts.createProduct("bbsd", 0, 0, false, nil)
+	ts.createProduct("bbasd", 0, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductString(
+			orm.Like("_a%"),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestLikeEscape() {
+	match1 := ts.createProduct("ba_sd", 0, 0, false, nil)
+	match2 := ts.createProduct("ca_pe", 0, 0, false, nil)
+
+	ts.createProduct("bb_sd", 0, 0, false, nil)
+	ts.createProduct("bba_sd", 0, 0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductString(
+			orm.Like("_a!_%").Escape('!'),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
