@@ -39,8 +39,9 @@ func CountryName(operator orm.Operator[string]) orm.WhereCondition[models.Countr
 }
 func CountryCapital(conditions ...orm.Condition[models.City]) orm.Condition[models.Country] {
 	return orm.JoinCondition[models.Country, models.City]{
-		Conditions: conditions,
-		T1Field:    "ID",
-		T2Field:    "CountryID",
+		Conditions:    conditions,
+		RelationField: "Capital",
+		T1Field:       "ID",
+		T2Field:       "CountryID",
 	}
 }

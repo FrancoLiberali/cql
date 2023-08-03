@@ -101,7 +101,11 @@ func (repository *CRUDRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...Co
 
 	query := tx
 	for _, condition := range conditions {
-		query, err = condition.ApplyTo(query, initialTableName)
+		query, err = condition.ApplyTo(query, Table{
+			Name:    initialTableName,
+			Alias:   initialTableName,
+			Initial: true,
+		})
 		if err != nil {
 			return nil, err
 		}

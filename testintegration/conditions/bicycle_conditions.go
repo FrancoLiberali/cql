@@ -39,9 +39,10 @@ func BicycleName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycl
 }
 func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.Condition[models.Bicycle] {
 	return orm.JoinCondition[models.Bicycle, models.Person]{
-		Conditions: conditions,
-		T1Field:    "OwnerName",
-		T2Field:    "Name",
+		Conditions:    conditions,
+		RelationField: "Owner",
+		T1Field:       "OwnerName",
+		T2Field:       "Name",
 	}
 }
 func BicycleOwnerName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {

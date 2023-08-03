@@ -45,9 +45,10 @@ func SaleDescription(operator orm.Operator[string]) orm.WhereCondition[models.Sa
 }
 func SaleProduct(conditions ...orm.Condition[models.Product]) orm.Condition[models.Sale] {
 	return orm.JoinCondition[models.Sale, models.Product]{
-		Conditions: conditions,
-		T1Field:    "ProductID",
-		T2Field:    "ID",
+		Conditions:    conditions,
+		RelationField: "Product",
+		T1Field:       "ProductID",
+		T2Field:       "ID",
 	}
 }
 func SaleProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sale] {
@@ -58,9 +59,10 @@ func SaleProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sa
 }
 func SaleSeller(conditions ...orm.Condition[models.Seller]) orm.Condition[models.Sale] {
 	return orm.JoinCondition[models.Sale, models.Seller]{
-		Conditions: conditions,
-		T1Field:    "SellerID",
-		T2Field:    "ID",
+		Conditions:    conditions,
+		RelationField: "Seller",
+		T1Field:       "SellerID",
+		T2Field:       "ID",
 	}
 }
 func SaleSellerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sale] {

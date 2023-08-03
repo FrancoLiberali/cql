@@ -370,7 +370,7 @@ func (ts *WhereConditionsIntTestSuite) TestJoinWithUnsafeCondition() {
 	entities, err := ts.crudSaleService.Query(
 		conditions.SaleSeller(
 			conditions.SellerCompany(
-				orm.NewUnsafeCondition[models.Company]("%s.name = sellers_sales.name", []any{}),
+				orm.NewUnsafeCondition[models.Company]("%s.name = Seller.name", []any{}),
 			),
 		),
 	)

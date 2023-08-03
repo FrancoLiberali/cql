@@ -39,9 +39,10 @@ func EmployeeName(operator orm.Operator[string]) orm.WhereCondition[models.Emplo
 }
 func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.Condition[models.Employee] {
 	return orm.JoinCondition[models.Employee, models.Employee]{
-		Conditions: conditions,
-		T1Field:    "BossID",
-		T2Field:    "ID",
+		Conditions:    conditions,
+		RelationField: "Boss",
+		T1Field:       "BossID",
+		T2Field:       "ID",
 	}
 }
 func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Employee] {

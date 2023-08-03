@@ -39,9 +39,10 @@ func SellerName(operator orm.Operator[string]) orm.WhereCondition[models.Seller]
 }
 func SellerCompany(conditions ...orm.Condition[models.Company]) orm.Condition[models.Seller] {
 	return orm.JoinCondition[models.Seller, models.Company]{
-		Conditions: conditions,
-		T1Field:    "CompanyID",
-		T2Field:    "ID",
+		Conditions:    conditions,
+		RelationField: "Company",
+		T1Field:       "CompanyID",
+		T2Field:       "ID",
 	}
 }
 func SellerCompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Seller] {
