@@ -40,12 +40,13 @@ func CountryName(operator orm.Operator[string]) orm.WhereCondition[models.Countr
 		Operator:        operator,
 	}
 }
-func CountryCapital(conditions ...orm.Condition[models.City]) orm.Condition[models.Country] {
+func CountryCapital(conditions ...orm.Condition[models.City]) orm.IJoinCondition[models.Country] {
 	return orm.JoinCondition[models.Country, models.City]{
-		Conditions:    conditions,
-		RelationField: "Capital",
-		T1Field:       "ID",
-		T2Field:       "CountryID",
+		Conditions:         conditions,
+		RelationField:      "Capital",
+		T1Field:            "ID",
+		T1PreloadCondition: CountryPreloadAttributes,
+		T2Field:            "CountryID",
 	}
 }
 

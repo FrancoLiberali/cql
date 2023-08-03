@@ -49,12 +49,13 @@ func SaleDescription(operator orm.Operator[string]) orm.WhereCondition[models.Sa
 		Operator:        operator,
 	}
 }
-func SaleProduct(conditions ...orm.Condition[models.Product]) orm.Condition[models.Sale] {
+func SaleProduct(conditions ...orm.Condition[models.Product]) orm.IJoinCondition[models.Sale] {
 	return orm.JoinCondition[models.Sale, models.Product]{
-		Conditions:    conditions,
-		RelationField: "Product",
-		T1Field:       "ProductID",
-		T2Field:       "ID",
+		Conditions:         conditions,
+		RelationField:      "Product",
+		T1Field:            "ProductID",
+		T1PreloadCondition: SalePreloadAttributes,
+		T2Field:            "ID",
 	}
 }
 
@@ -67,12 +68,13 @@ func SaleProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sa
 		Operator:        operator,
 	}
 }
-func SaleSeller(conditions ...orm.Condition[models.Seller]) orm.Condition[models.Sale] {
+func SaleSeller(conditions ...orm.Condition[models.Seller]) orm.IJoinCondition[models.Sale] {
 	return orm.JoinCondition[models.Sale, models.Seller]{
-		Conditions:    conditions,
-		RelationField: "Seller",
-		T1Field:       "SellerID",
-		T2Field:       "ID",
+		Conditions:         conditions,
+		RelationField:      "Seller",
+		T1Field:            "SellerID",
+		T1PreloadCondition: SalePreloadAttributes,
+		T2Field:            "ID",
 	}
 }
 

@@ -40,12 +40,13 @@ func BicycleName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycl
 		Operator:        operator,
 	}
 }
-func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.Condition[models.Bicycle] {
+func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.IJoinCondition[models.Bicycle] {
 	return orm.JoinCondition[models.Bicycle, models.Person]{
-		Conditions:    conditions,
-		RelationField: "Owner",
-		T1Field:       "OwnerName",
-		T2Field:       "Name",
+		Conditions:         conditions,
+		RelationField:      "Owner",
+		T1Field:            "OwnerName",
+		T1PreloadCondition: BicyclePreloadAttributes,
+		T2Field:            "Name",
 	}
 }
 

@@ -40,12 +40,13 @@ func SellerName(operator orm.Operator[string]) orm.WhereCondition[models.Seller]
 		Operator:        operator,
 	}
 }
-func SellerCompany(conditions ...orm.Condition[models.Company]) orm.Condition[models.Seller] {
+func SellerCompany(conditions ...orm.Condition[models.Company]) orm.IJoinCondition[models.Seller] {
 	return orm.JoinCondition[models.Seller, models.Company]{
-		Conditions:    conditions,
-		RelationField: "Company",
-		T1Field:       "CompanyID",
-		T2Field:       "ID",
+		Conditions:         conditions,
+		RelationField:      "Company",
+		T1Field:            "CompanyID",
+		T1PreloadCondition: SellerPreloadAttributes,
+		T2Field:            "ID",
 	}
 }
 

@@ -40,12 +40,13 @@ func PhoneName(operator orm.Operator[string]) orm.WhereCondition[models.Phone] {
 		Operator:        operator,
 	}
 }
-func PhoneBrand(conditions ...orm.Condition[models.Brand]) orm.Condition[models.Phone] {
+func PhoneBrand(conditions ...orm.Condition[models.Brand]) orm.IJoinCondition[models.Phone] {
 	return orm.JoinCondition[models.Phone, models.Brand]{
-		Conditions:    conditions,
-		RelationField: "Brand",
-		T1Field:       "BrandID",
-		T2Field:       "ID",
+		Conditions:         conditions,
+		RelationField:      "Brand",
+		T1Field:            "BrandID",
+		T1PreloadCondition: PhonePreloadAttributes,
+		T2Field:            "ID",
 	}
 }
 

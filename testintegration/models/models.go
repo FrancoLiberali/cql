@@ -186,3 +186,49 @@ type Phone struct {
 func (m Phone) Equal(other Phone) bool {
 	return m.Name == other.Name
 }
+
+type ParentParent struct {
+	orm.UUIDModel
+
+	Name string
+}
+
+func (m ParentParent) Equal(other ParentParent) bool {
+	return m.ID == other.ID
+}
+
+type Parent1 struct {
+	orm.UUIDModel
+
+	ParentParent   ParentParent
+	ParentParentID orm.UUID
+}
+
+func (m Parent1) Equal(other Parent1) bool {
+	return m.ID == other.ID
+}
+
+type Parent2 struct {
+	orm.UUIDModel
+
+	ParentParent   ParentParent
+	ParentParentID orm.UUID
+}
+
+func (m Parent2) Equal(other Parent2) bool {
+	return m.ID == other.ID
+}
+
+type Child struct {
+	orm.UUIDModel
+
+	Parent1   Parent1
+	Parent1ID orm.UUID
+
+	Parent2   Parent2
+	Parent2ID orm.UUID
+}
+
+func (m Child) Equal(other Child) bool {
+	return m.ID == other.ID
+}

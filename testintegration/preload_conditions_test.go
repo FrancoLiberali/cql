@@ -18,6 +18,7 @@ type PreloadConditionsIntTestSuite struct {
 	crudCityService     orm.CRUDService[models.City, orm.UUID]
 	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID]
 	crudPhoneService    orm.CRUDService[models.Phone, uint]
+	crudChildService    orm.CRUDService[models.Child, orm.UUID]
 }
 
 func NewPreloadConditionsIntTestSuite(
@@ -28,6 +29,7 @@ func NewPreloadConditionsIntTestSuite(
 	crudCityService orm.CRUDService[models.City, orm.UUID],
 	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID],
 	crudPhoneService orm.CRUDService[models.Phone, uint],
+	crudChildService orm.CRUDService[models.Child, orm.UUID],
 ) *PreloadConditionsIntTestSuite {
 	return &PreloadConditionsIntTestSuite{
 		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
@@ -39,6 +41,7 @@ func NewPreloadConditionsIntTestSuite(
 		crudCityService:     crudCityService,
 		crudEmployeeService: crudEmployeeService,
 		crudPhoneService:    crudPhoneService,
+		crudChildService:    crudChildService,
 	}
 }
 
@@ -207,6 +210,35 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferential() {
 	}))
 }
 
+func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel() {
+	bossBoss := &models.Employee{
+		Name: "Xavier",
+	}
+	boss := &models.Employee{
+		Name: "Vincent",
+		Boss: bossBoss,
+	}
+	employee := ts.createEmployee("franco", boss)
+
+	entities, err := ts.crudEmployeeService.Query(
+		conditions.EmployeeBoss(
+			conditions.EmployeeBoss(
+				conditions.EmployeePreloadAttributes,
+			),
+		),
+		conditions.EmployeeName(orm.Eq("franco")),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Employee{employee}, entities)
+
+	bossLoaded := entities[0].Boss
+	ts.True(bossLoaded.Equal(*boss))
+
+	bossBossLoaded := bossLoaded.Boss
+	ts.True(bossBossLoaded.Equal(*bossBoss))
+}
+
 func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditions() {
 	product1 := ts.createProduct("", 1, 0.0, false, nil)
 	product2 := ts.createProduct("", 2, 0.0, false, nil)
@@ -234,4 +266,176 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 	assert.DeepEqual(ts.T(), *product1, entities[0].Product)
 	assert.DeepEqual(ts.T(), seller1, entities[0].Seller)
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithoutConditions() {
+	parentParent := &models.ParentParent{}
+	err := ts.db.Create(parentParent).Error
+	ts.Nil(err)
+
+	parent1 := &models.Parent1{ParentParent: *parentParent}
+	err = ts.db.Create(parent1).Error
+	ts.Nil(err)
+
+	parent2 := &models.Parent2{ParentParent: *parentParent}
+	err = ts.db.Create(parent2).Error
+	ts.Nil(err)
+
+	child := &models.Child{Parent1: *parent1, Parent2: *parent2}
+	err = ts.db.Create(child).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudChildService.Query(
+		conditions.ChildPreloadParent1,
+		conditions.ChildPreloadParent2,
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Child{child}, entities)
+	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
+	assert.DeepEqual(ts.T(), *parent2, entities[0].Parent2)
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestPreloadRelations() {
+	parentParent := &models.ParentParent{}
+	err := ts.db.Create(parentParent).Error
+	ts.Nil(err)
+
+	parent1 := &models.Parent1{ParentParent: *parentParent}
+	err = ts.db.Create(parent1).Error
+	ts.Nil(err)
+
+	parent2 := &models.Parent2{ParentParent: *parentParent}
+	err = ts.db.Create(parent2).Error
+	ts.Nil(err)
+
+	child := &models.Child{Parent1: *parent1, Parent2: *parent2}
+	err = ts.db.Create(child).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudChildService.Query(
+		conditions.ChildPreloadRelations...,
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Child{child}, entities)
+	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
+	assert.DeepEqual(ts.T(), *parent2, entities[0].Parent2)
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithoutCondition() {
+	parentParent := &models.ParentParent{}
+	err := ts.db.Create(parentParent).Error
+	ts.Nil(err)
+
+	parent1 := &models.Parent1{ParentParent: *parentParent}
+	err = ts.db.Create(parent1).Error
+	ts.Nil(err)
+
+	parent2 := &models.Parent2{ParentParent: *parentParent}
+	err = ts.db.Create(parent2).Error
+	ts.Nil(err)
+
+	child := &models.Child{Parent1: *parent1, Parent2: *parent2}
+	err = ts.db.Create(child).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudChildService.Query(
+		conditions.ChildParent1(
+			conditions.Parent1PreloadAttributes,
+			conditions.Parent1PreloadParentParent,
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Child{child}, entities)
+	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
+	assert.DeepEqual(ts.T(), *parentParent, entities[0].Parent1.ParentParent)
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCondition() {
+	parentParent1 := &models.ParentParent{
+		Name: "parentParent1",
+	}
+	err := ts.db.Create(parentParent1).Error
+	ts.Nil(err)
+
+	parent11 := &models.Parent1{ParentParent: *parentParent1}
+	err = ts.db.Create(parent11).Error
+	ts.Nil(err)
+
+	parent21 := &models.Parent2{ParentParent: *parentParent1}
+	err = ts.db.Create(parent21).Error
+	ts.Nil(err)
+
+	child1 := &models.Child{Parent1: *parent11, Parent2: *parent21}
+	err = ts.db.Create(child1).Error
+	ts.Nil(err)
+
+	parentParent2 := &models.ParentParent{}
+	err = ts.db.Create(parentParent2).Error
+	ts.Nil(err)
+
+	parent12 := &models.Parent1{ParentParent: *parentParent2}
+	err = ts.db.Create(parent12).Error
+	ts.Nil(err)
+
+	parent22 := &models.Parent2{ParentParent: *parentParent2}
+	err = ts.db.Create(parent22).Error
+	ts.Nil(err)
+
+	child2 := &models.Child{Parent1: *parent12, Parent2: *parent22}
+	err = ts.db.Create(child2).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudChildService.Query(
+		conditions.ChildParent1(
+			conditions.Parent1PreloadAttributes,
+			conditions.Parent1ParentParent(
+				conditions.ParentParentPreloadAttributes,
+				conditions.ParentParentName(orm.Eq("parentParent1")),
+			),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Child{child1}, entities)
+	assert.DeepEqual(ts.T(), *parent11, entities[0].Parent1)
+	assert.DeepEqual(ts.T(), *parentParent1, entities[0].Parent1.ParentParent)
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadDiamond() {
+	parentParent := &models.ParentParent{}
+	err := ts.db.Create(parentParent).Error
+	ts.Nil(err)
+
+	parent1 := &models.Parent1{ParentParent: *parentParent}
+	err = ts.db.Create(parent1).Error
+	ts.Nil(err)
+
+	parent2 := &models.Parent2{ParentParent: *parentParent}
+	err = ts.db.Create(parent2).Error
+	ts.Nil(err)
+
+	child := &models.Child{Parent1: *parent1, Parent2: *parent2}
+	err = ts.db.Create(child).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudChildService.Query(
+		conditions.ChildParent1(
+			conditions.Parent1PreloadAttributes,
+			conditions.Parent1PreloadParentParent,
+		),
+		conditions.ChildParent2(
+			conditions.Parent2PreloadAttributes,
+			conditions.Parent2PreloadParentParent,
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Child{child}, entities)
+	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
+	assert.DeepEqual(ts.T(), *parent2, entities[0].Parent2)
+	assert.DeepEqual(ts.T(), *parentParent, entities[0].Parent1.ParentParent)
+	assert.DeepEqual(ts.T(), *parentParent, entities[0].Parent2.ParentParent)
 }

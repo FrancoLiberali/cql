@@ -40,12 +40,13 @@ func EmployeeName(operator orm.Operator[string]) orm.WhereCondition[models.Emplo
 		Operator:        operator,
 	}
 }
-func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.Condition[models.Employee] {
+func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.IJoinCondition[models.Employee] {
 	return orm.JoinCondition[models.Employee, models.Employee]{
-		Conditions:    conditions,
-		RelationField: "Boss",
-		T1Field:       "BossID",
-		T2Field:       "ID",
+		Conditions:         conditions,
+		RelationField:      "Boss",
+		T1Field:            "BossID",
+		T1PreloadCondition: EmployeePreloadAttributes,
+		T2Field:            "ID",
 	}
 }
 

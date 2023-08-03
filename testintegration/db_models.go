@@ -22,6 +22,10 @@ var ListOfTables = []any{
 	models.Bicycle{},
 	models.Brand{},
 	models.Phone{},
+	models.ParentParent{},
+	models.Parent1{},
+	models.Parent2{},
+	models.Child{},
 }
 
 func GetModels() orm.GetModelsResult {

@@ -58,6 +58,7 @@ func TestBaDaaSORM(t *testing.T) {
 		orm.GetCRUDServiceModule[models.Bicycle](),
 		orm.GetCRUDServiceModule[models.Phone](),
 		orm.GetCRUDServiceModule[models.Brand](),
+		orm.GetCRUDServiceModule[models.Child](),
 
 		// create test suites
 		fx.Provide(NewCRUDRepositoryIntTestSuite),
