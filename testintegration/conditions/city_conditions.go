@@ -49,6 +49,7 @@ func CityCountry(conditions ...orm.Condition[models.Country]) orm.Condition[mode
 	}
 }
 
+var CityPreloadCountry = CityCountry(CountryPreloadAttributes)
 var cityCountryIdFieldID = orm.FieldIdentifier{Field: "CountryID"}
 
 func CityCountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.City] {
@@ -57,3 +58,6 @@ func CityCountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Ci
 		Operator:        operator,
 	}
 }
+
+var CityPreloadAttributes = orm.NewPreloadCondition[models.City](cityNameFieldID, cityCountryIdFieldID)
+var CityPreloadRelations = []orm.Condition[models.City]{CityPreloadCountry}

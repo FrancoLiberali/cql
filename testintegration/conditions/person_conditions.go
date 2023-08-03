@@ -40,3 +40,5 @@ func PersonName(operator orm.Operator[string]) orm.WhereCondition[models.Person]
 		Operator:        operator,
 	}
 }
+
+var PersonPreloadAttributes = orm.NewPreloadCondition[models.Person](personNameFieldID)

@@ -49,6 +49,7 @@ func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.Condition[mode
 	}
 }
 
+var BicyclePreloadOwner = BicycleOwner(PersonPreloadAttributes)
 var bicycleOwnerNameFieldID = orm.FieldIdentifier{Field: "OwnerName"}
 
 func BicycleOwnerName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
@@ -57,3 +58,6 @@ func BicycleOwnerName(operator orm.Operator[string]) orm.WhereCondition[models.B
 		Operator:        operator,
 	}
 }
+
+var BicyclePreloadAttributes = orm.NewPreloadCondition[models.Bicycle](bicycleNameFieldID, bicycleOwnerNameFieldID)
+var BicyclePreloadRelations = []orm.Condition[models.Bicycle]{BicyclePreloadOwner}

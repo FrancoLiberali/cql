@@ -133,3 +133,5 @@ func ProductGormEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[model
 		Operator:        operator,
 	}
 }
+
+var ProductPreloadAttributes = orm.NewPreloadCondition[models.Product](productStringFieldID, productIntFieldID, productIntPointerFieldID, productFloatFieldID, productNullFloatFieldID, productBoolFieldID, productNullBoolFieldID, productByteArrayFieldID, productMultiStringFieldID, productToBeEmbeddedEmbeddedIntFieldID, productGormEmbeddedIntFieldID)

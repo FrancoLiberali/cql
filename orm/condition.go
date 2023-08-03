@@ -192,6 +192,48 @@ func (columnID FieldIdentifier) ColumnName(db *gorm.DB, table Table) string {
 	return columnID.ColumnPrefix + columnName
 }
 
+// Condition used to the preload the attributes of a model
+type PreloadCondition[T any] struct {
+	Fields []FieldIdentifier
+}
+
+//nolint:unused // see inside
+func (condition PreloadCondition[T]) interfaceVerificationMethod(_ T) {
+	// This method is necessary to get the compiler to verify
+	// that an object is of type Condition[T]
+}
+
+func (condition PreloadCondition[T]) ApplyTo(query *gorm.DB, table Table) (*gorm.DB, error) {
+	for _, fieldID := range condition.Fields {
+		columnName := fieldID.ColumnName(query, table)
+
+		query.Statement.Selects = append(
+			query.Statement.Selects,
+			fmt.Sprintf(
+				"%[1]s.%[2]s AS \"%[1]s__%[2]s\"", // name used by gorm to load the fields inside the models
+				table.Alias,
+				columnName,
+			),
+		)
+	}
+
+	return query, nil
+}
+
+// Condition used to the preload the attributes of a model
+func NewPreloadCondition[T any](fields ...FieldIdentifier) PreloadCondition[T] {
+	return PreloadCondition[T]{
+		Fields: append(
+			fields,
+			// base model fields
+			IDFieldID,
+			CreatedAtFieldID,
+			UpdatedAtFieldID,
+			DeletedAtFieldID,
+		),
+	}
+}
+
 // Condition that verifies the value of a field,
 // using the Operator
 type FieldCondition[TObject any, TAtribute any] struct {
@@ -254,7 +296,7 @@ func (condition JoinCondition[T1, T2]) interfaceVerificationMethod(t T1) {
 // previousTableName is the name of the table of T1
 // It also applies the nested conditions
 func (condition JoinCondition[T1, T2]) ApplyTo(query *gorm.DB, t1Table Table) (*gorm.DB, error) {
-	whereConditions, joinConditions := divideConditionsByType(condition.Conditions)
+	whereConditions, joinConditions, preloadCondition := divideConditionsByType(condition.Conditions)
 
 	// get the sql to do the join with T2
 	t2Table, err := t1Table.DeliverTable(query, *new(T2), condition.RelationField)
@@ -262,10 +304,14 @@ func (condition JoinCondition[T1, T2]) ApplyTo(query *gorm.DB, t1Table Table) (*
 		return nil, err
 	}
 
+	// get the sql to do the join with T2
+	// if it's only a preload use a left join
+	isLeftJoin := len(whereConditions) == 0 && preloadCondition != nil
 	joinQuery := condition.getSQLJoin(
 		query,
 		t1Table,
 		t2Table,
+		isLeftJoin,
 	)
 
 	// apply WhereConditions to the join in the "on" clause
@@ -290,6 +336,14 @@ func (condition JoinCondition[T1, T2]) ApplyTo(query *gorm.DB, t1Table Table) (*
 	// add the join to the query
 	query = query.Joins(joinQuery, onValues...)
 
+	// apply preload condition
+	if preloadCondition != nil {
+		query, err = preloadCondition.ApplyTo(query, t2Table)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	// apply nested joins
 	for _, joinCondition := range joinConditions {
 		query, err = joinCondition.ApplyTo(query, t2Table)
@@ -308,28 +362,40 @@ func (condition JoinCondition[T1, T2]) getSQLJoin(
 	query *gorm.DB,
 	t1Table Table,
 	t2Table Table,
+	isLeftJoin bool,
 ) string {
+	joinString := "INNER JOIN"
+	if isLeftJoin {
+		joinString = "LEFT JOIN"
+	}
+
 	return fmt.Sprintf(
-		`JOIN %[1]s %[2]s ON %[2]s.%[3]s = %[4]s.%[5]s
+		`%[6]s %[1]s %[2]s ON %[2]s.%[3]s = %[4]s.%[5]s
 		`,
 		t2Table.Name,
 		t2Table.Alias,
 		query.NamingStrategy.ColumnName(t2Table.Name, condition.T2Field),
 		t1Table.Alias,
 		query.NamingStrategy.ColumnName(t1Table.Name, condition.T1Field),
+		joinString,
 	)
 }
 
 // Divides a list of conditions by its type: WhereConditions and JoinConditions
 func divideConditionsByType[T any](
 	conditions []Condition[T],
-) (thisEntityConditions []WhereCondition[T], joinConditions []Condition[T]) {
+) (whereConditions []WhereCondition[T], joinConditions []Condition[T], preloadCondition *PreloadCondition[T]) {
 	for _, condition := range conditions {
-		typedCondition, ok := condition.(WhereCondition[T])
+		whereCondition, ok := condition.(WhereCondition[T])
 		if ok {
-			thisEntityConditions = append(thisEntityConditions, typedCondition)
+			whereConditions = append(whereConditions, whereCondition)
 		} else {
-			joinConditions = append(joinConditions, condition)
+			possiblePreloadCondition, ok := condition.(PreloadCondition[T])
+			if ok {
+				preloadCondition = &possiblePreloadCondition
+			} else {
+				joinConditions = append(joinConditions, condition)
+			}
 		}
 	}
 

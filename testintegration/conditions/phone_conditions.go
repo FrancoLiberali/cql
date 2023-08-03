@@ -49,6 +49,7 @@ func PhoneBrand(conditions ...orm.Condition[models.Brand]) orm.Condition[models.
 	}
 }
 
+var PhonePreloadBrand = PhoneBrand(BrandPreloadAttributes)
 var phoneBrandIdFieldID = orm.FieldIdentifier{Field: "BrandID"}
 
 func PhoneBrandId(operator orm.Operator[uint]) orm.WhereCondition[models.Phone] {
@@ -57,3 +58,6 @@ func PhoneBrandId(operator orm.Operator[uint]) orm.WhereCondition[models.Phone] 
 		Operator:        operator,
 	}
 }
+
+var PhonePreloadAttributes = orm.NewPreloadCondition[models.Phone](phoneNameFieldID, phoneBrandIdFieldID)
+var PhonePreloadRelations = []orm.Condition[models.Phone]{PhonePreloadBrand}

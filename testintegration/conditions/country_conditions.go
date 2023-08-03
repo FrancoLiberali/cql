@@ -48,3 +48,7 @@ func CountryCapital(conditions ...orm.Condition[models.City]) orm.Condition[mode
 		T2Field:       "CountryID",
 	}
 }
+
+var CountryPreloadCapital = CountryCapital(CityPreloadAttributes)
+var CountryPreloadAttributes = orm.NewPreloadCondition[models.Country](countryNameFieldID)
+var CountryPreloadRelations = []orm.Condition[models.Country]{CountryPreloadCapital}

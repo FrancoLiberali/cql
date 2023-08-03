@@ -99,7 +99,7 @@ func (repository *CRUDRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...Co
 		return nil, err
 	}
 
-	query := tx
+	query := tx.Select(initialTableName + ".*")
 	for _, condition := range conditions {
 		query, err = condition.ApplyTo(query, Table{
 			Name:    initialTableName,

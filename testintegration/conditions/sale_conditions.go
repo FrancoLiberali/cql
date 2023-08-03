@@ -58,6 +58,7 @@ func SaleProduct(conditions ...orm.Condition[models.Product]) orm.Condition[mode
 	}
 }
 
+var SalePreloadProduct = SaleProduct(ProductPreloadAttributes)
 var saleProductIdFieldID = orm.FieldIdentifier{Field: "ProductID"}
 
 func SaleProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sale] {
@@ -75,6 +76,7 @@ func SaleSeller(conditions ...orm.Condition[models.Seller]) orm.Condition[models
 	}
 }
 
+var SalePreloadSeller = SaleSeller(SellerPreloadAttributes)
 var saleSellerIdFieldID = orm.FieldIdentifier{Field: "SellerID"}
 
 func SaleSellerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sale] {
@@ -83,3 +85,6 @@ func SaleSellerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sal
 		Operator:        operator,
 	}
 }
+
+var SalePreloadAttributes = orm.NewPreloadCondition[models.Sale](saleCodeFieldID, saleDescriptionFieldID, saleProductIdFieldID, saleSellerIdFieldID)
+var SalePreloadRelations = []orm.Condition[models.Sale]{SalePreloadProduct, SalePreloadSeller}

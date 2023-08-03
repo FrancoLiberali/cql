@@ -40,3 +40,5 @@ func CompanyName(operator orm.Operator[string]) orm.WhereCondition[models.Compan
 		Operator:        operator,
 	}
 }
+
+var CompanyPreloadAttributes = orm.NewPreloadCondition[models.Company](companyNameFieldID)

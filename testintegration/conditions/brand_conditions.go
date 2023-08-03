@@ -40,3 +40,5 @@ func BrandName(operator orm.Operator[string]) orm.WhereCondition[models.Brand] {
 		Operator:        operator,
 	}
 }
+
+var BrandPreloadAttributes = orm.NewPreloadCondition[models.Brand](brandNameFieldID)

@@ -49,6 +49,7 @@ func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.Condition[mo
 	}
 }
 
+var EmployeePreloadBoss = EmployeeBoss(EmployeePreloadAttributes)
 var employeeBossIdFieldID = orm.FieldIdentifier{Field: "BossID"}
 
 func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Employee] {
@@ -57,3 +58,6 @@ func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.E
 		Operator:        operator,
 	}
 }
+
+var EmployeePreloadAttributes = orm.NewPreloadCondition[models.Employee](employeeNameFieldID, employeeBossIdFieldID)
+var EmployeePreloadRelations = []orm.Condition[models.Employee]{EmployeePreloadBoss}
