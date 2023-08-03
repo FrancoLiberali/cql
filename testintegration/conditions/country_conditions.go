@@ -44,10 +44,3 @@ func CountryCapital(conditions ...orm.Condition[models.City]) orm.Condition[mode
 		T2Field:    "CountryID",
 	}
 }
-func CityCountry(conditions ...orm.Condition[models.Country]) orm.Condition[models.City] {
-	return orm.JoinCondition[models.City, models.Country]{
-		Conditions: conditions,
-		T1Field:    "CountryID",
-		T2Field:    "ID",
-	}
-}

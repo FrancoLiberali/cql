@@ -28,6 +28,10 @@ type Company struct {
 	Sellers []Seller // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
 }
 
+func (m Company) Equal(other Company) bool {
+	return m.ID == other.ID
+}
+
 type MultiString []string
 
 func (s *MultiString) Scan(src interface{}) error {
@@ -87,6 +91,7 @@ type Seller struct {
 	orm.UUIDModel
 
 	Name      string
+	Company   *Company
 	CompanyID *orm.UUID // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
 }
 
@@ -124,6 +129,7 @@ type City struct {
 	orm.UUIDModel
 
 	Name      string
+	Country   *Country
 	CountryID orm.UUID // Country HasOne City (Country 1 -> 1 City)
 }
 
