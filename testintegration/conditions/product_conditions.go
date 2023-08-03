@@ -85,7 +85,7 @@ func ProductMultiString(operator orm.Operator[models.MultiString]) orm.WhereCond
 		Operator: operator,
 	}
 }
-func ProductEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
+func ProductToBeEmbeddedEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, int]{
 		Field:    "EmbeddedInt",
 		Operator: operator,

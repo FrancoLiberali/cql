@@ -258,7 +258,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfEmbedded() {
 	ts.Nil(err)
 
 	entities, err := ts.crudProductService.Query(
-		conditions.ProductEmbeddedInt(orm.Eq(1)),
+		conditions.ProductToBeEmbeddedEmbeddedInt(orm.Eq(1)),
 	)
 	ts.Nil(err)
 
