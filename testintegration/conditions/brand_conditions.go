@@ -9,31 +9,34 @@ import (
 
 func BrandId(operator orm.Operator[uint]) orm.WhereCondition[models.Brand] {
 	return orm.FieldCondition[models.Brand, uint]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func BrandCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Brand] {
 	return orm.FieldCondition[models.Brand, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func BrandUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Brand] {
 	return orm.FieldCondition[models.Brand, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func BrandDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Brand] {
 	return orm.FieldCondition[models.Brand, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var brandNameFieldID = orm.FieldIdentifier{Field: "Name"}
+
 func BrandName(operator orm.Operator[string]) orm.WhereCondition[models.Brand] {
 	return orm.FieldCondition[models.Brand, string]{
-		Field:    "Name",
-		Operator: operator,
+		FieldIdentifier: brandNameFieldID,
+		Operator:        operator,
 	}
 }

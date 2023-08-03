@@ -9,32 +9,35 @@ import (
 
 func BicycleId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func BicycleCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func BicycleUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func BicycleDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var bicycleNameFieldID = orm.FieldIdentifier{Field: "Name"}
+
 func BicycleName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, string]{
-		Field:    "Name",
-		Operator: operator,
+		FieldIdentifier: bicycleNameFieldID,
+		Operator:        operator,
 	}
 }
 func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.Condition[models.Bicycle] {
@@ -45,9 +48,12 @@ func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.Condition[mode
 		T2Field:       "Name",
 	}
 }
+
+var bicycleOwnerNameFieldID = orm.FieldIdentifier{Field: "OwnerName"}
+
 func BicycleOwnerName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, string]{
-		Field:    "OwnerName",
-		Operator: operator,
+		FieldIdentifier: bicycleOwnerNameFieldID,
+		Operator:        operator,
 	}
 }

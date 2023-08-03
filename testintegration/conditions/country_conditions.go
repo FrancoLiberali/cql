@@ -9,32 +9,35 @@ import (
 
 func CountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func CountryCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CountryUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CountryDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var countryNameFieldID = orm.FieldIdentifier{Field: "Name"}
+
 func CountryName(operator orm.Operator[string]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, string]{
-		Field:    "Name",
-		Operator: operator,
+		FieldIdentifier: countryNameFieldID,
+		Operator:        operator,
 	}
 }
 func CountryCapital(conditions ...orm.Condition[models.City]) orm.Condition[models.Country] {

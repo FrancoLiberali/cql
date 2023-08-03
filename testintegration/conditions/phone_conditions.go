@@ -9,32 +9,35 @@ import (
 
 func PhoneId(operator orm.Operator[uint]) orm.WhereCondition[models.Phone] {
 	return orm.FieldCondition[models.Phone, uint]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func PhoneCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Phone] {
 	return orm.FieldCondition[models.Phone, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func PhoneUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Phone] {
 	return orm.FieldCondition[models.Phone, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func PhoneDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Phone] {
 	return orm.FieldCondition[models.Phone, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var phoneNameFieldID = orm.FieldIdentifier{Field: "Name"}
+
 func PhoneName(operator orm.Operator[string]) orm.WhereCondition[models.Phone] {
 	return orm.FieldCondition[models.Phone, string]{
-		Field:    "Name",
-		Operator: operator,
+		FieldIdentifier: phoneNameFieldID,
+		Operator:        operator,
 	}
 }
 func PhoneBrand(conditions ...orm.Condition[models.Brand]) orm.Condition[models.Phone] {
@@ -45,9 +48,12 @@ func PhoneBrand(conditions ...orm.Condition[models.Brand]) orm.Condition[models.
 		T2Field:       "ID",
 	}
 }
+
+var phoneBrandIdFieldID = orm.FieldIdentifier{Field: "BrandID"}
+
 func PhoneBrandId(operator orm.Operator[uint]) orm.WhereCondition[models.Phone] {
 	return orm.FieldCondition[models.Phone, uint]{
-		Field:    "BrandID",
-		Operator: operator,
+		FieldIdentifier: phoneBrandIdFieldID,
+		Operator:        operator,
 	}
 }

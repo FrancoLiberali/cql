@@ -9,7 +9,14 @@ import (
 	"gorm.io/gorm"
 )
 
-const DeletedAtField = "DeletedAt"
+const deletedAtField = "DeletedAt"
+
+var (
+	IDFieldID        = FieldIdentifier{Field: "ID"}
+	CreatedAtFieldID = FieldIdentifier{Field: "CreatedAt"}
+	UpdatedAtFieldID = FieldIdentifier{Field: "UpdatedAt"}
+	DeletedAtFieldID = FieldIdentifier{Field: deletedAtField}
+)
 
 var ErrEmptyConditions = errors.New("condition must have at least one inner condition")
 
@@ -169,13 +176,27 @@ func NewConnectionCondition[T any](connector string, conditions ...WhereConditio
 	}
 }
 
+type FieldIdentifier struct {
+	Column       string
+	Field        string
+	ColumnPrefix string
+}
+
+func (columnID FieldIdentifier) ColumnName(db *gorm.DB, table Table) string {
+	columnName := columnID.Column
+	if columnName == "" {
+		columnName = db.NamingStrategy.ColumnName(table.Name, columnID.Field)
+	}
+
+	// add column prefix and table name once we know the column name
+	return columnID.ColumnPrefix + columnName
+}
+
 // Condition that verifies the value of a field,
 // using the Operator
 type FieldCondition[TObject any, TAtribute any] struct {
-	Field        string
-	Column       string
-	ColumnPrefix string
-	Operator     Operator[TAtribute]
+	FieldIdentifier FieldIdentifier
+	Operator        Operator[TAtribute]
 }
 
 //nolint:unused // see inside
@@ -208,18 +229,11 @@ func applyWhereCondition[T any](condition WhereCondition[T], query *gorm.DB, tab
 
 //nolint:unused // is used
 func (condition FieldCondition[TObject, TAtribute]) affectsDeletedAt() bool {
-	return condition.Field == DeletedAtField
+	return condition.FieldIdentifier.Field == deletedAtField
 }
 
 func (condition FieldCondition[TObject, TAtribute]) GetSQL(query *gorm.DB, table Table) (string, []any, error) {
-	columnName := condition.Column
-	if columnName == "" {
-		columnName = query.NamingStrategy.ColumnName(table.Name, condition.Field)
-	}
-
-	// add column prefix and table name once we know the column name
-	columnName = table.Alias + "." + condition.ColumnPrefix + columnName
-
+	columnName := table.Alias + "." + condition.FieldIdentifier.ColumnName(query, table)
 	return condition.Operator.ToSQL(columnName)
 }
 
