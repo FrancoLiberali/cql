@@ -105,7 +105,7 @@ type Sale struct {
 	Product   Product
 	ProductID orm.UUID
 
-	// Sale HasOne Seller (Sale 0..* -> 0..1 Seller)
+	// Sale belongsTo Seller (Sale 0..* -> 0..1 Seller)
 	Seller   *Seller
 	SellerID *orm.UUID
 }

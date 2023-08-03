@@ -24,7 +24,7 @@ var AutoMigrate = fx.Module(
 	),
 )
 
-func GetCRUDServiceModule[T any]() fx.Option {
+func GetCRUDServiceModule[T Model]() fx.Option {
 	entity := *new(T)
 
 	moduleName := fmt.Sprintf(
@@ -46,9 +46,9 @@ func GetCRUDServiceModule[T any]() fx.Option {
 		return fx.Module(
 			moduleName,
 			// repository
-			fx.Provide(NewCRUDRepository[T, uint]),
+			fx.Provide(NewCRUDRepository[T, UIntID]),
 			// service
-			fx.Provide(NewCRUDService[T, uint]),
+			fx.Provide(NewCRUDService[T, UIntID]),
 		)
 	default:
 		log.Printf("type %T is not a BaDaaS model\n", entity)
@@ -68,7 +68,7 @@ const (
 	KindNotModel
 )
 
-func getModelKind(entity any) modelKind {
+func getModelKind(entity Model) modelKind {
 	entityType := getEntityType(entity)
 
 	_, isUUIDModel := entityType.FieldByName("UUIDModel")

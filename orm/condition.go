@@ -32,7 +32,7 @@ func (table Table) IsInitial() bool {
 }
 
 // Returns the related Table corresponding to the model
-func (table Table) DeliverTable(query *gorm.DB, model any, relationName string) (Table, error) {
+func (table Table) DeliverTable(query *gorm.DB, model Model, relationName string) (Table, error) {
 	// get the name of the table for the model
 	tableName, err := getTableName(query, model)
 	if err != nil {
@@ -53,7 +53,7 @@ func (table Table) DeliverTable(query *gorm.DB, model any, relationName string) 
 	}, nil
 }
 
-type Condition[T any] interface {
+type Condition[T Model] interface {
 	// Applies the condition to the "query"
 	// using the "tableName" as name for the table holding
 	// the data for object of type T
@@ -68,7 +68,7 @@ type Condition[T any] interface {
 
 // Conditions that can be used in a where clause
 // (or in a on of a join)
-type WhereCondition[T any] interface {
+type WhereCondition[T Model] interface {
 	Condition[T]
 
 	// Get the sql string and values to use in the query
@@ -81,7 +81,7 @@ type WhereCondition[T any] interface {
 
 // Condition that contains a internal condition.
 // Example: NOT (internal condition)
-type ContainerCondition[T any] struct {
+type ContainerCondition[T Model] struct {
 	ConnectionCondition WhereCondition[T]
 	Prefix              string
 }
@@ -114,7 +114,7 @@ func (condition ContainerCondition[T]) affectsDeletedAt() bool {
 
 // Condition that contains a internal condition.
 // Example: NOT (internal condition)
-func NewContainerCondition[T any](prefix string, conditions ...WhereCondition[T]) WhereCondition[T] {
+func NewContainerCondition[T Model](prefix string, conditions ...WhereCondition[T]) WhereCondition[T] {
 	if len(conditions) == 0 {
 		return NewInvalidCondition[T](ErrEmptyConditions)
 	}
@@ -127,7 +127,7 @@ func NewContainerCondition[T any](prefix string, conditions ...WhereCondition[T]
 
 // Condition that connects multiple conditions.
 // Example: condition1 AND condition2
-type ConnectionCondition[T any] struct {
+type ConnectionCondition[T Model] struct {
 	Connector  string
 	Conditions []WhereCondition[T]
 }
@@ -169,7 +169,7 @@ func (condition ConnectionCondition[T]) affectsDeletedAt() bool {
 
 // Condition that connects multiple conditions.
 // Example: condition1 AND condition2
-func NewConnectionCondition[T any](connector string, conditions ...WhereCondition[T]) WhereCondition[T] {
+func NewConnectionCondition[T Model](connector string, conditions ...WhereCondition[T]) WhereCondition[T] {
 	return ConnectionCondition[T]{
 		Connector:  connector,
 		Conditions: conditions,
@@ -193,7 +193,7 @@ func (columnID FieldIdentifier) ColumnName(db *gorm.DB, table Table) string {
 }
 
 // Condition used to the preload the attributes of a model
-type PreloadCondition[T any] struct {
+type PreloadCondition[T Model] struct {
 	Fields []FieldIdentifier
 }
 
@@ -221,7 +221,7 @@ func (condition PreloadCondition[T]) ApplyTo(query *gorm.DB, table Table) (*gorm
 }
 
 // Condition used to the preload the attributes of a model
-func NewPreloadCondition[T any](fields ...FieldIdentifier) PreloadCondition[T] {
+func NewPreloadCondition[T Model](fields ...FieldIdentifier) PreloadCondition[T] {
 	return PreloadCondition[T]{
 		Fields: append(
 			fields,
@@ -236,7 +236,7 @@ func NewPreloadCondition[T any](fields ...FieldIdentifier) PreloadCondition[T] {
 
 // Condition that verifies the value of a field,
 // using the Operator
-type FieldCondition[TObject any, TAtribute any] struct {
+type FieldCondition[TObject Model, TAtribute any] struct {
 	FieldIdentifier FieldIdentifier
 	Operator        Operator[TAtribute]
 }
@@ -253,7 +253,7 @@ func (condition FieldCondition[TObject, TAtribute]) ApplyTo(query *gorm.DB, tabl
 	return applyWhereCondition[TObject](condition, query, table)
 }
 
-func applyWhereCondition[T any](condition WhereCondition[T], query *gorm.DB, table Table) (*gorm.DB, error) {
+func applyWhereCondition[T Model](condition WhereCondition[T], query *gorm.DB, table Table) (*gorm.DB, error) {
 	sql, values, err := condition.GetSQL(query, table)
 	if err != nil {
 		return nil, err
@@ -280,7 +280,7 @@ func (condition FieldCondition[TObject, TAtribute]) GetSQL(query *gorm.DB, table
 }
 
 // Interface of a join condition that joins T with any other model
-type IJoinCondition[T any] interface {
+type IJoinCondition[T Model] interface {
 	Condition[T]
 
 	// Returns true if this condition or any nested condition makes a preload
@@ -288,7 +288,7 @@ type IJoinCondition[T any] interface {
 }
 
 // Condition that joins with other table
-type JoinCondition[T1 any, T2 any] struct {
+type JoinCondition[T1 Model, T2 Model] struct {
 	T1Field       string
 	T2Field       string
 	RelationField string
@@ -411,7 +411,7 @@ func (condition JoinCondition[T1, T2]) getSQLJoin(
 }
 
 // Divides a list of conditions by its type: WhereConditions and JoinConditions
-func divideConditionsByType[T any](
+func divideConditionsByType[T Model](
 	conditions []Condition[T],
 ) (whereConditions []WhereCondition[T], joinConditions []IJoinCondition[T], preloadCondition *PreloadCondition[T]) {
 	for _, condition := range conditions {
@@ -439,7 +439,7 @@ func divideConditionsByType[T any](
 
 // Condition that can be used to express conditions that are not supported (yet?) by BaDORM
 // Example: table1.columnX = table2.columnY
-type UnsafeCondition[T any] struct {
+type UnsafeCondition[T Model] struct {
 	SQLCondition string
 	Values       []any
 }
@@ -468,7 +468,7 @@ func (condition UnsafeCondition[T]) affectsDeletedAt() bool {
 
 // Condition that can be used to express conditions that are not supported (yet?) by BaDORM
 // Example: table1.columnX = table2.columnY
-func NewUnsafeCondition[T any](condition string, values []any) UnsafeCondition[T] {
+func NewUnsafeCondition[T Model](condition string, values []any) UnsafeCondition[T] {
 	return UnsafeCondition[T]{
 		SQLCondition: condition,
 		Values:       values,
@@ -509,14 +509,14 @@ func NewInvalidCondition[T any](err error) InvalidCondition[T] {
 // Logical Operators
 // ref: https://www.postgresql.org/docs/current/functions-logical.html
 
-func And[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
+func And[T Model](conditions ...WhereCondition[T]) WhereCondition[T] {
 	return NewConnectionCondition("AND", conditions...)
 }
 
-func Or[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
+func Or[T Model](conditions ...WhereCondition[T]) WhereCondition[T] {
 	return NewConnectionCondition("OR", conditions...)
 }
 
-func Not[T any](conditions ...WhereCondition[T]) WhereCondition[T] {
+func Not[T Model](conditions ...WhereCondition[T]) WhereCondition[T] {
 	return NewContainerCondition("NOT", conditions...)
 }

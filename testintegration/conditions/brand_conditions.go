@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func BrandId(operator orm.Operator[uint]) orm.WhereCondition[models.Brand] {
-	return orm.FieldCondition[models.Brand, uint]{
+func BrandId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[models.Brand] {
+	return orm.FieldCondition[models.Brand, orm.UIntID]{
 		FieldIdentifier: orm.IDFieldID,
 		Operator:        operator,
 	}

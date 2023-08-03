@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-func PhoneId(operator orm.Operator[uint]) orm.WhereCondition[models.Phone] {
-	return orm.FieldCondition[models.Phone, uint]{
+func PhoneId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[models.Phone] {
+	return orm.FieldCondition[models.Phone, orm.UIntID]{
 		FieldIdentifier: orm.IDFieldID,
 		Operator:        operator,
 	}

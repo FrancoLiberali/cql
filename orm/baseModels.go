@@ -3,14 +3,18 @@ package orm
 import (
 	"time"
 
-	"github.com/google/uuid"
-
 	"gorm.io/gorm"
 )
 
 // supported types for model identifier
-type BadaasID interface {
-	uint | UUID
+type ModelID interface {
+	UIntID | UUID
+
+	IsNil() bool
+}
+
+type Model interface {
+	IsLoaded() bool
 }
 
 // Base Model for gorm
@@ -24,11 +28,32 @@ type UUIDModel struct {
 	DeletedAt gorm.DeletedAt `gorm:"index"`
 }
 
-func (model *UUIDModel) BeforeCreate(tx *gorm.DB) (err error) {
-	if model.ID == UUID(uuid.Nil) {
-		model.ID = UUID(uuid.New())
+func (model UUIDModel) IsLoaded() bool {
+	return !model.ID.IsNil()
+}
+
+func (model *UUIDModel) BeforeCreate(_ *gorm.DB) (err error) {
+	if model.ID == NilUUID {
+		model.ID = NewUUID()
 	}
 	return nil
 }
 
-type UIntModel gorm.Model
+type UIntID uint
+
+const NilUIntID = 0
+
+func (id UIntID) IsNil() bool {
+	return id == NilUIntID
+}
+
+type UIntModel struct {
+	ID        UIntID `gorm:"primarykey;not null"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
+	DeletedAt gorm.DeletedAt `gorm:"index"`
+}
+
+func (model UIntModel) IsLoaded() bool {
+	return !model.ID.IsNil()
+}

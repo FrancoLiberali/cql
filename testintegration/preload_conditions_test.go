@@ -1,6 +1,8 @@
 package testintegration
 
 import (
+	"errors"
+
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 	"gotest.tools/assert"
@@ -17,7 +19,7 @@ type PreloadConditionsIntTestSuite struct {
 	crudCountryService  orm.CRUDService[models.Country, orm.UUID]
 	crudCityService     orm.CRUDService[models.City, orm.UUID]
 	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID]
-	crudPhoneService    orm.CRUDService[models.Phone, uint]
+	crudPhoneService    orm.CRUDService[models.Phone, orm.UIntID]
 	crudChildService    orm.CRUDService[models.Child, orm.UUID]
 }
 
@@ -28,7 +30,7 @@ func NewPreloadConditionsIntTestSuite(
 	crudCountryService orm.CRUDService[models.Country, orm.UUID],
 	crudCityService orm.CRUDService[models.City, orm.UUID],
 	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID],
-	crudPhoneService orm.CRUDService[models.Phone, uint],
+	crudPhoneService orm.CRUDService[models.Phone, orm.UIntID],
 	crudChildService orm.CRUDService[models.Child, orm.UUID],
 ) *PreloadConditionsIntTestSuite {
 	return &PreloadConditionsIntTestSuite{
@@ -43,6 +45,48 @@ func NewPreloadConditionsIntTestSuite(
 		crudPhoneService:    crudPhoneService,
 		crudChildService:    crudChildService,
 	}
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestNoPreloadReturnsErrorOnGetRelation() {
+	product := ts.createProduct("a_string", 1, 0.0, false, nil)
+	seller := ts.createSeller("franco", nil)
+	sale := ts.createSale(0, product, seller)
+
+	entities, err := ts.crudSaleService.Query()
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{sale}, entities)
+
+	saleLoaded := entities[0]
+
+	ts.False(saleLoaded.Product.IsLoaded())
+	_, err = saleLoaded.GetProduct()
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+
+	ts.Nil(saleLoaded.Seller)       // is nil but we cant determine why directly (not loaded or really null)
+	_, err = saleLoaded.GetSeller() // GetSeller give us that information
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyNull() {
+	product := ts.createProduct("a_string", 1, 0.0, false, nil)
+	sale := ts.createSale(10, product, nil)
+
+	entities, err := ts.crudSaleService.Query()
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{sale}, entities)
+
+	saleLoaded := entities[0]
+
+	ts.False(saleLoaded.Product.IsLoaded())
+	_, err = saleLoaded.GetProduct()
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+
+	ts.Nil(saleLoaded.Seller)                 // is nil but we cant determine why directly (not loaded or really null)
+	saleSeller, err := saleLoaded.GetSeller() // GetSeller give us that information
+	ts.Nil(err)
+	ts.Nil(saleSeller)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNotFilter() {
@@ -61,10 +105,167 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 
 	EqualList(&ts.Suite, []*models.Sale{withSeller, withoutSeller}, entities)
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
-		return sale.Seller.Equal(*seller1)
+		saleSeller, err := sale.GetSeller()
+		return err == nil && saleSeller != nil && saleSeller.Equal(*seller1)
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
 		return sale.Seller == nil
+	}))
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestPreloadNullableAtSecondLevel() {
+	product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
+	product2 := ts.createProduct("", 2, 0.0, false, nil)
+
+	company := ts.createCompany("ditrit")
+
+	withCompany := ts.createSeller("with", company)
+	withoutCompany := ts.createSeller("without", nil)
+
+	sale1 := ts.createSale(0, product1, withoutCompany)
+	sale2 := ts.createSale(0, product2, withCompany)
+
+	entities, err := ts.crudSaleService.Query(
+		conditions.SaleSeller(
+			conditions.SellerPreloadCompany,
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{sale1, sale2}, entities)
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		saleSeller, err := sale.GetSeller()
+		if err != nil {
+			return false
+		}
+
+		sellerCompany, err := saleSeller.GetCompany()
+		return err == nil && saleSeller.Name == "with" && sellerCompany != nil && sellerCompany.Equal(*company)
+	}))
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		saleSeller, err := sale.GetSeller()
+		if err != nil {
+			return false
+		}
+
+		sellerCompany, err := saleSeller.GetCompany()
+		return err == nil && saleSeller.Name == "without" && sellerCompany == nil
+	}))
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestPreloadAtSecondLevelWorksWithManualPreload() {
+	product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
+	product2 := ts.createProduct("", 2, 0.0, false, nil)
+
+	company := ts.createCompany("ditrit")
+
+	withCompany := ts.createSeller("with", company)
+	withoutCompany := ts.createSeller("without", nil)
+
+	sale1 := ts.createSale(0, product1, withoutCompany)
+	sale2 := ts.createSale(0, product2, withCompany)
+
+	entities, err := ts.crudSaleService.Query(
+		conditions.SaleSeller(
+			conditions.SellerPreloadAttributes,
+			conditions.SellerPreloadCompany,
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{sale1, sale2}, entities)
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		saleSeller, err := sale.GetSeller()
+		if err != nil {
+			return false
+		}
+
+		sellerCompany, err := saleSeller.GetCompany()
+		return err == nil && saleSeller.Name == "with" && sellerCompany != nil && sellerCompany.Equal(*company)
+	}))
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		saleSeller, err := sale.GetSeller()
+		if err != nil {
+			return false
+		}
+
+		sellerCompany, err := saleSeller.GetCompany()
+		return err == nil && saleSeller.Name == "without" && sellerCompany == nil
+	}))
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
+	product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
+	product2 := ts.createProduct("", 2, 0.0, false, nil)
+
+	company := ts.createCompany("ditrit")
+
+	withCompany := ts.createSeller("with", company)
+	withoutCompany := ts.createSeller("without", nil)
+
+	sale1 := ts.createSale(0, product1, withoutCompany)
+	sale2 := ts.createSale(0, product2, withCompany)
+
+	entities, err := ts.crudSaleService.Query(
+		conditions.SalePreloadSeller,
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{sale1, sale2}, entities)
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		saleSeller, err := sale.GetSeller()
+		if err != nil {
+			return false
+		}
+
+		// the not null one is not loaded
+		sellerCompany, err := saleSeller.GetCompany()
+		return errors.Is(err, orm.ErrRelationNotLoaded) && sellerCompany == nil
+	}))
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		saleSeller, err := sale.GetSeller()
+		if err != nil {
+			return false
+		}
+
+		// we can be sure the null one is null
+		sellerCompany, err := saleSeller.GetCompany()
+		return err == nil && sellerCompany == nil
+	}))
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNotFilterAtSecondLevel() {
+	product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
+	product2 := ts.createProduct("", 2, 0.0, false, nil)
+
+	seller1 := ts.createSeller("franco", nil)
+
+	withSeller := ts.createSale(0, product1, seller1)
+	withoutSeller := ts.createSale(0, product2, nil)
+
+	entities, err := ts.crudSaleService.Query(
+		conditions.SaleSeller(
+			conditions.SellerPreloadCompany,
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{withSeller, withoutSeller}, entities)
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		saleSeller, err := sale.GetSeller()
+		if saleSeller == nil || err != nil {
+			return false
+		}
+
+		sellerCompany, err := saleSeller.GetCompany()
+
+		return err == nil && saleSeller.Equal(*seller1) && sellerCompany == nil
+	}))
+	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
+		// in this case sale.Seller will also be nil
+		// but we can now it's really null in the db because err is nil
+		saleSeller, err := sale.GetSeller()
+		return err == nil && saleSeller == nil
 	}))
 }
 
@@ -82,10 +283,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadUIntModel() {
 
 	EqualList(&ts.Suite, []*models.Phone{phone1, phone2}, entities)
 	ts.True(pie.Any(entities, func(phone *models.Phone) bool {
-		return phone.Brand.Equal(*brand1)
+		phoneBrand, err := phone.GetBrand()
+		return err == nil && phoneBrand.Equal(*brand1)
 	}))
 	ts.True(pie.Any(entities, func(phone *models.Phone) bool {
-		return phone.Brand.Equal(*brand2)
+		phoneBrand, err := phone.GetBrand()
+		return err == nil && phoneBrand.Equal(*brand2)
 	}))
 }
 
@@ -110,10 +313,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithWhereConditionFilters() 
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
-	assert.DeepEqual(ts.T(), *product1, entities[0].Product)
-	ts.Equal("a_string", entities[0].Product.String)
-	ts.Equal(1, entities[0].Product.EmbeddedInt)
-	ts.Equal(2, entities[0].Product.GormEmbedded.Int)
+	saleProduct, err := entities[0].GetProduct()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), product1, saleProduct)
+	ts.Equal("a_string", saleProduct.String)
+	ts.Equal(1, saleProduct.EmbeddedInt)
+	ts.Equal(2, saleProduct.GormEmbedded.Int)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOne() {
@@ -134,32 +339,36 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOne() {
 
 	EqualList(&ts.Suite, []*models.City{&capital1, &capital2}, entities)
 	ts.True(pie.Any(entities, func(city *models.City) bool {
-		return city.Country.Equal(*country1)
+		cityCountry, err := city.GetCountry()
+		if err != nil {
+			return false
+		}
+
+		return cityCountry.Equal(*country1)
 	}))
 	ts.True(pie.Any(entities, func(city *models.City) bool {
-		return city.Country.Equal(*country2)
+		cityCountry, err := city.GetCountry()
+		if err != nil {
+			return false
+		}
+
+		return cityCountry.Equal(*country2)
 	}))
 }
 
-func (ts *PreloadConditionsIntTestSuite) TestPreloadHasMany() {
-	company1 := ts.createCompany("ditrit")
-	company2 := ts.createCompany("orness")
+func (ts *PreloadConditionsIntTestSuite) TestNoPreloadOneToOne() {
+	capital1 := models.City{
+		Name: "Buenos Aires",
+	}
 
-	seller1 := ts.createSeller("franco", company1)
-	seller2 := ts.createSeller("agustin", company2)
+	ts.createCountry("Argentina", capital1)
 
-	entities, err := ts.crudSellerService.Query(
-		conditions.SellerPreloadCompany,
-	)
+	entities, err := ts.crudCityService.Query()
 	ts.Nil(err)
 
-	EqualList(&ts.Suite, []*models.Seller{seller1, seller2}, entities)
-	ts.True(pie.Any(entities, func(seller *models.Seller) bool {
-		return seller.Company.Equal(*company1)
-	}))
-	ts.True(pie.Any(entities, func(seller *models.Seller) bool {
-		return seller.Company.Equal(*company2)
-	}))
+	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
+	_, err = entities[0].GetCountry()
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
@@ -180,10 +389,35 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
 
 	EqualList(&ts.Suite, []*models.Country{country1, country2}, entities)
 	ts.True(pie.Any(entities, func(country *models.Country) bool {
-		return country.Capital.Equal(capital1)
+		countryCapital, err := country.GetCapital()
+		return err == nil && countryCapital.Equal(capital1)
 	}))
 	ts.True(pie.Any(entities, func(country *models.Country) bool {
-		return country.Capital.Equal(capital2)
+		countryCapital, err := country.GetCapital()
+		return err == nil && countryCapital.Equal(capital2)
+	}))
+}
+
+func (ts *PreloadConditionsIntTestSuite) TestPreloadHasManyReversed() {
+	company1 := ts.createCompany("ditrit")
+	company2 := ts.createCompany("orness")
+
+	seller1 := ts.createSeller("franco", company1)
+	seller2 := ts.createSeller("agustin", company2)
+
+	entities, err := ts.crudSellerService.Query(
+		conditions.SellerPreloadCompany,
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Seller{seller1, seller2}, entities)
+	ts.True(pie.Any(entities, func(seller *models.Seller) bool {
+		sellerCompany, err := seller.GetCompany()
+		return err == nil && sellerCompany.Equal(*company1)
+	}))
+	ts.True(pie.Any(entities, func(seller *models.Seller) bool {
+		sellerCompany, err := seller.GetCompany()
+		return err == nil && sellerCompany.Equal(*company2)
 	}))
 }
 
@@ -203,10 +437,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferential() {
 	EqualList(&ts.Suite, []*models.Employee{boss1, employee1, employee2}, entities)
 
 	ts.True(pie.Any(entities, func(employee *models.Employee) bool {
-		return employee.Boss != nil && employee.Boss.Equal(*boss1)
+		employeeBoss, err := employee.GetBoss()
+		return err == nil && employeeBoss != nil && employeeBoss.Equal(*boss1)
 	}))
 	ts.True(pie.Any(entities, func(employee *models.Employee) bool {
-		return employee.Boss == nil
+		employeeBoss, err := employee.GetBoss()
+		return err == nil && employeeBoss == nil
 	}))
 }
 
@@ -232,10 +468,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel
 
 	EqualList(&ts.Suite, []*models.Employee{employee}, entities)
 
-	bossLoaded := entities[0].Boss
+	bossLoaded, err := entities[0].GetBoss()
+	ts.Nil(err)
 	ts.True(bossLoaded.Equal(*boss))
 
-	bossBossLoaded := bossLoaded.Boss
+	bossBossLoaded, err := bossLoaded.GetBoss()
+	ts.Nil(err)
 	ts.True(bossBossLoaded.Equal(*bossBoss))
 }
 
@@ -264,8 +502,13 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
-	assert.DeepEqual(ts.T(), *product1, entities[0].Product)
-	assert.DeepEqual(ts.T(), seller1, entities[0].Seller)
+	saleProduct, err := entities[0].GetProduct()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), product1, saleProduct)
+
+	saleSeller, err := entities[0].GetSeller()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), seller1, saleSeller)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithoutConditions() {
@@ -292,8 +535,13 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithoutCond
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
-	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
-	assert.DeepEqual(ts.T(), *parent2, entities[0].Parent2)
+	childParent1, err := entities[0].GetParent1()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent1, childParent1)
+
+	childParent2, err := entities[0].GetParent2()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent2, childParent2)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadRelations() {
@@ -319,8 +567,13 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadRelations() {
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
-	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
-	assert.DeepEqual(ts.T(), *parent2, entities[0].Parent2)
+	childParent1, err := entities[0].GetParent1()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent1, childParent1)
+
+	childParent2, err := entities[0].GetParent2()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent2, childParent2)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithoutCondition() {
@@ -349,8 +602,13 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithoutC
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
-	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
-	assert.DeepEqual(ts.T(), *parentParent, entities[0].Parent1.ParentParent)
+	childParent1, err := entities[0].GetParent1()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent1, childParent1)
+
+	childParentParent, err := childParent1.GetParentParent()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parentParent, childParentParent)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCondition() {
@@ -400,8 +658,13 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCond
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child1}, entities)
-	assert.DeepEqual(ts.T(), *parent11, entities[0].Parent1)
-	assert.DeepEqual(ts.T(), *parentParent1, entities[0].Parent1.ParentParent)
+	childParent1, err := entities[0].GetParent1()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent11, childParent1)
+
+	childParentParent, err := childParent1.GetParentParent()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parentParent1, childParentParent)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadDiamond() {
@@ -423,19 +686,28 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadDiamond(
 
 	entities, err := ts.crudChildService.Query(
 		conditions.ChildParent1(
-			conditions.Parent1PreloadAttributes,
 			conditions.Parent1PreloadParentParent,
 		),
 		conditions.ChildParent2(
-			conditions.Parent2PreloadAttributes,
 			conditions.Parent2PreloadParentParent,
 		),
 	)
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
-	assert.DeepEqual(ts.T(), *parent1, entities[0].Parent1)
-	assert.DeepEqual(ts.T(), *parent2, entities[0].Parent2)
-	assert.DeepEqual(ts.T(), *parentParent, entities[0].Parent1.ParentParent)
-	assert.DeepEqual(ts.T(), *parentParent, entities[0].Parent2.ParentParent)
+	childParent1, err := entities[0].GetParent1()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent1, childParent1)
+
+	childParent2, err := entities[0].GetParent2()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parent2, childParent2)
+
+	childParent1Parent, err := childParent1.GetParentParent()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parentParent, childParent1Parent)
+
+	childParent2Parent, err := childParent2.GetParentParent()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), parentParent, childParent2Parent)
 }
