@@ -404,4 +404,5 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturns
 		),
 	)
 	ts.ErrorIs(err, orm.ErrEmptyConditions)
+	ts.ErrorContains(err, "connector: Not; model: models.Product")
 }

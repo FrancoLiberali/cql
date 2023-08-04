@@ -1,7 +1,6 @@
 package orm
 
 import (
-	"errors"
 	"fmt"
 	"strings"
 
@@ -18,11 +17,6 @@ var (
 	CreatedAtFieldID = FieldIdentifier{Field: "CreatedAt"}
 	UpdatedAtFieldID = FieldIdentifier{Field: "UpdatedAt"}
 	DeletedAtFieldID = FieldIdentifier{Field: deletedAtField}
-)
-
-var (
-	ErrEmptyConditions     = errors.New("condition must have at least one inner condition")
-	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
 )
 
 type Condition[T Model] interface {
@@ -86,7 +80,7 @@ func (condition ContainerCondition[T]) AffectsDeletedAt() bool {
 // Example: NOT (internal condition)
 func NewContainerCondition[T Model](prefix sql.Operator, conditions ...WhereCondition[T]) WhereCondition[T] {
 	if len(conditions) == 0 {
-		return NewInvalidCondition[T](ErrEmptyConditions)
+		return NewInvalidCondition[T](emptyConditionsError[T](prefix))
 	}
 
 	return ContainerCondition[T]{
@@ -246,7 +240,7 @@ func NewCollectionPreloadCondition[T1 Model, T2 Model](collectionField string, n
 	if pie.Any(nestedPreloads, func(nestedPreload IJoinCondition[T2]) bool {
 		return !nestedPreload.makesPreload() || nestedPreload.makesFilter()
 	}) {
-		return NewInvalidCondition[T1](ErrOnlyPreloadsAllowed)
+		return NewInvalidCondition[T1](onlyPreloadsAllowedError[T1](collectionField))
 	}
 
 	return CollectionPreloadCondition[T1, T2]{
@@ -296,8 +290,14 @@ func (condition FieldCondition[TObject, TAtribute]) AffectsDeletedAt() bool {
 }
 
 func (condition FieldCondition[TObject, TAtribute]) GetSQL(query *Query, table Table) (string, []any, error) {
-	columnName := table.Alias + "." + condition.FieldIdentifier.ColumnName(query, table)
-	return condition.Operator.ToSQL(columnName)
+	sqlString, values, err := condition.Operator.ToSQL(
+		condition.FieldIdentifier.ColumnSQL(query, table),
+	)
+	if err != nil {
+		return "", nil, conditionOperatorError[TObject](err, condition)
+	}
+
+	return sqlString, values, nil
 }
 
 // Interface of a join condition that joins T with any other model
