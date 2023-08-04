@@ -23,39 +23,6 @@ var (
 	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
 )
 
-type Table struct {
-	Name    string
-	Alias   string
-	Initial bool
-}
-
-// Returns true if the Table is the initial table in a query
-func (table Table) IsInitial() bool {
-	return table.Initial
-}
-
-// Returns the related Table corresponding to the model
-func (table Table) DeliverTable(query *gorm.DB, model Model, relationName string) (Table, error) {
-	// get the name of the table for the model
-	tableName, err := getTableName(query, model)
-	if err != nil {
-		return Table{}, err
-	}
-
-	// add a suffix to avoid tables with the same name when joining
-	// the same table more than once
-	tableAlias := relationName
-	if !table.IsInitial() {
-		tableAlias = table.Alias + "__" + relationName
-	}
-
-	return Table{
-		Name:    tableName,
-		Alias:   tableAlias,
-		Initial: false,
-	}, nil
-}
-
 type Condition[T Model] interface {
 	// Applies the condition to the "query"
 	// using the "tableName" as name for the table holding
