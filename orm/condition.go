@@ -7,6 +7,8 @@ import (
 
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
+
+	"github.com/ditrit/badaas/orm/sql"
 )
 
 const deletedAtField = "DeletedAt"
@@ -33,7 +35,7 @@ type Condition[T Model] interface {
 	// that an object is of type Condition[T],
 	// since if no method receives by parameter a type T,
 	// any other Condition[T2] would also be considered a Condition[T].
-	interfaceVerificationMethod(T)
+	InterfaceVerificationMethod(T)
 }
 
 // Conditions that can be used in a where clause
@@ -46,24 +48,23 @@ type WhereCondition[T Model] interface {
 
 	// Returns true if the DeletedAt column if affected by the condition
 	// If no condition affects the DeletedAt, the verification that it's null will be added automatically
-	affectsDeletedAt() bool
+	AffectsDeletedAt() bool
 }
 
 // Condition that contains a internal condition.
 // Example: NOT (internal condition)
 type ContainerCondition[T Model] struct {
 	ConnectionCondition WhereCondition[T]
-	Prefix              string
+	Prefix              sql.Operator
 }
 
-//nolint:unused // see inside
-func (condition ContainerCondition[T]) interfaceVerificationMethod(_ T) {
+func (condition ContainerCondition[T]) InterfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
 
 func (condition ContainerCondition[T]) ApplyTo(query *Query, table Table) error {
-	return applyWhereCondition[T](condition, query, table)
+	return ApplyWhereCondition[T](condition, query, table)
 }
 
 func (condition ContainerCondition[T]) GetSQL(query *Query, table Table) (string, []any, error) {
@@ -72,19 +73,18 @@ func (condition ContainerCondition[T]) GetSQL(query *Query, table Table) (string
 		return "", nil, err
 	}
 
-	sqlString = condition.Prefix + " (" + sqlString + ")"
+	sqlString = condition.Prefix.String() + " (" + sqlString + ")"
 
 	return sqlString, values, nil
 }
 
-//nolint:unused // is used
-func (condition ContainerCondition[T]) affectsDeletedAt() bool {
-	return condition.ConnectionCondition.affectsDeletedAt()
+func (condition ContainerCondition[T]) AffectsDeletedAt() bool {
+	return condition.ConnectionCondition.AffectsDeletedAt()
 }
 
 // Condition that contains a internal condition.
 // Example: NOT (internal condition)
-func NewContainerCondition[T Model](prefix string, conditions ...WhereCondition[T]) WhereCondition[T] {
+func NewContainerCondition[T Model](prefix sql.Operator, conditions ...WhereCondition[T]) WhereCondition[T] {
 	if len(conditions) == 0 {
 		return NewInvalidCondition[T](ErrEmptyConditions)
 	}
@@ -98,18 +98,17 @@ func NewContainerCondition[T Model](prefix string, conditions ...WhereCondition[
 // Condition that connects multiple conditions.
 // Example: condition1 AND condition2
 type ConnectionCondition[T Model] struct {
-	Connector  string
+	Connector  sql.Operator
 	Conditions []WhereCondition[T]
 }
 
-//nolint:unused // see inside
-func (condition ConnectionCondition[T]) interfaceVerificationMethod(_ T) {
+func (condition ConnectionCondition[T]) InterfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
 
 func (condition ConnectionCondition[T]) ApplyTo(query *Query, table Table) error {
-	return applyWhereCondition[T](condition, query, table)
+	return ApplyWhereCondition[T](condition, query, table)
 }
 
 func (condition ConnectionCondition[T]) GetSQL(query *Query, table Table) (string, []any, error) {
@@ -127,19 +126,21 @@ func (condition ConnectionCondition[T]) GetSQL(query *Query, table Table) (strin
 		values = append(values, internalValues...)
 	}
 
-	return strings.Join(sqlStrings, " "+condition.Connector+" "), values, nil
+	return strings.Join(
+		sqlStrings,
+		" "+condition.Connector.String()+" ",
+	), values, nil
 }
 
-//nolint:unused // is used
-func (condition ConnectionCondition[T]) affectsDeletedAt() bool {
+func (condition ConnectionCondition[T]) AffectsDeletedAt() bool {
 	return pie.Any(condition.Conditions, func(internalCondition WhereCondition[T]) bool {
-		return internalCondition.affectsDeletedAt()
+		return internalCondition.AffectsDeletedAt()
 	})
 }
 
 // Condition that connects multiple conditions.
 // Example: condition1 AND condition2
-func NewConnectionCondition[T Model](connector string, conditions ...WhereCondition[T]) WhereCondition[T] {
+func NewConnectionCondition[T Model](connector sql.Operator, conditions ...WhereCondition[T]) WhereCondition[T] {
 	return ConnectionCondition[T]{
 		Connector:  connector,
 		Conditions: conditions,
@@ -153,7 +154,7 @@ type FieldIdentifier struct {
 }
 
 // Returns the name of the column in which the field is saved in the table
-func (fieldID FieldIdentifier[T]) ColumnName(query *Query, table Table) string {
+func (fieldID FieldIdentifier) ColumnName(query *Query, table Table) string {
 	columnName := fieldID.Column
 	if columnName == "" {
 		columnName = query.ColumnName(table, fieldID.Field)
@@ -164,7 +165,7 @@ func (fieldID FieldIdentifier[T]) ColumnName(query *Query, table Table) string {
 }
 
 // Returns the SQL to get the value of the field in the table
-func (fieldID FieldIdentifier[T]) ColumnSQL(query *Query, table Table) string {
+func (fieldID FieldIdentifier) ColumnSQL(query *Query, table Table) string {
 	return table.Alias + "." + fieldID.ColumnName(query, table)
 }
 
@@ -173,8 +174,7 @@ type PreloadCondition[T Model] struct {
 	Fields []FieldIdentifier
 }
 
-//nolint:unused // see inside
-func (condition PreloadCondition[T]) interfaceVerificationMethod(_ T) {
+func (condition PreloadCondition[T]) InterfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
@@ -207,8 +207,7 @@ type CollectionPreloadCondition[T1 Model, T2 Model] struct {
 	NestedPreloads  []IJoinCondition[T2]
 }
 
-//nolint:unused // see inside
-func (condition CollectionPreloadCondition[T1, T2]) interfaceVerificationMethod(_ T1) {
+func (condition CollectionPreloadCondition[T1, T2]) InterfaceVerificationMethod(_ T1) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T1]
 }
@@ -263,8 +262,7 @@ type FieldCondition[TObject Model, TAtribute any] struct {
 	Operator        Operator[TAtribute]
 }
 
-//nolint:unused // see inside
-func (condition FieldCondition[TObject, TAtribute]) interfaceVerificationMethod(_ TObject) {
+func (condition FieldCondition[TObject, TAtribute]) InterfaceVerificationMethod(_ TObject) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
@@ -272,16 +270,16 @@ func (condition FieldCondition[TObject, TAtribute]) interfaceVerificationMethod(
 // Returns a gorm Where condition that can be used
 // to filter that the Field as a value of Value
 func (condition FieldCondition[TObject, TAtribute]) ApplyTo(query *Query, table Table) error {
-	return applyWhereCondition[TObject](condition, query, table)
+	return ApplyWhereCondition[TObject](condition, query, table)
 }
 
-func applyWhereCondition[T Model](condition WhereCondition[T], query *Query, table Table) error {
+func ApplyWhereCondition[T Model](condition WhereCondition[T], query *Query, table Table) error {
 	sql, values, err := condition.GetSQL(query, table)
 	if err != nil {
 		return err
 	}
 
-	if condition.affectsDeletedAt() {
+	if condition.AffectsDeletedAt() {
 		query.Unscoped()
 	}
 
@@ -293,8 +291,7 @@ func applyWhereCondition[T Model](condition WhereCondition[T], query *Query, tab
 	return nil
 }
 
-//nolint:unused // is used
-func (condition FieldCondition[TObject, TAtribute]) affectsDeletedAt() bool {
+func (condition FieldCondition[TObject, TAtribute]) AffectsDeletedAt() bool {
 	return condition.FieldIdentifier.Field == deletedAtField
 }
 
@@ -324,7 +321,7 @@ type JoinCondition[T1 Model, T2 Model] struct {
 	T1PreloadCondition PreloadCondition[T1]
 }
 
-func (condition JoinCondition[T1, T2]) interfaceVerificationMethod(t T1) {
+func (condition JoinCondition[T1, T2]) InterfaceVerificationMethod(_ T1) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
@@ -381,7 +378,7 @@ func (condition JoinCondition[T1, T2]) ApplyTo(query *Query, t1Table Table) erro
 		joinQuery += " AND " + onQuery
 	}
 
-	if !connectionCondition.affectsDeletedAt() {
+	if !connectionCondition.AffectsDeletedAt() {
 		joinQuery += fmt.Sprintf(
 			" AND %s.deleted_at IS NULL",
 			t2Table.Alias,
@@ -475,51 +472,12 @@ func divideConditionsByType[T Model](
 	return
 }
 
-// Condition that can be used to express conditions that are not supported (yet?) by BaDORM
-// Example: table1.columnX = table2.columnY
-type UnsafeCondition[T Model] struct {
-	SQLCondition string
-	Values       []any
-}
-
-//nolint:unused // see inside
-func (condition UnsafeCondition[T]) interfaceVerificationMethod(_ T) {
-	// This method is necessary to get the compiler to verify
-	// that an object is of type Condition[T]
-}
-
-func (condition UnsafeCondition[T]) ApplyTo(query *gorm.DB, table Table) (*gorm.DB, error) {
-	return applyWhereCondition[T](condition, query, table)
-}
-
-func (condition UnsafeCondition[T]) GetSQL(_ *gorm.DB, table Table) (string, []any, error) {
-	return fmt.Sprintf(
-		condition.SQLCondition,
-		table.Alias,
-	), condition.Values, nil
-}
-
-//nolint:unused // is used
-func (condition UnsafeCondition[T]) affectsDeletedAt() bool {
-	return false
-}
-
-// Condition that can be used to express conditions that are not supported (yet?) by BaDORM
-// Example: table1.columnX = table2.columnY
-func NewUnsafeCondition[T Model](condition string, values []any) UnsafeCondition[T] {
-	return UnsafeCondition[T]{
-		SQLCondition: condition,
-		Values:       values,
-	}
-}
-
 // Condition used to returns an error when the query is executed
 type InvalidCondition[T any] struct {
 	Err error
 }
 
-//nolint:unused // see inside
-func (condition InvalidCondition[T]) interfaceVerificationMethod(_ T) {
+func (condition InvalidCondition[T]) InterfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
@@ -532,8 +490,7 @@ func (condition InvalidCondition[T]) GetSQL(_ *Query, _ Table) (string, []any, e
 	return "", nil, condition.Err
 }
 
-//nolint:unused // is used
-func (condition InvalidCondition[T]) affectsDeletedAt() bool {
+func (condition InvalidCondition[T]) AffectsDeletedAt() bool {
 	return false
 }
 
@@ -548,13 +505,13 @@ func NewInvalidCondition[T any](err error) InvalidCondition[T] {
 // ref: https://www.postgresql.org/docs/current/functions-logical.html
 
 func And[T Model](conditions ...WhereCondition[T]) WhereCondition[T] {
-	return NewConnectionCondition("AND", conditions...)
+	return NewConnectionCondition(sql.And, conditions...)
 }
 
 func Or[T Model](conditions ...WhereCondition[T]) WhereCondition[T] {
-	return NewConnectionCondition("OR", conditions...)
+	return NewConnectionCondition(sql.Or, conditions...)
 }
 
 func Not[T Model](conditions ...WhereCondition[T]) WhereCondition[T] {
-	return NewContainerCondition("NOT", conditions...)
+	return NewContainerCondition(sql.Not, conditions...)
 }

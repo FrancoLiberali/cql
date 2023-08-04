@@ -43,7 +43,7 @@ type Query struct {
 	gormDB *gorm.DB
 }
 
-func (query *Query) AddSelect(table Table, fieldID iFieldIdentifier) {
+func (query *Query) AddSelect(table Table, fieldID FieldIdentifier) {
 	columnName := fieldID.ColumnName(query, table)
 
 	query.gormDB.Statement.Selects = append(

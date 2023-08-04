@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -370,7 +371,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithUnsafeCondition() {
 	entities, err := ts.crudSaleService.Query(
 		conditions.SaleSeller(
 			conditions.SellerCompany(
-				orm.NewUnsafeCondition[models.Company]("%s.name = Seller.name", []any{}),
+				unsafe.NewCondition[models.Company]("%s.name = Seller.name"),
 			),
 		),
 	)

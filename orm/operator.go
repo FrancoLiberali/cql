@@ -1,6 +1,10 @@
 package orm
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/ditrit/badaas/orm/sql"
+)
 
 type Operator[T any] interface {
 	// Transform the Operator to a SQL string and a list of values to use in the query
@@ -23,7 +27,7 @@ type ValueOperator[T any] struct {
 }
 
 type operation struct {
-	SQLOperator string
+	SQLOperator sql.Operator
 	Value       any
 }
 
@@ -37,20 +41,18 @@ func (operator ValueOperator[T]) ToSQL(columnName string) (string, []any, error)
 	values := []any{}
 
 	for _, operation := range operator.Operations {
-		operatorString += " " + operation.SQLOperator + " ?"
+		operatorString += " " + operation.SQLOperator.String() + " ?"
 		values = append(values, operation.Value)
 	}
 
 	return operatorString, values, nil
 }
 
-func NewValueOperator[T any](sqlOperator string, value any) ValueOperator[T] {
-	operator := ValueOperator[T]{}
-
-	return operator.AddOperation(sqlOperator, value)
+func NewValueOperator[T any](sqlOperator sql.Operator, value any) ValueOperator[T] {
+	return *new(ValueOperator[T]).AddOperation(sqlOperator, value)
 }
 
-func (operator *ValueOperator[T]) AddOperation(sqlOperator string, value any) ValueOperator[T] {
+func (operator *ValueOperator[T]) AddOperation(sqlOperator sql.Operator, value any) *ValueOperator[T] {
 	operator.Operations = append(
 		operator.Operations,
 		operation{
@@ -59,7 +61,7 @@ func (operator *ValueOperator[T]) AddOperation(sqlOperator string, value any) Va
 		},
 	)
 
-	return *operator
+	return operator
 }
 
 // Operator that verifies a predicate

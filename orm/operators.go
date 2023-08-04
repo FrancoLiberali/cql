@@ -1,38 +1,42 @@
 package orm
 
+import (
+	"github.com/ditrit/badaas/orm/sql"
+)
+
 // Comparison Operators
 // ref: https://www.postgresql.org/docs/current/functions-comparison.html
 
 // EqualTo
 // IsNotDistinct must be used in cases where value can be NULL
 func Eq[T any](value T) Operator[T] {
-	return NewValueOperator[T]("=", value)
+	return NewValueOperator[T](sql.Eq, value)
 }
 
 // NotEqualTo
 // IsDistinct must be used in cases where value can be NULL
 func NotEq[T any](value T) Operator[T] {
-	return NewValueOperator[T]("<>", value)
+	return NewValueOperator[T](sql.NotEq, value)
 }
 
 // LessThan
 func Lt[T any](value T) Operator[T] {
-	return NewValueOperator[T]("<", value)
+	return NewValueOperator[T](sql.Lt, value)
 }
 
 // LessThanOrEqualTo
 func LtOrEq[T any](value T) Operator[T] {
-	return NewValueOperator[T]("<=", value)
+	return NewValueOperator[T](sql.LtOrEq, value)
 }
 
 // GreaterThan
 func Gt[T any](value T) Operator[T] {
-	return NewValueOperator[T](">", value)
+	return NewValueOperator[T](sql.Gt, value)
 }
 
 // GreaterThanOrEqualTo
 func GtOrEq[T any](value T) Operator[T] {
-	return NewValueOperator[T](">=", value)
+	return NewValueOperator[T](sql.GtOrEq, value)
 }
 
 // Comparison Predicates
@@ -40,17 +44,17 @@ func GtOrEq[T any](value T) Operator[T] {
 
 // Equivalent to v1 < value < v2
 func Between[T any](v1 T, v2 T) Operator[T] {
-	return newBetweenOperator("BETWEEN", v1, v2)
+	return newBetweenOperator(sql.Between, v1, v2)
 }
 
 // Equivalent to NOT (v1 < value < v2)
 func NotBetween[T any](v1 T, v2 T) Operator[T] {
-	return newBetweenOperator("NOT BETWEEN", v1, v2)
+	return newBetweenOperator(sql.NotBetween, v1, v2)
 }
 
-func newBetweenOperator[T any](sqlOperator string, v1 T, v2 T) Operator[T] {
+func newBetweenOperator[T any](sqlOperator sql.Operator, v1 T, v2 T) Operator[T] {
 	operator := NewValueOperator[T](sqlOperator, v1)
-	return operator.AddOperation("AND", v2)
+	return operator.AddOperation(sql.And, v2)
 }
 
 func IsNull[T any]() PredicateOperator[T] {
@@ -88,21 +92,21 @@ func IsNotUnknown() PredicateOperator[bool] {
 }
 
 func IsDistinct[T any](value T) ValueOperator[T] {
-	return NewValueOperator[T]("IS DISTINCT FROM", value)
+	return NewValueOperator[T](sql.IsDistinct, value)
 }
 
 func IsNotDistinct[T any](value T) ValueOperator[T] {
-	return NewValueOperator[T]("IS NOT DISTINCT FROM", value)
+	return NewValueOperator[T](sql.IsNotDistinct, value)
 }
 
 // Row and Array Comparisons
 
 func ArrayIn[T any](values ...T) ValueOperator[T] {
-	return NewValueOperator[T]("IN", values)
+	return NewValueOperator[T](sql.ArrayIn, values)
 }
 
 func ArrayNotIn[T any](values ...T) ValueOperator[T] {
-	return NewValueOperator[T]("NOT IN", values)
+	return NewValueOperator[T](sql.ArrayNotIn, values)
 }
 
 // Pattern Matching
@@ -111,14 +115,14 @@ type LikeOperator struct {
 	ValueOperator[string]
 }
 
-func NewLikeOperator(sqlOperator string, pattern string) LikeOperator {
+func NewLikeOperator(sqlOperator sql.Operator, pattern string) LikeOperator {
 	return LikeOperator{
 		ValueOperator: NewValueOperator[string](sqlOperator, pattern),
 	}
 }
 
 func (operator LikeOperator) Escape(escape rune) ValueOperator[string] {
-	return operator.AddOperation("ESCAPE", string(escape))
+	return *operator.AddOperation(sql.Escape, string(escape))
 }
 
 // Patterns:
@@ -127,5 +131,5 @@ func (operator LikeOperator) Escape(escape rune) ValueOperator[string] {
 //
 // ref: https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-LIKE
 func Like(pattern string) LikeOperator {
-	return NewLikeOperator("LIKE", pattern)
+	return NewLikeOperator(sql.Like, pattern)
 }
