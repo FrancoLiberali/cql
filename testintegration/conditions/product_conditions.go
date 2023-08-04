@@ -4,134 +4,191 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
+	"reflect"
 	"time"
 )
 
+var productType = reflect.TypeOf(*new(models.Product))
+var ProductIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: productType,
+}
+
 func ProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func ProductCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func ProductUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func ProductDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: ProductIdField,
 		Operator:        operator,
 	}
 }
 
-var productStringFieldID = orm.FieldIdentifier{Column: "string_something_else"}
+var ProductCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: productType,
+}
+
+func ProductCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, time.Time]{
+		FieldIdentifier: ProductCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var ProductUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: productType,
+}
+
+func ProductUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, time.Time]{
+		FieldIdentifier: ProductUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var ProductDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: productType,
+}
+
+func ProductDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
+	return orm.FieldCondition[models.Product, time.Time]{
+		FieldIdentifier: ProductDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var ProductStringField = orm.FieldIdentifier[string]{
+	Column:    "string_something_else",
+	Field:     "String",
+	ModelType: productType,
+}
 
 func ProductString(operator orm.Operator[string]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, string]{
-		FieldIdentifier: productStringFieldID,
+		FieldIdentifier: ProductStringField,
 		Operator:        operator,
 	}
 }
 
-var productIntFieldID = orm.FieldIdentifier{Field: "Int"}
+var ProductIntField = orm.FieldIdentifier[int]{
+	Field:     "Int",
+	ModelType: productType,
+}
 
 func ProductInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: productIntFieldID,
+		FieldIdentifier: ProductIntField,
 		Operator:        operator,
 	}
 }
 
-var productIntPointerFieldID = orm.FieldIdentifier{Field: "IntPointer"}
+var ProductIntPointerField = orm.FieldIdentifier[int]{
+	Field:     "IntPointer",
+	ModelType: productType,
+}
 
 func ProductIntPointer(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: productIntPointerFieldID,
+		FieldIdentifier: ProductIntPointerField,
 		Operator:        operator,
 	}
 }
 
-var productFloatFieldID = orm.FieldIdentifier{Field: "Float"}
+var ProductFloatField = orm.FieldIdentifier[float64]{
+	Field:     "Float",
+	ModelType: productType,
+}
 
 func ProductFloat(operator orm.Operator[float64]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, float64]{
-		FieldIdentifier: productFloatFieldID,
+		FieldIdentifier: ProductFloatField,
 		Operator:        operator,
 	}
 }
 
-var productNullFloatFieldID = orm.FieldIdentifier{Field: "NullFloat"}
+var ProductNullFloatField = orm.FieldIdentifier[float64]{
+	Field:     "NullFloat",
+	ModelType: productType,
+}
 
 func ProductNullFloat(operator orm.Operator[float64]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, float64]{
-		FieldIdentifier: productNullFloatFieldID,
+		FieldIdentifier: ProductNullFloatField,
 		Operator:        operator,
 	}
 }
 
-var productBoolFieldID = orm.FieldIdentifier{Field: "Bool"}
+var ProductBoolField = orm.FieldIdentifier[bool]{
+	Field:     "Bool",
+	ModelType: productType,
+}
 
 func ProductBool(operator orm.Operator[bool]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, bool]{
-		FieldIdentifier: productBoolFieldID,
+		FieldIdentifier: ProductBoolField,
 		Operator:        operator,
 	}
 }
 
-var productNullBoolFieldID = orm.FieldIdentifier{Field: "NullBool"}
+var ProductNullBoolField = orm.FieldIdentifier[bool]{
+	Field:     "NullBool",
+	ModelType: productType,
+}
 
 func ProductNullBool(operator orm.Operator[bool]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, bool]{
-		FieldIdentifier: productNullBoolFieldID,
+		FieldIdentifier: ProductNullBoolField,
 		Operator:        operator,
 	}
 }
 
-var productByteArrayFieldID = orm.FieldIdentifier{Field: "ByteArray"}
+var ProductByteArrayField = orm.FieldIdentifier[[]uint8]{
+	Field:     "ByteArray",
+	ModelType: productType,
+}
 
 func ProductByteArray(operator orm.Operator[[]uint8]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, []uint8]{
-		FieldIdentifier: productByteArrayFieldID,
+		FieldIdentifier: ProductByteArrayField,
 		Operator:        operator,
 	}
 }
 
-var productMultiStringFieldID = orm.FieldIdentifier{Field: "MultiString"}
+var ProductMultiStringField = orm.FieldIdentifier[models.MultiString]{
+	Field:     "MultiString",
+	ModelType: productType,
+}
 
 func ProductMultiString(operator orm.Operator[models.MultiString]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, models.MultiString]{
-		FieldIdentifier: productMultiStringFieldID,
+		FieldIdentifier: ProductMultiStringField,
 		Operator:        operator,
 	}
 }
 
-var productToBeEmbeddedEmbeddedIntFieldID = orm.FieldIdentifier{Field: "EmbeddedInt"}
+var ProductToBeEmbeddedEmbeddedIntField = orm.FieldIdentifier[int]{
+	Field:     "EmbeddedInt",
+	ModelType: productType,
+}
 
 func ProductToBeEmbeddedEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: productToBeEmbeddedEmbeddedIntFieldID,
+		FieldIdentifier: ProductToBeEmbeddedEmbeddedIntField,
 		Operator:        operator,
 	}
 }
 
-var productGormEmbeddedIntFieldID = orm.FieldIdentifier{
+var ProductGormEmbeddedIntField = orm.FieldIdentifier[int]{
 	ColumnPrefix: "gorm_embedded_",
 	Field:        "Int",
+	ModelType:    productType,
 }
 
 func ProductGormEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
 	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: productGormEmbeddedIntFieldID,
+		FieldIdentifier: ProductGormEmbeddedIntField,
 		Operator:        operator,
 	}
 }
 
-var ProductPreloadAttributes = orm.NewPreloadCondition[models.Product](productStringFieldID, productIntFieldID, productIntPointerFieldID, productFloatFieldID, productNullFloatFieldID, productBoolFieldID, productNullBoolFieldID, productByteArrayFieldID, productMultiStringFieldID, productToBeEmbeddedEmbeddedIntFieldID, productGormEmbeddedIntFieldID)
+var ProductPreloadAttributes = orm.NewPreloadCondition[models.Product](ProductIdField, ProductCreatedAtField, ProductUpdatedAtField, ProductDeletedAtField, ProductStringField, ProductIntField, ProductIntPointerField, ProductFloatField, ProductNullFloatField, ProductBoolField, ProductNullBoolField, ProductByteArrayField, ProductMultiStringField, ProductToBeEmbeddedEmbeddedIntField, ProductGormEmbeddedIntField)

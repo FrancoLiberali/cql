@@ -91,21 +91,21 @@ func IsNotUnknown() PredicateOperator[bool] {
 	return NewPredicateOperator[bool]("IS NOT UNKNOWN")
 }
 
-func IsDistinct[T any](value T) ValueOperator[T] {
+func IsDistinct[T any](value T) Operator[T] {
 	return NewValueOperator[T](sql.IsDistinct, value)
 }
 
-func IsNotDistinct[T any](value T) ValueOperator[T] {
+func IsNotDistinct[T any](value T) Operator[T] {
 	return NewValueOperator[T](sql.IsNotDistinct, value)
 }
 
 // Row and Array Comparisons
 
-func ArrayIn[T any](values ...T) ValueOperator[T] {
+func ArrayIn[T any](values ...T) Operator[T] {
 	return NewValueOperator[T](sql.ArrayIn, values)
 }
 
-func ArrayNotIn[T any](values ...T) ValueOperator[T] {
+func ArrayNotIn[T any](values ...T) Operator[T] {
 	return NewValueOperator[T](sql.ArrayNotIn, values)
 }
 
@@ -117,7 +117,7 @@ type LikeOperator struct {
 
 func NewLikeOperator(sqlOperator sql.Operator, pattern string) LikeOperator {
 	return LikeOperator{
-		ValueOperator: NewValueOperator[string](sqlOperator, pattern),
+		ValueOperator: *NewValueOperator[string](sqlOperator, pattern),
 	}
 }
 

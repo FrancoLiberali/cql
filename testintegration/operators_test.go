@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/dynamic"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -466,4 +467,68 @@ func (ts *OperatorsIntTestSuite) TestLikeEscape() {
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBasicType() {
+	int1 := 1
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 2, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductInt(
+			dynamic.Eq(conditions.ProductIntPointerField),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForCustomType() {
+	match := ts.createProduct("salut,hola", 1, 0.0, false, nil)
+	match.MultiString = models.MultiString{"salut", "hola"}
+	err := ts.db.Save(match).Error
+	ts.Nil(err)
+
+	ts.createProduct("salut,hola", 1, 0.0, false, nil)
+	ts.createProduct("hola", 1, 0.0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductMultiString(
+			dynamic.Eq(conditions.ProductMultiStringField),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBaseModelAttribute() {
+	match := ts.createProduct("", 1, 0.0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductDeletedAt(dynamic.IsNotDistinct(conditions.ProductDeletedAtField)),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNotNullTypeCanBeComparedWithNullableType() {
+	match := ts.createProduct("", 1, 1.0, false, nil)
+	match.NullFloat = sql.NullFloat64{Valid: true, Float64: 1.0}
+	err := ts.db.Save(match).Error
+	ts.Nil(err)
+
+	ts.createProduct("", 1, 0.0, false, nil)
+
+	entities, err := ts.crudProductService.Query(
+		conditions.ProductFloat(
+			dynamic.Eq[float64](conditions.ProductNullFloatField),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }

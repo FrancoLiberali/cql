@@ -4,39 +4,67 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
+	"reflect"
 	"time"
 )
 
+var bicycleType = reflect.TypeOf(*new(models.Bicycle))
+var BicycleIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: bicycleType,
+}
+
 func BicycleId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func BicycleCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func BicycleUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func BicycleDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: BicycleIdField,
 		Operator:        operator,
 	}
 }
 
-var bicycleNameFieldID = orm.FieldIdentifier{Field: "Name"}
+var BicycleCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: bicycleType,
+}
+
+func BicycleCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, time.Time]{
+		FieldIdentifier: BicycleCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var BicycleUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: bicycleType,
+}
+
+func BicycleUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, time.Time]{
+		FieldIdentifier: BicycleUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var BicycleDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: bicycleType,
+}
+
+func BicycleDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, time.Time]{
+		FieldIdentifier: BicycleDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var BicycleNameField = orm.FieldIdentifier[string]{
+	Field:     "Name",
+	ModelType: bicycleType,
+}
 
 func BicycleName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, string]{
-		FieldIdentifier: bicycleNameFieldID,
+		FieldIdentifier: BicycleNameField,
 		Operator:        operator,
 	}
 }
@@ -51,14 +79,17 @@ func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.IJoinCondition
 }
 
 var BicyclePreloadOwner = BicycleOwner(PersonPreloadAttributes)
-var bicycleOwnerNameFieldID = orm.FieldIdentifier{Field: "OwnerName"}
+var BicycleOwnerNameField = orm.FieldIdentifier[string]{
+	Field:     "OwnerName",
+	ModelType: bicycleType,
+}
 
 func BicycleOwnerName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
 	return orm.FieldCondition[models.Bicycle, string]{
-		FieldIdentifier: bicycleOwnerNameFieldID,
+		FieldIdentifier: BicycleOwnerNameField,
 		Operator:        operator,
 	}
 }
 
-var BicyclePreloadAttributes = orm.NewPreloadCondition[models.Bicycle](bicycleNameFieldID, bicycleOwnerNameFieldID)
+var BicyclePreloadAttributes = orm.NewPreloadCondition[models.Bicycle](BicycleIdField, BicycleCreatedAtField, BicycleUpdatedAtField, BicycleDeletedAtField, BicycleNameField, BicycleOwnerNameField)
 var BicyclePreloadRelations = []orm.Condition[models.Bicycle]{BicyclePreloadOwner}

@@ -4,42 +4,69 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
+	"reflect"
 	"time"
 )
 
+var universityType = reflect.TypeOf(*new(models.University))
+var UniversityIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: universityType,
+}
+
 func UniversityId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.University] {
 	return orm.FieldCondition[models.University, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func UniversityCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.University] {
-	return orm.FieldCondition[models.University, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func UniversityUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.University] {
-	return orm.FieldCondition[models.University, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func UniversityDeletedAt(operator orm.Operator[gorm.DeletedAt]) orm.WhereCondition[models.University] {
-	return orm.FieldCondition[models.University, gorm.DeletedAt]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: UniversityIdField,
 		Operator:        operator,
 	}
 }
 
-var universityNameFieldID = orm.FieldIdentifier{Field: "Name"}
+var UniversityCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: universityType,
+}
+
+func UniversityCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.University] {
+	return orm.FieldCondition[models.University, time.Time]{
+		FieldIdentifier: UniversityCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var UniversityUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: universityType,
+}
+
+func UniversityUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.University] {
+	return orm.FieldCondition[models.University, time.Time]{
+		FieldIdentifier: UniversityUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var UniversityDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: universityType,
+}
+
+func UniversityDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.University] {
+	return orm.FieldCondition[models.University, time.Time]{
+		FieldIdentifier: UniversityDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var UniversityNameField = orm.FieldIdentifier[string]{
+	Field:     "Name",
+	ModelType: universityType,
+}
 
 func UniversityName(operator orm.Operator[string]) orm.WhereCondition[models.University] {
 	return orm.FieldCondition[models.University, string]{
-		FieldIdentifier: universityNameFieldID,
+		FieldIdentifier: UniversityNameField,
 		Operator:        operator,
 	}
 }
 
-var UniversityPreloadAttributes = orm.NewPreloadCondition[models.University](universityNameFieldID)
+var UniversityPreloadAttributes = orm.NewPreloadCondition[models.University](UniversityIdField, UniversityCreatedAtField, UniversityUpdatedAtField, UniversityDeletedAtField, UniversityNameField)

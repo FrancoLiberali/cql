@@ -2,6 +2,7 @@ package orm
 
 import (
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/elliotchance/pie/v2"
@@ -11,13 +12,6 @@ import (
 )
 
 const deletedAtField = "DeletedAt"
-
-var (
-	IDFieldID        = FieldIdentifier{Field: "ID"}
-	CreatedAtFieldID = FieldIdentifier{Field: "CreatedAt"}
-	UpdatedAtFieldID = FieldIdentifier{Field: "UpdatedAt"}
-	DeletedAtFieldID = FieldIdentifier{Field: deletedAtField}
-)
 
 type Condition[T Model] interface {
 	// Applies the condition to the "query"
@@ -141,14 +135,25 @@ func NewConnectionCondition[T Model](connector sql.Operator, conditions ...Where
 	}
 }
 
-type FieldIdentifier struct {
+type iFieldIdentifier interface {
+	ColumnName(query *Query, table Table) string
+	ColumnSQL(query *Query, table Table) string
+	GetModelType() reflect.Type
+}
+
+type FieldIdentifier[T any] struct {
 	Column       string
 	Field        string
 	ColumnPrefix string
+	ModelType    reflect.Type
+}
+
+func (fieldID FieldIdentifier[T]) GetModelType() reflect.Type {
+	return fieldID.ModelType
 }
 
 // Returns the name of the column in which the field is saved in the table
-func (fieldID FieldIdentifier) ColumnName(query *Query, table Table) string {
+func (fieldID FieldIdentifier[T]) ColumnName(query *Query, table Table) string {
 	columnName := fieldID.Column
 	if columnName == "" {
 		columnName = query.ColumnName(table, fieldID.Field)
@@ -159,13 +164,13 @@ func (fieldID FieldIdentifier) ColumnName(query *Query, table Table) string {
 }
 
 // Returns the SQL to get the value of the field in the table
-func (fieldID FieldIdentifier) ColumnSQL(query *Query, table Table) string {
+func (fieldID FieldIdentifier[T]) ColumnSQL(query *Query, table Table) string {
 	return table.Alias + "." + fieldID.ColumnName(query, table)
 }
 
 // Condition used to the preload the attributes of a model
 type PreloadCondition[T Model] struct {
-	Fields []FieldIdentifier
+	Fields []iFieldIdentifier
 }
 
 func (condition PreloadCondition[T]) InterfaceVerificationMethod(_ T) {
@@ -182,21 +187,14 @@ func (condition PreloadCondition[T]) ApplyTo(query *Query, table Table) error {
 }
 
 // Condition used to the preload the attributes of a model
-func NewPreloadCondition[T Model](fields ...FieldIdentifier) PreloadCondition[T] {
+func NewPreloadCondition[T Model](fields ...iFieldIdentifier) PreloadCondition[T] {
 	return PreloadCondition[T]{
-		Fields: append(
-			fields,
-			// base model fields
-			IDFieldID,
-			CreatedAtFieldID,
-			UpdatedAtFieldID,
-			DeletedAtFieldID,
-		),
+		Fields: fields,
 	}
 }
 
 // Condition used to the preload a collection of models of a model
-type CollectionPreloadCondition[T1 Model, T2 Model] struct {
+type CollectionPreloadCondition[T1, T2 Model] struct {
 	CollectionField string
 	NestedPreloads  []IJoinCondition[T2]
 }
@@ -252,7 +250,7 @@ func NewCollectionPreloadCondition[T1 Model, T2 Model](collectionField string, n
 // Condition that verifies the value of a field,
 // using the Operator
 type FieldCondition[TObject Model, TAtribute any] struct {
-	FieldIdentifier FieldIdentifier
+	FieldIdentifier FieldIdentifier[TAtribute]
 	Operator        Operator[TAtribute]
 }
 
@@ -291,6 +289,7 @@ func (condition FieldCondition[TObject, TAtribute]) AffectsDeletedAt() bool {
 
 func (condition FieldCondition[TObject, TAtribute]) GetSQL(query *Query, table Table) (string, []any, error) {
 	sqlString, values, err := condition.Operator.ToSQL(
+		query,
 		condition.FieldIdentifier.ColumnSQL(query, table),
 	)
 	if err != nil {
@@ -352,8 +351,10 @@ func (condition JoinCondition[T1, T2]) makesFilter() bool {
 func (condition JoinCondition[T1, T2]) ApplyTo(query *Query, t1Table Table) error {
 	whereConditions, joinConditions, t2PreloadCondition := divideConditionsByType(condition.Conditions)
 
+	t2Model := *new(T2)
+
 	// get the sql to do the join with T2
-	t2Table, err := t1Table.DeliverTable(query, *new(T2), condition.RelationField)
+	t2Table, err := t1Table.DeliverTable(query, t2Model, condition.RelationField)
 	if err != nil {
 		return err
 	}
@@ -364,6 +365,11 @@ func (condition JoinCondition[T1, T2]) ApplyTo(query *Query, t1Table Table) erro
 		t1Table,
 		t2Table,
 		len(whereConditions) == 0 && makesPreload,
+	)
+
+	query.AddConcernedModel(
+		t2Model,
+		t2Table,
 	)
 
 	// apply WhereConditions to the join in the "on" clause

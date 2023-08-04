@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/dynamic"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -18,6 +19,7 @@ type JoinConditionsIntTestSuite struct {
 	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID]
 	crudBicycleService  orm.CRUDService[models.Bicycle, orm.UUID]
 	crudPhoneService    orm.CRUDService[models.Phone, orm.UIntID]
+	crudChildService    orm.CRUDService[models.Child, orm.UUID]
 }
 
 func NewJoinConditionsIntTestSuite(
@@ -29,6 +31,7 @@ func NewJoinConditionsIntTestSuite(
 	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID],
 	crudBicycleService orm.CRUDService[models.Bicycle, orm.UUID],
 	crudPhoneService orm.CRUDService[models.Phone, orm.UIntID],
+	crudChildService orm.CRUDService[models.Child, orm.UUID],
 ) *JoinConditionsIntTestSuite {
 	return &JoinConditionsIntTestSuite{
 		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
@@ -41,6 +44,7 @@ func NewJoinConditionsIntTestSuite(
 		crudEmployeeService: crudEmployeeService,
 		crudBicycleService:  crudBicycleService,
 		crudPhoneService:    crudPhoneService,
+		crudChildService:    crudChildService,
 	}
 }
 
@@ -405,4 +409,112 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturns
 	)
 	ts.ErrorIs(err, orm.ErrEmptyConditions)
 	ts.ErrorContains(err, "connector: Not; model: models.Product")
+}
+
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
+	company1 := ts.createCompany("ditrit")
+	company2 := ts.createCompany("orness")
+
+	seller1 := ts.createSeller("ditrit", company1)
+	ts.createSeller("agustin", company2)
+
+	entities, err := ts.crudSellerService.Query(
+		conditions.SellerCompany(
+			conditions.CompanyName(
+				dynamic.Eq(conditions.SellerNameField),
+			),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Seller{seller1}, entities)
+}
+
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel() {
+	product1 := ts.createProduct("", 0, 0.0, false, nil)
+	product2 := ts.createProduct("", 0, 0.0, false, nil)
+
+	company1 := ts.createCompany("ditrit")
+	company2 := ts.createCompany("orness")
+
+	seller1 := ts.createSeller("ditrit", company1)
+	seller2 := ts.createSeller("agustin", company2)
+
+	match := ts.createSale(0, product1, seller1)
+	ts.createSale(0, product2, seller2)
+
+	entities, err := ts.crudSaleService.Query(
+		conditions.SaleSeller(
+			conditions.SellerCompany(
+				conditions.CompanyName(
+					dynamic.Eq(conditions.SellerNameField),
+				),
+			),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Sale{match}, entities)
+}
+
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelReturnsError() {
+	_, err := ts.crudChildService.Query(
+		conditions.ChildId(dynamic.Eq(conditions.ParentParentIdField)),
+	)
+	ts.ErrorIs(err, orm.ErrFieldModelNotConcerned)
+	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
+}
+
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinReturnsError() {
+	_, err := ts.crudChildService.Query(
+		conditions.ChildParent1(
+			conditions.Parent1ParentParent(),
+		),
+		conditions.ChildParent2(
+			conditions.Parent2ParentParent(),
+		),
+		conditions.ChildId(dynamic.Eq(conditions.ParentParentIdField)),
+	)
+	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
+	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
+}
+
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSelectJoin() {
+	parentParent := &models.ParentParent{Name: "franco"}
+	parent1 := &models.Parent1{ParentParent: *parentParent}
+	parent2 := &models.Parent2{ParentParent: *parentParent}
+	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "franco"}
+	err := ts.db.Create(child).Error
+	ts.Nil(err)
+
+	entities, err := ts.crudChildService.Query(
+		conditions.ChildParent1(
+			conditions.Parent1ParentParent(),
+		),
+		conditions.ChildParent2(
+			conditions.Parent2ParentParent(),
+		),
+		conditions.ChildName(
+			dynamic.Eq(conditions.ParentParentNameField).SelectJoin(0, 0),
+		),
+	)
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Child{child}, entities)
+}
+
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinOnMultivalueOperatorReturnsError() {
+	_, err := ts.crudChildService.Query(
+		conditions.ChildParent1(
+			conditions.Parent1ParentParent(),
+		),
+		conditions.ChildParent2(
+			conditions.Parent2ParentParent(),
+		),
+		conditions.ChildId(
+			dynamic.Between(conditions.ParentParentIdField, conditions.ParentParentIdField),
+		),
+	)
+	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
+	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Between; model: models.Child, field: ID")
 }

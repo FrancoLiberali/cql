@@ -4,31 +4,79 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
+	"reflect"
 	"time"
 )
 
+var childType = reflect.TypeOf(*new(models.Child))
+var ChildIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: childType,
+}
+
 func ChildId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Child] {
 	return orm.FieldCondition[models.Child, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: ChildIdField,
 		Operator:        operator,
 	}
 }
+
+var ChildCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: childType,
+}
+
 func ChildCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Child] {
 	return orm.FieldCondition[models.Child, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: ChildCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var ChildUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: childType,
+}
+
 func ChildUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Child] {
 	return orm.FieldCondition[models.Child, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: ChildUpdatedAtField,
 		Operator:        operator,
 	}
 }
-func ChildDeletedAt(operator orm.Operator[gorm.DeletedAt]) orm.WhereCondition[models.Child] {
-	return orm.FieldCondition[models.Child, gorm.DeletedAt]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+
+var ChildDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: childType,
+}
+
+func ChildDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Child] {
+	return orm.FieldCondition[models.Child, time.Time]{
+		FieldIdentifier: ChildDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var ChildNameField = orm.FieldIdentifier[string]{
+	Field:     "Name",
+	ModelType: childType,
+}
+
+func ChildName(operator orm.Operator[string]) orm.WhereCondition[models.Child] {
+	return orm.FieldCondition[models.Child, string]{
+		FieldIdentifier: ChildNameField,
+		Operator:        operator,
+	}
+}
+
+var ChildNumberField = orm.FieldIdentifier[int]{
+	Field:     "Number",
+	ModelType: childType,
+}
+
+func ChildNumber(operator orm.Operator[int]) orm.WhereCondition[models.Child] {
+	return orm.FieldCondition[models.Child, int]{
+		FieldIdentifier: ChildNumberField,
 		Operator:        operator,
 	}
 }
@@ -43,11 +91,14 @@ func ChildParent1(conditions ...orm.Condition[models.Parent1]) orm.IJoinConditio
 }
 
 var ChildPreloadParent1 = ChildParent1(Parent1PreloadAttributes)
-var childParent1IdFieldID = orm.FieldIdentifier{Field: "Parent1ID"}
+var ChildParent1IdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "Parent1ID",
+	ModelType: childType,
+}
 
 func ChildParent1Id(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Child] {
 	return orm.FieldCondition[models.Child, orm.UUID]{
-		FieldIdentifier: childParent1IdFieldID,
+		FieldIdentifier: ChildParent1IdField,
 		Operator:        operator,
 	}
 }
@@ -62,14 +113,17 @@ func ChildParent2(conditions ...orm.Condition[models.Parent2]) orm.IJoinConditio
 }
 
 var ChildPreloadParent2 = ChildParent2(Parent2PreloadAttributes)
-var childParent2IdFieldID = orm.FieldIdentifier{Field: "Parent2ID"}
+var ChildParent2IdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "Parent2ID",
+	ModelType: childType,
+}
 
 func ChildParent2Id(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Child] {
 	return orm.FieldCondition[models.Child, orm.UUID]{
-		FieldIdentifier: childParent2IdFieldID,
+		FieldIdentifier: ChildParent2IdField,
 		Operator:        operator,
 	}
 }
 
-var ChildPreloadAttributes = orm.NewPreloadCondition[models.Child](childParent1IdFieldID, childParent2IdFieldID)
+var ChildPreloadAttributes = orm.NewPreloadCondition[models.Child](ChildIdField, ChildCreatedAtField, ChildUpdatedAtField, ChildDeletedAtField, ChildNameField, ChildNumberField, ChildParent1IdField, ChildParent2IdField)
 var ChildPreloadRelations = []orm.Condition[models.Child]{ChildPreloadParent1, ChildPreloadParent2}

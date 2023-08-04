@@ -2,6 +2,7 @@ package orm
 
 import (
 	"fmt"
+	"reflect"
 
 	"gorm.io/gorm"
 )
@@ -40,10 +41,11 @@ func (t Table) DeliverTable(query *Query, model Model, relationName string) (Tab
 }
 
 type Query struct {
-	gormDB *gorm.DB
+	gormDB          *gorm.DB
+	concernedModels map[reflect.Type][]Table
 }
 
-func (query *Query) AddSelect(table Table, fieldID FieldIdentifier) {
+func (query *Query) AddSelect(table Table, fieldID iFieldIdentifier) {
 	columnName := fieldID.ColumnName(query, table)
 
 	query.gormDB.Statement.Selects = append(
@@ -78,6 +80,25 @@ func (query *Query) Find(dest interface{}, conds ...interface{}) error {
 	return query.gormDB.Error
 }
 
+func (query *Query) AddConcernedModel(model Model, table Table) {
+	tableList, isPresent := query.concernedModels[reflect.TypeOf(model)]
+	if !isPresent {
+		query.concernedModels[reflect.TypeOf(model)] = []Table{table}
+	} else {
+		tableList = append(tableList, table)
+		query.concernedModels[reflect.TypeOf(model)] = tableList
+	}
+}
+
+func (query *Query) GetTables(modelType reflect.Type) []Table {
+	tableList, isPresent := query.concernedModels[modelType]
+	if !isPresent {
+		return nil
+	}
+
+	return tableList
+}
+
 func (query Query) ColumnName(table Table, fieldName string) string {
 	return query.gormDB.NamingStrategy.ColumnName(table.Name, fieldName)
 }
@@ -97,8 +118,10 @@ func NewQuery[T Model](db *gorm.DB, conditions []Condition[T]) (*Query, error) {
 	}
 
 	query := &Query{
-		gormDB: db.Select(initialTableName + ".*"),
+		gormDB:          db.Select(initialTableName + ".*"),
+		concernedModels: map[reflect.Type][]Table{},
 	}
+	query.AddConcernedModel(model, initialTable)
 
 	for _, condition := range conditions {
 		err = condition.ApplyTo(query, initialTable)
