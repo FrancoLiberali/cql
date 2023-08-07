@@ -25,6 +25,10 @@ Badaas provides several key features, each provided by a component that can be u
 
 See [this section](./CONTRIBUTING.md).
 
+## Code of Conduct
+
+This project has adopted the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md)
+
 ## License
 
 Badaas is Licensed under the [Mozilla Public License Version 2.0](./LICENSE).
