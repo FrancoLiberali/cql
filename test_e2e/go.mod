@@ -7,6 +7,7 @@ replace github.com/ditrit/badaas => ../
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/cucumber/godog v0.12.5
+	github.com/cucumber/messages-go/v16 v16.0.1
 	github.com/ditrit/badaas v0.0.0
 	github.com/elliotchance/pie/v2 v2.7.0
 	github.com/spf13/pflag v1.0.5
@@ -17,7 +18,6 @@ require (
 
 require (
 	github.com/cucumber/gherkin-go/v19 v19.0.3 // indirect
-	github.com/cucumber/messages-go/v16 v16.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/ditrit/verdeter v0.4.0 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
