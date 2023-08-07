@@ -20,5 +20,6 @@ func TestSessionCtx(t *testing.T) {
 
 func TestSessionCtxPanic(t *testing.T) {
 	ctx := context.Background()
+
 	assert.Panics(t, func() { GetSessionClaimsFromContext(ctx) })
 }

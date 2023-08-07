@@ -16,6 +16,8 @@ import (
 	"github.com/ditrit/badaas/services/userservice"
 )
 
+const accessTokenCookieExpirationTime = 48 * time.Hour
+
 // HTTPErrRequestMalformed is sent when the request is malformed
 var HTTPErrRequestMalformed httperrors.HTTPError = httperrors.NewHTTPError(
 	http.StatusBadRequest,
@@ -55,6 +57,7 @@ func NewBasicAuthenticationController(
 // Log In with username and password
 func (basicAuthController *basicAuthenticationController) BasicLoginHandler(w http.ResponseWriter, r *http.Request) (any, httperrors.HTTPError) {
 	var loginJSONStruct dto.UserLoginDTO
+
 	err := json.NewDecoder(r.Body).Decode(&loginJSONStruct)
 	if err != nil {
 		return nil, HTTPErrRequestMalformed
@@ -87,7 +90,7 @@ func (basicAuthController *basicAuthenticationController) BasicLoginHandler(w ht
 		return nil, herr
 	}
 
-	return dto.DTOLoginSuccess{
+	return dto.LoginSuccess{
 		Email:    user.Email,
 		ID:       user.ID.String(),
 		Username: user.Username,
@@ -117,13 +120,15 @@ func createAndSetAccessTokenCookie(w http.ResponseWriter, sessionUUID string) ht
 		HttpOnly: true,
 		SameSite: http.SameSiteNoneMode, // TODO change to http.SameSiteStrictMode in prod
 		Secure:   false,                 // TODO change to true in prod
-		Expires:  time.Now().Add(48 * time.Hour),
+		Expires:  time.Now().Add(accessTokenCookieExpirationTime),
 	}
+
 	err := accessToken.Valid()
 	if err != nil {
 		return httperrors.NewInternalServerError("access token error", "unable to create access token", err)
 	}
 
 	http.SetCookie(w, accessToken)
+
 	return nil
 }

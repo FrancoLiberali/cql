@@ -50,6 +50,7 @@ func newHTTPServer(
 	)(router)
 
 	srv := createServer(handler, httpServerConfig)
+
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			ln, err := net.Listen("tcp", srv.Addr)
@@ -57,7 +58,10 @@ func newHTTPServer(
 				return err
 			}
 			logger.Sugar().Infof("Ready to serve at %s", srv.Addr)
-			go srv.Serve(ln)
+			go func() {
+				_ = srv.Serve(ln)
+			}()
+
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {

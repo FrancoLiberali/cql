@@ -46,13 +46,13 @@ func getDatabaseConfigurationKeys() []KeyDefinition {
 			Name:     DatabaseRetryKey,
 			ValType:  verdeter.IsUint,
 			Usage:    "The number of times badaas tries to establish a connection with the database",
-			DefaultV: uint(10),
+			DefaultV: defaultDatabaseRetry,
 		},
 		{
 			Name:     DatabaseRetryDurationKey,
 			ValType:  verdeter.IsUint,
 			Usage:    "The duration in seconds badaas wait between connection attempts",
-			DefaultV: uint(5),
+			DefaultV: defaultDatabaseRetryDuration,
 		},
 	}
 }

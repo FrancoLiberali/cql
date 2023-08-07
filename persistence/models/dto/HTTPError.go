@@ -1,9 +1,9 @@
 package dto
 
-// Data Transfert Object Package
+// Data Transfer Object Package
 
 // Describe the HTTP Error payload
-type DTOHTTPError struct {
+type HTTPError struct {
 	Error   string `json:"err"`
 	Message string `json:"msg"`
 	Status  string `json:"status"`

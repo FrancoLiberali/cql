@@ -22,6 +22,7 @@ func EqualList[T any](ts *suite.Suite, expectedList, actualList []T) {
 					break
 				}
 			}
+
 			if j == expectedLen {
 				for _, element := range actualList {
 					log.Println(element)

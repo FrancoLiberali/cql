@@ -52,6 +52,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createSeller(name string, company *mode
 	if company != nil {
 		companyID = &company.ID
 	}
+
 	entity := &models.Seller{
 		Name:      name,
 		CompanyID: companyID,

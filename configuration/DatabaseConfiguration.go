@@ -3,9 +3,10 @@ package configuration
 import (
 	"time"
 
-	"github.com/ditrit/badaas/utils"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+
+	"github.com/ditrit/badaas/utils"
 )
 
 // The config keys regarding the database settings
@@ -22,7 +23,7 @@ const (
 
 // Hold the configuration values for the database connection
 type DatabaseConfiguration interface {
-	ConfigurationHolder
+	Holder
 	GetPort() int
 	GetHost() string
 	GetDBName() string
@@ -49,6 +50,7 @@ type databaseConfigurationImpl struct {
 func NewDatabaseConfiguration() DatabaseConfiguration {
 	databaseConfiguration := new(databaseConfigurationImpl)
 	databaseConfiguration.Reload()
+
 	return databaseConfiguration
 }
 

@@ -12,7 +12,7 @@ const (
 
 // Hold the configuration values for the initialization
 type InitializationConfiguration interface {
-	ConfigurationHolder
+	Holder
 	GetAdminPassword() string
 }
 
@@ -25,6 +25,7 @@ type initializationConfigurationIml struct {
 func NewInitializationConfiguration() InitializationConfiguration {
 	initializationConfiguration := &initializationConfigurationIml{}
 	initializationConfiguration.Reload()
+
 	return initializationConfiguration
 }
 

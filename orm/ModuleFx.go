@@ -50,10 +50,12 @@ func GetCRUDServiceModule[T Model]() fx.Option {
 			// service
 			fx.Provide(NewCRUDService[T, UIntID]),
 		)
-	default:
+	case KindNotModel:
 		log.Printf("type %T is not a BaDaaS model\n", entity)
 		return fx.Invoke(failNotBaDaaSModel())
 	}
+
+	return nil
 }
 
 func failNotBaDaaSModel() error {

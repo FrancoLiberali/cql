@@ -9,25 +9,27 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/ditrit/badaas/httperrors"
-	"github.com/ditrit/badaas/persistence/models/dto"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/ditrit/badaas/httperrors"
+	"github.com/ditrit/badaas/persistence/models/dto"
 )
 
 func TestTojson(t *testing.T) {
 	err := "Error while parsing json"
 	message := "The request body was malformed"
-	error := httperrors.NewHTTPError(http.StatusBadRequest, err, message, nil, true)
-	assert.NotEmpty(t, error.ToJSON())
-	assert.True(t, json.Valid([]byte(error.ToJSON())), "output json is not valid")
+	herr := httperrors.NewHTTPError(http.StatusBadRequest, err, message, nil, true)
+	assert.NotEmpty(t, herr.ToJSON())
+	assert.True(t, json.Valid([]byte(herr.ToJSON())), "output json is not valid")
 
-	// check if is is correctly deserialized
+	// check if it is correctly deserialized
 	var content map[string]any
-	json.Unmarshal([]byte(error.ToJSON()), &content)
+
+	json.Unmarshal([]byte(herr.ToJSON()), &content)
 	_, ok := content["err"]
 	assert.True(t, ok, "\"err\" field should be in the json string")
 	_, ok = content["msg"]
@@ -38,29 +40,30 @@ func TestTojson(t *testing.T) {
 	assert.Equal(t, err, content["err"].(string))
 	assert.Equal(t, message, content["msg"].(string))
 	assert.Equal(t, http.StatusText(http.StatusBadRequest), content["status"].(string))
-	assert.True(t, error.Log())
+	assert.True(t, herr.Log())
 }
 
 func TestLog(t *testing.T) {
-	error := httperrors.NewHTTPError(http.StatusBadRequest, "err", "message", nil, true)
-	assert.True(t, error.Log())
-	error = httperrors.NewHTTPError(http.StatusBadRequest, "err", "message", nil, false)
-	assert.False(t, error.Log())
+	herr := httperrors.NewHTTPError(http.StatusBadRequest, "err", "message", nil, true)
+	assert.True(t, herr.Log())
+	herr = httperrors.NewHTTPError(http.StatusBadRequest, "err", "message", nil, false)
+	assert.False(t, herr.Log())
 }
 
 func TestError(t *testing.T) {
-	error := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
-	assert.Contains(t, error.Error(), error.ToJSON())
+	herr := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
+	assert.Contains(t, herr.Error(), herr.ToJSON())
 }
 
 func TestWrite(t *testing.T) {
 	res := httptest.NewRecorder()
-	error := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
-	error.Write(res, zap.L())
+	herr := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
+	herr.Write(res, zap.L())
 	bodyBytes, err := io.ReadAll(res.Body)
 	assert.Nil(t, err)
 	assert.NotEmpty(t, bodyBytes)
-	originalBytes := []byte(error.ToJSON())
+
+	originalBytes := []byte(herr.ToJSON())
 	// can't use assert.Contains because it only support strings
 	assert.True(t,
 		bytes.Contains(bodyBytes, originalBytes))
@@ -72,8 +75,8 @@ func TestLogger(t *testing.T) {
 	observedLogger := zap.New(observedZapCore)
 
 	res := httptest.NewRecorder()
-	error := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
-	error.Write(res, observedLogger)
+	herr := httperrors.NewHTTPError(http.StatusBadRequest, "Error while parsing json", "The request body was malformed", nil, true)
+	herr.Write(res, observedLogger)
 
 	require.Equal(t, 1, observedLogs.Len())
 	log := observedLogs.All()[0]
@@ -88,32 +91,35 @@ func TestLogger(t *testing.T) {
 
 func TestNewErrorNotFound(t *testing.T) {
 	ressourceName := "file"
-	error := httperrors.NewErrorNotFound(ressourceName, "main.css is not accessible")
-	assert.NotNil(t, error)
-	assert.False(t, error.Log())
-	dto := new(dto.DTOHTTPError)
-	err := json.Unmarshal([]byte(error.ToJSON()), &dto)
+	herr := httperrors.NewErrorNotFound(ressourceName, "main.css is not accessible")
+	assert.NotNil(t, herr)
+	assert.False(t, herr.Log())
+
+	dto := new(dto.HTTPError)
+	err := json.Unmarshal([]byte(herr.ToJSON()), &dto)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusText(http.StatusNotFound), dto.Status)
 	assert.Equal(t, fmt.Sprintf("%s not found", ressourceName), dto.Error)
 }
 
 func TestNewInternalServerError(t *testing.T) {
-	error := httperrors.NewInternalServerError("casbin error", "the ressource is not accessible", nil)
-	assert.NotNil(t, error)
-	assert.True(t, error.Log())
-	dto := new(dto.DTOHTTPError)
-	err := json.Unmarshal([]byte(error.ToJSON()), &dto)
+	herr := httperrors.NewInternalServerError("casbin error", "the ressource is not accessible", nil)
+	assert.NotNil(t, herr)
+	assert.True(t, herr.Log())
+
+	dto := new(dto.HTTPError)
+	err := json.Unmarshal([]byte(herr.ToJSON()), &dto)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusText(http.StatusInternalServerError), dto.Status)
 }
 
 func TestNewUnauthorizedError(t *testing.T) {
-	error := httperrors.NewUnauthorizedError("json unmarshalling", "nil value whatever")
-	assert.NotNil(t, error)
-	assert.True(t, error.Log())
-	dto := new(dto.DTOHTTPError)
-	err := json.Unmarshal([]byte(error.ToJSON()), &dto)
+	herr := httperrors.NewUnauthorizedError("json unmarshalling", "nil value whatever")
+	assert.NotNil(t, herr)
+	assert.True(t, herr.Log())
+
+	dto := new(dto.HTTPError)
+	err := json.Unmarshal([]byte(herr.ToJSON()), &dto)
 	assert.NoError(t, err)
 	assert.Equal(t, http.StatusText(http.StatusUnauthorized), dto.Status)
 }

@@ -59,6 +59,7 @@ func NewSessionService(
 		db:                   db,
 	}
 	sessionService.init()
+
 	return sessionService
 }
 
@@ -69,6 +70,7 @@ func (sessionService *sessionServiceImpl) IsValid(sessionUUID orm.UUID) (bool, *
 	if sessionInstance == nil {
 		return false, nil
 	}
+
 	return true, makeSessionClaims(sessionInstance)
 }
 
@@ -113,6 +115,7 @@ func (sessionService *sessionServiceImpl) add(session *models.Session) error {
 // Initialize the session service
 func (sessionService *sessionServiceImpl) init() {
 	sessionService.cache = make(map[orm.UUID]*models.Session)
+
 	go func() {
 		for {
 			sessionService.removeExpired()
@@ -138,6 +141,7 @@ func (sessionService *sessionServiceImpl) pullFromDB() {
 	for _, sessionFromDatabase := range sessionsFromDatabase {
 		newSessionCache[sessionFromDatabase.ID] = sessionFromDatabase
 	}
+
 	sessionService.cache = newSessionCache
 	sessionService.logger.Debug(
 		"Pulled sessions from DB",
@@ -151,6 +155,7 @@ func (sessionService *sessionServiceImpl) removeExpired() {
 	defer sessionService.mutex.Unlock()
 
 	var i int
+
 	for sessionUUID, session := range sessionService.cache {
 		if session.IsExpired() {
 			// Delete the session in the database
@@ -165,6 +170,7 @@ func (sessionService *sessionServiceImpl) removeExpired() {
 			i++
 		}
 	}
+
 	sessionService.logger.Debug(
 		"Removed expired session",
 		zap.Int("expiredSessionCount", i),
@@ -177,6 +183,7 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 	defer sessionService.mutex.Unlock()
 
 	sessionUUID := session.ID
+
 	err := sessionService.sessionRepository.Delete(sessionService.db, session)
 	if err != nil {
 		return httperrors.NewInternalServerError(
@@ -185,7 +192,9 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 			err,
 		)
 	}
+
 	delete(sessionService.cache, sessionUUID)
+
 	return nil
 }
 
@@ -193,6 +202,7 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 func (sessionService *sessionServiceImpl) RollSession(sessionUUID orm.UUID) httperrors.HTTPError {
 	rollInterval := sessionService.sessionConfiguration.GetRollDuration()
 	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
+
 	session := sessionService.get(sessionUUID)
 	if session == nil {
 		// no session to roll, no error
@@ -208,6 +218,7 @@ func (sessionService *sessionServiceImpl) RollSession(sessionUUID orm.UUID) http
 		defer sessionService.mutex.Unlock()
 
 		session.ExpiresAt = session.ExpiresAt.Add(sessionDuration)
+
 		err := sessionService.sessionRepository.Save(sessionService.db, session)
 		if err != nil {
 			return httperrors.NewDBError(err)
@@ -225,10 +236,12 @@ func (sessionService *sessionServiceImpl) RollSession(sessionUUID orm.UUID) http
 func (sessionService *sessionServiceImpl) LogUserIn(user *models.User) (*models.Session, error) {
 	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
 	session := models.NewSession(user.ID, sessionDuration)
+
 	err := sessionService.add(session)
 	if err != nil {
 		return nil, err
 	}
+
 	return session, nil
 }
 

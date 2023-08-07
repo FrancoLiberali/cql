@@ -42,6 +42,7 @@ func (s *MultiString) Scan(src interface{}) error {
 	case []byte:
 		str := string(typedSrc)
 		*s = strings.Split(str, ",")
+
 		return nil
 	default:
 		return fmt.Errorf("failed to scan multistring field - source is not a string, is %T", src)
@@ -52,6 +53,7 @@ func (s MultiString) Value() (driver.Value, error) {
 	if len(s) == 0 {
 		return nil, nil
 	}
+
 	return strings.Join(s, ","), nil
 }
 

@@ -5,13 +5,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ditrit/badaas/configuration"
 	"github.com/spf13/viper"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/ditrit/badaas/configuration"
 )
 
 var databaseConfigurationString = `
@@ -35,6 +36,7 @@ database:
 func setupViperEnvironment(configurationString string) {
 	viper.Reset()
 	viper.SetConfigType("yaml")
+
 	err := viper.ReadConfig(strings.NewReader(configurationString))
 	if err != nil {
 		panic(err)
@@ -43,51 +45,63 @@ func setupViperEnvironment(configurationString string) {
 
 func TestDatabaseConfigurationNewDBConfig(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.NotNil(t, databaseConfiguration, "the database configuration should not be nil")
 }
 
 func TestDatabaseConfigurationGetPort(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, 26257, databaseConfiguration.GetPort(), "should be equals")
 }
 
 func TestDatabaseConfigurationGetHost(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, "e2e-db-1", databaseConfiguration.GetHost())
 }
 
 func TestDatabaseConfigurationGetUsername(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, "root", databaseConfiguration.GetUsername())
 }
+
 func TestDatabaseConfigurationGetPassword(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, "postgres", databaseConfiguration.GetPassword())
 }
+
 func TestDatabaseConfigurationGetSSLMode(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, "disable", databaseConfiguration.GetSSLMode())
 }
+
 func TestDatabaseConfigurationGetDBName(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, "badaas_db", databaseConfiguration.GetDBName())
 }
 
 func TestDatabaseConfigurationGetRetryTime(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
-	assert.Equal(t, time.Duration(5*time.Second), databaseConfiguration.GetRetryTime())
+	assert.Equal(t, 5*time.Second, databaseConfiguration.GetRetryTime())
 }
 
 func TestDatabaseConfigurationGetRetry(t *testing.T) {
 	setupViperEnvironment(databaseConfigurationString)
+
 	databaseConfiguration := configuration.NewDatabaseConfiguration()
 	assert.Equal(t, uint(10), databaseConfiguration.GetRetry())
 }

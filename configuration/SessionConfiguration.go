@@ -3,9 +3,10 @@ package configuration
 import (
 	"time"
 
-	"github.com/ditrit/badaas/utils"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
+
+	"github.com/ditrit/badaas/utils"
 )
 
 // The config keys regarding the session handling settings
@@ -17,7 +18,7 @@ const (
 
 // Hold the configuration values to handle the sessions
 type SessionConfiguration interface {
-	ConfigurationHolder
+	Holder
 	GetSessionDuration() time.Duration
 	GetPullInterval() time.Duration
 	GetRollDuration() time.Duration
@@ -34,6 +35,7 @@ type sessionConfigurationImpl struct {
 func NewSessionConfiguration() SessionConfiguration {
 	sessionConfiguration := new(sessionConfigurationImpl)
 	sessionConfiguration.Reload()
+
 	return sessionConfiguration
 }
 

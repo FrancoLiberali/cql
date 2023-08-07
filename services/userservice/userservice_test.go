@@ -59,6 +59,7 @@ func TestNewUserServiceDatabaseError(t *testing.T) {
 	).Return(
 		errors.New("database error"),
 	)
+
 	userService := userservice.NewUserService(observedLogger, userRepositoryMock, gormDB)
 	user, err := userService.NewUser("bob", "bob@email.com", "1234")
 	assert.Error(t, err)
