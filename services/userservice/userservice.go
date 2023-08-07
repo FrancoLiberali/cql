@@ -12,7 +12,7 @@ import (
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/models/dto"
 	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
-	validator "github.com/ditrit/badaas/validators"
+	"github.com/ditrit/badaas/utils/validators"
 )
 
 // UserService provide functions related to Users
@@ -48,7 +48,7 @@ func NewUserService(
 
 // Create a new user
 func (userService *userServiceImpl) NewUser(username, email, password string) (*models.User, error) {
-	sanitizedEmail, err := validator.ValidEmail(email)
+	sanitizedEmail, err := validators.ValidEmail(email)
 	if err != nil {
 		return nil, fmt.Errorf("the provided email is not valid")
 	}
