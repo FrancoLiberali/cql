@@ -33,7 +33,7 @@ Badaas provides several key features, each provided by a component that can be u
 
 ## Contributing
 
-See [this section](./CONTRIBUTING.md).
+See [this section](./docs/contributing/contributing.md).
 
 ## Code of Conduct
 

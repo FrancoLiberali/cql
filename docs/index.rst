@@ -51,3 +51,11 @@ Learn how to use BaDaaS following the :doc:`badaas/quickstart`.
    badaas-orm/query
    badaas-orm/advanced_query
    badaas-orm/preloading
+
+.. toctree::
+   :caption: Contributing
+
+   contributing/contributing
+   contributing/developing
+   contributing/maintaining
+   Github <https://www.github.com/ditrit/badaas>
