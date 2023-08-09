@@ -23,5 +23,35 @@ func getLoggerConfigurationKeys() []KeyDefinition {
 			DefaultV:  "prod",
 			Validator: &modeValidator,
 		},
+		{
+			Name:     LoggerDisableStacktraceKey,
+			ValType:  verdeter.IsBool,
+			Usage:    "Disable error stacktrace from logs (default to true)",
+			DefaultV: true,
+		},
+		{
+			Name:     LoggerSlowQueryThresholdKey,
+			ValType:  verdeter.IsInt,
+			Usage:    "Threshold for the slow query warning in milliseconds (default to 200)",
+			DefaultV: defaultLoggerSlowQueryThreshold,
+		},
+		{
+			Name:     LoggerSlowTransactionThresholdKey,
+			ValType:  verdeter.IsInt,
+			Usage:    "Threshold for the slow transaction warning in milliseconds (default to 200)",
+			DefaultV: defaultLoggerSlowTransactionThreshold,
+		},
+		{
+			Name:     LoggerIgnoreRecordNotFoundErrorKey,
+			ValType:  verdeter.IsBool,
+			Usage:    "If true, ignore gorm.ErrRecordNotFound error for logger (default to false)",
+			DefaultV: false,
+		},
+		{
+			Name:     LoggerParameterizedQueriesKey,
+			ValType:  verdeter.IsBool,
+			Usage:    "If true, don't include params in the query execution logs (default to false)",
+			DefaultV: false,
+		},
 	}
 }
