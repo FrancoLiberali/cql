@@ -128,6 +128,23 @@ func getZapFields(elapsedTime time.Duration, rowsAffected int64, sql string) []z
 	}
 }
 
+func (l gormzap) TraceTransaction(_ context.Context, begin time.Time) {
+	elapsed := time.Since(begin)
+
+	switch {
+	case l.SlowTransactionThreshold != logger.DisableThreshold && elapsed > l.SlowTransactionThreshold && l.LogLevel >= gormLogger.Warn:
+		l.logger().Warn(
+			fmt.Sprintf("transaction_slow (>= %v)", l.SlowTransactionThreshold),
+			zap.Duration("elapsed_time", elapsed),
+		)
+	case l.LogLevel >= gormLogger.Info:
+		l.logger().Debug(
+			"transaction_exec",
+			zap.Duration("elapsed_time", elapsed),
+		)
+	}
+}
+
 // Filter parameters from queries depending of the value of ParameterizedQueries
 func (l gormzap) ParamsFilter(_ context.Context, sql string, params ...interface{}) (string, []interface{}) {
 	if l.ParameterizedQueries {

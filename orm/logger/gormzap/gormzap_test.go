@@ -6,12 +6,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
-
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 
 	"github.com/ditrit/badaas/orm/logger"
 	"github.com/ditrit/badaas/orm/logger/gormzap"
@@ -86,4 +85,38 @@ func TestTraceQueryExec(t *testing.T) {
 	require.Len(t, log.Context, 3)
 	assert.Contains(t, log.Context, zap.Field{Key: "rows_affected", Type: zapcore.StringType, String: "1"})
 	assert.Contains(t, log.Context, zap.Field{Key: "sql", Type: zapcore.StringType, String: "normal sql"})
+}
+
+func TestTraceSlowTransaction(t *testing.T) {
+	core, logs := observer.New(zap.DebugLevel)
+	zapLogger := zap.New(core)
+
+	logger := gormzap.NewDefault(zapLogger)
+	logger.TraceTransaction(
+		context.Background(),
+		time.Now().Add(-300*time.Millisecond),
+	)
+
+	require.Equal(t, 1, logs.Len())
+	log := logs.All()[0]
+	assert.Equal(t, log.Level, zapcore.WarnLevel)
+	assert.Equal(t, log.Message, "transaction_slow (>= 200ms)")
+	require.Len(t, log.Context, 1)
+}
+
+func TestTraceTransactionExec(t *testing.T) {
+	core, logs := observer.New(zap.DebugLevel)
+	zapLogger := zap.New(core)
+
+	logger := gormzap.NewDefault(zapLogger).ToLogMode(logger.Info)
+	logger.TraceTransaction(
+		context.Background(),
+		time.Now().Add(3*time.Hour),
+	)
+
+	require.Equal(t, 1, logs.Len())
+	log := logs.All()[0]
+	assert.Equal(t, log.Level, zapcore.DebugLevel)
+	assert.Equal(t, log.Message, "transaction_exec")
+	require.Len(t, log.Context, 1)
 }

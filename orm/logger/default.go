@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"context"
 	"log"
 	"os"
 	"strconv"
@@ -10,14 +11,16 @@ import (
 )
 
 const (
-	defaultSlowQueryThreshold = 200 * time.Millisecond
-	DisableThreshold          = 0
+	defaultSlowQueryThreshold       = 200 * time.Millisecond
+	defaultSlowTransactionThreshold = 200 * time.Millisecond
+	DisableThreshold                = 0
 )
 
 var (
 	DefaultConfig = Config{
 		LogLevel:                  gormLogger.Warn,
 		SlowQueryThreshold:        defaultSlowQueryThreshold,
+		SlowTransactionThreshold:  defaultSlowTransactionThreshold,
 		IgnoreRecordNotFoundError: false,
 		ParameterizedQueries:      false,
 	}
@@ -55,6 +58,23 @@ func (l *defaultLogger) ToLogMode(level gormLogger.LogLevel) Interface {
 	newLogger.Interface = newLogger.Interface.LogMode(level)
 
 	return &newLogger
+}
+
+const nanoToMicro = 1e6
+
+func (l defaultLogger) TraceTransaction(ctx context.Context, begin time.Time) {
+	if l.LogLevel <= gormLogger.Silent {
+		return
+	}
+
+	elapsed := time.Since(begin)
+
+	switch {
+	case l.SlowTransactionThreshold != DisableThreshold && elapsed > l.SlowTransactionThreshold && l.LogLevel >= gormLogger.Warn:
+		l.Interface.Warn(ctx, "transaction_slow (>= %v) [%.3fms]", l.SlowTransactionThreshold, float64(elapsed.Nanoseconds())/nanoToMicro)
+	case l.LogLevel >= gormLogger.Info:
+		l.Interface.Info(ctx, "transaction_exec [%.3fms]", float64(elapsed.Nanoseconds())/nanoToMicro)
+	}
 }
 
 type writerWrapper struct {

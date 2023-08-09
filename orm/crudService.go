@@ -42,16 +42,31 @@ func NewCRUDService[T model.Model, ID model.ID](
 
 // Get the model of type T that has the "id"
 func (service *crudServiceImpl[T, ID]) GetByID(id ID) (*T, error) {
-	return service.repository.GetByID(service.db, id)
+	return Transaction[*T](
+		service.db,
+		func(tx *gorm.DB) (*T, error) {
+			return service.repository.GetByID(tx, id)
+		},
+	)
 }
 
 // Get only one model that match "conditions"
-// or return error if 0 or more than 1 are found.
+// or returns error if 0 or more than 1 are found.
 func (service *crudServiceImpl[T, ID]) QueryOne(conditions ...condition.Condition[T]) (*T, error) {
-	return service.repository.QueryOne(service.db, conditions...)
+	return Transaction[*T](
+		service.db,
+		func(tx *gorm.DB) (*T, error) {
+			return service.repository.QueryOne(tx, conditions...)
+		},
+	)
 }
 
 // Get the list of models that match "conditions"
 func (service *crudServiceImpl[T, ID]) Query(conditions ...condition.Condition[T]) ([]*T, error) {
-	return service.repository.Query(service.db, conditions...)
+	return Transaction[[]*T](
+		service.db,
+		func(tx *gorm.DB) ([]*T, error) {
+			return service.repository.Query(tx, conditions...)
+		},
+	)
 }

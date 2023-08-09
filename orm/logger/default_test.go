@@ -66,3 +66,27 @@ func TestTraceQueryExec(t *testing.T) {
 	assert.Contains(t, buffer.String(), "[rows:1]")
 	assert.Contains(t, buffer.String(), "normal sql")
 }
+
+func TestTraceSlowTransaction(t *testing.T) {
+	var buffer bytes.Buffer
+
+	logger := logger.NewWithWriter(logger.DefaultConfig, log.New(&buffer, "\r\n", log.LstdFlags))
+	logger.TraceTransaction(
+		context.Background(),
+		time.Now().Add(-300*time.Millisecond),
+	)
+
+	assert.Contains(t, buffer.String(), "transaction_slow (>= 200ms)")
+}
+
+func TestTraceTransactionExec(t *testing.T) {
+	var buffer bytes.Buffer
+
+	logger := logger.NewWithWriter(logger.DefaultConfig, log.New(&buffer, "\r\n", log.LstdFlags)).ToLogMode(logger.Info)
+	logger.TraceTransaction(
+		context.Background(),
+		time.Now().Add(3*time.Hour),
+	)
+
+	assert.Contains(t, buffer.String(), "transaction_exec")
+}
