@@ -8,7 +8,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/persistence/gormdatabase/gormzap"
+	"github.com/ditrit/badaas/orm/logger/gormzap"
 )
 
 func CreateDialector(host, username, password, sslmode, dbname string, port int) gorm.Dialector {
@@ -36,7 +36,7 @@ func ConnectToDialector(
 
 	for numberRetry := uint(0); numberRetry < retryAmount; numberRetry++ {
 		database, err = gorm.Open(dialector, &gorm.Config{
-			Logger: gormzap.New(logger),
+			Logger: gormzap.NewDefault(logger),
 		})
 
 		if err == nil {
