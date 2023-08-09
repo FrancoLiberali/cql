@@ -17,7 +17,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/configuration"
-	"github.com/ditrit/badaas/persistence/gormdatabase"
+	"github.com/ditrit/badaas/persistence/database"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
 )
@@ -55,9 +55,10 @@ func TestMain(_ *testing.M) {
 	viper.Set(configuration.DatabaseRetryKey, 10)
 	viper.Set(configuration.DatabaseRetryDurationKey, 5)
 
-	db, err = gormdatabase.SetupDatabaseConnection(
+	db, err = database.SetupDatabaseConnection(
 		logger,
 		configuration.NewDatabaseConfiguration(),
+		configuration.NewLoggerConfiguration(),
 	)
 	if err != nil {
 		log.Fatalln("Unable to connect to database : ", err)

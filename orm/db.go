@@ -1,56 +1,27 @@
 package orm
 
 import (
-	"fmt"
-	"time"
-
-	"go.uber.org/zap"
-	"gorm.io/driver/postgres"
+	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm/logger/gormzap"
+	"github.com/ditrit/badaas/orm/logger"
 )
 
-func CreateDialector(host, username, password, sslmode, dbname string, port int) gorm.Dialector {
-	return postgres.Open(CreateDSN(
-		host, username, password, sslmode, dbname, port,
-	))
-}
+// Open initialize db session based on dialector
+func Open(dialector gorm.Dialector, opts ...gorm.Option) (*gorm.DB, error) {
+	configs := pie.Filter(opts, func(opt gorm.Option) bool {
+		_, isConfig := opt.(*gorm.Config)
+		return isConfig
+	})
 
-func CreateDSN(host, username, password, sslmode, dbname string, port int) string {
-	return fmt.Sprintf(
-		"user=%s password=%s host=%s port=%d sslmode=%s dbname=%s",
-		username, password, host, port, sslmode, dbname,
-	)
-}
-
-func ConnectToDialector(
-	logger *zap.Logger,
-	dialector gorm.Dialector,
-	retryAmount uint,
-	retryTime time.Duration,
-) (*gorm.DB, error) {
-	var err error
-
-	var database *gorm.DB
-
-	for numberRetry := uint(0); numberRetry < retryAmount; numberRetry++ {
-		database, err = gorm.Open(dialector, &gorm.Config{
-			Logger: gormzap.NewDefault(logger),
-		})
-
-		if err == nil {
-			logger.Sugar().Debugf("Database connection is active")
-			return database, nil
-		}
-
-		logger.Sugar().Debugf("Database connection failed with error %q", err.Error())
-		logger.Sugar().Debugf(
-			"Retrying database connection %d/%d in %s",
-			numberRetry+1, retryAmount, retryTime.String(),
-		)
-		time.Sleep(retryTime)
+	if len(configs) == 0 {
+		return gorm.Open(dialector, append(opts, &gorm.Config{Logger: logger.Default})...)
 	}
 
-	return nil, err
+	lastConfig, _ := configs[len(configs)-1].(*gorm.Config)
+	if lastConfig.Logger == nil {
+		lastConfig.Logger = logger.Default
+	}
+
+	return gorm.Open(dialector, opts...)
 }
