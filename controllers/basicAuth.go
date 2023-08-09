@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ditrit/badaas/httperrors"
-	"github.com/ditrit/badaas/orm"
+	badaasORMErrors "github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/persistence/models/dto"
 	"github.com/ditrit/badaas/services/sessionservice"
 	"github.com/ditrit/badaas/services/userservice"
@@ -65,7 +65,7 @@ func (basicAuthController *basicAuthenticationController) BasicLoginHandler(w ht
 
 	user, err := basicAuthController.userService.GetUser(loginJSONStruct)
 	if err != nil {
-		if errors.Is(err, orm.ErrObjectNotFound) {
+		if errors.Is(err, badaasORMErrors.ErrObjectNotFound) {
 			return nil, httperrors.NewErrorNotFound(
 				"user",
 				fmt.Sprintf("no user found with email %q", loginJSONStruct.Email),

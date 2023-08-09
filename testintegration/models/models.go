@@ -6,15 +6,15 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 )
 
 type Employee struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name   string
 	Boss   *Employee // Self-Referential Has One (Employee 0..* -> 0..1 Employee)
-	BossID *orm.UUID
+	BossID *model.UUID
 }
 
 func (m Employee) Equal(other Employee) bool {
@@ -22,7 +22,7 @@ func (m Employee) Equal(other Employee) bool {
 }
 
 type Company struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name    string
 	Sellers *[]Seller // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
@@ -70,7 +70,7 @@ type ToBeGormEmbedded struct {
 }
 
 type Product struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	String      string `gorm:"column:string_something_else"`
 	Int         int
@@ -90,7 +90,7 @@ func (m Product) Equal(other Product) bool {
 }
 
 type University struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name string
 }
@@ -100,29 +100,29 @@ func (m University) Equal(other University) bool {
 }
 
 type Seller struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name      string
 	Company   *Company
-	CompanyID *orm.UUID // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
+	CompanyID *model.UUID // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
 
 	University   *University
-	UniversityID *orm.UUID
+	UniversityID *model.UUID
 }
 
 type Sale struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Code        int
 	Description string
 
 	// Sale belongsTo Product (Sale 0..* -> 1 Product)
 	Product   Product
-	ProductID orm.UUID
+	ProductID model.UUID
 
 	// Sale belongsTo Seller (Sale 0..* -> 0..1 Seller)
 	Seller   *Seller
-	SellerID *orm.UUID
+	SellerID *model.UUID
 }
 
 func (m Sale) Equal(other Sale) bool {
@@ -134,18 +134,18 @@ func (m Seller) Equal(other Seller) bool {
 }
 
 type Country struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name    string
 	Capital City // Country HasOne City (Country 1 -> 1 City)
 }
 
 type City struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name      string
 	Country   *Country
-	CountryID orm.UUID // Country HasOne City (Country 1 -> 1 City)
+	CountryID model.UUID // Country HasOne City (Country 1 -> 1 City)
 }
 
 func (m Country) Equal(other Country) bool {
@@ -157,7 +157,7 @@ func (m City) Equal(other City) bool {
 }
 
 type Person struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name string `gorm:"unique;type:VARCHAR(255)"`
 }
@@ -167,7 +167,7 @@ func (m Person) TableName() string {
 }
 
 type Bicycle struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name string
 	// Bicycle BelongsTo Person (Bicycle 0..* -> 1 Person)
@@ -180,7 +180,7 @@ func (m Bicycle) Equal(other Bicycle) bool {
 }
 
 type Brand struct {
-	orm.UIntModel
+	model.UIntModel
 
 	Name string
 }
@@ -190,7 +190,7 @@ func (m Brand) Equal(other Brand) bool {
 }
 
 type Phone struct {
-	orm.UIntModel
+	model.UIntModel
 
 	Name string
 	// Phone belongsTo Brand (Phone 0..* -> 1 Brand)
@@ -203,7 +203,7 @@ func (m Phone) Equal(other Phone) bool {
 }
 
 type ParentParent struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name   string
 	Number int
@@ -214,10 +214,10 @@ func (m ParentParent) Equal(other ParentParent) bool {
 }
 
 type Parent1 struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	ParentParent   ParentParent
-	ParentParentID orm.UUID
+	ParentParentID model.UUID
 }
 
 func (m Parent1) Equal(other Parent1) bool {
@@ -225,10 +225,10 @@ func (m Parent1) Equal(other Parent1) bool {
 }
 
 type Parent2 struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	ParentParent   ParentParent
-	ParentParentID orm.UUID
+	ParentParentID model.UUID
 }
 
 func (m Parent2) Equal(other Parent2) bool {
@@ -236,16 +236,16 @@ func (m Parent2) Equal(other Parent2) bool {
 }
 
 type Child struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Name   string
 	Number int
 
 	Parent1   Parent1
-	Parent1ID orm.UUID
+	Parent1ID model.UUID
 
 	Parent2   Parent2
-	Parent2ID orm.UUID
+	Parent2ID model.UUID
 }
 
 func (m Child) Equal(other Child) bool {

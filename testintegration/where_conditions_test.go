@@ -5,6 +5,8 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -12,16 +14,16 @@ import (
 
 type WhereConditionsIntTestSuite struct {
 	CRUDServiceCommonIntTestSuite
-	crudProductService orm.CRUDService[models.Product, orm.UUID]
-	crudSaleService    orm.CRUDService[models.Sale, orm.UUID]
-	crudBrandService   orm.CRUDService[models.Brand, orm.UIntID]
+	crudProductService orm.CRUDService[models.Product, model.UUID]
+	crudSaleService    orm.CRUDService[models.Sale, model.UUID]
+	crudBrandService   orm.CRUDService[models.Brand, model.UIntID]
 }
 
 func NewWhereConditionsIntTestSuite(
 	db *gorm.DB,
-	crudProductService orm.CRUDService[models.Product, orm.UUID],
-	crudSaleService orm.CRUDService[models.Sale, orm.UUID],
-	crudBrandService orm.CRUDService[models.Brand, orm.UIntID],
+	crudProductService orm.CRUDService[models.Product, model.UUID],
+	crudSaleService orm.CRUDService[models.Sale, model.UUID],
+	crudBrandService orm.CRUDService[models.Brand, model.UIntID],
 ) *WhereConditionsIntTestSuite {
 	return &WhereConditionsIntTestSuite{
 		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
@@ -36,14 +38,14 @@ func NewWhereConditionsIntTestSuite(
 // ------------------------- GetByID --------------------------------
 
 func (ts *WhereConditionsIntTestSuite) TestGetByIDReturnsErrorIfNotEntityCreated() {
-	_, err := ts.crudProductService.GetByID(orm.NilUUID)
+	_, err := ts.crudProductService.GetByID(model.NilUUID)
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
 
 func (ts *WhereConditionsIntTestSuite) TestGetByIDReturnsErrorIfNotEntityMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 
-	_, err := ts.crudProductService.GetByID(orm.NewUUID())
+	_, err := ts.crudProductService.GetByID(model.NewUUID())
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
 
@@ -410,7 +412,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationTypeOptionalByNil(
 	ts.createSale(0, product2, seller2)
 
 	entities, err := ts.crudSaleService.Query(
-		conditions.SaleSellerId(orm.IsNull[orm.UUID]()),
+		conditions.SaleSellerId(orm.IsNull[model.UUID]()),
 	)
 	ts.Nil(err)
 
@@ -566,5 +568,5 @@ func (ts *WhereConditionsIntTestSuite) TestEmptyContainerConditionReturnsError()
 	_, err := ts.crudProductService.Query(
 		orm.Not[models.Product](),
 	)
-	ts.ErrorIs(err, orm.ErrEmptyConditions)
+	ts.ErrorIs(err, errors.ErrEmptyConditions)
 }

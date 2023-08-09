@@ -8,6 +8,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/models/dto"
 	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
@@ -27,7 +28,7 @@ var _ UserService = (*userServiceImpl)(nil)
 
 // The UserService concrete implementation
 type userServiceImpl struct {
-	userRepository orm.CRUDRepository[models.User, orm.UUID]
+	userRepository orm.CRUDRepository[models.User, model.UUID]
 	logger         *zap.Logger
 	db             *gorm.DB
 }
@@ -35,7 +36,7 @@ type userServiceImpl struct {
 // UserService constructor
 func NewUserService(
 	logger *zap.Logger,
-	userRepository orm.CRUDRepository[models.User, orm.UUID],
+	userRepository orm.CRUDRepository[models.User, model.UUID],
 	db *gorm.DB,
 ) UserService {
 	return &userServiceImpl{

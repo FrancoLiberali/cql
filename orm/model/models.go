@@ -1,4 +1,4 @@
-package orm
+package model
 
 import (
 	"time"
@@ -7,7 +7,7 @@ import (
 )
 
 // supported types for model identifier
-type ModelID interface {
+type ID interface {
 	UIntID | UUID
 
 	IsNil() bool

@@ -6,14 +6,14 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 )
 
 func TestNewSession(t *testing.T) {
-	sessionInstance := models.NewSession(orm.NilUUID, time.Second)
+	sessionInstance := models.NewSession(model.NilUUID, time.Second)
 	assert.NotNil(t, sessionInstance)
-	assert.Equal(t, orm.NilUUID, sessionInstance.UserID)
+	assert.Equal(t, model.NilUUID, sessionInstance.UserID)
 }
 
 func TestExpired(t *testing.T) {

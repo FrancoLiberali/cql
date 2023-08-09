@@ -5,6 +5,8 @@ import (
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/dynamic"
+	"github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -12,26 +14,26 @@ import (
 
 type JoinConditionsIntTestSuite struct {
 	CRUDServiceCommonIntTestSuite
-	crudSaleService     orm.CRUDService[models.Sale, orm.UUID]
-	crudSellerService   orm.CRUDService[models.Seller, orm.UUID]
-	crudCountryService  orm.CRUDService[models.Country, orm.UUID]
-	crudCityService     orm.CRUDService[models.City, orm.UUID]
-	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID]
-	crudBicycleService  orm.CRUDService[models.Bicycle, orm.UUID]
-	crudPhoneService    orm.CRUDService[models.Phone, orm.UIntID]
-	crudChildService    orm.CRUDService[models.Child, orm.UUID]
+	crudSaleService     orm.CRUDService[models.Sale, model.UUID]
+	crudSellerService   orm.CRUDService[models.Seller, model.UUID]
+	crudCountryService  orm.CRUDService[models.Country, model.UUID]
+	crudCityService     orm.CRUDService[models.City, model.UUID]
+	crudEmployeeService orm.CRUDService[models.Employee, model.UUID]
+	crudBicycleService  orm.CRUDService[models.Bicycle, model.UUID]
+	crudPhoneService    orm.CRUDService[models.Phone, model.UIntID]
+	crudChildService    orm.CRUDService[models.Child, model.UUID]
 }
 
 func NewJoinConditionsIntTestSuite(
 	db *gorm.DB,
-	crudSaleService orm.CRUDService[models.Sale, orm.UUID],
-	crudSellerService orm.CRUDService[models.Seller, orm.UUID],
-	crudCountryService orm.CRUDService[models.Country, orm.UUID],
-	crudCityService orm.CRUDService[models.City, orm.UUID],
-	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID],
-	crudBicycleService orm.CRUDService[models.Bicycle, orm.UUID],
-	crudPhoneService orm.CRUDService[models.Phone, orm.UIntID],
-	crudChildService orm.CRUDService[models.Child, orm.UUID],
+	crudSaleService orm.CRUDService[models.Sale, model.UUID],
+	crudSellerService orm.CRUDService[models.Seller, model.UUID],
+	crudCountryService orm.CRUDService[models.Country, model.UUID],
+	crudCityService orm.CRUDService[models.City, model.UUID],
+	crudEmployeeService orm.CRUDService[models.Employee, model.UUID],
+	crudBicycleService orm.CRUDService[models.Bicycle, model.UUID],
+	crudPhoneService orm.CRUDService[models.Phone, model.UIntID],
+	crudChildService orm.CRUDService[models.Child, model.UUID],
 ) *JoinConditionsIntTestSuite {
 	return &JoinConditionsIntTestSuite{
 		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
@@ -407,7 +409,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturns
 			orm.Not[models.Product](),
 		),
 	)
-	ts.ErrorIs(err, orm.ErrEmptyConditions)
+	ts.ErrorIs(err, errors.ErrEmptyConditions)
 	ts.ErrorContains(err, "connector: Not; model: models.Product")
 }
 
@@ -461,7 +463,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelRetur
 	_, err := ts.crudChildService.Query(
 		conditions.ChildId(dynamic.Eq(conditions.ParentParentIdField)),
 	)
-	ts.ErrorIs(err, orm.ErrFieldModelNotConcerned)
+	ts.ErrorIs(err, errors.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
@@ -475,7 +477,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		),
 		conditions.ChildId(dynamic.Eq(conditions.ParentParentIdField)),
 	)
-	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
@@ -515,6 +517,6 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 			dynamic.Between(conditions.ParentParentIdField, conditions.ParentParentIdField),
 		),
 	)
-	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Between; model: models.Child, field: ID")
 }

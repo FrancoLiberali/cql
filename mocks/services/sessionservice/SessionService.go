@@ -6,9 +6,9 @@ import (
 	httperrors "github.com/ditrit/badaas/httperrors"
 	mock "github.com/stretchr/testify/mock"
 
-	models "github.com/ditrit/badaas/persistence/models"
+	model "github.com/ditrit/badaas/orm/model"
 
-	orm "github.com/ditrit/badaas/orm"
+	models "github.com/ditrit/badaas/persistence/models"
 
 	sessionservice "github.com/ditrit/badaas/services/sessionservice"
 )
@@ -19,21 +19,21 @@ type SessionService struct {
 }
 
 // IsValid provides a mock function with given fields: sessionUUID
-func (_m *SessionService) IsValid(sessionUUID orm.UUID) (bool, *sessionservice.SessionClaims) {
+func (_m *SessionService) IsValid(sessionUUID model.UUID) (bool, *sessionservice.SessionClaims) {
 	ret := _m.Called(sessionUUID)
 
 	var r0 bool
 	var r1 *sessionservice.SessionClaims
-	if rf, ok := ret.Get(0).(func(orm.UUID) (bool, *sessionservice.SessionClaims)); ok {
+	if rf, ok := ret.Get(0).(func(model.UUID) (bool, *sessionservice.SessionClaims)); ok {
 		return rf(sessionUUID)
 	}
-	if rf, ok := ret.Get(0).(func(orm.UUID) bool); ok {
+	if rf, ok := ret.Get(0).(func(model.UUID) bool); ok {
 		r0 = rf(sessionUUID)
 	} else {
 		r0 = ret.Get(0).(bool)
 	}
 
-	if rf, ok := ret.Get(1).(func(orm.UUID) *sessionservice.SessionClaims); ok {
+	if rf, ok := ret.Get(1).(func(model.UUID) *sessionservice.SessionClaims); ok {
 		r1 = rf(sessionUUID)
 	} else {
 		if ret.Get(1) != nil {
@@ -87,11 +87,11 @@ func (_m *SessionService) LogUserOut(sessionClaims *sessionservice.SessionClaims
 }
 
 // RollSession provides a mock function with given fields: _a0
-func (_m *SessionService) RollSession(_a0 orm.UUID) httperrors.HTTPError {
+func (_m *SessionService) RollSession(_a0 model.UUID) httperrors.HTTPError {
 	ret := _m.Called(_a0)
 
 	var r0 httperrors.HTTPError
-	if rf, ok := ret.Get(0).(func(orm.UUID) httperrors.HTTPError); ok {
+	if rf, ok := ret.Get(0).(func(model.UUID) httperrors.HTTPError); ok {
 		r0 = rf(_a0)
 	} else {
 		if ret.Get(0) != nil {

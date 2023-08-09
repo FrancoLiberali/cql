@@ -3,14 +3,14 @@ package sessionservice
 import (
 	"context"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 )
 
 // The session claims passed in the request context
 type SessionClaims struct {
-	UserID      orm.UUID
-	SessionUUID orm.UUID
+	UserID      model.UUID
+	SessionUUID model.UUID
 }
 
 // Unique claim key type

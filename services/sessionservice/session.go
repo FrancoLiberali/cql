@@ -11,6 +11,7 @@ import (
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/httperrors"
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 )
 
@@ -24,9 +25,9 @@ var (
 
 // SessionService handle sessions
 type SessionService interface {
-	IsValid(sessionUUID orm.UUID) (bool, *SessionClaims)
+	IsValid(sessionUUID model.UUID) (bool, *SessionClaims)
 	// TODO services should not work with httperrors
-	RollSession(orm.UUID) httperrors.HTTPError
+	RollSession(model.UUID) httperrors.HTTPError
 	LogUserIn(user *models.User) (*models.Session, error)
 	LogUserOut(sessionClaims *SessionClaims) httperrors.HTTPError
 }
@@ -36,8 +37,8 @@ var _ SessionService = (*sessionServiceImpl)(nil)
 
 // The SessionService concrete interface
 type sessionServiceImpl struct {
-	sessionRepository    orm.CRUDRepository[models.Session, orm.UUID]
-	cache                map[orm.UUID]*models.Session
+	sessionRepository    orm.CRUDRepository[models.Session, model.UUID]
+	cache                map[model.UUID]*models.Session
 	mutex                sync.Mutex
 	logger               *zap.Logger
 	sessionConfiguration configuration.SessionConfiguration
@@ -47,12 +48,12 @@ type sessionServiceImpl struct {
 // The SessionService constructor
 func NewSessionService(
 	logger *zap.Logger,
-	sessionRepository orm.CRUDRepository[models.Session, orm.UUID],
+	sessionRepository orm.CRUDRepository[models.Session, model.UUID],
 	sessionConfiguration configuration.SessionConfiguration,
 	db *gorm.DB,
 ) SessionService {
 	sessionService := &sessionServiceImpl{
-		cache:                make(map[orm.UUID]*models.Session),
+		cache:                make(map[model.UUID]*models.Session),
 		logger:               logger,
 		sessionRepository:    sessionRepository,
 		sessionConfiguration: sessionConfiguration,
@@ -65,7 +66,7 @@ func NewSessionService(
 
 // Return true if the session exists and is still valid.
 // A instance of SessionClaims is returned to be added to the request context if the conditions previously mentioned are met.
-func (sessionService *sessionServiceImpl) IsValid(sessionUUID orm.UUID) (bool, *SessionClaims) {
+func (sessionService *sessionServiceImpl) IsValid(sessionUUID model.UUID) (bool, *SessionClaims) {
 	sessionInstance := sessionService.get(sessionUUID)
 	if sessionInstance == nil {
 		return false, nil
@@ -76,7 +77,7 @@ func (sessionService *sessionServiceImpl) IsValid(sessionUUID orm.UUID) (bool, *
 
 // Get a session from cache
 // return nil if not found
-func (sessionService *sessionServiceImpl) get(sessionUUID orm.UUID) *models.Session {
+func (sessionService *sessionServiceImpl) get(sessionUUID model.UUID) *models.Session {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
 
@@ -114,7 +115,7 @@ func (sessionService *sessionServiceImpl) add(session *models.Session) error {
 
 // Initialize the session service
 func (sessionService *sessionServiceImpl) init() {
-	sessionService.cache = make(map[orm.UUID]*models.Session)
+	sessionService.cache = make(map[model.UUID]*models.Session)
 
 	go func() {
 		for {
@@ -137,7 +138,7 @@ func (sessionService *sessionServiceImpl) pullFromDB() {
 		panic(err)
 	}
 
-	newSessionCache := make(map[orm.UUID]*models.Session)
+	newSessionCache := make(map[model.UUID]*models.Session)
 	for _, sessionFromDatabase := range sessionsFromDatabase {
 		newSessionCache[sessionFromDatabase.ID] = sessionFromDatabase
 	}
@@ -199,7 +200,7 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 }
 
 // Roll a session. If the session is close to expiration, extend its duration.
-func (sessionService *sessionServiceImpl) RollSession(sessionUUID orm.UUID) httperrors.HTTPError {
+func (sessionService *sessionServiceImpl) RollSession(sessionUUID model.UUID) httperrors.HTTPError {
 	rollInterval := sessionService.sessionConfiguration.GetRollDuration()
 	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
 

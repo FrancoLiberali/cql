@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
@@ -48,7 +48,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createSale(code int, product *models.Pr
 }
 
 func (ts *CRUDServiceCommonIntTestSuite) createSeller(name string, company *models.Company) *models.Seller {
-	var companyID *orm.UUID
+	var companyID *model.UUID
 	if company != nil {
 		companyID = &company.ID
 	}
