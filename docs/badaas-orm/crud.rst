@@ -21,7 +21,7 @@ Each pair of CRUDService and CRUDRepository corresponds to a model. To create th
 the `orm.GetCRUD[<model>, <modelID>](gormDB)` where 
 `<model>` is the type of your :ref:`model <badaas-orm/concepts:model>`, 
 `<modelID>` is the type of your :ref:`model's id <badaas-orm/concepts:model id>` 
-and `gormDB` is the :ref:`GormDB <badaas-orm/concepts:GormDB>` object.
+and `gormDB` is the :ref:`gorm.DB <badaas-orm/concepts:GormDB>` object.
 
 When using badaas-orm with `fx` as :ref:`dependency injector <badaas-orm/concepts:Dependency injection>` you 
 will need to provide to fx `orm.GetCRUDServiceModule[<model>]()` 
@@ -43,8 +43,7 @@ For example:
     func main() {
         fx.New(
             // connect to db
-            fx.Provide(NewGormDBConnection),
-            // activate badaas-orm
+            fx.Provide(NewDBConnection),
             fx.Provide(GetModels),
             orm.AutoMigrate,
 
@@ -56,3 +55,15 @@ For example:
     func QueryCRUDObjects(crudYourModelService orm.CRUDService[YourModel, model.UUID]) {
         // use crudYourModelService
     }
+
+Transactions
+--------------------
+
+To execute transactions badaas-orm provides the function orm.Transaction. 
+The function passed by parameter will be executed inside a gorm transaction 
+(for more information visit https://gorm.io/docs/transactions.html). 
+Using this method will also allow the transaction execution time to be logged.
+
+In accordance to the previous section, 
+CRUDServices make use of the orm.Transaction function while 
+CRUDRepositories must be called within one of them.
