@@ -48,6 +48,8 @@ sinks:
       auditable: true
     sql-exec:
       channels: [SQL_EXEC]
+    sql-schema:
+      channels: [SQL_SCHEMA]
     sql-slow:
       channels: [SQL_PERF]
     sql-slow-internal-only:

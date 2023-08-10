@@ -10,10 +10,10 @@ services:
     working_dir: /cockroach
     entrypoint: /cockroach/cockroach.sh start-single-node --insecure --log-config-file=files/logs.yaml
     ports:
-      - "26257:26257"
+      - "5000:26257"
       - "8080:8080" # Web based dashboard
     environment:
-      - COCKROACH_USER=root
+      - COCKROACH_USER=badaas
       - COCKROACH_DATABASE=badaas_db
     healthcheck:
       test: curl --fail http://localhost:8080 || exit 1
