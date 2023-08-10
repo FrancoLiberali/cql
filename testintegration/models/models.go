@@ -6,20 +6,11 @@ import (
 	"fmt"
 	"strings"
 
+	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
+
 	"github.com/ditrit/badaas/orm/model"
 )
-
-type Employee struct {
-	model.UUIDModel
-
-	Name   string
-	Boss   *Employee // Self-Referential Has One (Employee 0..* -> 0..1 Employee)
-	BossID *model.UUID
-}
-
-func (m Employee) Equal(other Employee) bool {
-	return m.Name == other.Name
-}
 
 type Company struct {
 	model.UUIDModel
@@ -59,6 +50,15 @@ func (s MultiString) Value() (driver.Value, error) {
 
 func (MultiString) GormDataType() string {
 	return "text"
+}
+
+func (MultiString) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
+	switch db.Dialector.Name() {
+	case "sqlserver":
+		return "varchar(255)"
+	default:
+		return "text"
+	}
 }
 
 type ToBeEmbedded struct {

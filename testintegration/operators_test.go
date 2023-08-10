@@ -2,6 +2,7 @@ package testintegration
 
 import (
 	"database/sql"
+	"log"
 	"strings"
 
 	"gorm.io/gorm"
@@ -9,6 +10,7 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/dynamic"
 	"github.com/ditrit/badaas/orm/model"
+	"github.com/ditrit/badaas/orm/operator"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -259,9 +261,18 @@ func (ts *OperatorsIntTestSuite) TestIsTrue() {
 	ts.createProduct("not_match", 0, 0, false, nil)
 	ts.createProduct("not_match", 0, 0, false, nil)
 
+	var isTrueOperator operator.Operator[bool]
+
+	switch getDBDialector() {
+	case postgreSQL, mySQL, sqLite:
+		isTrueOperator = orm.IsTrue()
+	case sqlServer:
+		isTrueOperator = orm.Eq(true)
+	}
+
 	entities, err := ts.crudProductService.Query(
 		conditions.ProductBool(
-			orm.IsTrue(),
+			isTrueOperator,
 		),
 	)
 	ts.Nil(err)
@@ -274,9 +285,18 @@ func (ts *OperatorsIntTestSuite) TestIsFalse() {
 	ts.createProduct("not_match", 0, 0, true, nil)
 	ts.createProduct("not_match", 0, 0, true, nil)
 
+	var isFalseOperator operator.Operator[bool]
+
+	switch getDBDialector() {
+	case postgreSQL, mySQL, sqLite:
+		isFalseOperator = orm.IsFalse()
+	case sqlServer:
+		isFalseOperator = orm.Eq(false)
+	}
+
 	entities, err := ts.crudProductService.Query(
 		conditions.ProductBool(
-			orm.IsFalse(),
+			isFalseOperator,
 		),
 	)
 	ts.Nil(err)
@@ -284,6 +304,7 @@ func (ts *OperatorsIntTestSuite) TestIsFalse() {
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }
 
+//nolint:dupl // not really duplicated
 func (ts *OperatorsIntTestSuite) TestIsNotTrue() {
 	match1 := ts.createProduct("match", 0, 0, false, nil)
 	match2 := ts.createProduct("match", 0, 0, false, nil)
@@ -296,9 +317,18 @@ func (ts *OperatorsIntTestSuite) TestIsNotTrue() {
 	err = ts.db.Save(notMatch).Error
 	ts.Nil(err)
 
+	var isNotTrueOperator operator.Operator[bool]
+
+	switch getDBDialector() {
+	case postgreSQL, mySQL, sqLite:
+		isNotTrueOperator = orm.IsNotTrue()
+	case sqlServer:
+		isNotTrueOperator = orm.IsDistinct(true)
+	}
+
 	entities, err := ts.crudProductService.Query(
 		conditions.ProductNullBool(
-			orm.IsNotTrue(),
+			isNotTrueOperator,
 		),
 	)
 	ts.Nil(err)
@@ -306,6 +336,7 @@ func (ts *OperatorsIntTestSuite) TestIsNotTrue() {
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
 
+//nolint:dupl // not duplicated
 func (ts *OperatorsIntTestSuite) TestIsNotFalse() {
 	match1 := ts.createProduct("match", 0, 0, false, nil)
 	match2 := ts.createProduct("match", 0, 0, false, nil)
@@ -318,9 +349,18 @@ func (ts *OperatorsIntTestSuite) TestIsNotFalse() {
 	err = ts.db.Save(notMatch).Error
 	ts.Nil(err)
 
+	var isNotFalseOperator operator.Operator[bool]
+
+	switch getDBDialector() {
+	case postgreSQL, mySQL, sqLite:
+		isNotFalseOperator = orm.IsNotFalse()
+	case sqlServer:
+		isNotFalseOperator = orm.IsDistinct(false)
+	}
+
 	entities, err := ts.crudProductService.Query(
 		conditions.ProductNullBool(
-			orm.IsNotFalse(),
+			isNotFalseOperator,
 		),
 	)
 	ts.Nil(err)
@@ -341,9 +381,18 @@ func (ts *OperatorsIntTestSuite) TestIsUnknown() {
 	err = ts.db.Save(notMatch2).Error
 	ts.Nil(err)
 
+	var isUnknownOperator operator.Operator[bool]
+
+	switch getDBDialector() {
+	case postgreSQL, mySQL:
+		isUnknownOperator = orm.IsUnknown()
+	case sqlServer, sqLite:
+		isUnknownOperator = orm.IsNull[bool]()
+	}
+
 	entities, err := ts.crudProductService.Query(
 		conditions.ProductNullBool(
-			orm.IsUnknown(),
+			isUnknownOperator,
 		),
 	)
 	ts.Nil(err)
@@ -364,9 +413,18 @@ func (ts *OperatorsIntTestSuite) TestIsNotUnknown() {
 
 	ts.createProduct("", 0, 0, false, nil)
 
+	var isNotUnknownOperator operator.Operator[bool]
+
+	switch getDBDialector() {
+	case postgreSQL, mySQL:
+		isNotUnknownOperator = orm.IsNotUnknown()
+	case sqlServer, sqLite:
+		isNotUnknownOperator = orm.IsNotNull[bool]()
+	}
+
 	entities, err := ts.crudProductService.Query(
 		conditions.ProductNullBool(
-			orm.IsNotUnknown(),
+			isNotUnknownOperator,
 		),
 	)
 	ts.Nil(err)
@@ -375,33 +433,43 @@ func (ts *OperatorsIntTestSuite) TestIsNotUnknown() {
 }
 
 func (ts *OperatorsIntTestSuite) TestIsDistinct() {
-	match1 := ts.createProduct("match", 3, 0, false, nil)
-	match2 := ts.createProduct("match", 4, 0, false, nil)
-	ts.createProduct("not_match", 2, 0, false, nil)
+	switch getDBDialector() {
+	case postgreSQL, sqlServer, sqLite:
+		match1 := ts.createProduct("match", 3, 0, false, nil)
+		match2 := ts.createProduct("match", 4, 0, false, nil)
+		ts.createProduct("not_match", 2, 0, false, nil)
 
-	entities, err := ts.crudProductService.Query(
-		conditions.ProductInt(
-			orm.IsDistinct(2),
-		),
-	)
-	ts.Nil(err)
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductInt(
+				orm.IsDistinct(2),
+			),
+		)
+		ts.Nil(err)
 
-	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+	case mySQL:
+		log.Println("IsDistinct not compatible")
+	}
 }
 
 func (ts *OperatorsIntTestSuite) TestIsNotDistinct() {
-	match := ts.createProduct("match", 3, 0, false, nil)
-	ts.createProduct("not_match", 4, 0, false, nil)
-	ts.createProduct("not_match", 2, 0, false, nil)
+	switch getDBDialector() {
+	case postgreSQL, sqlServer, sqLite:
+		match := ts.createProduct("match", 3, 0, false, nil)
+		ts.createProduct("not_match", 4, 0, false, nil)
+		ts.createProduct("not_match", 2, 0, false, nil)
 
-	entities, err := ts.crudProductService.Query(
-		conditions.ProductInt(
-			orm.IsNotDistinct(3),
-		),
-	)
-	ts.Nil(err)
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductInt(
+				orm.IsNotDistinct(3),
+			),
+		)
+		ts.Nil(err)
 
-	EqualList(&ts.Suite, []*models.Product{match}, entities)
+		EqualList(&ts.Suite, []*models.Product{match}, entities)
+	case mySQL:
+		log.Println("IsNotDistinct not compatible")
+	}
 }
 
 func (ts *OperatorsIntTestSuite) TestArrayIn() {
@@ -511,7 +579,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBaseModelAttribute() {
 	match := ts.createProduct("", 1, 0.0, false, nil)
 
 	entities, err := ts.crudProductService.Query(
-		conditions.ProductDeletedAt(dynamic.IsNotDistinct(conditions.ProductDeletedAtField)),
+		conditions.ProductCreatedAt(dynamic.Eq(conditions.ProductCreatedAtField)),
 	)
 	ts.Nil(err)
 
@@ -554,30 +622,127 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchConvertibl
 }
 
 func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvertible() {
-	_, err := ts.crudProductService.Query(
-		conditions.ProductFloat(
-			unsafe.Eq[float64]("not_convertible_to_float"),
-		),
-	)
-	ts.ErrorContains(err, "not_convertible_to_float")
+	switch getDBDialector() {
+	case sqLite:
+		// comparisons between types are allowed and matches nothing if not convertible
+		ts.createProduct("", 0, 0, false, nil)
+		ts.createProduct("", 0, 2, false, nil)
+		ts.createProduct("", 0, 2.3, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64]("not_convertible_to_float"),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{}, entities)
+	case mySQL:
+		// comparisons between types are allowed but matches 0s if not convertible
+		match := ts.createProduct("", 0, 0, false, nil)
+		ts.createProduct("", 0, 2, false, nil)
+		ts.createProduct("", 0, 2.3, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64]("not_convertible_to_float"),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match}, entities)
+	case sqlServer:
+		// returns an error
+		_, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64]("not_convertible_to_float"),
+			),
+		)
+		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
+	case postgreSQL:
+		// returns an error
+		_, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64]("not_convertible_to_float"),
+			),
+		)
+		ts.ErrorContains(err, "not_convertible_to_float")
+	}
 }
 
 func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch() {
-	_, err := ts.crudProductService.Query(
-		conditions.ProductFloat(
-			unsafe.Eq[float64](conditions.ProductStringField),
-		),
-	)
+	switch getDBDialector() {
+	case sqLite:
+		// comparisons between fields with different types are allowed
+		match1 := ts.createProduct("0", 0, 0, false, nil)
+		match2 := ts.createProduct("1", 0, 1, false, nil)
+		ts.createProduct("0", 0, 1, false, nil)
+		ts.createProduct("not_convertible", 0, 0, false, nil)
 
-	ts.True(
-		strings.Contains(
-			err.Error(),
-			"ERROR: operator does not exist: numeric = text (SQLSTATE 42883)", // postgresql
-		) || strings.Contains(
-			err.Error(),
-			"ERROR: unsupported comparison operator: <decimal> = <string> (SQLSTATE 22023)", // cockroachdb
-		),
-	)
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64](conditions.ProductStringField),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+	case mySQL:
+		// comparisons between fields with different types are allowed but matches 0s on not convertible
+		match1 := ts.createProduct("0", 1, 0, false, nil)
+		match2 := ts.createProduct("1", 2, 1, false, nil)
+		match3 := ts.createProduct("not_convertible", 2, 0, false, nil)
+		ts.createProduct("0.0", 2, 1.0, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64](conditions.ProductStringField),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
+	case sqlServer:
+		// comparisons between fields with different types are allowed and returns error only if at least one is not convertible
+		match1 := ts.createProduct("0", 1, 0, false, nil)
+		match2 := ts.createProduct("1", 2, 1, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64](conditions.ProductStringField),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+
+		ts.createProduct("not_convertible", 3, 0, false, nil)
+		ts.createProduct("0.0", 4, 1.0, false, nil)
+
+		_, err = ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64](conditions.ProductStringField),
+			),
+		)
+		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
+	case postgreSQL:
+		// returns an error
+		_, err := ts.crudProductService.Query(
+			conditions.ProductFloat(
+				unsafe.Eq[float64](conditions.ProductStringField),
+			),
+		)
+
+		ts.True(
+			strings.Contains(
+				err.Error(),
+				"ERROR: operator does not exist: numeric = text (SQLSTATE 42883)", // postgresql
+			) || strings.Contains(
+				err.Error(),
+				"ERROR: unsupported comparison operator: <decimal> = <string> (SQLSTATE 22023)", // cockroachdb
+			),
+		)
+	}
 }
 
 func (ts *OperatorsIntTestSuite) TestUnsafeOperatorCanCompareFieldsThatMapToTheSameType() {

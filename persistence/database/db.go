@@ -16,7 +16,7 @@ import (
 
 // Create the dsn string from the configuration
 func createDialectorFromConf(databaseConfiguration configuration.DatabaseConfiguration) gorm.Dialector {
-	return postgres.Open(orm.CreateDSN(
+	return postgres.Open(orm.CreatePostgreSQLDSN(
 		databaseConfiguration.GetHost(),
 		databaseConfiguration.GetUsername(),
 		databaseConfiguration.GetPassword(),
