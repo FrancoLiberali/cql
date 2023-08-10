@@ -63,11 +63,13 @@ make -k test_unit
 
 ### Integration tests
 
-Integration tests have a database and the dependency injection system.
+Integration tests have a database and the dependency injection system. Badaas-orm is tested on multiple databases. By default, the database used will be postgresql:
 
 ```sh
 make test_integration
 ```
+
+To run the tests on another database you can use: `make test_integration_postgresql`, `make test_integration_cockroachdb`, `make test_integration_mysql`, `make test_integration_sqlite`, `make test_integration_sqlserver`. All of them will be verified by our continuous integration system.
 
 ### Feature tests (end to end tests)
 

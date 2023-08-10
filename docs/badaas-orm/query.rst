@@ -161,15 +161,22 @@ Below you will find the complete list of available operators:
 - orm.IsNotNull()
 - orm.Between(v1, v2): Equivalent to v1 < attribute < v2
 - orm.NotBetween(v1, v2): Equivalent to NOT (v1 < attribute < v2)
-- orm.IsTrue()
-- orm.IsNotTrue()
-- orm.IsFalse()
-- orm.IsNotFalse()
-- orm.IsUnknown()
-- orm.IsNotUnknown()
-- orm.IsDistinct(value)
-- orm.IsNotDistinct(value)
+- orm.IsTrue() (Not supported by: sqlserver)
+- orm.IsNotTrue() (Not supported by: sqlserver)
+- orm.IsFalse() (Not supported by: sqlserver)
+- orm.IsNotFalse() (Not supported by: sqlserver)
+- orm.IsUnknown() (Not supported by: sqlserver, sqlite)
+- orm.IsNotUnknown() (Not supported by: sqlserver, sqlite)
+- orm.IsDistinct(value) (Not supported by: mysql)
+- orm.IsNotDistinct(value) (Not supported by: mysql)
 - orm.Like(pattern)
 - orm.Like(pattern).Escape(escape)
 - orm.ArrayIn(values)
 - orm.ArrayNotIn(values)
+
+In addition to these, badaas-orm gives the possibility to use operators 
+that are only supported by a certain database (outside the standard). 
+These operators can be found in <https://pkg.go.dev/github.com/ditrit/badaas/orm/mysql>, 
+<https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlserver>, 
+<https://pkg.go.dev/github.com/ditrit/badaas/orm/psql> 
+and <https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlite>.
