@@ -10,7 +10,10 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/dynamic"
 	"github.com/ditrit/badaas/orm/model"
+	"github.com/ditrit/badaas/orm/mysql"
 	"github.com/ditrit/badaas/orm/operator"
+	"github.com/ditrit/badaas/orm/psql"
+	"github.com/ditrit/badaas/orm/sqlite"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -538,6 +541,135 @@ func (ts *OperatorsIntTestSuite) TestLikeEscape() {
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestLikeOnNumeric() {
+	switch getDBDialector() {
+	case postgreSQL, sqlServer, sqLite:
+		log.Println("Like with numeric not compatible")
+	case mySQL:
+		match1 := ts.createProduct("", 10, 0, false, nil)
+		match2 := ts.createProduct("", 100, 0, false, nil)
+
+		ts.createProduct("", 20, 0, false, nil)
+		ts.createProduct("", 3, 0, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductInt(
+				mysql.Like[int]("1%"),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+	}
+}
+
+func (ts *OperatorsIntTestSuite) TestILike() {
+	switch getDBDialector() {
+	case mySQL, sqlServer, sqLite:
+		log.Println("ILike not compatible")
+	case postgreSQL:
+		match1 := ts.createProduct("basd", 0, 0, false, nil)
+		match2 := ts.createProduct("cape", 0, 0, false, nil)
+		match3 := ts.createProduct("bAsd", 0, 0, false, nil)
+
+		ts.createProduct("bbsd", 0, 0, false, nil)
+		ts.createProduct("bbasd", 0, 0, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductString(
+				psql.ILike("_a%"),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
+	}
+}
+
+func (ts *OperatorsIntTestSuite) TestSimilarTo() {
+	switch getDBDialector() {
+	case mySQL, sqlServer, sqLite:
+		log.Println("SimilarTo not compatible")
+	case postgreSQL:
+		match1 := ts.createProduct("abc", 0, 0, false, nil)
+		match2 := ts.createProduct("aabcc", 0, 0, false, nil)
+
+		ts.createProduct("aec", 0, 0, false, nil)
+		ts.createProduct("aaaaa", 0, 0, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductString(
+				psql.SimilarTo("%(b|d)%"),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+	}
+}
+
+func (ts *OperatorsIntTestSuite) TestPosixRegexCaseSensitive() {
+	match1 := ts.createProduct("ab", 0, 0, false, nil)
+	match2 := ts.createProduct("ax", 0, 0, false, nil)
+
+	ts.createProduct("bb", 0, 0, false, nil)
+	ts.createProduct("cx", 0, 0, false, nil)
+	ts.createProduct("AB", 0, 0, false, nil)
+
+	var posixRegexOperator operator.Operator[string]
+
+	switch getDBDialector() {
+	case sqlServer, mySQL:
+		log.Println("PosixRegex not compatible")
+	case postgreSQL:
+		posixRegexOperator = psql.POSIXMatch("^a(b|x)")
+	case sqLite:
+		posixRegexOperator = sqlite.Glob("a[bx]")
+	}
+
+	if posixRegexOperator != nil {
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductString(
+				posixRegexOperator,
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+	}
+}
+
+func (ts *OperatorsIntTestSuite) TestPosixRegexCaseInsensitive() {
+	match1 := ts.createProduct("ab", 0, 0, false, nil)
+	match2 := ts.createProduct("ax", 0, 0, false, nil)
+	match3 := ts.createProduct("AB", 0, 0, false, nil)
+
+	ts.createProduct("bb", 0, 0, false, nil)
+	ts.createProduct("cx", 0, 0, false, nil)
+
+	var posixRegexOperator operator.Operator[string]
+
+	switch getDBDialector() {
+	case sqlServer, sqLite:
+		log.Println("PosixRegex Case Insensitive not compatible")
+	case mySQL:
+		posixRegexOperator = mysql.RegexP("^a(b|x)")
+	case postgreSQL:
+		posixRegexOperator = psql.POSIXIMatch("^a(b|x)")
+	}
+
+	if posixRegexOperator != nil {
+		entities, err := ts.crudProductService.Query(
+			conditions.ProductString(
+				posixRegexOperator,
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
+	}
 }
 
 func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBasicType() {
