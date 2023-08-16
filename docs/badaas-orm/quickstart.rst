@@ -74,3 +74,9 @@ method with the models you want to be persisted:
       },
     )
   }
+
+Use it
+----------------------
+
+Now that you know how to integrate badaas-orm into your project, 
+you can learn how to use it by following the :doc:`tutorial`.

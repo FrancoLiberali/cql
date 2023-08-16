@@ -36,7 +36,7 @@ All contributions come through pull requests. To submit a proposed change, follo
 4. Install the necessary [development environment](developing.md#environment)
 5. Create your change and the corresponding [tests](developing.md#tests)
 6. Update relevant documentation for the change in `docs/`
-7. If changes are necessary in [BaDaaS example](https://github.com/ditrit/badaas-example) and [badaas-orm example](https://github.com/ditrit/badaas-orm-example), follow the same workflow there
+7. If changes are necessary in [BaDaaS example](https://github.com/ditrit/badaas-example), [badaas-orm quickstart](https://github.com/ditrit/badaas-orm-quickstart) and [badaas-orm tutorial](https://github.com/ditrit/badaas-orm-tutorial), follow the same workflow there
 8. Open a PR (and add links to the example repos' PR if they exist)
 9. Wait for the CI process to finish and make sure all checks are green
 10. A maintainer of the project will be assigned

@@ -31,3 +31,6 @@ Badaas-orm seeks to address these limitations with a query system that:
 - It is designed for high performance: 
   the query system avoids as much as possible the use of reflection and aims 
   that all the necessary model data can be retrieved in a single query to the database.
+
+To see how to start using badaas-orm in your project you can read the :doc:`quickstart`. 
+If you are interested in learning how to use the features provided by badaas-orm you can read the :doc:`tutorial`.
