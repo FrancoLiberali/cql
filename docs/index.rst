@@ -44,6 +44,7 @@ Learn how to use BaDaaS following the :doc:`badaas/quickstart`.
    :caption: Badaas-orm
 
    badaas-orm/index
+   badaas-orm/quickstart
    badaas-orm/concepts
    badaas-orm/declaring_models
    badaas-orm/connecting_to_a_database
