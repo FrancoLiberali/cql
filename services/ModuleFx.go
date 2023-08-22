@@ -3,8 +3,8 @@ package services
 import (
 	"go.uber.org/fx"
 
-	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/model"
+	"github.com/ditrit/badaas/persistence/gormfx"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/repository"
 	"github.com/ditrit/badaas/services/sessionservice"
@@ -24,8 +24,8 @@ var AuthServiceModule = fx.Module(
 	fx.Provide(sessionservice.NewSessionService),
 )
 
-func getAuthModels() orm.GetModelsResult {
-	return orm.GetModelsResult{
+func getAuthModels() gormfx.GetModelsResult {
+	return gormfx.GetModelsResult{
 		Models: []any{
 			models.Session{},
 			models.User{},

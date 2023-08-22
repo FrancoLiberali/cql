@@ -6,7 +6,7 @@ import (
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/persistence/gormfx"
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
@@ -28,8 +28,8 @@ var ListOfTables = []any{
 	models.Child{},
 }
 
-func GetModels() orm.GetModelsResult {
-	return orm.GetModelsResult{
+func GetModels() gormfx.GetModelsResult {
+	return gormfx.GetModelsResult{
 		Models: ListOfTables,
 	}
 }

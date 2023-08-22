@@ -17,6 +17,7 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/logger"
 	"github.com/ditrit/badaas/persistence/database"
+	"github.com/ditrit/badaas/persistence/gormfx"
 )
 
 var tGlobal *testing.T
@@ -48,7 +49,7 @@ func TestBaDaaSORM(t *testing.T) {
 		// connect to db
 		fx.Provide(NewDBConnection),
 		fx.Provide(GetModels),
-		orm.AutoMigrate,
+		gormfx.AutoMigrate,
 
 		// create test suites
 		fx.Provide(NewQueryIntTestSuite),

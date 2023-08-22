@@ -1,7 +1,9 @@
-package orm
+package gormfx
 
 import (
+	"github.com/elliotchance/pie/v2"
 	"go.uber.org/fx"
+	"gorm.io/gorm"
 )
 
 type GetModelsResult struct {
@@ -19,3 +21,12 @@ var AutoMigrate = fx.Module(
 		),
 	),
 )
+
+func autoMigrate(modelsLists [][]any, db *gorm.DB) error {
+	if len(modelsLists) > 0 {
+		allModels := pie.Flat(modelsLists)
+		return db.AutoMigrate(allModels...)
+	}
+
+	return nil
+}

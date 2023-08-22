@@ -3,8 +3,8 @@ package persistence
 import (
 	"go.uber.org/fx"
 
-	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/persistence/database"
+	"github.com/ditrit/badaas/persistence/gormfx"
 )
 
 // PersistanceModule for fx
@@ -18,5 +18,5 @@ var PersistanceModule = fx.Module(
 	// Database connection
 	fx.Provide(database.SetupDatabaseConnection),
 	// auto-migrate
-	orm.AutoMigrate,
+	gormfx.AutoMigrate,
 )
