@@ -135,3 +135,105 @@ func (ts *QueryIntTestSuite) TestTakeReturnsFirstCreatedEntityIfConditionsMatch(
 
 	ts.True(cmp.Equal(productReturned, product1) || cmp.Equal(productReturned, product2))
 }
+
+// ------------------------- Order --------------------------------
+
+func (ts *QueryIntTestSuite) TestAscendingReturnsResultsInAscendingOrder() {
+	product1 := ts.createProduct("", 1, 1.0, false, nil)
+	product2 := ts.createProduct("", 1, 2.0, false, nil)
+	products, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Ascending(conditions.Product.Float).Find()
+	ts.Nil(err)
+
+	ts.Len(products, 2)
+	assert.DeepEqual(ts.T(), product1, products[0])
+	assert.DeepEqual(ts.T(), product2, products[1])
+}
+
+func (ts *QueryIntTestSuite) TestDescendingReturnsResultsInDescendingOrder() {
+	product1 := ts.createProduct("", 1, 1.0, false, nil)
+	product2 := ts.createProduct("", 1, 2.0, false, nil)
+	products, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Descending(conditions.Product.Float).Find()
+	ts.Nil(err)
+
+	ts.Len(products, 2)
+	assert.DeepEqual(ts.T(), product2, products[0])
+	assert.DeepEqual(ts.T(), product1, products[1])
+}
+
+func (ts *QueryIntTestSuite) TestOrderByFieldThatIsJoined() {
+	product1 := ts.createProduct("", 0, 1.0, false, nil)
+	product2 := ts.createProduct("", 0, 2.0, false, nil)
+
+	sale1 := ts.createSale(0, product1, nil)
+	sale2 := ts.createSale(0, product2, nil)
+
+	sales, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.Product(),
+	).Descending(conditions.Product.Float).Find()
+	ts.Nil(err)
+
+	ts.Len(sales, 2)
+	assert.DeepEqual(ts.T(), sale2, sales[0])
+	assert.DeepEqual(ts.T(), sale1, sales[1])
+}
+
+func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsNotConcerned() {
+	_, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Descending(conditions.Seller.ID).Find()
+	ts.ErrorIs(err, errors.ErrFieldModelNotConcerned)
+	ts.ErrorContains(err, "not concerned model: models.Seller; method: Descending")
+}
+
+func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAndJoinIsNotSelected() {
+	_, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).Descending(conditions.ParentParent.ID).Find()
+	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
+	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; method: Descending")
+}
+
+func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndJoinIsSelected() {
+	parentParent1 := &models.ParentParent{Name: "a"}
+	parent11 := &models.Parent1{ParentParent: *parentParent1}
+	parent12 := &models.Parent2{ParentParent: *parentParent1}
+	child1 := &models.Child{Parent1: *parent11, Parent2: *parent12, Name: "franco"}
+	err := ts.db.Create(child1).Error
+	ts.Nil(err)
+
+	parentParent2 := &models.ParentParent{Name: "b"}
+	parent21 := &models.Parent1{ParentParent: *parentParent2}
+	parent22 := &models.Parent2{ParentParent: *parentParent2}
+	child2 := &models.Child{Parent1: *parent21, Parent2: *parent22, Name: "franco"}
+	err = ts.db.Create(child2).Error
+	ts.Nil(err)
+
+	children, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).Ascending(conditions.ParentParent.Name, 0).Find()
+	ts.Nil(err)
+
+	ts.Len(children, 2)
+	assert.DeepEqual(ts.T(), child1, children[0])
+	assert.DeepEqual(ts.T(), child2, children[1])
+}

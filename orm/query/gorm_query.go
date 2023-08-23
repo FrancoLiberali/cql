@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 
 	"github.com/ditrit/badaas/orm/model"
@@ -14,6 +15,50 @@ import (
 type GormQuery struct {
 	GormDB          *gorm.DB
 	ConcernedModels map[reflect.Type][]Table
+}
+
+// Order specify order when retrieving models from database.
+//
+// if descending is true, the ordering is in descending direction.
+//
+// joinNumber can be used to select the join in case the field is joined more than once.
+func (query *GormQuery) Order(field IFieldIdentifier, descending bool, joinNumber int) error {
+	table, err := query.GetModelTable(field, joinNumber)
+	if err != nil {
+		return err
+	}
+
+	switch query.GormDB.Dialector.Name() {
+	case "postgres":
+		// postgres supports only order by selected fields
+		query.AddSelect(table, field)
+		query.GormDB = query.GormDB.Order(
+			clause.OrderByColumn{
+				Column: clause.Column{
+					Name: query.getSelectAlias(table, field),
+				},
+				Desc: descending,
+			},
+		)
+
+		return nil
+	case "sqlserver", "sqlite", "mysql":
+		query.GormDB = query.GormDB.Order(
+			clause.OrderByColumn{
+				Column: clause.Column{
+					Name: field.ColumnSQL(
+						query,
+						table,
+					),
+				},
+				Desc: descending,
+			},
+		)
+
+		return nil
+	}
+
+	return nil
 }
 
 // First finds the first record ordered by primary key, matching given conditions
@@ -37,15 +82,22 @@ func (query *GormQuery) Find(dest any) error {
 }
 
 func (query *GormQuery) AddSelect(table Table, fieldID IFieldIdentifier) {
-	columnName := fieldID.ColumnName(query, table)
-
 	query.GormDB.Statement.Selects = append(
 		query.GormDB.Statement.Selects,
 		fmt.Sprintf(
-			"%[1]s.%[2]s AS \"%[1]s__%[2]s\"", // name used by gorm to load the fields inside the models
+			"%s.%s AS %s",
 			table.Alias,
-			columnName,
+			fieldID.ColumnName(query, table),
+			query.getSelectAlias(table, fieldID),
 		),
+	)
+}
+
+func (query *GormQuery) getSelectAlias(table Table, fieldID IFieldIdentifier) string {
+	return fmt.Sprintf(
+		"\"%[1]s__%[2]s\"", // name used by gorm to load the fields inside the models
+		table.Alias,
+		fieldID.ColumnName(query, table),
 	)
 }
 
@@ -82,6 +134,25 @@ func (query *GormQuery) GetTables(modelType reflect.Type) []Table {
 	}
 
 	return tableList
+}
+
+const UndefinedJoinNumber = -1
+
+func (query *GormQuery) GetModelTable(field IFieldIdentifier, joinNumber int) (Table, error) {
+	modelTables := query.GetTables(field.GetModelType())
+	if modelTables == nil {
+		return Table{}, fieldModelNotConcernedError(field)
+	}
+
+	if len(modelTables) == 1 {
+		return modelTables[0], nil
+	}
+
+	if joinNumber == UndefinedJoinNumber {
+		return Table{}, joinMustBeSelectedError(field)
+	}
+
+	return modelTables[joinNumber], nil
 }
 
 func (query GormQuery) ColumnName(table Table, fieldName string) string {
