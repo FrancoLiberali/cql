@@ -61,6 +61,20 @@ func (query *GormQuery) Order(field IFieldIdentifier, descending bool, joinNumbe
 	return nil
 }
 
+// Offset specify the number of records to skip before starting to return the records
+//
+// Offset conditions can be cancelled by using `Offset(-1)`.
+func (query *GormQuery) Offset(offset int) {
+	query.GormDB = query.GormDB.Offset(offset)
+}
+
+// Limit specify the number of records to be retrieved
+//
+// Limit conditions can be cancelled by using `Limit(-1)`
+func (query *GormQuery) Limit(limit int) {
+	query.GormDB = query.GormDB.Limit(limit)
+}
+
 // First finds the first record ordered by primary key, matching given conditions
 func (query *GormQuery) First(dest any) error {
 	return query.GormDB.First(dest).Error

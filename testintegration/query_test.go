@@ -237,3 +237,93 @@ func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndJoinIsS
 	assert.DeepEqual(ts.T(), child1, children[0])
 	assert.DeepEqual(ts.T(), child2, children[1])
 }
+
+// ------------------------- Limit --------------------------------
+
+func (ts *QueryIntTestSuite) TestLimitLimitsTheAmountOfModelsReturned() {
+	product1 := ts.createProduct("", 1, 0, false, nil)
+	product2 := ts.createProduct("", 1, 0, false, nil)
+	products, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Limit(1).Find()
+	ts.Nil(err)
+
+	ts.Len(products, 1)
+	ts.True(cmp.Equal(products[0], product1) || cmp.Equal(products[0], product2))
+}
+
+func (ts *QueryIntTestSuite) TestLimitCanBeCanceled() {
+	product1 := ts.createProduct("", 1, 0, false, nil)
+	product2 := ts.createProduct("", 1, 0, false, nil)
+	products, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Limit(1).Limit(-1).Find()
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1, product2}, products)
+}
+
+// ------------------------- Offset --------------------------------
+
+func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
+	ts.createProduct("", 1, 1, false, nil)
+	product2 := ts.createProduct("", 1, 2, false, nil)
+
+	switch getDBDialector() {
+	case postgreSQL, sqlServer, sqLite:
+		products, err := orm.NewQuery[models.Product](
+			ts.db,
+			conditions.Product.IntIs().Eq(1),
+		).Ascending(conditions.Product.Float).Offset(1).Find()
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{product2}, products)
+	case mySQL:
+		products, err := orm.NewQuery[models.Product](
+			ts.db,
+			conditions.Product.IntIs().Eq(1),
+		).Ascending(conditions.Product.Float).Offset(1).Limit(10).Find()
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{product2}, products)
+	}
+}
+
+func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
+	ts.createProduct("", 1, 0, false, nil)
+	ts.createProduct("", 1, 0, false, nil)
+
+	switch getDBDialector() {
+	case postgreSQL, sqlServer, sqLite:
+		products, err := orm.NewQuery[models.Product](
+			ts.db,
+			conditions.Product.IntIs().Eq(1),
+		).Offset(2).Find()
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{}, products)
+	case mySQL:
+		products, err := orm.NewQuery[models.Product](
+			ts.db,
+			conditions.Product.IntIs().Eq(1),
+		).Offset(2).Limit(10).Find()
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{}, products)
+	}
+}
+
+func (ts *QueryIntTestSuite) TestOffsetAndLimitWorkTogether() {
+	ts.createProduct("", 1, 1, false, nil)
+	product2 := ts.createProduct("", 1, 2, false, nil)
+	ts.createProduct("", 1, 3, false, nil)
+	products, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Ascending(conditions.Product.Float).Offset(1).Limit(1).Find()
+	ts.Nil(err)
+
+	EqualList(&ts.Suite, []*models.Product{product2}, products)
+}

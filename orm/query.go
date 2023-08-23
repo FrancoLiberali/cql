@@ -51,6 +51,26 @@ func getJoinNumber(joinNumberList []uint) int {
 	return int(joinNumberList[0])
 }
 
+// Limit specify the number of models to be retrieved
+//
+// Limit conditions can be cancelled by using `Limit(-1)`
+func (query *Query[T]) Limit(limit int) *Query[T] {
+	query.gormQuery.Limit(limit)
+
+	return query
+}
+
+// Offset specify the number of models to skip before starting to return the results
+//
+// Offset conditions can be cancelled by using `Offset(-1)`
+//
+// Warning: in MySQL Offset can only be used if Limit is also used
+func (query *Query[T]) Offset(offset int) *Query[T] {
+	query.gormQuery.Offset(offset)
+
+	return query
+}
+
 // First finds the first model ordered by primary key, matching given conditions
 // or returns gorm.ErrRecordNotFound is if no model does it
 func (query *Query[T]) First() (*T, error) {
