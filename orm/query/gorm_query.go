@@ -16,6 +16,21 @@ type GormQuery struct {
 	ConcernedModels map[reflect.Type][]Table
 }
 
+// First finds the first record ordered by primary key, matching given conditions
+func (query *GormQuery) First(dest any) error {
+	return query.GormDB.First(dest).Error
+}
+
+// Take finds the first record returned by the database in no specified order, matching given conditions
+func (query *GormQuery) Take(dest any) error {
+	return query.GormDB.Take(dest).Error
+}
+
+// Last finds the last record ordered by primary key, matching given conditions
+func (query *GormQuery) Last(dest any) error {
+	return query.GormDB.Last(dest).Error
+}
+
 // Find finds all models matching given conditions
 func (query *GormQuery) Find(dest any) error {
 	return query.GormDB.Find(dest).Error

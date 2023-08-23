@@ -14,6 +14,42 @@ type Query[T model.Model] struct {
 	err       error
 }
 
+// First finds the first model ordered by primary key, matching given conditions
+// or returns gorm.ErrRecordNotFound is if no model does it
+func (query *Query[T]) First() (*T, error) {
+	if query.err != nil {
+		return nil, query.err
+	}
+
+	var model *T
+
+	return model, query.gormQuery.First(&model)
+}
+
+// Take finds the first model returned by the database in no specified order, matching given conditions
+// or returns gorm.ErrRecordNotFound is if no model does it
+func (query *Query[T]) Take() (*T, error) {
+	if query.err != nil {
+		return nil, query.err
+	}
+
+	var model *T
+
+	return model, query.gormQuery.Take(&model)
+}
+
+// Last finds the last model ordered by primary key, matching given conditions
+// or returns gorm.ErrRecordNotFound is if no model does it
+func (query *Query[T]) Last() (*T, error) {
+	if query.err != nil {
+		return nil, query.err
+	}
+
+	var model *T
+
+	return model, query.gormQuery.Last(&model)
+}
+
 // FindOne finds the only one model that matches given conditions
 // or returns error if 0 or more than 1 are found.
 func (query *Query[T]) FindOne() (*T, error) {
