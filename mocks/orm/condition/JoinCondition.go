@@ -15,11 +15,11 @@ type JoinCondition[T model.Model] struct {
 }
 
 // ApplyTo provides a mock function with given fields: _a0, _a1
-func (_m *JoinCondition[T]) ApplyTo(_a0 *query.Query, _a1 query.Table) error {
+func (_m *JoinCondition[T]) ApplyTo(_a0 *query.GormQuery, _a1 query.Table) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*query.Query, query.Table) error); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, query.Table) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)

@@ -22,7 +22,7 @@ func (condition fieldCondition[TObject, TAtribute]) InterfaceVerificationMethod(
 
 // Returns a gorm Where condition that can be used
 // to filter that the Field as a value of Value
-func (condition fieldCondition[TObject, TAtribute]) ApplyTo(query *query.Query, table query.Table) error {
+func (condition fieldCondition[TObject, TAtribute]) ApplyTo(query *query.GormQuery, table query.Table) error {
 	return ApplyWhereCondition[TObject](condition, query, table)
 }
 
@@ -30,7 +30,7 @@ func (condition fieldCondition[TObject, TAtribute]) AffectsDeletedAt() bool {
 	return condition.FieldIdentifier.Field == deletedAtField
 }
 
-func (condition fieldCondition[TObject, TAtribute]) GetSQL(query *query.Query, table query.Table) (string, []any, error) {
+func (condition fieldCondition[TObject, TAtribute]) GetSQL(query *query.GormQuery, table query.Table) (string, []any, error) {
 	sqlString, values, err := condition.Operator.ToSQL(
 		query,
 		condition.FieldIdentifier.ColumnSQL(query, table),

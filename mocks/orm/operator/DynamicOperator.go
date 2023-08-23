@@ -36,22 +36,22 @@ func (_m *DynamicOperator[T]) SelectJoin(valueNumber uint, joinNumber uint) oper
 }
 
 // ToSQL provides a mock function with given fields: _a0, columnName
-func (_m *DynamicOperator[T]) ToSQL(_a0 *query.Query, columnName string) (string, []interface{}, error) {
+func (_m *DynamicOperator[T]) ToSQL(_a0 *query.GormQuery, columnName string) (string, []interface{}, error) {
 	ret := _m.Called(_a0, columnName)
 
 	var r0 string
 	var r1 []interface{}
 	var r2 error
-	if rf, ok := ret.Get(0).(func(*query.Query, string) (string, []interface{}, error)); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, string) (string, []interface{}, error)); ok {
 		return rf(_a0, columnName)
 	}
-	if rf, ok := ret.Get(0).(func(*query.Query, string) string); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, string) string); ok {
 		r0 = rf(_a0, columnName)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(*query.Query, string) []interface{}); ok {
+	if rf, ok := ret.Get(1).(func(*query.GormQuery, string) []interface{}); ok {
 		r1 = rf(_a0, columnName)
 	} else {
 		if ret.Get(1) != nil {
@@ -59,7 +59,7 @@ func (_m *DynamicOperator[T]) ToSQL(_a0 *query.Query, columnName string) (string
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(*query.Query, string) error); ok {
+	if rf, ok := ret.Get(2).(func(*query.GormQuery, string) error); ok {
 		r2 = rf(_a0, columnName)
 	} else {
 		r2 = ret.Error(2)

@@ -15,11 +15,11 @@ type IFieldIdentifier struct {
 }
 
 // ColumnName provides a mock function with given fields: _a0, table
-func (_m *IFieldIdentifier) ColumnName(_a0 *query.Query, table query.Table) string {
+func (_m *IFieldIdentifier) ColumnName(_a0 *query.GormQuery, table query.Table) string {
 	ret := _m.Called(_a0, table)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(*query.Query, query.Table) string); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, query.Table) string); ok {
 		r0 = rf(_a0, table)
 	} else {
 		r0 = ret.Get(0).(string)
@@ -29,11 +29,11 @@ func (_m *IFieldIdentifier) ColumnName(_a0 *query.Query, table query.Table) stri
 }
 
 // ColumnSQL provides a mock function with given fields: _a0, table
-func (_m *IFieldIdentifier) ColumnSQL(_a0 *query.Query, table query.Table) string {
+func (_m *IFieldIdentifier) ColumnSQL(_a0 *query.GormQuery, table query.Table) string {
 	ret := _m.Called(_a0, table)
 
 	var r0 string
-	if rf, ok := ret.Get(0).(func(*query.Query, query.Table) string); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, query.Table) string); ok {
 		r0 = rf(_a0, table)
 	} else {
 		r0 = ret.Get(0).(string)

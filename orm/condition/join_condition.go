@@ -75,7 +75,7 @@ func (condition joinConditionImpl[T1, T2]) makesFilter() bool {
 // Applies a join between the tables of T1 and T2
 // previousTableName is the name of the table of T1
 // It also applies the nested conditions
-func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.Query, t1Table query.Table) error {
+func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.GormQuery, t1Table query.Table) error {
 	whereConditions, joinConditions, t2PreloadCondition := divideConditionsByType(condition.Conditions)
 
 	t2Model := *new(T2)
@@ -156,7 +156,7 @@ func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.Query, t1Table q
 // taking into account that the ID attribute necessary to do it
 // can be either in T1's or T2's table.
 func (condition joinConditionImpl[T1, T2]) getSQLJoin(
-	query *query.Query,
+	query *query.GormQuery,
 	t1Table query.Table,
 	t2Table query.Table,
 	isLeftJoin bool,
