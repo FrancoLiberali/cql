@@ -17,7 +17,6 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/logger"
 	"github.com/ditrit/badaas/persistence/database"
-	"github.com/ditrit/badaas/testintegration/models"
 )
 
 var tGlobal *testing.T
@@ -51,21 +50,8 @@ func TestBaDaaSORM(t *testing.T) {
 		fx.Provide(GetModels),
 		orm.AutoMigrate,
 
-		// create crud services for models
-		orm.GetCRUDServiceModule[models.Seller](),
-		orm.GetCRUDServiceModule[models.Company](),
-		orm.GetCRUDServiceModule[models.Product](),
-		orm.GetCRUDServiceModule[models.Sale](),
-		orm.GetCRUDServiceModule[models.City](),
-		orm.GetCRUDServiceModule[models.Country](),
-		orm.GetCRUDServiceModule[models.Employee](),
-		orm.GetCRUDServiceModule[models.Bicycle](),
-		orm.GetCRUDServiceModule[models.Phone](),
-		orm.GetCRUDServiceModule[models.Brand](),
-		orm.GetCRUDServiceModule[models.Child](),
-
 		// create test suites
-		fx.Provide(NewCRUDRepositoryIntTestSuite),
+		fx.Provide(NewQueryIntTestSuite),
 		fx.Provide(NewWhereConditionsIntTestSuite),
 		fx.Provide(NewJoinConditionsIntTestSuite),
 		fx.Provide(NewPreloadConditionsIntTestSuite),
@@ -77,14 +63,14 @@ func TestBaDaaSORM(t *testing.T) {
 }
 
 func runORMTestSuites(
-	tsCRUDRepository *CRUDRepositoryIntTestSuite,
+	tsQuery *QueryIntTestSuite,
 	tsWhereConditions *WhereConditionsIntTestSuite,
 	tsJoinConditions *JoinConditionsIntTestSuite,
 	tsPreloadConditions *PreloadConditionsIntTestSuite,
 	tsOperators *OperatorsIntTestSuite,
 	shutdowner fx.Shutdowner,
 ) {
-	suite.Run(tGlobal, tsCRUDRepository)
+	suite.Run(tGlobal, tsQuery)
 	suite.Run(tGlobal, tsWhereConditions)
 	suite.Run(tGlobal, tsJoinConditions)
 	suite.Run(tGlobal, tsPreloadConditions)

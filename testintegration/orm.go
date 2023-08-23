@@ -8,20 +8,20 @@ import (
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
-type CRUDServiceCommonIntTestSuite struct {
+type ORMIntTestSuite struct {
 	suite.Suite
 	db *gorm.DB
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) SetupTest() {
+func (ts *ORMIntTestSuite) SetupTest() {
 	CleanDB(ts.db)
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) TearDownSuite() {
+func (ts *ORMIntTestSuite) TearDownSuite() {
 	CleanDB(ts.db)
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createProduct(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.Product {
+func (ts *ORMIntTestSuite) createProduct(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.Product {
 	entity := &models.Product{
 		String:     stringV,
 		Int:        intV,
@@ -35,7 +35,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createProduct(stringV string, intV int,
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createSale(code int, product *models.Product, seller *models.Seller) *models.Sale {
+func (ts *ORMIntTestSuite) createSale(code int, product *models.Product, seller *models.Seller) *models.Sale {
 	entity := &models.Sale{
 		Code:    code,
 		Product: *product,
@@ -47,7 +47,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createSale(code int, product *models.Pr
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createSeller(name string, company *models.Company) *models.Seller {
+func (ts *ORMIntTestSuite) createSeller(name string, company *models.Company) *models.Seller {
 	var companyID *model.UUID
 	if company != nil {
 		companyID = &company.ID
@@ -63,7 +63,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createSeller(name string, company *mode
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createCompany(name string) *models.Company {
+func (ts *ORMIntTestSuite) createCompany(name string) *models.Company {
 	entity := &models.Company{
 		Name: name,
 	}
@@ -73,7 +73,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createCompany(name string) *models.Comp
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createCountry(name string, capital models.City) *models.Country {
+func (ts *ORMIntTestSuite) createCountry(name string, capital models.City) *models.Country {
 	entity := &models.Country{
 		Name:    name,
 		Capital: capital,
@@ -84,7 +84,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createCountry(name string, capital mode
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createEmployee(name string, boss *models.Employee) *models.Employee {
+func (ts *ORMIntTestSuite) createEmployee(name string, boss *models.Employee) *models.Employee {
 	entity := &models.Employee{
 		Name: name,
 		Boss: boss,
@@ -95,7 +95,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createEmployee(name string, boss *model
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createBicycle(name string, owner models.Person) *models.Bicycle {
+func (ts *ORMIntTestSuite) createBicycle(name string, owner models.Person) *models.Bicycle {
 	entity := &models.Bicycle{
 		Name:  name,
 		Owner: owner,
@@ -106,7 +106,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createBicycle(name string, owner models
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createBrand(name string) *models.Brand {
+func (ts *ORMIntTestSuite) createBrand(name string) *models.Brand {
 	entity := &models.Brand{
 		Name: name,
 	}
@@ -116,7 +116,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createBrand(name string) *models.Brand 
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createPhone(name string, brand models.Brand) *models.Phone {
+func (ts *ORMIntTestSuite) createPhone(name string, brand models.Brand) *models.Phone {
 	entity := &models.Phone{
 		Name:  name,
 		Brand: brand,
@@ -127,7 +127,7 @@ func (ts *CRUDServiceCommonIntTestSuite) createPhone(name string, brand models.B
 	return entity
 }
 
-func (ts *CRUDServiceCommonIntTestSuite) createUniversity(name string) *models.University {
+func (ts *ORMIntTestSuite) createUniversity(name string) *models.University {
 	entity := &models.University{
 		Name: name,
 	}

@@ -6,47 +6,22 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/dynamic"
 	"github.com/ditrit/badaas/orm/errors"
-	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
 type JoinConditionsIntTestSuite struct {
-	CRUDServiceCommonIntTestSuite
-	crudSaleService     orm.CRUDService[models.Sale, model.UUID]
-	crudSellerService   orm.CRUDService[models.Seller, model.UUID]
-	crudCountryService  orm.CRUDService[models.Country, model.UUID]
-	crudCityService     orm.CRUDService[models.City, model.UUID]
-	crudEmployeeService orm.CRUDService[models.Employee, model.UUID]
-	crudBicycleService  orm.CRUDService[models.Bicycle, model.UUID]
-	crudPhoneService    orm.CRUDService[models.Phone, model.UIntID]
-	crudChildService    orm.CRUDService[models.Child, model.UUID]
+	ORMIntTestSuite
 }
 
 func NewJoinConditionsIntTestSuite(
 	db *gorm.DB,
-	crudSaleService orm.CRUDService[models.Sale, model.UUID],
-	crudSellerService orm.CRUDService[models.Seller, model.UUID],
-	crudCountryService orm.CRUDService[models.Country, model.UUID],
-	crudCityService orm.CRUDService[models.City, model.UUID],
-	crudEmployeeService orm.CRUDService[models.Employee, model.UUID],
-	crudBicycleService orm.CRUDService[models.Bicycle, model.UUID],
-	crudPhoneService orm.CRUDService[models.Phone, model.UIntID],
-	crudChildService orm.CRUDService[models.Child, model.UUID],
 ) *JoinConditionsIntTestSuite {
 	return &JoinConditionsIntTestSuite{
-		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
+		ORMIntTestSuite: ORMIntTestSuite{
 			db: db,
 		},
-		crudSaleService:     crudSaleService,
-		crudSellerService:   crudSellerService,
-		crudCountryService:  crudCountryService,
-		crudCityService:     crudCityService,
-		crudEmployeeService: crudEmployeeService,
-		crudBicycleService:  crudBicycleService,
-		crudPhoneService:    crudPhoneService,
-		crudChildService:    crudChildService,
 	}
 }
 
@@ -57,11 +32,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsUintBelongsTo() {
 	match := ts.createPhone("pixel", *brand1)
 	ts.createPhone("iphone", *brand2)
 
-	entities, err := ts.crudPhoneService.Query(
+	entities, err := orm.NewQuery[models.Phone](
+		ts.db,
 		conditions.PhoneBrand(
 			conditions.BrandName(orm.Eq("google")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Phone{match}, entities)
@@ -74,11 +50,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsBelongsTo() {
 	match := ts.createSale(0, product1, nil)
 	ts.createSale(0, product2, nil)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			conditions.ProductInt(orm.Eq(1)),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -95,12 +72,13 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersTheMainEnt
 	ts.createSale(2, product2, seller2)
 	ts.createSale(2, product1, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleCode(orm.Eq(1)),
 		conditions.SaleProduct(
 			conditions.ProductInt(orm.Eq(1)),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -116,11 +94,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneOptional() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleSeller(
 			conditions.SellerName(orm.Eq("franco")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -137,11 +116,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneSelfReferentia
 	match := ts.createEmployee("franco", boss1)
 	ts.createEmployee("pierre", boss2)
 
-	entities, err := ts.crudEmployeeService.Query(
+	entities, err := orm.NewQuery[models.Employee](
+		ts.db,
 		conditions.EmployeeBoss(
 			conditions.EmployeeName(orm.Eq("Xavier")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Employee{match}, entities)
@@ -158,11 +138,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOne() {
 	ts.createCountry("Argentina", capital1)
 	ts.createCountry("France", capital2)
 
-	entities, err := ts.crudCityService.Query(
+	entities, err := orm.NewQuery[models.City](
+		ts.db,
 		conditions.CityCountry(
 			conditions.CountryName(orm.Eq("Argentina")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
@@ -179,11 +160,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOneReversed() {
 	country1 := ts.createCountry("Argentina", capital1)
 	ts.createCountry("France", capital2)
 
-	entities, err := ts.crudCountryService.Query(
+	entities, err := orm.NewQuery[models.Country](
+		ts.db,
 		conditions.CountryCapital(
 			conditions.CityName(orm.Eq("Buenos Aires")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Country{country1}, entities)
@@ -200,11 +182,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsWithEntityThatDefine
 	match := ts.createBicycle("BMX", person1)
 	ts.createBicycle("Shimano", person2)
 
-	entities, err := ts.crudBicycleService.Query(
+	entities, err := orm.NewQuery[models.Bicycle](
+		ts.db,
 		conditions.BicycleOwner(
 			conditions.PersonName(orm.Eq("franco")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Bicycle{match}, entities)
@@ -217,11 +200,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnHasMany() {
 	match := ts.createSeller("franco", company1)
 	ts.createSeller("agustin", company2)
 
-	entities, err := ts.crudSellerService.Query(
+	entities, err := orm.NewQuery[models.Seller](
+		ts.db,
 		conditions.SellerCompany(
 			conditions.CompanyName(orm.Eq("ditrit")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Seller{match}, entities)
@@ -237,12 +221,13 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDifferentAttribute
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			conditions.ProductInt(orm.Eq(1)),
 			conditions.ProductString(orm.Eq("match")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -260,11 +245,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAddsDeletedAtAutomat
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			conditions.ProductString(orm.Eq("match")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -282,11 +268,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDeletedAt() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			conditions.ProductDeletedAt(orm.Eq(product1.DeletedAt.Time)),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -300,11 +287,12 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersByNil() {
 	match := ts.createSale(0, product1, nil)
 	ts.createSale(0, product2, nil)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			conditions.ProductIntPointer(orm.IsNull[int]()),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -322,14 +310,15 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsDifferentEntities() 
 	ts.createSale(0, product1, seller2)
 	ts.createSale(0, product2, seller1)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			conditions.ProductInt(orm.Eq(1)),
 		),
 		conditions.SaleSeller(
 			conditions.SellerName(orm.Eq("franco")),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -348,14 +337,15 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsMultipleTimes() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleSeller(
 			conditions.SellerName(orm.Eq("franco")),
 			conditions.SellerCompany(
 				conditions.CompanyName(orm.Eq("ditrit")),
 			),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -374,13 +364,14 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithUnsafeCondition() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleSeller(
 			conditions.SellerCompany(
 				unsafe.NewCondition[models.Company]("%s.name = Seller.name"),
 			),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -393,22 +384,24 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyConnectionConditionMakesN
 	match1 := ts.createSale(0, product1, nil)
 	match2 := ts.createSale(0, product2, nil)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			orm.And[models.Product](),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match1, match2}, entities)
 }
 
 func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturnsError() {
-	_, err := ts.crudSaleService.Query(
+	_, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleProduct(
 			orm.Not[models.Product](),
 		),
-	)
+	).Find()
 	ts.ErrorIs(err, errors.ErrEmptyConditions)
 	ts.ErrorContains(err, "connector: Not; model: models.Product")
 }
@@ -420,13 +413,14 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
 	seller1 := ts.createSeller("ditrit", company1)
 	ts.createSeller("agustin", company2)
 
-	entities, err := ts.crudSellerService.Query(
+	entities, err := orm.NewQuery[models.Seller](
+		ts.db,
 		conditions.SellerCompany(
 			conditions.CompanyName(
 				dynamic.Eq(conditions.SellerNameField),
 			),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Seller{seller1}, entities)
@@ -445,7 +439,8 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := ts.crudSaleService.Query(
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
 		conditions.SaleSeller(
 			conditions.SellerCompany(
 				conditions.CompanyName(
@@ -453,22 +448,24 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 				),
 			),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
 
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelReturnsError() {
-	_, err := ts.crudChildService.Query(
+	_, err := orm.NewQuery[models.Child](
+		ts.db,
 		conditions.ChildId(dynamic.Eq(conditions.ParentParentIdField)),
-	)
+	).Find()
 	ts.ErrorIs(err, errors.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinReturnsError() {
-	_, err := ts.crudChildService.Query(
+	_, err := orm.NewQuery[models.Child](
+		ts.db,
 		conditions.ChildParent1(
 			conditions.Parent1ParentParent(),
 		),
@@ -476,7 +473,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 			conditions.Parent2ParentParent(),
 		),
 		conditions.ChildId(dynamic.Eq(conditions.ParentParentIdField)),
-	)
+	).Find()
 	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
@@ -489,7 +486,8 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 	err := ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudChildService.Query(
+	entities, err := orm.NewQuery[models.Child](
+		ts.db,
 		conditions.ChildParent1(
 			conditions.Parent1ParentParent(),
 		),
@@ -499,14 +497,15 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 		conditions.ChildName(
 			dynamic.Eq(conditions.ParentParentNameField).SelectJoin(0, 0),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
 }
 
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinOnMultivalueOperatorReturnsError() {
-	_, err := ts.crudChildService.Query(
+	_, err := orm.NewQuery[models.Child](
+		ts.db,
 		conditions.ChildParent1(
 			conditions.Parent1ParentParent(),
 		),
@@ -516,7 +515,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		conditions.ChildId(
 			dynamic.Between(conditions.ParentParentIdField, conditions.ParentParentIdField),
 		),
-	)
+	).Find()
 	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Between; model: models.Child, field: ID")
 }

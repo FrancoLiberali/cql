@@ -10,9 +10,9 @@ import (
 
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/httperrors"
-	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
+	"github.com/ditrit/badaas/persistence/repository"
 )
 
 // Errors
@@ -37,7 +37,7 @@ var _ SessionService = (*sessionServiceImpl)(nil)
 
 // The SessionService concrete interface
 type sessionServiceImpl struct {
-	sessionRepository    orm.CRUDRepository[models.Session, model.UUID]
+	sessionRepository    repository.CRUD[models.Session, model.UUID]
 	cache                map[model.UUID]*models.Session
 	mutex                sync.Mutex
 	logger               *zap.Logger
@@ -48,7 +48,7 @@ type sessionServiceImpl struct {
 // The SessionService constructor
 func NewSessionService(
 	logger *zap.Logger,
-	sessionRepository orm.CRUDRepository[models.Session, model.UUID],
+	sessionRepository repository.CRUD[models.Session, model.UUID],
 	sessionConfiguration configuration.SessionConfiguration,
 	db *gorm.DB,
 ) SessionService {
@@ -133,7 +133,7 @@ func (sessionService *sessionServiceImpl) pullFromDB() {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
 
-	sessionsFromDatabase, err := sessionService.sessionRepository.Query(sessionService.db)
+	sessionsFromDatabase, err := sessionService.sessionRepository.Find(sessionService.db)
 	if err != nil {
 		panic(err)
 	}

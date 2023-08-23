@@ -11,6 +11,7 @@ import (
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/models/dto"
+	"github.com/ditrit/badaas/persistence/repository"
 	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
 	"github.com/ditrit/badaas/utils/validators"
 )
@@ -28,7 +29,7 @@ var _ UserService = (*userServiceImpl)(nil)
 
 // The UserService concrete implementation
 type userServiceImpl struct {
-	userRepository orm.CRUDRepository[models.User, model.UUID]
+	userRepository repository.CRUD[models.User, model.UUID]
 	logger         *zap.Logger
 	db             *gorm.DB
 }
@@ -36,7 +37,7 @@ type userServiceImpl struct {
 // UserService constructor
 func NewUserService(
 	logger *zap.Logger,
-	userRepository orm.CRUDRepository[models.User, model.UUID],
+	userRepository repository.CRUD[models.User, model.UUID],
 	db *gorm.DB,
 ) UserService {
 	return &userServiceImpl{
@@ -75,7 +76,7 @@ func (userService *userServiceImpl) NewUser(username, email, password string) (*
 
 // Get user if the email and password provided are correct, return an error if not.
 func (userService *userServiceImpl) GetUser(userLoginDTO dto.UserLoginDTO) (*models.User, error) {
-	user, err := userService.userRepository.QueryOne(
+	user, err := userService.userRepository.FindOne(
 		userService.db,
 		models.UserEmailCondition(orm.Eq(userLoginDTO.Email)),
 	)
