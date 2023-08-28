@@ -7,9 +7,9 @@ import (
 	"go.uber.org/zap"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
+	"github.com/ditrit/badaas/persistence/models/conditions"
 	"github.com/ditrit/badaas/persistence/models/dto"
 	"github.com/ditrit/badaas/persistence/repository"
 	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
@@ -78,7 +78,7 @@ func (userService *userServiceImpl) NewUser(username, email, password string) (*
 func (userService *userServiceImpl) GetUser(userLoginDTO dto.UserLoginDTO) (*models.User, error) {
 	user, err := userService.userRepository.FindOne(
 		userService.db,
-		models.UserEmailCondition(orm.Eq(userLoginDTO.Email)),
+		conditions.User.EmailIs().Eq(userLoginDTO.Email),
 	)
 	if err != nil {
 		return nil, err

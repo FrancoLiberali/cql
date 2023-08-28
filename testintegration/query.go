@@ -38,7 +38,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := orm.NewQuery[models.Product](
 		ts.db,
-		conditions.ProductInt(orm.Eq(1)),
+		conditions.Product.IntIs().Eq(1),
 	).FindOne()
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
@@ -47,7 +47,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsEntityIfConditionsMatch() {
 	product := ts.createProduct("", 1, 0, false, nil)
 	productReturned, err := orm.NewQuery[models.Product](
 		ts.db,
-		conditions.ProductInt(orm.Eq(1)),
+		conditions.Product.IntIs().Eq(1),
 	).FindOne()
 	ts.Nil(err)
 
@@ -59,7 +59,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfMoreThanOneMatchConditions
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := orm.NewQuery[models.Product](
 		ts.db,
-		conditions.ProductInt(orm.Eq(0)),
+		conditions.Product.IntIs().Eq(0),
 	).FindOne()
 	ts.Error(err, errors.ErrMoreThanOneObjectFound)
 }

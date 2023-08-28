@@ -42,11 +42,20 @@ func (condition fieldCondition[TObject, TAtribute]) GetSQL(query *query.GormQuer
 	return sqlString, values, nil
 }
 
+func (condition *fieldCondition[TObject, TAtribute]) SelectJoin(operationNumber, joinNumber uint) DynamicCondition[TObject] {
+	dynamicOperator, isDynamic := condition.Operator.(operator.DynamicOperator[TAtribute])
+	if isDynamic {
+		condition.Operator = dynamicOperator.SelectJoin(operationNumber, joinNumber)
+	}
+
+	return condition
+}
+
 func NewFieldCondition[TObject model.Model, TAtribute any](
 	fieldIdentifier query.FieldIdentifier[TAtribute],
 	operator operator.Operator[TAtribute],
-) WhereCondition[TObject] {
-	return fieldCondition[TObject, TAtribute]{
+) DynamicCondition[TObject] {
+	return &fieldCondition[TObject, TAtribute]{
 		FieldIdentifier: fieldIdentifier,
 		Operator:        operator,
 	}

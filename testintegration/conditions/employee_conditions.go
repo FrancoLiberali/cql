@@ -2,9 +2,9 @@
 package conditions
 
 import (
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
@@ -12,63 +12,74 @@ import (
 )
 
 var employeeType = reflect.TypeOf(*new(models.Employee))
-var EmployeeIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: employeeType,
+
+func (employeeConditions employeeConditions) IdIs() orm.FieldIs[models.Employee, model.UUID] {
+	return orm.FieldIs[models.Employee, model.UUID]{FieldID: employeeConditions.ID}
+}
+func (employeeConditions employeeConditions) CreatedAtIs() orm.FieldIs[models.Employee, time.Time] {
+	return orm.FieldIs[models.Employee, time.Time]{FieldID: employeeConditions.CreatedAt}
+}
+func (employeeConditions employeeConditions) UpdatedAtIs() orm.FieldIs[models.Employee, time.Time] {
+	return orm.FieldIs[models.Employee, time.Time]{FieldID: employeeConditions.UpdatedAt}
+}
+func (employeeConditions employeeConditions) DeletedAtIs() orm.FieldIs[models.Employee, time.Time] {
+	return orm.FieldIs[models.Employee, time.Time]{FieldID: employeeConditions.DeletedAt}
+}
+func (employeeConditions employeeConditions) NameIs() orm.StringFieldIs[models.Employee] {
+	return orm.StringFieldIs[models.Employee]{FieldIs: orm.FieldIs[models.Employee, string]{FieldID: employeeConditions.Name}}
+}
+func (employeeConditions employeeConditions) Boss(conditions ...condition.Condition[models.Employee]) condition.JoinCondition[models.Employee] {
+	return condition.NewJoinCondition[models.Employee, models.Employee](conditions, "Boss", "BossID", employeeConditions.Preload(), "ID")
+}
+func (employeeConditions employeeConditions) PreloadBoss() condition.JoinCondition[models.Employee] {
+	return employeeConditions.Boss(Employee.Preload())
+}
+func (employeeConditions employeeConditions) BossIdIs() orm.FieldIs[models.Employee, model.UUID] {
+	return orm.FieldIs[models.Employee, model.UUID]{FieldID: employeeConditions.BossID}
 }
 
-func EmployeeId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Employee] {
-	return condition.NewFieldCondition[models.Employee, model.UUID](EmployeeIdField, operator)
+type employeeConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
+	Name      query.FieldIdentifier[string]
+	BossID    query.FieldIdentifier[model.UUID]
 }
 
-var EmployeeCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: employeeType,
+var Employee = employeeConditions{
+	BossID: query.FieldIdentifier[model.UUID]{
+		Field:     "BossID",
+		ModelType: employeeType,
+	},
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: employeeType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: employeeType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: employeeType,
+	},
+	Name: query.FieldIdentifier[string]{
+		Field:     "Name",
+		ModelType: employeeType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: employeeType,
+	},
 }
 
-func EmployeeCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Employee] {
-	return condition.NewFieldCondition[models.Employee, time.Time](EmployeeCreatedAtField, operator)
+// Preload allows preloading the Employee when doing a query
+func (employeeConditions employeeConditions) Preload() condition.Condition[models.Employee] {
+	return condition.NewPreloadCondition[models.Employee](employeeConditions.ID, employeeConditions.CreatedAt, employeeConditions.UpdatedAt, employeeConditions.DeletedAt, employeeConditions.Name, employeeConditions.BossID)
 }
 
-var EmployeeUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: employeeType,
+// PreloadRelations allows preloading all the Employee's relation when doing a query
+func (employeeConditions employeeConditions) PreloadRelations() []condition.Condition[models.Employee] {
+	return []condition.Condition[models.Employee]{employeeConditions.PreloadBoss()}
 }
-
-func EmployeeUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Employee] {
-	return condition.NewFieldCondition[models.Employee, time.Time](EmployeeUpdatedAtField, operator)
-}
-
-var EmployeeDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: employeeType,
-}
-
-func EmployeeDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Employee] {
-	return condition.NewFieldCondition[models.Employee, time.Time](EmployeeDeletedAtField, operator)
-}
-
-var EmployeeNameField = query.FieldIdentifier[string]{
-	Field:     "Name",
-	ModelType: employeeType,
-}
-
-func EmployeeName(operator operator.Operator[string]) condition.WhereCondition[models.Employee] {
-	return condition.NewFieldCondition[models.Employee, string](EmployeeNameField, operator)
-}
-func EmployeeBoss(conditions ...condition.Condition[models.Employee]) condition.JoinCondition[models.Employee] {
-	return condition.NewJoinCondition[models.Employee, models.Employee](conditions, "Boss", "BossID", EmployeePreloadAttributes, "ID")
-}
-
-var EmployeePreloadBoss = EmployeeBoss(EmployeePreloadAttributes)
-var EmployeeBossIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "BossID",
-	ModelType: employeeType,
-}
-
-func EmployeeBossId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Employee] {
-	return condition.NewFieldCondition[models.Employee, model.UUID](EmployeeBossIdField, operator)
-}
-
-var EmployeePreloadAttributes = condition.NewPreloadCondition[models.Employee](EmployeeIdField, EmployeeCreatedAtField, EmployeeUpdatedAtField, EmployeeDeletedAtField, EmployeeNameField, EmployeeBossIdField)
-var EmployeePreloadRelations = []condition.Condition[models.Employee]{EmployeePreloadBoss}

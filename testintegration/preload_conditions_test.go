@@ -82,7 +82,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.SalePreloadSeller,
+		conditions.Sale.PreloadSeller(),
 	).Find()
 	ts.Nil(err)
 
@@ -110,8 +110,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadNullableAtSecondLevel() {
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.SaleSeller(
-			conditions.SellerPreloadCompany,
+		conditions.Sale.Seller(
+			conditions.Seller.PreloadCompany(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -151,9 +151,9 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadAtSecondLevelWorksWithManual
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.SaleSeller(
-			conditions.SellerPreloadAttributes,
-			conditions.SellerPreloadCompany,
+		conditions.Sale.Seller(
+			conditions.Seller.Preload(),
+			conditions.Seller.PreloadCompany(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -193,7 +193,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.SalePreloadSeller,
+		conditions.Sale.PreloadSeller(),
 	).Find()
 	ts.Nil(err)
 
@@ -231,8 +231,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.SaleSeller(
-			conditions.SellerPreloadCompany,
+		conditions.Sale.Seller(
+			conditions.Seller.PreloadCompany(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -265,7 +265,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadUIntModel() {
 
 	entities, err := orm.NewQuery[models.Phone](
 		ts.db,
-		conditions.PhonePreloadBrand,
+		conditions.Phone.PreloadBrand(),
 	).Find()
 	ts.Nil(err)
 
@@ -294,9 +294,9 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithWhereConditionFilters() 
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.SaleProduct(
-			conditions.ProductPreloadAttributes,
-			conditions.ProductInt(orm.Eq(1)),
+		conditions.Sale.Product(
+			conditions.Product.Preload(),
+			conditions.Product.IntIs().Eq(1),
 		),
 	).Find()
 	ts.Nil(err)
@@ -323,7 +323,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOne() {
 
 	entities, err := orm.NewQuery[models.City](
 		ts.db,
-		conditions.CityPreloadCountry,
+		conditions.City.PreloadCountry(),
 	).Find()
 	ts.Nil(err)
 
@@ -374,7 +374,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
 
 	entities, err := orm.NewQuery[models.Country](
 		ts.db,
-		conditions.CountryPreloadCapital,
+		conditions.Country.PreloadCapital(),
 	).Find()
 	ts.Nil(err)
 
@@ -398,7 +398,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadHasManyReversed() {
 
 	entities, err := orm.NewQuery[models.Seller](
 		ts.db,
-		conditions.SellerPreloadCompany,
+		conditions.Seller.PreloadCompany(),
 	).Find()
 	ts.Nil(err)
 
@@ -423,7 +423,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferential() {
 
 	entities, err := orm.NewQuery[models.Employee](
 		ts.db,
-		conditions.EmployeePreloadBoss,
+		conditions.Employee.PreloadBoss(),
 	).Find()
 	ts.Nil(err)
 
@@ -451,12 +451,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel
 
 	entities, err := orm.NewQuery[models.Employee](
 		ts.db,
-		conditions.EmployeeBoss(
-			conditions.EmployeeBoss(
-				conditions.EmployeePreloadAttributes,
+		conditions.Employee.Boss(
+			conditions.Employee.Boss(
+				conditions.Employee.Preload(),
 			),
 		),
-		conditions.EmployeeName(orm.Eq("franco")),
+		conditions.Employee.NameIs().Eq("franco"),
 	).Find()
 	ts.Nil(err)
 
@@ -485,13 +485,13 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.SaleProduct(
-			conditions.ProductPreloadAttributes,
-			conditions.ProductInt(orm.Eq(1)),
+		conditions.Sale.Product(
+			conditions.Product.Preload(),
+			conditions.Product.IntIs().Eq(1),
 		),
-		conditions.SaleSeller(
-			conditions.SellerPreloadAttributes,
-			conditions.SellerName(orm.Eq("franco")),
+		conditions.Sale.Seller(
+			conditions.Seller.Preload(),
+			conditions.Seller.NameIs().Eq("franco"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -525,8 +525,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithoutCond
 
 	entities, err := orm.NewQuery[models.Child](
 		ts.db,
-		conditions.ChildPreloadParent1,
-		conditions.ChildPreloadParent2,
+		conditions.Child.PreloadParent1(),
+		conditions.Child.PreloadParent2(),
 	).Find()
 	ts.Nil(err)
 
@@ -559,7 +559,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadRelations() {
 
 	entities, err := orm.NewQuery[models.Child](
 		ts.db,
-		conditions.ChildPreloadRelations...,
+		conditions.Child.PreloadRelations()...,
 	).Find()
 	ts.Nil(err)
 
@@ -592,9 +592,9 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithoutC
 
 	entities, err := orm.NewQuery[models.Child](
 		ts.db,
-		conditions.ChildParent1(
-			conditions.Parent1PreloadAttributes,
-			conditions.Parent1PreloadParentParent,
+		conditions.Child.Parent1(
+			conditions.Parent1.Preload(),
+			conditions.Parent1.PreloadParentParent(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -646,11 +646,11 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCond
 
 	entities, err := orm.NewQuery[models.Child](
 		ts.db,
-		conditions.ChildParent1(
-			conditions.Parent1PreloadAttributes,
-			conditions.Parent1ParentParent(
-				conditions.ParentParentPreloadAttributes,
-				conditions.ParentParentName(orm.Eq("parentParent1")),
+		conditions.Child.Parent1(
+			conditions.Parent1.Preload(),
+			conditions.Parent1.ParentParent(
+				conditions.ParentParent.Preload(),
+				conditions.ParentParent.NameIs().Eq("parentParent1"),
 			),
 		),
 	).Find()
@@ -685,11 +685,11 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadDiamond(
 
 	entities, err := orm.NewQuery[models.Child](
 		ts.db,
-		conditions.ChildParent1(
-			conditions.Parent1PreloadParentParent,
+		conditions.Child.Parent1(
+			conditions.Parent1.PreloadParentParent(),
 		),
-		conditions.ChildParent2(
-			conditions.Parent2PreloadParentParent,
+		conditions.Child.Parent2(
+			conditions.Parent2.PreloadParentParent(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -719,7 +719,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadCollection() {
 
 	entities, err := orm.NewQuery[models.Company](
 		ts.db,
-		conditions.CompanyPreloadSellers(),
+		conditions.Company.PreloadSellers(),
 	).Find()
 	ts.Nil(err)
 
@@ -734,7 +734,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadEmptyCollection() {
 
 	entities, err := orm.NewQuery[models.Company](
 		ts.db,
-		conditions.CompanyPreloadSellers(),
+		conditions.Company.PreloadSellers(),
 	).Find()
 	ts.Nil(err)
 
@@ -772,8 +772,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
 
 	entities, err := orm.NewQuery[models.Company](
 		ts.db,
-		conditions.CompanyPreloadSellers(
-			conditions.SellerPreloadUniversity,
+		conditions.Company.PreloadSellers(
+			conditions.Seller.PreloadUniversity(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -821,8 +821,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 
 	entities, err := orm.NewQuery[models.Company](
 		ts.db,
-		conditions.CompanyPreloadSellers(
-			conditions.SellerPreloadUniversity,
+		conditions.Company.PreloadSellers(
+			conditions.Seller.PreloadUniversity(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -868,10 +868,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithFiltersReturnsError() {
 	_, err := orm.NewQuery[models.Company](
 		ts.db,
-		conditions.CompanyPreloadSellers(
-			conditions.SellerUniversity(
-				conditions.UniversityPreloadAttributes,
-				conditions.UniversityId(orm.Eq(model.NilUUID)),
+		conditions.Company.PreloadSellers(
+			conditions.Seller.University(
+				conditions.University.Preload(),
+				conditions.University.IdIs().Eq(model.NilUUID),
 			),
 		),
 	).Find()
@@ -882,8 +882,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithoutPreloadReturnsError() {
 	_, err := orm.NewQuery[models.Company](
 		ts.db,
-		conditions.CompanyPreloadSellers(
-			conditions.SellerUniversity(),
+		conditions.Company.PreloadSellers(
+			conditions.Seller.University(),
 		),
 	).Find()
 	ts.ErrorIs(err, badaasORMErrors.ErrOnlyPreloadsAllowed)

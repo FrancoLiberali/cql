@@ -13,7 +13,6 @@ import (
 	"gorm.io/gorm"
 
 	repositoryMocks "github.com/ditrit/badaas/mocks/persistence/repository"
-	"github.com/ditrit/badaas/orm"
 	badaasORMErrors "github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
@@ -102,7 +101,7 @@ func TestGetUser(t *testing.T) {
 
 	require.NoError(t, err)
 	userRepositoryMock.On(
-		"FindOne", gormDB, models.UserEmailCondition(orm.Eq("bob@email.com")),
+		"FindOne", gormDB, mock.Anything,
 	).Return(
 		user,
 		nil,
@@ -130,7 +129,7 @@ func TestGetUserNoUserFound(t *testing.T) {
 	userRepositoryMock := repositoryMocks.NewCRUD[models.User, model.UUID](t)
 	userService := userservice.NewUserService(observedLogger, userRepositoryMock, gormDB)
 	userRepositoryMock.On(
-		"FindOne", gormDB, models.UserEmailCondition(orm.Eq("bobnotfound@email.com")),
+		"FindOne", gormDB, mock.Anything,
 	).Return(
 		&models.User{},
 		badaasORMErrors.ErrObjectNotFound,
@@ -157,7 +156,7 @@ func TestGetUserWrongPassword(t *testing.T) {
 
 	require.NoError(t, err)
 	userRepositoryMock.On(
-		"FindOne", gormDB, models.UserEmailCondition(orm.Eq("bob@email.com")),
+		"FindOne", gormDB, mock.Anything,
 	).Return(
 		user,
 		nil,

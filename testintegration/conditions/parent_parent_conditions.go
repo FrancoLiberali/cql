@@ -2,9 +2,9 @@
 package conditions
 
 import (
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
@@ -12,58 +12,63 @@ import (
 )
 
 var parentParentType = reflect.TypeOf(*new(models.ParentParent))
-var ParentParentIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: parentParentType,
+
+func (parentParentConditions parentParentConditions) IdIs() orm.FieldIs[models.ParentParent, model.UUID] {
+	return orm.FieldIs[models.ParentParent, model.UUID]{FieldID: parentParentConditions.ID}
+}
+func (parentParentConditions parentParentConditions) CreatedAtIs() orm.FieldIs[models.ParentParent, time.Time] {
+	return orm.FieldIs[models.ParentParent, time.Time]{FieldID: parentParentConditions.CreatedAt}
+}
+func (parentParentConditions parentParentConditions) UpdatedAtIs() orm.FieldIs[models.ParentParent, time.Time] {
+	return orm.FieldIs[models.ParentParent, time.Time]{FieldID: parentParentConditions.UpdatedAt}
+}
+func (parentParentConditions parentParentConditions) DeletedAtIs() orm.FieldIs[models.ParentParent, time.Time] {
+	return orm.FieldIs[models.ParentParent, time.Time]{FieldID: parentParentConditions.DeletedAt}
+}
+func (parentParentConditions parentParentConditions) NameIs() orm.StringFieldIs[models.ParentParent] {
+	return orm.StringFieldIs[models.ParentParent]{FieldIs: orm.FieldIs[models.ParentParent, string]{FieldID: parentParentConditions.Name}}
+}
+func (parentParentConditions parentParentConditions) NumberIs() orm.FieldIs[models.ParentParent, int] {
+	return orm.FieldIs[models.ParentParent, int]{FieldID: parentParentConditions.Number}
 }
 
-func ParentParentId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.ParentParent] {
-	return condition.NewFieldCondition[models.ParentParent, model.UUID](ParentParentIdField, operator)
+type parentParentConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
+	Name      query.FieldIdentifier[string]
+	Number    query.FieldIdentifier[int]
 }
 
-var ParentParentCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: parentParentType,
+var ParentParent = parentParentConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: parentParentType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: parentParentType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: parentParentType,
+	},
+	Name: query.FieldIdentifier[string]{
+		Field:     "Name",
+		ModelType: parentParentType,
+	},
+	Number: query.FieldIdentifier[int]{
+		Field:     "Number",
+		ModelType: parentParentType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: parentParentType,
+	},
 }
 
-func ParentParentCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.ParentParent] {
-	return condition.NewFieldCondition[models.ParentParent, time.Time](ParentParentCreatedAtField, operator)
+// Preload allows preloading the ParentParent when doing a query
+func (parentParentConditions parentParentConditions) Preload() condition.Condition[models.ParentParent] {
+	return condition.NewPreloadCondition[models.ParentParent](parentParentConditions.ID, parentParentConditions.CreatedAt, parentParentConditions.UpdatedAt, parentParentConditions.DeletedAt, parentParentConditions.Name, parentParentConditions.Number)
 }
-
-var ParentParentUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: parentParentType,
-}
-
-func ParentParentUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.ParentParent] {
-	return condition.NewFieldCondition[models.ParentParent, time.Time](ParentParentUpdatedAtField, operator)
-}
-
-var ParentParentDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: parentParentType,
-}
-
-func ParentParentDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.ParentParent] {
-	return condition.NewFieldCondition[models.ParentParent, time.Time](ParentParentDeletedAtField, operator)
-}
-
-var ParentParentNameField = query.FieldIdentifier[string]{
-	Field:     "Name",
-	ModelType: parentParentType,
-}
-
-func ParentParentName(operator operator.Operator[string]) condition.WhereCondition[models.ParentParent] {
-	return condition.NewFieldCondition[models.ParentParent, string](ParentParentNameField, operator)
-}
-
-var ParentParentNumberField = query.FieldIdentifier[int]{
-	Field:     "Number",
-	ModelType: parentParentType,
-}
-
-func ParentParentNumber(operator operator.Operator[int]) condition.WhereCondition[models.ParentParent] {
-	return condition.NewFieldCondition[models.ParentParent, int](ParentParentNumberField, operator)
-}
-
-var ParentParentPreloadAttributes = condition.NewPreloadCondition[models.ParentParent](ParentParentIdField, ParentParentCreatedAtField, ParentParentUpdatedAtField, ParentParentDeletedAtField, ParentParentNameField, ParentParentNumberField)

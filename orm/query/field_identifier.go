@@ -1,6 +1,8 @@
 package query
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type IFieldIdentifier interface {
 	ColumnName(query *GormQuery, table Table) string

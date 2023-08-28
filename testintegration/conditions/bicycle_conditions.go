@@ -2,9 +2,9 @@
 package conditions
 
 import (
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
@@ -12,63 +12,74 @@ import (
 )
 
 var bicycleType = reflect.TypeOf(*new(models.Bicycle))
-var BicycleIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: bicycleType,
+
+func (bicycleConditions bicycleConditions) IdIs() orm.FieldIs[models.Bicycle, model.UUID] {
+	return orm.FieldIs[models.Bicycle, model.UUID]{FieldID: bicycleConditions.ID}
+}
+func (bicycleConditions bicycleConditions) CreatedAtIs() orm.FieldIs[models.Bicycle, time.Time] {
+	return orm.FieldIs[models.Bicycle, time.Time]{FieldID: bicycleConditions.CreatedAt}
+}
+func (bicycleConditions bicycleConditions) UpdatedAtIs() orm.FieldIs[models.Bicycle, time.Time] {
+	return orm.FieldIs[models.Bicycle, time.Time]{FieldID: bicycleConditions.UpdatedAt}
+}
+func (bicycleConditions bicycleConditions) DeletedAtIs() orm.FieldIs[models.Bicycle, time.Time] {
+	return orm.FieldIs[models.Bicycle, time.Time]{FieldID: bicycleConditions.DeletedAt}
+}
+func (bicycleConditions bicycleConditions) NameIs() orm.StringFieldIs[models.Bicycle] {
+	return orm.StringFieldIs[models.Bicycle]{FieldIs: orm.FieldIs[models.Bicycle, string]{FieldID: bicycleConditions.Name}}
+}
+func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Condition[models.Person]) condition.JoinCondition[models.Bicycle] {
+	return condition.NewJoinCondition[models.Bicycle, models.Person](conditions, "Owner", "OwnerName", bicycleConditions.Preload(), "Name")
+}
+func (bicycleConditions bicycleConditions) PreloadOwner() condition.JoinCondition[models.Bicycle] {
+	return bicycleConditions.Owner(Person.Preload())
+}
+func (bicycleConditions bicycleConditions) OwnerNameIs() orm.StringFieldIs[models.Bicycle] {
+	return orm.StringFieldIs[models.Bicycle]{FieldIs: orm.FieldIs[models.Bicycle, string]{FieldID: bicycleConditions.OwnerName}}
 }
 
-func BicycleId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Bicycle] {
-	return condition.NewFieldCondition[models.Bicycle, model.UUID](BicycleIdField, operator)
+type bicycleConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
+	Name      query.FieldIdentifier[string]
+	OwnerName query.FieldIdentifier[string]
 }
 
-var BicycleCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: bicycleType,
+var Bicycle = bicycleConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: bicycleType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: bicycleType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: bicycleType,
+	},
+	Name: query.FieldIdentifier[string]{
+		Field:     "Name",
+		ModelType: bicycleType,
+	},
+	OwnerName: query.FieldIdentifier[string]{
+		Field:     "OwnerName",
+		ModelType: bicycleType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: bicycleType,
+	},
 }
 
-func BicycleCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Bicycle] {
-	return condition.NewFieldCondition[models.Bicycle, time.Time](BicycleCreatedAtField, operator)
+// Preload allows preloading the Bicycle when doing a query
+func (bicycleConditions bicycleConditions) Preload() condition.Condition[models.Bicycle] {
+	return condition.NewPreloadCondition[models.Bicycle](bicycleConditions.ID, bicycleConditions.CreatedAt, bicycleConditions.UpdatedAt, bicycleConditions.DeletedAt, bicycleConditions.Name, bicycleConditions.OwnerName)
 }
 
-var BicycleUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: bicycleType,
+// PreloadRelations allows preloading all the Bicycle's relation when doing a query
+func (bicycleConditions bicycleConditions) PreloadRelations() []condition.Condition[models.Bicycle] {
+	return []condition.Condition[models.Bicycle]{bicycleConditions.PreloadOwner()}
 }
-
-func BicycleUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Bicycle] {
-	return condition.NewFieldCondition[models.Bicycle, time.Time](BicycleUpdatedAtField, operator)
-}
-
-var BicycleDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: bicycleType,
-}
-
-func BicycleDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Bicycle] {
-	return condition.NewFieldCondition[models.Bicycle, time.Time](BicycleDeletedAtField, operator)
-}
-
-var BicycleNameField = query.FieldIdentifier[string]{
-	Field:     "Name",
-	ModelType: bicycleType,
-}
-
-func BicycleName(operator operator.Operator[string]) condition.WhereCondition[models.Bicycle] {
-	return condition.NewFieldCondition[models.Bicycle, string](BicycleNameField, operator)
-}
-func BicycleOwner(conditions ...condition.Condition[models.Person]) condition.JoinCondition[models.Bicycle] {
-	return condition.NewJoinCondition[models.Bicycle, models.Person](conditions, "Owner", "OwnerName", BicyclePreloadAttributes, "Name")
-}
-
-var BicyclePreloadOwner = BicycleOwner(PersonPreloadAttributes)
-var BicycleOwnerNameField = query.FieldIdentifier[string]{
-	Field:     "OwnerName",
-	ModelType: bicycleType,
-}
-
-func BicycleOwnerName(operator operator.Operator[string]) condition.WhereCondition[models.Bicycle] {
-	return condition.NewFieldCondition[models.Bicycle, string](BicycleOwnerNameField, operator)
-}
-
-var BicyclePreloadAttributes = condition.NewPreloadCondition[models.Bicycle](BicycleIdField, BicycleCreatedAtField, BicycleUpdatedAtField, BicycleDeletedAtField, BicycleNameField, BicycleOwnerNameField)
-var BicyclePreloadRelations = []condition.Condition[models.Bicycle]{BicyclePreloadOwner}
