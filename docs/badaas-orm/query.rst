@@ -29,9 +29,25 @@ Query methods
 The `orm.Query` object obtained using `orm.NewQuery` has different methods that 
 will allow you to obtain the results of the query:
 
-- FindOne: will allow you to obtain the only one model that meets the conditions received by parameter
-  or an error will be returned if none or more than one model comply with them.
-- Find: will allow you to obtain the list of models that meet the conditions received by parameter.
+Modifier methods
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Modifier methods are those that modify the query in a certain way, affecting the results obtained:
+- Limit: specify the number of models to be retrieved.
+- Offset: specify the number of models to skip before starting to return the results.
+- Ascending: specify an ascending order when retrieving models.
+- Descending: specify a descending order when retrieving models from database.
+
+Finishing methods
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Finishing methods are those that cause the query to be executed and the result(s) of the query to be returned:
+
+- First: finds the first model ordered by primary key.
+- Take: finds the first model returned by the database in no specified order.
+- Last: finds the last model ordered by primary key.
+- FindOne: finds the only one model that matches given conditions or returns error if 0 or more than 1 are found.
+- Find: finds list of models that meet the conditions.
 
 Conditions
 ------------------------
