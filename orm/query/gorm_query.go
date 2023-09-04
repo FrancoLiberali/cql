@@ -188,7 +188,7 @@ func (query GormQuery) Dialector() Dialector {
 
 func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *GormQuery {
 	query := &GormQuery{
-		GormDB:          db.Select(initialTable.Name + ".*"),
+		GormDB:          db.Model(initialModel).Select(initialTable.Name + ".*"),
 		ConcernedModels: map[reflect.Type][]Table{},
 	}
 
@@ -207,4 +207,24 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 	}
 
 	return schemaName.Table, nil
+}
+
+// Find finds all models matching given conditions
+func (query *GormQuery) Update(field IFieldIdentifier, value any) (int64, error) {
+	// TODO ver este 0
+	table, err := query.GetModelTable(field, 0)
+	if err != nil {
+		// TODO aca falta agregar el metodo usado
+		return 0, err
+	}
+
+	// TODO tambien sacar el preload en caso de que hagan un preload collection
+	query.GormDB.Statement.Selects = []string{}
+
+	update := query.GormDB.Update(
+		field.ColumnName(query, table),
+		value,
+	)
+
+	return update.RowsAffected, update.Error
 }

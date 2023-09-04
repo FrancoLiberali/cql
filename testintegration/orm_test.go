@@ -49,6 +49,7 @@ func TestBaDaaSORM(t *testing.T) {
 		fx.Provide(NewJoinConditionsIntTestSuite),
 		fx.Provide(NewPreloadConditionsIntTestSuite),
 		fx.Provide(NewOperatorsIntTestSuite),
+		fx.Provide(NewUpdateIntTestSuite),
 
 		// run tests
 		fx.Invoke(runORMTestSuites),
@@ -61,6 +62,7 @@ func runORMTestSuites(
 	tsJoinConditions *JoinConditionsIntTestSuite,
 	tsPreloadConditions *PreloadConditionsIntTestSuite,
 	tsOperators *OperatorsIntTestSuite,
+	tsUpdate *UpdateIntTestSuite,
 	shutdowner fx.Shutdowner,
 ) {
 	suite.Run(tGlobal, tsQuery)
@@ -68,6 +70,7 @@ func runORMTestSuites(
 	suite.Run(tGlobal, tsJoinConditions)
 	suite.Run(tGlobal, tsPreloadConditions)
 	suite.Run(tGlobal, tsOperators)
+	suite.Run(tGlobal, tsUpdate)
 
 	shutdowner.Shutdown()
 }

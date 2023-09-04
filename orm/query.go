@@ -145,3 +145,13 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) 
 		err:       err,
 	}
 }
+
+func (query *Query[T]) Update(sets ...*Set[T]) (int64, error) {
+	if query.err != nil {
+		return 0, query.err
+	}
+
+	firstSet := sets[0]
+
+	return query.gormQuery.Update(firstSet.fieldID, firstSet.value)
+}
