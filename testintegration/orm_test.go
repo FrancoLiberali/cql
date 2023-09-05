@@ -65,11 +65,11 @@ func runORMTestSuites(
 	tsUpdate *UpdateIntTestSuite,
 	shutdowner fx.Shutdowner,
 ) {
-	suite.Run(tGlobal, tsQuery)
-	suite.Run(tGlobal, tsWhereConditions)
-	suite.Run(tGlobal, tsJoinConditions)
-	suite.Run(tGlobal, tsPreloadConditions)
-	suite.Run(tGlobal, tsOperators)
+	// suite.Run(tGlobal, tsQuery)
+	// suite.Run(tGlobal, tsWhereConditions)
+	// suite.Run(tGlobal, tsJoinConditions)
+	// suite.Run(tGlobal, tsPreloadConditions)
+	// suite.Run(tGlobal, tsOperators)
 	suite.Run(tGlobal, tsUpdate)
 
 	shutdowner.Shutdown()

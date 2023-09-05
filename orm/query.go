@@ -146,12 +146,17 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) 
 	}
 }
 
+// TODO returning
+
 func (query *Query[T]) Update(sets ...*Set[T]) (int64, error) {
 	if query.err != nil {
 		return 0, query.err
 	}
 
-	firstSet := sets[0]
+	updateMap := map[ormQuery.IFieldIdentifier]any{}
+	for _, set := range sets {
+		updateMap[set.fieldID] = set.value
+	}
 
-	return query.gormQuery.Update(firstSet.fieldID, firstSet.value)
+	return query.gormQuery.Update(updateMap)
 }

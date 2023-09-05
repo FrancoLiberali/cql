@@ -150,3 +150,7 @@ func (productConditions productConditions) Preload() condition.Condition[models.
 func (productConditions productConditions) IntSet() orm.FieldSet[models.Product, int] {
 	return orm.FieldSet[models.Product, int]{FieldID: productConditions.Int}
 }
+
+func (productConditions productConditions) BoolSet() orm.FieldSet[models.Product, bool] {
+	return orm.FieldSet[models.Product, bool]{FieldID: productConditions.Bool}
+}

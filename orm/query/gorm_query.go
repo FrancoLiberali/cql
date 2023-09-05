@@ -2,7 +2,9 @@ package query
 
 import (
 	"fmt"
+	"log"
 	"reflect"
+	"strings"
 	"sync"
 
 	"gorm.io/gorm"
@@ -15,6 +17,7 @@ import (
 type GormQuery struct {
 	GormDB          *gorm.DB
 	ConcernedModels map[reflect.Type][]Table
+	initialTable    Table
 }
 
 // Order specify order when retrieving models from database.
@@ -190,6 +193,7 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *Go
 	query := &GormQuery{
 		GormDB:          db.Model(initialModel).Select(initialTable.Name + ".*"),
 		ConcernedModels: map[reflect.Type][]Table{},
+		initialTable:    initialTable,
 	}
 
 	query.AddConcernedModel(initialModel, initialTable)
@@ -210,21 +214,101 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 }
 
 // Find finds all models matching given conditions
-func (query *GormQuery) Update(field IFieldIdentifier, value any) (int64, error) {
-	// TODO ver este 0
-	table, err := query.GetModelTable(field, 0)
-	if err != nil {
-		// TODO aca falta agregar el metodo usado
-		return 0, err
+func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
+	updateMap := map[string]any{}
+
+	for field, value := range values {
+		// TODO ver este 0
+		table, err := query.GetModelTable(field, 0)
+		if err != nil {
+			// TODO aca falta agregar el metodo usado
+			return 0, err
+		}
+
+		updateMap[field.ColumnName(query, table)] = value
 	}
 
 	// TODO tambien sacar el preload en caso de que hagan un preload collection
+	// Tambien ver el tema de los order y eso
+	// y si pongo el returning tambien ver que eso no rompa los find
 	query.GormDB.Statement.Selects = []string{}
 
-	update := query.GormDB.Update(
-		field.ColumnName(query, table),
-		value,
-	)
+	// postgre y sqlite son con from, que es lo mismo que hacer un exists en el where
+	// mysql y sqlserver permiten update join, lo cual es lo mismo mas que permiten hacer el update de mas de una tabla a la vez
+	// pero sqlserver necesita la repeticion de la tabla inicial, al menos segun la doc, se podria probar
+
+	joinClauses := []clause.Join{}
+	joins := query.GormDB.Statement.Joins
+	lastI := len(joins) - 1
+	for i := range query.GormDB.Statement.Joins {
+		// TODO quizas para evitarme estos split podria usar bien los joins en la creacion directamente, con el on y eso
+		join := joins[lastI-i]
+		joinName := strings.ReplaceAll(join.Name, "INNER JOIN ", "")
+		joinName = strings.ReplaceAll(joinName, "LEFT JOIN ", "")
+		log.Println(joinName)
+		joinNameSplit := strings.Split(joinName, " ON ")
+		tableNameAndAlias := joinNameSplit[0]
+		onStatement := joinNameSplit[1]
+		log.Println(tableNameAndAlias)
+		log.Println(onStatement)
+		tableNameAndAliasSplit := strings.Split(tableNameAndAlias, " ")
+		tableName := tableNameAndAliasSplit[0]
+		tableAlias := tableNameAndAliasSplit[1]
+		log.Println(tableName)
+		log.Println(tableAlias)
+
+		if i == lastI || true {
+			query.GormDB.Statement.AddClause(
+				clause.From{
+					Tables: []clause.Table{
+						{
+							Name:  tableName,
+							Alias: tableAlias,
+							Raw:   true, // prevent gorm from putting the alias in quotes
+						},
+					},
+					// TODO ver que pone LEFT JOIN siempre
+					// Joins: joinClauses,
+				},
+			)
+
+			query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
+		} else {
+			onExpressions := []clause.Expression{}
+			if strings.Contains(onStatement, query.initialTable.Name) {
+				// onStatementSplit := strings.Split(onStatement, " AND ")
+				// joinConditionIndex := pie.FindFirstUsing(onStatementSplit, func(condition string) bool {
+				// 	return strings.Contains(onStatement, query.initialTable.Name)
+				// })
+				// log.Println("index")
+				// log.Println(joinConditionIndex)
+				// // TODO ver si este da que no esta
+				// joinCondition := onStatementSplit[joinConditionIndex]
+				// onStatement = strings.Join(
+				// 	append(onStatementSplit[:joinConditionIndex], onStatementSplit[joinConditionIndex+1:]...),
+				// 	" AND ",
+				// )
+				// join.Conds = append(join.Conds[:joinConditionIndex], join.Conds[joinConditionIndex+1:]...)
+				query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
+			} else {
+				onExpressions = []clause.Expression{
+					clause.Expr{SQL: onStatement, Vars: join.Conds},
+				}
+			}
+
+			joinClauses = append(joinClauses, clause.Join{
+				Type: join.JoinType,
+				Table: clause.Table{
+					Name:  tableName,
+					Alias: tableAlias,
+					Raw:   true, // prevent gorm from putting the alias in quotes
+				},
+				ON: clause.Where{Exprs: onExpressions},
+			})
+		}
+	}
+
+	update := query.GormDB.Updates(updateMap)
 
 	return update.RowsAffected, update.Error
 }

@@ -83,3 +83,7 @@ func (phoneConditions phoneConditions) Preload() condition.Condition[models.Phon
 func (phoneConditions phoneConditions) PreloadRelations() []condition.Condition[models.Phone] {
 	return []condition.Condition[models.Phone]{phoneConditions.PreloadBrand()}
 }
+
+func (phoneConditions phoneConditions) NameSet() orm.FieldSet[models.Phone, string] {
+	return orm.FieldSet[models.Phone, string]{FieldID: phoneConditions.Name}
+}

@@ -105,3 +105,7 @@ func (saleConditions saleConditions) Preload() condition.Condition[models.Sale] 
 func (saleConditions saleConditions) PreloadRelations() []condition.Condition[models.Sale] {
 	return []condition.Condition[models.Sale]{saleConditions.PreloadProduct(), saleConditions.PreloadSeller()}
 }
+
+func (saleConditions saleConditions) CodeSet() orm.FieldSet[models.Sale, int] {
+	return orm.FieldSet[models.Sale, int]{FieldID: saleConditions.Code}
+}
