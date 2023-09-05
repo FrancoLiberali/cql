@@ -236,34 +236,38 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	// mysql y sqlserver permiten update join, lo cual es lo mismo mas que permiten hacer el update de mas de una tabla a la vez
 	// pero sqlserver necesita la repeticion de la tabla inicial, al menos segun la doc, se podria probar
 
-	tables := []clause.Table{}
+	switch query.GormDB.Dialector.Name() {
+	// TODO poner en constantes
+	case "postgres", "sqlite":
+		tables := []clause.Table{}
 
-	for _, join := range query.GormDB.Statement.Joins {
-		// TODO quizas para evitarme estos split podria usar bien los joins en la creacion directamente, con el on y eso
-		joinName := strings.ReplaceAll(join.Name, "INNER JOIN ", "")
-		joinName = strings.ReplaceAll(joinName, "LEFT JOIN ", "")
-		joinNameSplit := strings.Split(joinName, " ON ")
-		tableNameAndAlias := joinNameSplit[0]
-		onStatement := joinNameSplit[1]
-		tableNameAndAliasSplit := strings.Split(tableNameAndAlias, " ")
-		tableName := tableNameAndAliasSplit[0]
-		tableAlias := tableNameAndAliasSplit[1]
+		for _, join := range query.GormDB.Statement.Joins {
+			// TODO quizas para evitarme estos split podria usar bien los joins en la creacion directamente, con el on y eso
+			joinName := strings.ReplaceAll(join.Name, "INNER JOIN ", "")
+			joinName = strings.ReplaceAll(joinName, "LEFT JOIN ", "")
+			joinNameSplit := strings.Split(joinName, " ON ")
+			tableNameAndAlias := joinNameSplit[0]
+			onStatement := joinNameSplit[1]
+			tableNameAndAliasSplit := strings.Split(tableNameAndAlias, " ")
+			tableName := tableNameAndAliasSplit[0]
+			tableAlias := tableNameAndAliasSplit[1]
 
-		tables = append(tables, clause.Table{
-			Name:  tableName,
-			Alias: tableAlias,
-			Raw:   true, // prevent gorm from putting the alias in quotes
-		})
+			tables = append(tables, clause.Table{
+				Name:  tableName,
+				Alias: tableAlias,
+				Raw:   true, // prevent gorm from putting the alias in quotes
+			})
 
-		query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
-	}
+			query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
+		}
 
-	if len(tables) > 0 {
-		query.GormDB.Statement.AddClause(
-			clause.From{
-				Tables: tables,
-			},
-		)
+		if len(tables) > 0 {
+			query.GormDB.Statement.AddClause(
+				clause.From{
+					Tables: tables,
+				},
+			)
+		}
 	}
 
 	update := query.GormDB.Updates(updateMap)

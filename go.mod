@@ -3,6 +3,7 @@ module github.com/ditrit/badaas
 go 1.18
 
 replace gorm.io/driver/postgres => ../../../Documents/postgres
+replace gorm.io/driver/sqlite => ../../../Documents/sqlite
 
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
