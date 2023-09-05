@@ -85,7 +85,10 @@ func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.GormQuery, t1Tab
 		return err
 	}
 
-	condition.addJoin(query, t1Table, t2Table, whereConditions)
+	err = condition.addJoin(query, t1Table, t2Table, whereConditions)
+	if err != nil {
+		return err
+	}
 
 	// apply T1 preload condition
 	// if this condition has a T2 preload condition
