@@ -2,7 +2,6 @@ package query
 
 import (
 	"fmt"
-	"log"
 	"reflect"
 	"strings"
 	"sync"
@@ -237,75 +236,34 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	// mysql y sqlserver permiten update join, lo cual es lo mismo mas que permiten hacer el update de mas de una tabla a la vez
 	// pero sqlserver necesita la repeticion de la tabla inicial, al menos segun la doc, se podria probar
 
-	joinClauses := []clause.Join{}
-	joins := query.GormDB.Statement.Joins
-	lastI := len(joins) - 1
-	for i := range query.GormDB.Statement.Joins {
+	tables := []clause.Table{}
+
+	for _, join := range query.GormDB.Statement.Joins {
 		// TODO quizas para evitarme estos split podria usar bien los joins en la creacion directamente, con el on y eso
-		join := joins[lastI-i]
 		joinName := strings.ReplaceAll(join.Name, "INNER JOIN ", "")
 		joinName = strings.ReplaceAll(joinName, "LEFT JOIN ", "")
-		log.Println(joinName)
 		joinNameSplit := strings.Split(joinName, " ON ")
 		tableNameAndAlias := joinNameSplit[0]
 		onStatement := joinNameSplit[1]
-		log.Println(tableNameAndAlias)
-		log.Println(onStatement)
 		tableNameAndAliasSplit := strings.Split(tableNameAndAlias, " ")
 		tableName := tableNameAndAliasSplit[0]
 		tableAlias := tableNameAndAliasSplit[1]
-		log.Println(tableName)
-		log.Println(tableAlias)
 
-		if i == lastI || true {
-			query.GormDB.Statement.AddClause(
-				clause.From{
-					Tables: []clause.Table{
-						{
-							Name:  tableName,
-							Alias: tableAlias,
-							Raw:   true, // prevent gorm from putting the alias in quotes
-						},
-					},
-					// TODO ver que pone LEFT JOIN siempre
-					// Joins: joinClauses,
-				},
-			)
+		tables = append(tables, clause.Table{
+			Name:  tableName,
+			Alias: tableAlias,
+			Raw:   true, // prevent gorm from putting the alias in quotes
+		})
 
-			query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
-		} else {
-			onExpressions := []clause.Expression{}
-			if strings.Contains(onStatement, query.initialTable.Name) {
-				// onStatementSplit := strings.Split(onStatement, " AND ")
-				// joinConditionIndex := pie.FindFirstUsing(onStatementSplit, func(condition string) bool {
-				// 	return strings.Contains(onStatement, query.initialTable.Name)
-				// })
-				// log.Println("index")
-				// log.Println(joinConditionIndex)
-				// // TODO ver si este da que no esta
-				// joinCondition := onStatementSplit[joinConditionIndex]
-				// onStatement = strings.Join(
-				// 	append(onStatementSplit[:joinConditionIndex], onStatementSplit[joinConditionIndex+1:]...),
-				// 	" AND ",
-				// )
-				// join.Conds = append(join.Conds[:joinConditionIndex], join.Conds[joinConditionIndex+1:]...)
-				query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
-			} else {
-				onExpressions = []clause.Expression{
-					clause.Expr{SQL: onStatement, Vars: join.Conds},
-				}
-			}
+		query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
+	}
 
-			joinClauses = append(joinClauses, clause.Join{
-				Type: join.JoinType,
-				Table: clause.Table{
-					Name:  tableName,
-					Alias: tableAlias,
-					Raw:   true, // prevent gorm from putting the alias in quotes
-				},
-				ON: clause.Where{Exprs: onExpressions},
-			})
-		}
+	if len(tables) > 0 {
+		query.GormDB.Statement.AddClause(
+			clause.From{
+				Tables: tables,
+			},
+		)
 	}
 
 	update := query.GormDB.Updates(updateMap)

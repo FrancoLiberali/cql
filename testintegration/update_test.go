@@ -30,92 +30,92 @@ func (ts *UpdateIntTestSuite) TearDownSuite() {
 	CleanDB(ts.db)
 }
 
-// func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
-// 	ts.createProduct("", 0, 0, false, nil)
+func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
+	ts.createProduct("", 0, 0, false, nil)
 
-// 	updated, err := orm.NewQuery[models.Product](
-// 		ts.db,
-// 		conditions.Product.IntIs().Eq(1),
-// 	).Update(
-// 		conditions.Product.IntSet().Eq(0),
-// 	)
-// 	ts.Nil(err)
-// 	ts.Equal(int64(0), updated)
-// }
+	updated, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Update(
+		conditions.Product.IntSet().Eq(0),
+	)
+	ts.Nil(err)
+	ts.Equal(int64(0), updated)
+}
 
-// func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
-// 	product := ts.createProduct("", 0, 0, false, nil)
+func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
+	product := ts.createProduct("", 0, 0, false, nil)
 
-// 	updated, err := orm.NewQuery[models.Product](
-// 		ts.db,
-// 		conditions.Product.IntIs().Eq(0),
-// 	).Update(
-// 		conditions.Product.IntSet().Eq(1),
-// 		// TODO conditions.Product.IntSet().Dynamic(conditions.Sale.Code),
-// 		// TODO conditions.Product.IntSet().Unsafe("1"),
-// 		// TODO se pueden repetir? mirar si da error en la base o que hace
-// 	)
-// 	ts.Nil(err)
-// 	ts.Equal(int64(1), updated)
+	updated, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(0),
+	).Update(
+		conditions.Product.IntSet().Eq(1),
+		// TODO conditions.Product.IntSet().Dynamic(conditions.Sale.Code),
+		// TODO conditions.Product.IntSet().Unsafe("1"),
+		// TODO se pueden repetir? mirar si da error en la base o que hace
+	)
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
 
-// 	productReturned, err := orm.NewQuery[models.Product](
-// 		ts.db,
-// 		conditions.Product.IntIs().Eq(1),
-// 	).FindOne()
-// 	ts.Nil(err)
+	productReturned, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).FindOne()
+	ts.Nil(err)
 
-// 	ts.Equal(product.ID, productReturned.ID)
-// 	ts.Equal(1, productReturned.Int)
-// }
+	ts.Equal(product.ID, productReturned.ID)
+	ts.Equal(1, productReturned.Int)
+}
 
-// func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
-// 	product1 := ts.createProduct("1", 0, 0, false, nil)
-// 	product2 := ts.createProduct("2", 0, 0, false, nil)
+func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
+	product1 := ts.createProduct("1", 0, 0, false, nil)
+	product2 := ts.createProduct("2", 0, 0, false, nil)
 
-// 	updated, err := orm.NewQuery[models.Product](
-// 		ts.db,
-// 		conditions.Product.BoolIs().Eq(false),
-// 	).Update(
-// 		conditions.Product.IntSet().Eq(1),
-// 	)
-// 	ts.Nil(err)
-// 	ts.Equal(int64(2), updated)
+	updated, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.BoolIs().Eq(false),
+	).Update(
+		conditions.Product.IntSet().Eq(1),
+	)
+	ts.Nil(err)
+	ts.Equal(int64(2), updated)
 
-// 	products, err := orm.NewQuery[models.Product](
-// 		ts.db,
-// 		conditions.Product.IntIs().Eq(1),
-// 	).Find()
-// 	ts.Nil(err)
+	products, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).Find()
+	ts.Nil(err)
 
-// 	EqualList(&ts.Suite, []*models.Product{product1, product2}, products)
-// 	ts.Equal(1, products[0].Int)
-// 	ts.Equal(1, products[1].Int)
-// }
+	EqualList(&ts.Suite, []*models.Product{product1, product2}, products)
+	ts.Equal(1, products[0].Int)
+	ts.Equal(1, products[1].Int)
+}
 
-// func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
-// 	product := ts.createProduct("", 0, 0, false, nil)
+func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
+	product := ts.createProduct("", 0, 0, false, nil)
 
-// 	updated, err := orm.NewQuery[models.Product](
-// 		ts.db,
-// 		conditions.Product.IntIs().Eq(0),
-// 	).Update(
-// 		conditions.Product.IntSet().Eq(1),
-// 		conditions.Product.BoolSet().Eq(true),
-// 	)
-// 	ts.Nil(err)
-// 	ts.Equal(int64(1), updated)
+	updated, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(0),
+	).Update(
+		conditions.Product.IntSet().Eq(1),
+		conditions.Product.BoolSet().Eq(true),
+	)
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
 
-// 	productReturned, err := orm.NewQuery[models.Product](
-// 		ts.db,
-// 		conditions.Product.IntIs().Eq(1),
-// 		conditions.Product.BoolIs().Eq(true),
-// 	).FindOne()
-// 	ts.Nil(err)
+	productReturned, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+		conditions.Product.BoolIs().Eq(true),
+	).FindOne()
+	ts.Nil(err)
 
-// 	ts.Equal(product.ID, productReturned.ID)
-// 	ts.Equal(1, productReturned.Int)
-// 	ts.True(productReturned.Bool)
-// }
+	ts.Equal(product.ID, productReturned.ID)
+	ts.Equal(1, productReturned.Int)
+	ts.True(productReturned.Bool)
+}
 
 func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 	brand1 := ts.createBrand("google")
@@ -145,41 +145,41 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 	ts.Equal("pixel 7", pixel7.Name)
 }
 
-// func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() {
-// 	product1 := ts.createProduct("", 1, 0.0, false, nil)
-// 	product2 := ts.createProduct("", 2, 0.0, false, nil)
+func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() {
+	product1 := ts.createProduct("", 1, 0.0, false, nil)
+	product2 := ts.createProduct("", 2, 0.0, false, nil)
 
-// 	seller1 := ts.createSeller("franco", nil)
-// 	seller2 := ts.createSeller("agustin", nil)
+	seller1 := ts.createSeller("franco", nil)
+	seller2 := ts.createSeller("agustin", nil)
 
-// 	match := ts.createSale(0, product1, seller1)
-// 	ts.createSale(0, product2, seller2)
-// 	ts.createSale(0, product1, seller2)
-// 	ts.createSale(0, product2, seller1)
+	match := ts.createSale(0, product1, seller1)
+	ts.createSale(0, product2, seller2)
+	ts.createSale(0, product1, seller2)
+	ts.createSale(0, product2, seller1)
 
-// 	updated, err := orm.NewQuery[models.Sale](
-// 		ts.db,
-// 		conditions.Sale.Product(
-// 			conditions.Product.IntIs().Eq(1),
-// 		),
-// 		conditions.Sale.Seller(
-// 			conditions.Seller.NameIs().Eq("franco"),
-// 		),
-// 	).Update(
-// 		conditions.Sale.CodeSet().Eq(1),
-// 	)
-// 	ts.Nil(err)
-// 	ts.Equal(int64(1), updated)
+	updated, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.Product(
+			conditions.Product.IntIs().Eq(1),
+		),
+		conditions.Sale.Seller(
+			conditions.Seller.NameIs().Eq("franco"),
+		),
+	).Update(
+		conditions.Sale.CodeSet().Eq(1),
+	)
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
 
-// 	sale, err := orm.NewQuery[models.Sale](
-// 		ts.db,
-// 		conditions.Sale.CodeIs().Eq(1),
-// 	).FindOne()
-// 	ts.Nil(err)
+	sale, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.CodeIs().Eq(1),
+	).FindOne()
+	ts.Nil(err)
 
-// 	ts.Equal(match.ID, sale.ID)
-// 	ts.Equal(1, sale.Code)
-// }
+	ts.Equal(match.ID, sale.ID)
+	ts.Equal(1, sale.Code)
+}
 
 func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	product1 := ts.createProduct("", 0, 0.0, false, nil)
@@ -216,6 +216,4 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 
 	ts.Equal(match.ID, sale.ID)
 	ts.Equal(1, sale.Code)
-
-	ts.Fail("to print")
 }
