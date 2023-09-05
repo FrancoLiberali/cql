@@ -216,17 +216,6 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	updateMap := map[string]any{}
 
-	for field, value := range values {
-		// TODO ver este 0
-		table, err := query.GetModelTable(field, 0)
-		if err != nil {
-			// TODO aca falta agregar el metodo usado
-			return 0, err
-		}
-
-		updateMap[field.ColumnName(query, table)] = value
-	}
-
 	// TODO tambien sacar el preload en caso de que hagan un preload collection
 	// Tambien ver el tema de los order y eso
 	// y si pongo el returning tambien ver que eso no rompa los find
@@ -239,6 +228,17 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	switch query.GormDB.Dialector.Name() {
 	// TODO poner en constantes
 	case "postgres", "sqlite":
+		for field, value := range values {
+			// TODO ver este 0
+			table, err := query.GetModelTable(field, 0)
+			if err != nil {
+				// TODO aca falta agregar el metodo usado
+				return 0, err
+			}
+
+			updateMap[field.ColumnName(query, table)] = value
+		}
+
 		tables := []clause.Table{}
 
 		for _, join := range query.GormDB.Statement.Joins {
@@ -317,7 +317,6 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 
 		sets := clause.Set{}
 
-		// TODO codigo repetido aca arriba
 		for field, value := range values {
 			// TODO ver este 0
 			table, err := query.GetModelTable(field, 0)
@@ -336,8 +335,6 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 		}
 
 		query.GormDB.Statement.AddClause(sets)
-
-		updateMap = nil
 	}
 
 	update := query.GormDB.Updates(updateMap)
