@@ -268,6 +268,76 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 				},
 			)
 		}
+	// TODO ver que no se cual es pero permite modifiers en el update
+	case "mysql":
+		joinClauses := []clause.Join{}
+
+		for _, join := range query.GormDB.Statement.Joins {
+			// TODO codigo repetido
+			joinName := strings.ReplaceAll(join.Name, "INNER JOIN ", "")
+			joinName = strings.ReplaceAll(joinName, "LEFT JOIN ", "")
+			joinNameSplit := strings.Split(joinName, " ON ")
+			tableNameAndAlias := joinNameSplit[0]
+			onStatement := joinNameSplit[1]
+			tableNameAndAliasSplit := strings.Split(tableNameAndAlias, " ")
+			tableName := tableNameAndAliasSplit[0]
+			tableAlias := tableNameAndAliasSplit[1]
+
+			joinClauses = append(joinClauses, clause.Join{
+				// Type: join.JoinType,
+				Type: clause.InnerJoin,
+				Table: clause.Table{
+					Name:  tableName,
+					Alias: tableAlias,
+					Raw:   true, // prevent gorm from putting the alias in quotes
+				},
+				ON: clause.Where{Exprs: []clause.Expression{
+					clause.Expr{SQL: onStatement, Vars: join.Conds},
+				}},
+			})
+		}
+
+		// if at least one join is done,
+		// allow UPDATE without WHERE as the condition can be the join
+		if len(joinClauses) > 0 {
+			query.GormDB.AllowGlobalUpdate = true
+		}
+
+		// TODO esto no es necesario si hago el cambio interno de gorm que deje en TODO
+		query.GormDB.Statement.AddClause(
+			clause.Update{
+				Table: clause.Table{
+					Name: query.initialTable.Name,
+					Raw:  true, // prevent gorm from putting the alias in quotes
+				},
+				// TODO ver que pone LEFT JOIN siempre
+				Joins: joinClauses,
+			},
+		)
+
+		sets := clause.Set{}
+
+		// TODO codigo repetido aca arriba
+		for field, value := range values {
+			// TODO ver este 0
+			table, err := query.GetModelTable(field, 0)
+			if err != nil {
+				// TODO aca falta agregar el metodo usado
+				return 0, err
+			}
+
+			sets = append(sets, clause.Assignment{
+				Column: clause.Column{
+					Name:  field.ColumnName(query, table),
+					Table: table.Name,
+				},
+				Value: value,
+			})
+		}
+
+		query.GormDB.Statement.AddClause(sets)
+
+		updateMap = nil
 	}
 
 	update := query.GormDB.Updates(updateMap)
