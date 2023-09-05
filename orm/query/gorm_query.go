@@ -246,15 +246,7 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 		tables := []clause.Table{}
 
 		for _, join := range query.GormDB.Statement.Joins {
-			// TODO quizas para evitarme estos split podria usar bien los joins en la creacion directamente, con el on y eso
-			joinName := strings.ReplaceAll(join.Name, "INNER JOIN ", "")
-			joinName = strings.ReplaceAll(joinName, "LEFT JOIN ", "")
-			joinNameSplit := strings.Split(joinName, " ON ")
-			tableNameAndAlias := joinNameSplit[0]
-			onStatement := joinNameSplit[1]
-			tableNameAndAliasSplit := strings.Split(tableNameAndAlias, " ")
-			tableName := tableNameAndAliasSplit[0]
-			tableAlias := tableNameAndAliasSplit[1]
+			tableName, tableAlias, onStatement := splitJoin(join.Name)
 
 			tables = append(tables, clause.Table{
 				Name:  tableName,
@@ -277,15 +269,7 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 		joinClauses := []clause.Join{}
 
 		for _, join := range query.GormDB.Statement.Joins {
-			// TODO codigo repetido
-			joinName := strings.ReplaceAll(join.Name, "INNER JOIN ", "")
-			joinName = strings.ReplaceAll(joinName, "LEFT JOIN ", "")
-			joinNameSplit := strings.Split(joinName, " ON ")
-			tableNameAndAlias := joinNameSplit[0]
-			onStatement := joinNameSplit[1]
-			tableNameAndAliasSplit := strings.Split(tableNameAndAlias, " ")
-			tableName := tableNameAndAliasSplit[0]
-			tableAlias := tableNameAndAliasSplit[1]
+			tableName, tableAlias, onStatement := splitJoin(join.Name)
 
 			joinClauses = append(joinClauses, clause.Join{
 				Type: join.JoinType,
@@ -342,4 +326,21 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	update := query.GormDB.Updates(updateMap)
 
 	return update.RowsAffected, update.Error
+}
+
+// Splits a JOIN statement into the table name, table alias and ON statement
+func splitJoin(joinStatement string) (string, string, string) {
+	// remove INNER JOIN and LEFT JOIN
+	joinStatement = strings.ReplaceAll(joinStatement, "INNER JOIN ", "")
+	joinStatement = strings.ReplaceAll(joinStatement, "LEFT JOIN ", "")
+
+	// divide table and on statement
+	joinStatementSplit := strings.Split(joinStatement, " ON ")
+	table := joinStatementSplit[0]
+	onStatement := joinStatementSplit[1]
+
+	// divide table name and alias
+	tableSplit := strings.Split(table, " ")
+
+	return tableSplit[0], tableSplit[1], onStatement
 }
