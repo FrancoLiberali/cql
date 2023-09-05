@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/elliotchance/pie/v2"
+	"gorm.io/gorm/clause"
 
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/orm/query"
@@ -78,55 +79,20 @@ func (condition joinConditionImpl[T1, T2]) makesFilter() bool {
 func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.GormQuery, t1Table query.Table) error {
 	whereConditions, joinConditions, t2PreloadCondition := divideConditionsByType(condition.Conditions)
 
-	t2Model := *new(T2)
-
 	// get the sql to do the join with T2
-	t2Table, err := t1Table.DeliverTable(query, t2Model, condition.RelationField)
+	t2Table, err := t1Table.DeliverTable(query, *new(T2), condition.RelationField)
 	if err != nil {
 		return err
 	}
 
-	makesPreload := condition.makesPreload()
-	joinQuery := condition.getSQLJoin(
-		query,
-		t1Table,
-		t2Table,
-		len(whereConditions) == 0 && makesPreload,
-	)
-
-	query.AddConcernedModel(
-		t2Model,
-		t2Table,
-	)
-
-	// apply WhereConditions to the join in the "on" clause
-	connectionCondition := And(whereConditions...)
-
-	onQuery, onValues, err := connectionCondition.GetSQL(query, t2Table)
-	if err != nil {
-		return err
-	}
-
-	if onQuery != "" {
-		joinQuery += " AND " + onQuery
-	}
-
-	if !connectionCondition.AffectsDeletedAt() {
-		joinQuery += fmt.Sprintf(
-			" AND %s.deleted_at IS NULL",
-			t2Table.Alias,
-		)
-	}
-
-	// add the join to the query
-	query.Joins(joinQuery, onValues...)
+	condition.addJoin(query, t1Table, t2Table, whereConditions)
 
 	// apply T1 preload condition
 	// if this condition has a T2 preload condition
 	// or any nested join condition has a preload condition
 	// and this is not first level (T1 is the type of the repository)
 	// because T1 is always loaded in that case
-	if makesPreload && !t1Table.IsInitial() {
+	if condition.makesPreload() && !t1Table.IsInitial() {
 		err = condition.T1PreloadCondition.ApplyTo(query, t1Table)
 		if err != nil {
 			return err
@@ -152,6 +118,48 @@ func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.GormQuery, t1Tab
 	return nil
 }
 
+// Adds the join between t1Table and t2Table to the query and the whereConditions in the "ON"
+func (condition joinConditionImpl[T1, T2]) addJoin(query *query.GormQuery, t1Table, t2Table query.Table, whereConditions []WhereCondition[T2]) error {
+	joinQuery := condition.getSQLJoin(
+		query,
+		t1Table,
+		t2Table,
+	)
+
+	query.AddConcernedModel(
+		*new(T2),
+		t2Table,
+	)
+
+	// apply WhereConditions to the join in the "on" clause
+	connectionCondition := And(whereConditions...)
+
+	onQuery, onValues, err := connectionCondition.GetSQL(query, t2Table)
+	if err != nil {
+		return err
+	}
+
+	if onQuery != "" {
+		joinQuery += clause.AndWithSpace + onQuery
+	}
+
+	if !connectionCondition.AffectsDeletedAt() {
+		joinQuery += fmt.Sprintf(
+			clause.AndWithSpace+"%s.deleted_at IS NULL",
+			t2Table.Alias,
+		)
+	}
+
+	// add the join to the query
+	query.Joins(
+		joinQuery,
+		len(whereConditions) == 0 && condition.makesPreload(),
+		onValues...,
+	)
+
+	return nil
+}
+
 // Returns the SQL string to do a join between T1 and T2
 // taking into account that the ID attribute necessary to do it
 // can be either in T1's or T2's table.
@@ -159,22 +167,15 @@ func (condition joinConditionImpl[T1, T2]) getSQLJoin(
 	query *query.GormQuery,
 	t1Table query.Table,
 	t2Table query.Table,
-	isLeftJoin bool,
 ) string {
-	joinString := "INNER JOIN"
-	if isLeftJoin {
-		joinString = "LEFT JOIN"
-	}
-
 	return fmt.Sprintf(
-		`%[6]s %[1]s %[2]s ON %[2]s.%[3]s = %[4]s.%[5]s
+		`%[1]s %[2]s ON %[2]s.%[3]s = %[4]s.%[5]s
 		`,
 		t2Table.Name,
 		t2Table.Alias,
 		query.ColumnName(t2Table, condition.T2Field),
 		t1Table.Alias,
 		query.ColumnName(t1Table, condition.T1Field),
-		joinString,
 	)
 }
 

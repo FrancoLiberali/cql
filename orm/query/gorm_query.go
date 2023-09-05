@@ -129,8 +129,12 @@ func (query *GormQuery) Where(whereQuery interface{}, args ...interface{}) {
 	query.GormDB = query.GormDB.Where(whereQuery, args...)
 }
 
-func (query *GormQuery) Joins(joinQuery string, args ...interface{}) {
-	query.GormDB = query.GormDB.Joins(joinQuery, args...)
+func (query *GormQuery) Joins(joinQuery string, isLeftJoin bool, args ...interface{}) {
+	if isLeftJoin {
+		query.GormDB = query.GormDB.Joins("LEFT JOIN "+joinQuery, args...)
+	} else {
+		query.GormDB = query.GormDB.InnerJoins("INNER JOIN "+joinQuery, args...)
+	}
 }
 
 func (query *GormQuery) AddConcernedModel(model model.Model, table Table) {
@@ -284,8 +288,7 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 			tableAlias := tableNameAndAliasSplit[1]
 
 			joinClauses = append(joinClauses, clause.Join{
-				// Type: join.JoinType,
-				Type: clause.InnerJoin,
+				Type: join.JoinType,
 				Table: clause.Table{
 					Name:  tableName,
 					Alias: tableAlias,
@@ -310,7 +313,6 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 					Name: query.initialTable.Name,
 					Raw:  true, // prevent gorm from putting the alias in quotes
 				},
-				// TODO ver que pone LEFT JOIN siempre
 				Joins: joinClauses,
 			},
 		)
