@@ -2,9 +2,6 @@ module github.com/ditrit/badaas
 
 go 1.18
 
-replace gorm.io/driver/postgres => ../../../Documents/postgres
-replace gorm.io/driver/sqlite => ../../../Documents/sqlite
-replace gorm.io/driver/sqlserver => ../../../Documents/sqlserver
 replace gorm.io/gorm => ../../../Documents/gorm
 
 require (
@@ -69,3 +66,7 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+replace gorm.io/driver/postgres v1.5.2 => github.com/ditrit/postgres v0.0.0-20230906140800-b3d5f9d4b6ad
+replace gorm.io/driver/sqlite v1.5.2 => github.com/ditrit/sqlite v0.0.0-20230906140046-2f37a3f972de
+replace gorm.io/driver/sqlserver v1.5.1 => github.com/ditrit/sqlserver v0.0.0-20230906142139-ffc300569d6d
