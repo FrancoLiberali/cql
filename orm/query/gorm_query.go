@@ -264,6 +264,8 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 				},
 			)
 		}
+
+		query.GormDB.Statement.Joins = nil
 	// TODO ver que no se cual es pero permite modifiers en el update
 	case "mysql":
 		joinClauses := []clause.Join{}
