@@ -3,8 +3,8 @@ module github.com/ditrit/badaas
 go 1.18
 
 replace gorm.io/driver/postgres => ../../../Documents/postgres
-replace gorm.io/driver/mysql => ../../../Documents/mysql
 replace gorm.io/driver/sqlite => ../../../Documents/sqlite
+replace gorm.io/driver/sqlserver => ../../../Documents/sqlserver
 replace gorm.io/gorm => ../../../Documents/gorm
 
 require (
