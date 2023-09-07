@@ -226,10 +226,6 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	// y si pongo el returning tambien ver que eso no rompa los find
 	query.GormDB.Statement.Selects = []string{}
 
-	// postgre y sqlite son con from, que es lo mismo que hacer un exists en el where
-	// mysql y sqlserver permiten update join, lo cual es lo mismo mas que permiten hacer el update de mas de una tabla a la vez
-	// pero sqlserver necesita la repeticion de la tabla inicial, al menos segun la doc, se podria probar
-
 	switch query.GormDB.Dialector.Name() {
 	// TODO poner en constantes
 	case "postgres", "sqlite", "sqlserver":
