@@ -157,6 +157,24 @@ func (query *Query[T]) Update(sets ...*Set[T]) (int64, error) {
 	return query.unsafeUpdate(setsAsInterface)
 }
 
+func (query *Query[T]) unsafeUpdate(sets []ISet) (int64, error) {
+	if query.err != nil {
+		return 0, query.err
+	}
+
+	updateMap := map[ormQuery.IFieldIdentifier]any{}
+	for _, set := range sets {
+		updateMap[set.Field()] = set.Value()
+	}
+
+	updated, err := query.gormQuery.Update(updateMap)
+	if err != nil {
+		return 0, methodError(err, "Update")
+	}
+
+	return updated, nil
+}
+
 func (query *Query[T]) addError(err error) {
 	if query.err == nil {
 		query.err = err
@@ -172,19 +190,6 @@ func (query *Query[T]) MySQL() *MySQLQuery[T] {
 	return &MySQLQuery[T]{
 		query: *query,
 	}
-}
-
-func (query *Query[T]) unsafeUpdate(sets []ISet) (int64, error) {
-	if query.err != nil {
-		return 0, query.err
-	}
-
-	updateMap := map[ormQuery.IFieldIdentifier]any{}
-	for _, set := range sets {
-		updateMap[set.Field()] = set.Value()
-	}
-
-	return query.gormQuery.Update(updateMap)
 }
 
 type MySQLQuery[T model.Model] struct {
