@@ -228,7 +228,7 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 
 	switch query.GormDB.Dialector.Name() {
 	// TODO poner en constantes
-	case "postgres", "sqlite", "sqlserver":
+	case "postgres", "sqlite", "sqlserver": // support UPDATE SET FROM
 		for field, value := range values {
 			// TODO ver este 0
 			table, err := query.GetModelTable(field, 0)
