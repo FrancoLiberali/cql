@@ -28,8 +28,8 @@ func (query *GormQuery) Order(field IFieldIdentifier, descending bool, joinNumbe
 		return err
 	}
 
-	switch query.GormDB.Dialector.Name() {
-	case "postgres":
+	switch query.Dialector() {
+	case Postgres:
 		// postgres supports only order by selected fields
 		query.AddSelect(table, field)
 		query.GormDB = query.GormDB.Order(
@@ -42,7 +42,7 @@ func (query *GormQuery) Order(field IFieldIdentifier, descending bool, joinNumbe
 		)
 
 		return nil
-	case "sqlserver", "sqlite", "mysql":
+	case SQLServer, SQLite, MySQL:
 		query.GormDB = query.GormDB.Order(
 			clause.OrderByColumn{
 				Column: clause.Column{
@@ -171,6 +171,19 @@ func (query *GormQuery) GetModelTable(field IFieldIdentifier, joinNumber int) (T
 
 func (query GormQuery) ColumnName(table Table, fieldName string) string {
 	return query.GormDB.NamingStrategy.ColumnName(table.Name, fieldName)
+}
+
+type Dialector string
+
+const (
+	Postgres  Dialector = "postgres"
+	MySQL     Dialector = "mysql"
+	SQLite    Dialector = "sqlite"
+	SQLServer Dialector = "sqlserver"
+)
+
+func (query GormQuery) Dialector() Dialector {
+	return Dialector(query.GormDB.Dialector.Name())
 }
 
 func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *GormQuery {

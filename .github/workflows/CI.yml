@@ -103,10 +103,10 @@ jobs:
           map: |
             {
               "postgresql": {
-                "dialector": "postgresql"
+                "dialector": "postgres"
               },
               "cockroachdb": {
-                "dialector": "postgresql"
+                "dialector": "postgres"
               },
               "mysql": {
                 "dialector": "mysql"

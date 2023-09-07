@@ -8,6 +8,7 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/mysql"
+	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -500,9 +501,9 @@ func (ts *WhereConditionsIntTestSuite) TestNotOr() {
 
 func (ts *WhereConditionsIntTestSuite) TestXor() {
 	switch getDBDialector() {
-	case postgreSQL, sqLite, sqlServer:
+	case query.Postgres, query.SQLite, query.SQLServer:
 		log.Println("Xor not compatible")
-	case mySQL:
+	case query.MySQL:
 		match1 := ts.createProduct("", 1, 0, false, nil)
 		match2 := ts.createProduct("", 7, 0, false, nil)
 

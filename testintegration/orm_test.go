@@ -16,6 +16,7 @@ import (
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/logger"
+	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/persistence/database"
 	"github.com/ditrit/badaas/persistence/gormfx"
 )
@@ -31,15 +32,6 @@ const (
 	port     = 5000
 	sslMode  = "disable"
 	dbName   = "badaas_db"
-)
-
-type dbDialector string
-
-const (
-	postgreSQL dbDialector = "postgresql"
-	mySQL      dbDialector = "mysql"
-	sqLite     dbDialector = "sqlite"
-	sqlServer  dbDialector = "sqlserver"
 )
 
 func TestBaDaaSORM(t *testing.T) {
@@ -84,13 +76,13 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case postgreSQL:
+	case query.Postgres:
 		dialector = postgres.Open(orm.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
-	case mySQL:
-		dialector = mysql.Open(orm.CreateMySQLDSN(host, username, password, dbName, port))
-	case sqLite:
+	case query.SQLite:
 		dialector = sqlite.Open(orm.CreateSQLiteDSN(host))
-	case sqlServer:
+	case query.MySQL:
+		dialector = mysql.Open(orm.CreateMySQLDSN(host, username, password, dbName, port))
+	case query.SQLServer:
 		dialector = sqlserver.Open(orm.CreateSQLServerDSN(host, username, password, dbName, port))
 	default:
 		return nil, fmt.Errorf("unknown db %s", getDBDialector())
@@ -103,6 +95,6 @@ func NewDBConnection() (*gorm.DB, error) {
 	)
 }
 
-func getDBDialector() dbDialector {
-	return dbDialector(os.Getenv(dbTypeEnvKey))
+func getDBDialector() query.Dialector {
+	return query.Dialector(os.Getenv(dbTypeEnvKey))
 }

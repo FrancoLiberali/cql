@@ -7,6 +7,7 @@ import (
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -272,7 +273,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 	product2 := ts.createProduct("", 1, 2, false, nil)
 
 	switch getDBDialector() {
-	case postgreSQL, sqlServer, sqLite:
+	case query.Postgres, query.SQLServer, query.SQLite:
 		products, err := orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.IntIs().Eq(1),
@@ -280,7 +281,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{product2}, products)
-	case mySQL:
+	case query.MySQL:
 		products, err := orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.IntIs().Eq(1),
@@ -296,7 +297,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 	ts.createProduct("", 1, 0, false, nil)
 
 	switch getDBDialector() {
-	case postgreSQL, sqlServer, sqLite:
+	case query.Postgres, query.SQLServer, query.SQLite:
 		products, err := orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.IntIs().Eq(1),
@@ -304,7 +305,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{}, products)
-	case mySQL:
+	case query.MySQL:
 		products, err := orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.IntIs().Eq(1),

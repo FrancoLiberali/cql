@@ -11,6 +11,7 @@ import (
 	"github.com/ditrit/badaas/orm/mysql"
 	"github.com/ditrit/badaas/orm/operator"
 	"github.com/ditrit/badaas/orm/psql"
+	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/orm/sqlite"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -250,12 +251,12 @@ func (ts *OperatorsIntTestSuite) TestIsTrue() {
 	var entities []*models.Product
 
 	switch getDBDialector() {
-	case postgreSQL, mySQL, sqLite:
+	case query.Postgres, query.MySQL, query.SQLite:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.BoolIs().True(),
 		).Find()
-	case sqlServer:
+	case query.SQLServer:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.BoolIs().Eq(true),
@@ -277,12 +278,12 @@ func (ts *OperatorsIntTestSuite) TestIsFalse() {
 	var entities []*models.Product
 
 	switch getDBDialector() {
-	case postgreSQL, mySQL, sqLite:
+	case query.Postgres, query.MySQL, query.SQLite:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.BoolIs().False(),
 		).Find()
-	case sqlServer:
+	case query.SQLServer:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.BoolIs().Eq(false),
@@ -310,12 +311,12 @@ func (ts *OperatorsIntTestSuite) TestIsNotTrue() {
 	var entities []*models.Product
 
 	switch getDBDialector() {
-	case postgreSQL, mySQL, sqLite:
+	case query.Postgres, query.MySQL, query.SQLite:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().NotTrue(),
 		).Find()
-	case sqlServer:
+	case query.SQLServer:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().Distinct(true),
@@ -343,12 +344,12 @@ func (ts *OperatorsIntTestSuite) TestIsNotFalse() {
 	var entities []*models.Product
 
 	switch getDBDialector() {
-	case postgreSQL, mySQL, sqLite:
+	case query.Postgres, query.MySQL, query.SQLite:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().NotFalse(),
 		).Find()
-	case sqlServer:
+	case query.SQLServer:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().Distinct(false),
@@ -376,12 +377,12 @@ func (ts *OperatorsIntTestSuite) TestIsUnknown() {
 	var entities []*models.Product
 
 	switch getDBDialector() {
-	case postgreSQL, mySQL:
+	case query.Postgres, query.MySQL:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().Unknown(),
 		).Find()
-	case sqlServer, sqLite:
+	case query.SQLServer, query.SQLite:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().Null(),
@@ -409,12 +410,12 @@ func (ts *OperatorsIntTestSuite) TestIsNotUnknown() {
 	var entities []*models.Product
 
 	switch getDBDialector() {
-	case postgreSQL, mySQL:
+	case query.Postgres, query.MySQL:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().NotUnknown(),
 		).Find()
-	case sqlServer, sqLite:
+	case query.SQLServer, query.SQLite:
 		entities, err = orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.NullBoolIs().NotNull(),
@@ -428,7 +429,7 @@ func (ts *OperatorsIntTestSuite) TestIsNotUnknown() {
 
 func (ts *OperatorsIntTestSuite) TestIsDistinct() {
 	switch getDBDialector() {
-	case postgreSQL, sqlServer, sqLite:
+	case query.Postgres, query.SQLServer, query.SQLite:
 		match1 := ts.createProduct("match", 3, 0, false, nil)
 		match2 := ts.createProduct("match", 4, 0, false, nil)
 		ts.createProduct("not_match", 2, 0, false, nil)
@@ -440,14 +441,14 @@ func (ts *OperatorsIntTestSuite) TestIsDistinct() {
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
-	case mySQL:
+	case query.MySQL:
 		log.Println("IsDistinct not compatible")
 	}
 }
 
 func (ts *OperatorsIntTestSuite) TestIsNotDistinct() {
 	switch getDBDialector() {
-	case postgreSQL, sqlServer, sqLite:
+	case query.Postgres, query.SQLServer, query.SQLite:
 		match := ts.createProduct("match", 3, 0, false, nil)
 		ts.createProduct("not_match", 4, 0, false, nil)
 		ts.createProduct("not_match", 2, 0, false, nil)
@@ -459,7 +460,7 @@ func (ts *OperatorsIntTestSuite) TestIsNotDistinct() {
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{match}, entities)
-	case mySQL:
+	case query.MySQL:
 		log.Println("IsNotDistinct not compatible")
 	}
 }
@@ -532,9 +533,9 @@ func (ts *OperatorsIntTestSuite) TestLikeEscape() {
 
 func (ts *OperatorsIntTestSuite) TestLikeOnNumeric() {
 	switch getDBDialector() {
-	case postgreSQL, sqlServer, sqLite:
+	case query.Postgres, query.SQLServer, query.SQLite:
 		log.Println("Like with numeric not compatible")
-	case mySQL:
+	case query.MySQL:
 		match1 := ts.createProduct("", 10, 0, false, nil)
 		match2 := ts.createProduct("", 100, 0, false, nil)
 
@@ -555,9 +556,9 @@ func (ts *OperatorsIntTestSuite) TestLikeOnNumeric() {
 
 func (ts *OperatorsIntTestSuite) TestILike() {
 	switch getDBDialector() {
-	case mySQL, sqlServer, sqLite:
+	case query.MySQL, query.SQLServer, query.SQLite:
 		log.Println("ILike not compatible")
-	case postgreSQL:
+	case query.Postgres:
 		match1 := ts.createProduct("basd", 0, 0, false, nil)
 		match2 := ts.createProduct("cape", 0, 0, false, nil)
 		match3 := ts.createProduct("bAsd", 0, 0, false, nil)
@@ -579,9 +580,9 @@ func (ts *OperatorsIntTestSuite) TestILike() {
 
 func (ts *OperatorsIntTestSuite) TestSimilarTo() {
 	switch getDBDialector() {
-	case mySQL, sqlServer, sqLite:
+	case query.MySQL, query.SQLServer, query.SQLite:
 		log.Println("SimilarTo not compatible")
-	case postgreSQL:
+	case query.Postgres:
 		match1 := ts.createProduct("abc", 0, 0, false, nil)
 		match2 := ts.createProduct("aabcc", 0, 0, false, nil)
 
@@ -611,11 +612,11 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseSensitive() {
 	var posixRegexOperator operator.Operator[string]
 
 	switch getDBDialector() {
-	case sqlServer, mySQL:
+	case query.SQLServer, query.MySQL:
 		log.Println("PosixRegex not compatible")
-	case postgreSQL:
+	case query.Postgres:
 		posixRegexOperator = psql.POSIXMatch("^a(b|x)")
-	case sqLite:
+	case query.SQLite:
 		posixRegexOperator = sqlite.Glob("a[bx]")
 	}
 
@@ -643,11 +644,11 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseInsensitive() {
 	var posixRegexOperator operator.Operator[string]
 
 	switch getDBDialector() {
-	case sqlServer, sqLite:
+	case query.SQLServer, query.SQLite:
 		log.Println("PosixRegex Case Insensitive not compatible")
-	case mySQL:
+	case query.MySQL:
 		posixRegexOperator = mysql.RegexP("^a(b|x)")
-	case postgreSQL:
+	case query.Postgres:
 		posixRegexOperator = psql.POSIXIMatch("^a(b|x)")
 	}
 
@@ -744,7 +745,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchConvertibl
 
 func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvertible() {
 	switch getDBDialector() {
-	case sqLite:
+	case query.SQLite:
 		// comparisons between types are allowed and matches nothing if not convertible
 		ts.createProduct("", 0, 0, false, nil)
 		ts.createProduct("", 0, 2, false, nil)
@@ -757,7 +758,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{}, entities)
-	case mySQL:
+	case query.MySQL:
 		// comparisons between types are allowed but matches 0s if not convertible
 		match := ts.createProduct("", 0, 0, false, nil)
 		ts.createProduct("", 0, 2, false, nil)
@@ -770,14 +771,14 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{match}, entities)
-	case sqlServer:
+	case query.SQLServer:
 		// returns an error
 		_, err := orm.NewQuery[models.Product](
 			ts.db,
 			conditions.Product.FloatIs().Unsafe().Eq("not_convertible_to_float"),
 		).Find()
 		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
-	case postgreSQL:
+	case query.Postgres:
 		// returns an error
 		_, err := orm.NewQuery[models.Product](
 			ts.db,
@@ -789,7 +790,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 
 func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch() {
 	switch getDBDialector() {
-	case sqLite:
+	case query.SQLite:
 		// comparisons between fields with different types are allowed
 		match1 := ts.createProduct("0", 0, 0, false, nil)
 		match2 := ts.createProduct("1", 0, 1, false, nil)
@@ -803,7 +804,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
-	case mySQL:
+	case query.MySQL:
 		// comparisons between fields with different types are allowed but matches 0s on not convertible
 		match1 := ts.createProduct("0", 1, 0, false, nil)
 		match2 := ts.createProduct("1", 2, 1, false, nil)
@@ -817,7 +818,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 		ts.Nil(err)
 
 		EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
-	case sqlServer:
+	case query.SQLServer:
 		// comparisons between fields with different types are allowed and returns error only if at least one is not convertible
 		match1 := ts.createProduct("0", 1, 0, false, nil)
 		match2 := ts.createProduct("1", 2, 1, false, nil)
@@ -838,7 +839,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 			conditions.Product.FloatIs().Unsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
-	case postgreSQL:
+	case query.Postgres:
 		// returns an error
 		_, err := orm.NewQuery[models.Product](
 			ts.db,

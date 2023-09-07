@@ -29,10 +29,10 @@ sqlserver:
 	docker compose -f "docker/sqlserver/docker-compose.yml" up -d --build
 
 test_integration_postgresql: postgresql
-	DB=postgresql gotestsum --format testname ./testintegration
+	DB=postgres gotestsum --format testname ./testintegration
 
 test_integration_cockroachdb: cockroachdb
-	DB=postgresql gotestsum --format testname ./testintegration -tags=cockroachdb
+	DB=postgres gotestsum --format testname ./testintegration -tags=cockroachdb
 
 test_integration_mysql: mysql
 	DB=mysql gotestsum --format testname ./testintegration -tags=mysql
