@@ -312,10 +312,7 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IFieldIdentifi
 
 	for _, set := range sets {
 		field := set.Field()
-		// TODO este 0 es el de que tabla actualizar
-		// para no mysql tiene que se la tabla a la que le hice el update, no se donde sale
-		// y nunca deberia haber un field de otra tabla (verificar esto?), pero el 0 esta bien porque siempre va a ser la primera que se agrega
-		// en mysql si se podria elegir porque el field puede estar en varias tablas
+
 		table, err := query.GetModelTable(field, 0)
 		if err != nil {
 			return nil, err

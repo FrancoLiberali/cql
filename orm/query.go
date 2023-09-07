@@ -148,6 +148,17 @@ func (query *Query[T]) Update(sets ...*ormQuery.Set[T]) (int64, error) {
 	return query.unsafeUpdate(setsAsInterface)
 }
 
+// available for: mysql
+func (query *Query[T]) UpdateMultiple(sets ...ormQuery.ISet) (int64, error) {
+	// TODO hacer lo mismo con todos los operadores
+	if query.gormQuery.Dialector() != ormQuery.MySQL {
+		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "MySQL"))
+	}
+
+	// TODO que pasa si esta vacio?
+	return query.unsafeUpdate(sets)
+}
+
 func (query *Query[T]) unsafeUpdate(sets []ormQuery.ISet) (int64, error) {
 	if query.err != nil {
 		return 0, query.err
@@ -165,24 +176,4 @@ func (query *Query[T]) addError(err error) {
 	if query.err == nil {
 		query.err = err
 	}
-}
-
-func (query *Query[T]) MySQL() *MySQLQuery[T] {
-	// TODO hacer lo mismo con todos los operadores
-	if query.gormQuery.Dialector() != ormQuery.MySQL {
-		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "MySQL"))
-	}
-
-	return &MySQLQuery[T]{
-		query: *query,
-	}
-}
-
-type MySQLQuery[T model.Model] struct {
-	query Query[T]
-}
-
-func (mySQLQuery *MySQLQuery[T]) Update(sets ...ormQuery.ISet) (int64, error) {
-	// TODO que pasa si esta vacio?
-	return mySQLQuery.query.unsafeUpdate(sets)
 }

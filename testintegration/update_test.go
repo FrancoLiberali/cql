@@ -331,7 +331,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	if getDBDialector() != "mysql" {
 		_, err := orm.NewQuery[models.Phone](
 			ts.db,
-		).MySQL().Update()
+		).UpdateMultiple()
 		ts.ErrorIs(err, errors.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: MySQL")
 	} else {
@@ -346,8 +346,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 			conditions.Phone.Brand(
 				conditions.Brand.NameIs().Eq("google"),
 			),
-		).MySQL().Update(
-			conditions.Phone.NameSet().Eq("7"),
+		).UpdateMultiple(
 			conditions.Phone.NameSet().Eq("7"),
 			conditions.Brand.NameSet().Eq("google pixel"),
 		)
@@ -374,4 +373,20 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 		ts.Equal("google pixel", googlePixel.Name)
 		ts.NotEqual(brand1.UpdatedAt.UnixMicro(), googlePixel.UpdatedAt.UnixMicro())
 	}
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoined() {
+	// update join only supported for mysql
+	if getDBDialector() != "mysql" {
+		return
+	}
+
+	_, err := orm.NewQuery[models.Phone](
+		ts.db,
+	).UpdateMultiple(
+		conditions.Phone.NameSet().Eq("7"),
+		conditions.Brand.NameSet().Eq("google pixel"),
+	)
+	ts.ErrorIs(err, errors.ErrFieldModelNotConcerned)
+	ts.ErrorContains(err, "not concerned model: models.Brand; method: Update")
 }
