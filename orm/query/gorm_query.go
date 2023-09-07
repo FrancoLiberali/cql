@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
@@ -17,7 +18,6 @@ import (
 type GormQuery struct {
 	GormDB          *gorm.DB
 	ConcernedModels map[reflect.Type][]Table
-	initialTable    Table
 }
 
 // Order specify order when retrieving models from database.
@@ -197,7 +197,6 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *Go
 	query := &GormQuery{
 		GormDB:          db.Model(initialModel).Select(initialTable.Name + ".*"),
 		ConcernedModels: map[reflect.Type][]Table{},
-		initialTable:    initialTable,
 	}
 
 	query.AddConcernedModel(initialModel, initialTable)
@@ -273,6 +272,7 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 		}
 
 		sets := clause.Set{}
+		updatedTables := []Table{}
 
 		for field := range values {
 			table := tablesAndValues[field].table
@@ -281,21 +281,25 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 			sets = append(sets, clause.Assignment{
 				Column: clause.Column{
 					Name:  field.ColumnName(query, table),
-					Table: table.Name,
+					Table: table.SQLName(),
 				},
 				Value: value,
 			})
+
+			updatedTables = append(updatedTables, table)
 		}
 
 		// TODO que no existan los set de field de los models (id, created, updated, etc)
-		// TODO si se puede editar mas de una tabla hacer en todas las tablas
-		sets = append(sets, clause.Assignment{
-			Column: clause.Column{
-				Name:  "updated_at",
-				Table: query.initialTable.Name,
-			},
-			Value: time.Now(),
-		})
+		now := time.Now()
+		for _, table := range pie.Unique(updatedTables) {
+			sets = append(sets, clause.Assignment{
+				Column: clause.Column{
+					Name:  "updated_at",
+					Table: table.SQLName(),
+				},
+				Value: now,
+			})
+		}
 
 		query.GormDB.Statement.AddClause(sets)
 	}

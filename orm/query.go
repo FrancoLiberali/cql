@@ -149,14 +149,37 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) 
 // TODO returning
 
 func (query *Query[T]) Update(sets ...*Set[T]) (int64, error) {
+	setsAsInterface := []ISet{}
+	for _, set := range sets {
+		setsAsInterface = append(setsAsInterface, set)
+	}
+
+	return query.unsafeUpdate(setsAsInterface)
+}
+
+func (query *Query[T]) MySQL() *MySQLQuery[T] {
+	return &MySQLQuery[T]{
+		query: *query,
+	}
+}
+
+func (query *Query[T]) unsafeUpdate(sets []ISet) (int64, error) {
 	if query.err != nil {
 		return 0, query.err
 	}
 
 	updateMap := map[ormQuery.IFieldIdentifier]any{}
 	for _, set := range sets {
-		updateMap[set.fieldID] = set.value
+		updateMap[set.Field()] = set.Value()
 	}
 
 	return query.gormQuery.Update(updateMap)
+}
+
+type MySQLQuery[T model.Model] struct {
+	query Query[T]
+}
+
+func (mySQLQuery *MySQLQuery[T]) Update(sets ...ISet) (int64, error) {
+	return mySQLQuery.query.unsafeUpdate(sets)
 }

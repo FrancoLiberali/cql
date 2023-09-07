@@ -5,13 +5,27 @@ import (
 	"github.com/ditrit/badaas/orm/query"
 )
 
+type ISet interface {
+	Field() query.IFieldIdentifier
+	Value() any
+}
+
 // TODO ver donde pongo esto
 type Set[T model.Model] struct {
 	fieldID query.IFieldIdentifier
 	value   any
 }
 
+func (set Set[T]) Field() query.IFieldIdentifier {
+	return set.fieldID
+}
+
+func (set Set[T]) Value() any {
+	return set.value
+}
+
 // TODO ver donde pongo esto
+// TODO nombre muy parecido
 type FieldSet[TObject model.Model, TAttribute any] struct {
 	FieldID query.FieldIdentifier[TAttribute]
 }
