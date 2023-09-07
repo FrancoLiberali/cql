@@ -264,7 +264,7 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 
 		query.GormDB.Statement.Joins = nil
 	// TODO ver que no se cual es pero permite modifiers en el update
-	case "mysql":
+	case "mysql": // support UPDATE JOIN SET
 		// if at least one join is done,
 		// allow UPDATE without WHERE as the condition can be the join
 		if len(query.GormDB.Statement.Joins) > 0 {
