@@ -260,7 +260,6 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 		conditions.Product.IntIs().Eq(0),
 	).Update(
 		conditions.Product.IntSet().Unsafe("1"),
-		// TODO se pueden repetir? mirar si da error en la base o que hace
 	)
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
