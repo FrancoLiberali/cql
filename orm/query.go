@@ -152,7 +152,7 @@ func (query *Query[T]) Update(sets ...*ormQuery.Set[T]) (int64, error) {
 func (query *Query[T]) UpdateMultiple(sets ...ormQuery.ISet) (int64, error) {
 	// TODO hacer lo mismo con todos los operadores
 	if query.gormQuery.Dialector() != ormQuery.MySQL {
-		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "MySQL"))
+		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "UpdateMultiple"))
 	}
 
 	// TODO que pasa si esta vacio?

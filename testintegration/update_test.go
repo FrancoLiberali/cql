@@ -334,7 +334,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 			ts.db,
 		).UpdateMultiple()
 		ts.ErrorIs(err, errors.ErrUnsupportedByDatabase)
-		ts.ErrorContains(err, "method: MySQL")
+		ts.ErrorContains(err, "method: UpdateMultiple")
 	} else {
 		brand1 := ts.createBrand("google")
 		brand2 := ts.createBrand("apple")
