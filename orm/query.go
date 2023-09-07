@@ -30,13 +30,13 @@ func (query *Query[T]) Descending(field ormQuery.IFieldIdentifier, joinNumber ..
 // if descending is true, the ordering is in descending direction
 func (query *Query[T]) order(field ormQuery.IFieldIdentifier, descending bool, joinNumberList []uint) *Query[T] {
 	err := query.gormQuery.Order(field, descending, getJoinNumber(joinNumberList))
-	if err != nil && query.err == nil {
+	if err != nil {
 		methodName := "Ascending"
 		if descending {
 			methodName = "Descending"
 		}
 
-		query.err = methodError(err, methodName)
+		query.addError(methodError(err, methodName))
 	}
 
 	return query
@@ -157,7 +157,18 @@ func (query *Query[T]) Update(sets ...*Set[T]) (int64, error) {
 	return query.unsafeUpdate(setsAsInterface)
 }
 
+func (query *Query[T]) addError(err error) {
+	if query.err == nil {
+		query.err = err
+	}
+}
+
 func (query *Query[T]) MySQL() *MySQLQuery[T] {
+	// TODO hacer lo mismo con todos los operadores
+	if query.gormQuery.GormDB.Dialector.Name() != "mysql" {
+		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "MySQL"))
+	}
+
 	return &MySQLQuery[T]{
 		query: *query,
 	}
@@ -181,5 +192,6 @@ type MySQLQuery[T model.Model] struct {
 }
 
 func (mySQLQuery *MySQLQuery[T]) Update(sets ...ISet) (int64, error) {
+	// TODO que pasa si esta vacio?
 	return mySQLQuery.query.unsafeUpdate(sets)
 }

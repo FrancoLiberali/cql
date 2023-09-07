@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -278,45 +279,49 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	// update join only supported for mysql
 	if getDBDialector() != "mysql" {
-		return
+		_, err := orm.NewQuery[models.Phone](
+			ts.db,
+		).MySQL().Update()
+		ts.ErrorIs(err, errors.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: MySQL")
+	} else {
+		brand1 := ts.createBrand("google")
+		brand2 := ts.createBrand("apple")
+
+		pixel := ts.createPhone("pixel", *brand1)
+		ts.createPhone("iphone", *brand2)
+
+		updated, err := orm.NewQuery[models.Phone](
+			ts.db,
+			conditions.Phone.Brand(
+				conditions.Brand.NameIs().Eq("google"),
+			),
+		).MySQL().Update(
+			conditions.Phone.NameSet().Eq("7"),
+			conditions.Phone.NameSet().Eq("7"),
+			conditions.Brand.NameSet().Eq("google pixel"),
+		)
+		ts.Nil(err)
+		ts.Equal(int64(2), updated)
+
+		pixel7, err := orm.NewQuery[models.Phone](
+			ts.db,
+			conditions.Phone.NameIs().Eq("7"),
+		).FindOne()
+		ts.Nil(err)
+
+		ts.Equal(pixel.ID, pixel7.ID)
+		ts.Equal("7", pixel7.Name)
+		ts.NotEqual(pixel.UpdatedAt.UnixMicro(), pixel7.UpdatedAt.UnixMicro())
+
+		googlePixel, err := orm.NewQuery[models.Brand](
+			ts.db,
+			conditions.Brand.NameIs().Eq("google pixel"),
+		).FindOne()
+		ts.Nil(err)
+
+		ts.Equal(brand1.ID, googlePixel.ID)
+		ts.Equal("google pixel", googlePixel.Name)
+		ts.NotEqual(brand1.UpdatedAt.UnixMicro(), googlePixel.UpdatedAt.UnixMicro())
 	}
-
-	brand1 := ts.createBrand("google")
-	brand2 := ts.createBrand("apple")
-
-	pixel := ts.createPhone("pixel", *brand1)
-	ts.createPhone("iphone", *brand2)
-
-	updated, err := orm.NewQuery[models.Phone](
-		ts.db,
-		conditions.Phone.Brand(
-			conditions.Brand.NameIs().Eq("google"),
-		),
-	).MySQL().Update(
-		conditions.Phone.NameSet().Eq("7"),
-		conditions.Phone.NameSet().Eq("7"),
-		conditions.Brand.NameSet().Eq("google pixel"),
-	)
-	ts.Nil(err)
-	ts.Equal(int64(2), updated)
-
-	pixel7, err := orm.NewQuery[models.Phone](
-		ts.db,
-		conditions.Phone.NameIs().Eq("7"),
-	).FindOne()
-	ts.Nil(err)
-
-	ts.Equal(pixel.ID, pixel7.ID)
-	ts.Equal("7", pixel7.Name)
-	ts.NotEqual(pixel.UpdatedAt.UnixMicro(), pixel7.UpdatedAt.UnixMicro())
-
-	googlePixel, err := orm.NewQuery[models.Brand](
-		ts.db,
-		conditions.Brand.NameIs().Eq("google pixel"),
-	).FindOne()
-	ts.Nil(err)
-
-	ts.Equal(brand1.ID, googlePixel.ID)
-	ts.Equal("google pixel", googlePixel.Name)
-	ts.NotEqual(brand1.UpdatedAt.UnixMicro(), googlePixel.UpdatedAt.UnixMicro())
 }

@@ -19,4 +19,6 @@ var (
 
 	// preload
 	ErrRelationNotLoaded = errors.New("relation not loaded")
+
+	ErrUnsupportedByDatabase = errors.New("method not supported by database")
 )
