@@ -5,6 +5,7 @@ import (
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -328,7 +329,7 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	// update join only supported for mysql
-	if getDBDialector() != "mysql" {
+	if getDBDialector() != query.MySQL {
 		_, err := orm.NewQuery[models.Phone](
 			ts.db,
 		).UpdateMultiple()
@@ -377,7 +378,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoined() {
 	// update join only supported for mysql
-	if getDBDialector() != "mysql" {
+	if getDBDialector() != query.MySQL {
 		return
 	}
 
