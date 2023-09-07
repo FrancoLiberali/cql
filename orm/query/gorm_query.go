@@ -251,7 +251,7 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 		}
 
 		if len(joinTables) > 0 {
-			query.GormDB.Statement.AddClause(
+			query.GormDB.Clauses(
 				clause.From{
 					Tables: joinTables,
 				},
@@ -294,7 +294,7 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 			})
 		}
 
-		query.GormDB.Statement.AddClause(sets)
+		query.GormDB.Clauses(sets)
 	}
 
 	update := query.GormDB.Updates(updateMap)
