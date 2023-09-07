@@ -268,40 +268,11 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 		query.GormDB.Statement.Joins = nil
 	// TODO ver que no se cual es pero permite modifiers en el update
 	case "mysql":
-		joinClauses := []clause.Join{}
-
-		for _, join := range query.GormDB.Statement.Joins {
-			tableName, tableAlias, onStatement := splitJoin(join.Name)
-
-			joinClauses = append(joinClauses, clause.Join{
-				Type: join.JoinType,
-				Table: clause.Table{
-					Name:  tableName,
-					Alias: tableAlias,
-					Raw:   true, // prevent gorm from putting the alias in quotes
-				},
-				ON: clause.Where{Exprs: []clause.Expression{
-					clause.Expr{SQL: onStatement, Vars: join.Conds},
-				}},
-			})
-		}
-
 		// if at least one join is done,
 		// allow UPDATE without WHERE as the condition can be the join
-		if len(joinClauses) > 0 {
+		if len(query.GormDB.Statement.Joins) > 0 {
 			query.GormDB.AllowGlobalUpdate = true
 		}
-
-		// TODO esto no es necesario si hago el cambio interno de gorm que deje en TODO
-		query.GormDB.Statement.AddClause(
-			clause.Update{
-				Table: clause.Table{
-					Name: query.initialTable.Name,
-					Raw:  true, // prevent gorm from putting the alias in quotes
-				},
-				Joins: joinClauses,
-			},
-		)
 
 		sets := clause.Set{}
 
@@ -313,6 +284,7 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 				return 0, err
 			}
 
+			// TODO al hacerlo a mano no hace el update del updated_at
 			sets = append(sets, clause.Assignment{
 				Column: clause.Column{
 					Name:  field.ColumnName(query, table),

@@ -2,8 +2,6 @@ module github.com/ditrit/badaas
 
 go 1.18
 
-replace gorm.io/gorm => ../../../Documents/gorm
-
 require (
 	github.com/Masterminds/semver/v3 v3.1.1
 	github.com/ditrit/verdeter v0.4.0
@@ -70,3 +68,4 @@ require (
 replace gorm.io/driver/postgres v1.5.2 => github.com/ditrit/postgres v0.0.0-20230906140800-b3d5f9d4b6ad
 replace gorm.io/driver/sqlite v1.5.2 => github.com/ditrit/sqlite v0.0.0-20230906140046-2f37a3f972de
 replace gorm.io/driver/sqlserver v1.5.1 => github.com/ditrit/sqlserver v0.0.0-20230906142139-ffc300569d6d
+replace gorm.io/gorm => github.com/ditrit/gorm v0.0.0-20230906130401-7b583d2bc623

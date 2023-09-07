@@ -203,6 +203,8 @@ github.com/cpuguy83/go-md2man/v2 v2.0.2 h1:p1EgwI/C7NhT0JmVkwCD2ZBK8j4aeHQX2pMHH
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/dgrijalva/jwt-go v3.2.0+incompatible h1:7qlOGliEKZXTDg6OTjfoBKDXWrumCAMpl/TFQ4/5kLM=
 github.com/dgryski/go-sip13 v0.0.0-20181026042036-e10d5fee7954 h1:RMLoZVzv4GliuWafOuPuQDKSm1SJph7uCRnnS61JAn4=
+github.com/ditrit/gorm v0.0.0-20230906130401-7b583d2bc623 h1:SBpyAnW37Yoo4oJOX8l1bE6A9Z33bByyOclNJqFnb4k=
+github.com/ditrit/gorm v0.0.0-20230906130401-7b583d2bc623/go.mod h1:hbnx/Oo0ChWMn1BIhpy1oYozzpM15i4YPuHDmfYtwg8=
 github.com/ditrit/postgres v0.0.0-20230906140800-b3d5f9d4b6ad h1:EMZ4BcMgh+yvTIZfFQh7A7LCmLVHmaCwUtavqLBWDlM=
 github.com/ditrit/postgres v0.0.0-20230906140800-b3d5f9d4b6ad/go.mod h1:U1aH6CNEknanYTb+ViFuAA7SsPay4jBbaOpuwkyoh1k=
 github.com/ditrit/sqlite v0.0.0-20230906140046-2f37a3f972de h1:s9G66wUSTOPtl3hSLOSWi6Y/THLwWXyJWk8XjhLDkDU=
