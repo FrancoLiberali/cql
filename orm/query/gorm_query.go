@@ -217,10 +217,9 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 }
 
 // Find finds all models matching given conditions
-func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
-	tablesAndValues, err := getUpdateTablesAndValues(query, values)
+func (query *GormQuery) Update(sets []ISet) (int64, error) {
+	tablesAndValues, err := getUpdateTablesAndValues(query, sets)
 	if err != nil {
-		// TODO aca falta agregar el metodo usado
 		return 0, err
 	}
 
@@ -233,10 +232,8 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 
 	switch query.Dialector() {
 	case Postgres, SQLServer, SQLite: // support UPDATE SET FROM
-		for field := range values {
-			table := tablesAndValues[field].table
-			value := tablesAndValues[field].value
-			updateMap[field.ColumnName(query, table)] = value
+		for field, tableAndValue := range tablesAndValues {
+			updateMap[field.ColumnName(query, tableAndValue.table)] = tableAndValue.value
 		}
 
 		joinTables := []clause.Table{}
@@ -273,19 +270,16 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 		sets := clause.Set{}
 		updatedTables := []Table{}
 
-		for field := range values {
-			table := tablesAndValues[field].table
-			value := tablesAndValues[field].value
-
+		for field, tableAndValue := range tablesAndValues {
 			sets = append(sets, clause.Assignment{
 				Column: clause.Column{
-					Name:  field.ColumnName(query, table),
-					Table: table.SQLName(),
+					Name:  field.ColumnName(query, tableAndValue.table),
+					Table: tableAndValue.table.SQLName(),
 				},
-				Value: value,
+				Value: tableAndValue.value,
 			})
 
-			updatedTables = append(updatedTables, table)
+			updatedTables = append(updatedTables, tableAndValue.table)
 		}
 
 		// TODO que no existan los set de field de los models (id, created, updated, etc)
@@ -313,10 +307,11 @@ type TableAndValue struct {
 	value any
 }
 
-func getUpdateTablesAndValues(query *GormQuery, values map[IFieldIdentifier]any) (map[IFieldIdentifier]TableAndValue, error) {
+func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IFieldIdentifier]TableAndValue, error) {
 	tables := map[IFieldIdentifier]TableAndValue{}
 
-	for field, value := range values {
+	for _, set := range sets {
+		field := set.Field()
 		// TODO este 0 es el de que tabla actualizar
 		// para no mysql tiene que se la tabla a la que le hice el update, no se donde sale
 		// y nunca deberia haber un field de otra tabla (verificar esto?), pero el 0 esta bien porque siempre va a ser la primera que se agrega
@@ -326,7 +321,7 @@ func getUpdateTablesAndValues(query *GormQuery, values map[IFieldIdentifier]any)
 			return nil, err
 		}
 
-		updateValue, err := getUpdateValue(query, value)
+		updateValue, err := getUpdateValue(query, set)
 		if err != nil {
 			return nil, err
 		}
@@ -340,10 +335,11 @@ func getUpdateTablesAndValues(query *GormQuery, values map[IFieldIdentifier]any)
 	return tables, nil
 }
 
-func getUpdateValue(query *GormQuery, value any) (any, error) {
+func getUpdateValue(query *GormQuery, set ISet) (any, error) {
+	value := set.Value()
+
 	if field, isField := value.(IFieldIdentifier); isField {
-		// TODO ver este 0
-		table, err := query.GetModelTable(field, 0)
+		table, err := query.GetModelTable(field, set.JoinNumber())
 		if err != nil {
 			return nil, err
 		}
@@ -369,4 +365,13 @@ func splitJoin(joinStatement string) (string, string, string) {
 	tableSplit := strings.Split(table, " ")
 
 	return tableSplit[0], tableSplit[1], onStatement
+}
+
+// from a list of uint, return the first or UndefinedJoinNumber in case the list is empty
+func GetJoinNumber(joinNumberList []uint) int {
+	if len(joinNumberList) == 0 {
+		return UndefinedJoinNumber
+	}
+
+	return int(joinNumberList[0])
 }

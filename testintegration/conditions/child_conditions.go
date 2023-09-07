@@ -105,3 +105,7 @@ func (childConditions childConditions) Preload() condition.Condition[models.Chil
 func (childConditions childConditions) PreloadRelations() []condition.Condition[models.Child] {
 	return []condition.Condition[models.Child]{childConditions.PreloadParent1(), childConditions.PreloadParent2()}
 }
+
+func (childConditions childConditions) NameSet() query.FieldSet[models.Child, string] {
+	return query.FieldSet[models.Child, string]{FieldID: childConditions.Name}
+}

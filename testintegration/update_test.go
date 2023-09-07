@@ -253,6 +253,56 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	ts.NotEqual(pixel.UpdatedAt.UnixMicro(), phoneReturned.UpdatedAt.UnixMicro())
 }
 
+func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJoinedMoreThanOnce() {
+	_, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).Update(
+		conditions.Child.NameSet().Dynamic(conditions.ParentParent.Name),
+	)
+
+	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
+	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; method: Update")
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
+	parentParent := &models.ParentParent{Name: "franco"}
+	parent1 := &models.Parent1{ParentParent: *parentParent}
+	parent2 := &models.Parent2{ParentParent: *parentParent}
+	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "not_franco"}
+	err := ts.db.Create(child).Error
+	ts.Nil(err)
+
+	updated, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).Update(
+		conditions.Child.NameSet().Dynamic(conditions.ParentParent.Name, 0),
+	)
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
+
+	childReturned, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.NameIs().Eq("franco"),
+	).FindOne()
+	ts.Nil(err)
+
+	ts.Equal(child.ID, childReturned.ID)
+	ts.Equal("franco", childReturned.Name)
+	ts.NotEqual(child.UpdatedAt.UnixMicro(), childReturned.UpdatedAt.UnixMicro())
+}
+
 func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 	product := ts.createProduct("", 0, 0, false, nil)
 

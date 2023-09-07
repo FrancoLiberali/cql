@@ -106,6 +106,6 @@ func (saleConditions saleConditions) PreloadRelations() []condition.Condition[mo
 	return []condition.Condition[models.Sale]{saleConditions.PreloadProduct(), saleConditions.PreloadSeller()}
 }
 
-func (saleConditions saleConditions) CodeSet() orm.FieldSet[models.Sale, int] {
-	return orm.FieldSet[models.Sale, int]{FieldID: saleConditions.Code}
+func (saleConditions saleConditions) CodeSet() query.FieldSet[models.Sale, int] {
+	return query.FieldSet[models.Sale, int]{FieldID: saleConditions.Code}
 }

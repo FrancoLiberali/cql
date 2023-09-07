@@ -147,10 +147,10 @@ func (productConditions productConditions) Preload() condition.Condition[models.
 	return condition.NewPreloadCondition[models.Product](productConditions.ID, productConditions.CreatedAt, productConditions.UpdatedAt, productConditions.DeletedAt, productConditions.String, productConditions.Int, productConditions.IntPointer, productConditions.Float, productConditions.NullFloat, productConditions.Bool, productConditions.NullBool, productConditions.ByteArray, productConditions.MultiString, productConditions.ToBeEmbeddedEmbeddedInt, productConditions.GormEmbeddedInt)
 }
 
-func (productConditions productConditions) IntSet() orm.FieldSet[models.Product, int] {
-	return orm.FieldSet[models.Product, int]{FieldID: productConditions.Int}
+func (productConditions productConditions) IntSet() query.FieldSet[models.Product, int] {
+	return query.FieldSet[models.Product, int]{FieldID: productConditions.Int}
 }
 
-func (productConditions productConditions) BoolSet() orm.FieldSet[models.Product, bool] {
-	return orm.FieldSet[models.Product, bool]{FieldID: productConditions.Bool}
+func (productConditions productConditions) BoolSet() query.FieldSet[models.Product, bool] {
+	return query.FieldSet[models.Product, bool]{FieldID: productConditions.Bool}
 }

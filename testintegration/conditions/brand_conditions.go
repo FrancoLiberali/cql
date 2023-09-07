@@ -65,6 +65,6 @@ func (brandConditions brandConditions) Preload() condition.Condition[models.Bran
 	return condition.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
 }
 
-func (brandConditions brandConditions) NameSet() orm.FieldSet[models.Brand, string] {
-	return orm.FieldSet[models.Brand, string]{FieldID: brandConditions.Name}
+func (brandConditions brandConditions) NameSet() query.FieldSet[models.Brand, string] {
+	return query.FieldSet[models.Brand, string]{FieldID: brandConditions.Name}
 }

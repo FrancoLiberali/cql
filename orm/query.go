@@ -29,7 +29,7 @@ func (query *Query[T]) Descending(field ormQuery.IFieldIdentifier, joinNumber ..
 // Order specify order when retrieving models from database
 // if descending is true, the ordering is in descending direction
 func (query *Query[T]) order(field ormQuery.IFieldIdentifier, descending bool, joinNumberList []uint) *Query[T] {
-	err := query.gormQuery.Order(field, descending, getJoinNumber(joinNumberList))
+	err := query.gormQuery.Order(field, descending, ormQuery.GetJoinNumber(joinNumberList))
 	if err != nil {
 		methodName := "Ascending"
 		if descending {
@@ -40,15 +40,6 @@ func (query *Query[T]) order(field ormQuery.IFieldIdentifier, descending bool, j
 	}
 
 	return query
-}
-
-// from a list of uint, return the first or UndefinedJoinNumber in case the list is empty
-func getJoinNumber(joinNumberList []uint) int {
-	if len(joinNumberList) == 0 {
-		return ormQuery.UndefinedJoinNumber
-	}
-
-	return int(joinNumberList[0])
 }
 
 // Limit specify the number of models to be retrieved
@@ -148,8 +139,8 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) 
 
 // TODO returning
 
-func (query *Query[T]) Update(sets ...*Set[T]) (int64, error) {
-	setsAsInterface := []ISet{}
+func (query *Query[T]) Update(sets ...*ormQuery.Set[T]) (int64, error) {
+	setsAsInterface := []ormQuery.ISet{}
 	for _, set := range sets {
 		setsAsInterface = append(setsAsInterface, set)
 	}
@@ -157,17 +148,12 @@ func (query *Query[T]) Update(sets ...*Set[T]) (int64, error) {
 	return query.unsafeUpdate(setsAsInterface)
 }
 
-func (query *Query[T]) unsafeUpdate(sets []ISet) (int64, error) {
+func (query *Query[T]) unsafeUpdate(sets []ormQuery.ISet) (int64, error) {
 	if query.err != nil {
 		return 0, query.err
 	}
 
-	updateMap := map[ormQuery.IFieldIdentifier]any{}
-	for _, set := range sets {
-		updateMap[set.Field()] = set.Value()
-	}
-
-	updated, err := query.gormQuery.Update(updateMap)
+	updated, err := query.gormQuery.Update(sets)
 	if err != nil {
 		return 0, methodError(err, "Update")
 	}
@@ -196,7 +182,7 @@ type MySQLQuery[T model.Model] struct {
 	query Query[T]
 }
 
-func (mySQLQuery *MySQLQuery[T]) Update(sets ...ISet) (int64, error) {
+func (mySQLQuery *MySQLQuery[T]) Update(sets ...ormQuery.ISet) (int64, error) {
 	// TODO que pasa si esta vacio?
 	return mySQLQuery.query.unsafeUpdate(sets)
 }
