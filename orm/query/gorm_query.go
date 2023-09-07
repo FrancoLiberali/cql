@@ -219,6 +219,12 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 
 // Find finds all models matching given conditions
 func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
+	tablesAndValues, err := getUpdateTablesAndValues(query, values)
+	if err != nil {
+		// TODO aca falta agregar el metodo usado
+		return 0, err
+	}
+
 	updateMap := map[string]any{}
 
 	// TODO tambien sacar el preload en caso de que hagan un preload collection
@@ -229,23 +235,18 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	switch query.GormDB.Dialector.Name() {
 	// TODO poner en constantes
 	case "postgres", "sqlite", "sqlserver": // support UPDATE SET FROM
-		for field, value := range values {
-			// TODO ver este 0
-			table, err := query.GetModelTable(field, 0)
-			if err != nil {
-				// TODO aca falta agregar el metodo usado
-				return 0, err
-			}
-
+		for field := range values {
+			table := tablesAndValues[field].table
+			value := tablesAndValues[field].value
 			updateMap[field.ColumnName(query, table)] = value
 		}
 
-		tables := []clause.Table{}
+		joinTables := []clause.Table{}
 
 		for _, join := range query.GormDB.Statement.Joins {
 			tableName, tableAlias, onStatement := splitJoin(join.Name)
 
-			tables = append(tables, clause.Table{
+			joinTables = append(joinTables, clause.Table{
 				Name:  tableName,
 				Alias: tableAlias,
 				Raw:   true, // prevent gorm from putting the alias in quotes
@@ -254,10 +255,10 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 			query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
 		}
 
-		if len(tables) > 0 {
+		if len(joinTables) > 0 {
 			query.GormDB.Statement.AddClause(
 				clause.From{
-					Tables: tables,
+					Tables: joinTables,
 				},
 			)
 		}
@@ -273,13 +274,9 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 
 		sets := clause.Set{}
 
-		for field, value := range values {
-			// TODO ver este 0
-			table, err := query.GetModelTable(field, 0)
-			if err != nil {
-				// TODO aca falta agregar el metodo usado
-				return 0, err
-			}
+		for field := range values {
+			table := tablesAndValues[field].table
+			value := tablesAndValues[field].value
 
 			sets = append(sets, clause.Assignment{
 				Column: clause.Column{
@@ -306,6 +303,52 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 	update := query.GormDB.Updates(updateMap)
 
 	return update.RowsAffected, update.Error
+}
+
+type TableAndValue struct {
+	table Table
+	value any
+}
+
+func getUpdateTablesAndValues(query *GormQuery, values map[IFieldIdentifier]any) (map[IFieldIdentifier]TableAndValue, error) {
+	tables := map[IFieldIdentifier]TableAndValue{}
+
+	for field, value := range values {
+		// TODO ver este 0
+		table, err := query.GetModelTable(field, 0)
+		if err != nil {
+			// TODO aca falta agregar el metodo usado
+			return nil, err
+		}
+
+		updateValue, err := getUpdateValue(query, value)
+		if err != nil {
+			// TODO aca falta agregar el metodo usado
+			return nil, err
+		}
+
+		tables[field] = TableAndValue{
+			table: table,
+			value: updateValue,
+		}
+	}
+
+	return tables, nil
+}
+
+func getUpdateValue(query *GormQuery, value any) (any, error) {
+	if field, isField := value.(IFieldIdentifier); isField {
+		// TODO ver este 0
+		table, err := query.GetModelTable(field, 0)
+		if err != nil {
+			// TODO aca falta agregar el metodo usado
+			return nil, err
+		}
+
+		return gorm.Expr(field.ColumnSQL(query, table)), nil
+	}
+
+	return value, nil
 }
 
 // Splits a JOIN statement into the table name, table alias and ON statement

@@ -51,9 +51,6 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 		conditions.Product.IntIs().Eq(0),
 	).Update(
 		conditions.Product.IntSet().Eq(1),
-		// TODO conditions.Product.IntSet().Dynamic(conditions.Sale.Code),
-		// TODO conditions.Product.IntSet().Unsafe("1"),
-		// TODO se pueden repetir? mirar si da error en la base o que hace
 	)
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
@@ -223,4 +220,36 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	ts.Equal(match.ID, sale.ID)
 	ts.Equal(1, sale.Code)
 	ts.NotEqual(match.UpdatedAt.UnixMicro(), sale.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
+	google := ts.createBrand("google")
+	apple := ts.createBrand("apple")
+
+	pixel := ts.createPhone("pixel", *google)
+	ts.createPhone("iphone", *apple)
+
+	updated, err := orm.NewQuery[models.Phone](
+		ts.db,
+		conditions.Phone.Brand(
+			conditions.Brand.NameIs().Eq("google"),
+		),
+	).Update(
+		conditions.Phone.NameSet().Dynamic(conditions.Brand.Name),
+		// TODO conditions.Product.IntSet().Unsafe("1"),
+		// TODO se pueden repetir? mirar si da error en la base o que hace
+	)
+
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
+
+	phoneReturned, err := orm.NewQuery[models.Phone](
+		ts.db,
+		conditions.Phone.NameIs().Eq("google"),
+	).FindOne()
+	ts.Nil(err)
+
+	ts.Equal(pixel.ID, phoneReturned.ID)
+	ts.Equal("google", phoneReturned.Name)
+	ts.NotEqual(pixel.UpdatedAt.UnixMicro(), phoneReturned.UpdatedAt.UnixMicro())
 }
