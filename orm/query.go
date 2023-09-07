@@ -165,7 +165,7 @@ func (query *Query[T]) addError(err error) {
 
 func (query *Query[T]) MySQL() *MySQLQuery[T] {
 	// TODO hacer lo mismo con todos los operadores
-	if query.gormQuery.GormDB.Dialector.Name() != "mysql" {
+	if query.gormQuery.Dialector() != ormQuery.MySQL {
 		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "MySQL"))
 	}
 
