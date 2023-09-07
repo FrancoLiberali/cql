@@ -66,6 +66,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 
 	ts.Equal(product.ID, productReturned.ID)
 	ts.Equal(1, productReturned.Int)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
@@ -90,6 +91,8 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 	EqualList(&ts.Suite, []*models.Product{product1, product2}, products)
 	ts.Equal(1, products[0].Int)
 	ts.Equal(1, products[1].Int)
+	ts.NotEqual(product1.UpdatedAt.UnixMicro(), products[0].UpdatedAt.UnixMicro())
+	ts.NotEqual(product2.UpdatedAt.UnixMicro(), products[1].UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
@@ -115,6 +118,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 	ts.Equal(product.ID, productReturned.ID)
 	ts.Equal(1, productReturned.Int)
 	ts.True(productReturned.Bool)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
@@ -143,6 +147,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 
 	ts.Equal(pixel.ID, pixel7.ID)
 	ts.Equal("pixel 7", pixel7.Name)
+	ts.NotEqual(pixel.UpdatedAt.UnixMicro(), pixel7.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() {
@@ -179,6 +184,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() 
 
 	ts.Equal(match.ID, sale.ID)
 	ts.Equal(1, sale.Code)
+	ts.NotEqual(match.UpdatedAt.UnixMicro(), sale.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
@@ -216,4 +222,5 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 
 	ts.Equal(match.ID, sale.ID)
 	ts.Equal(1, sale.Code)
+	ts.NotEqual(match.UpdatedAt.UnixMicro(), sale.UpdatedAt.UnixMicro())
 }

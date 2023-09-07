@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"sync"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -284,7 +285,6 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 				return 0, err
 			}
 
-			// TODO al hacerlo a mano no hace el update del updated_at
 			sets = append(sets, clause.Assignment{
 				Column: clause.Column{
 					Name:  field.ColumnName(query, table),
@@ -293,6 +293,16 @@ func (query *GormQuery) Update(values map[IFieldIdentifier]any) (int64, error) {
 				Value: value,
 			})
 		}
+
+		// TODO que no existan los set de field de los models (id, created, updated, etc)
+		// TODO si se puede editar mas de una tabla hacer en todas las tablas
+		sets = append(sets, clause.Assignment{
+			Column: clause.Column{
+				Name:  "updated_at",
+				Table: query.initialTable.Name,
+			},
+			Value: time.Now(),
+		})
 
 		query.GormDB.Statement.AddClause(sets)
 	}
