@@ -236,8 +236,6 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 		),
 	).Update(
 		conditions.Phone.NameSet().Dynamic(conditions.Brand.Name),
-		// TODO conditions.Product.IntSet().Unsafe("1"),
-		// TODO se pueden repetir? mirar si da error en la base o que hace
 	)
 
 	ts.Nil(err)
@@ -252,4 +250,28 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	ts.Equal(pixel.ID, phoneReturned.ID)
 	ts.Equal("google", phoneReturned.Name)
 	ts.NotEqual(pixel.UpdatedAt.UnixMicro(), phoneReturned.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
+	product := ts.createProduct("", 0, 0, false, nil)
+
+	updated, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(0),
+	).Update(
+		conditions.Product.IntSet().Unsafe("1"),
+		// TODO se pueden repetir? mirar si da error en la base o que hace
+	)
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).FindOne()
+	ts.Nil(err)
+
+	ts.Equal(product.ID, productReturned.ID)
+	ts.Equal(1, productReturned.Int)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
