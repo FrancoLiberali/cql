@@ -69,6 +69,6 @@ replace gorm.io/driver/postgres v1.5.2 => github.com/ditrit/postgres v0.0.0-2023
 
 replace gorm.io/driver/sqlite v1.5.2 => github.com/ditrit/sqlite v0.0.0-20230906140046-2f37a3f972de
 
-replace gorm.io/driver/sqlserver v1.5.1 => github.com/ditrit/sqlserver v0.0.0-20230906142139-ffc300569d6d
+replace gorm.io/driver/sqlserver v1.5.1 => github.com/ditrit/sqlserver v0.0.0-20230908120642-af1820b994f4
 
-replace gorm.io/gorm => github.com/ditrit/gorm v0.0.0-20230907173046-bd1cee726740
+replace gorm.io/gorm => github.com/ditrit/gorm v0.0.0-20230908121523-25af385d3894

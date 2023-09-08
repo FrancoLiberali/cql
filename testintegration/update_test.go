@@ -330,14 +330,14 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 
 func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 	switch getDBDialector() {
-	// update returning only supported for postgres and sqlite
-	case query.MySQL, query.SQLServer:
+	// update returning only supported for postgres, sqlite, sqlserver
+	case query.MySQL:
 		_, err := orm.NewUpdate[models.Phone](
 			ts.db,
 		).Returning(nil).Set()
 		ts.ErrorIs(err, errors.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
-	case query.Postgres, query.SQLite:
+	case query.Postgres, query.SQLite, query.SQLServer:
 		product := ts.createProduct("", 0, 0, false, nil)
 
 		productsReturned := []models.Product{}
@@ -361,7 +361,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 	switch getDBDialector() {
 	// update returning with preload only supported for postgres
-	case query.SQLite:
+	case query.SQLite, query.SQLServer:
 		salesReturned := []models.Sale{}
 		_, err := orm.NewUpdate[models.Sale](
 			ts.db,
@@ -446,8 +446,8 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 	switch getDBDialector() {
-	// update returning only supported for postgres and sqlite
-	case query.Postgres, query.SQLite:
+	// update returning only supported for postgres, sqlite, sqlserver
+	case query.Postgres, query.SQLite, query.SQLServer:
 		company := ts.createCompany("ditrit")
 		seller1 := ts.createSeller("1", company)
 		seller2 := ts.createSeller("2", company)

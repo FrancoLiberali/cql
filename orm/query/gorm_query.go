@@ -217,9 +217,9 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 	return schemaName.Table, nil
 }
 
-// available for: postgres, sqlite
+// available for: postgres, sqlite, sqlserver
 //
-// warning: in sqlite preloads are not allowed
+// warning: in sqlite, sqlserver preloads are not allowed
 func (query *GormQuery) Returning(dest any) error {
 	query.GormDB.Model(dest)
 
@@ -237,13 +237,13 @@ func (query *GormQuery) Returning(dest any) error {
 		}
 
 		query.GormDB.Clauses(clause.Returning{Columns: columns})
-	case SQLite: // supports RETURNING only from main table
+	case SQLite, SQLServer: // supports RETURNING only from main table
 		if len(query.GormDB.Statement.Selects) > 1 {
 			return preloadsInReturningNotAllowed(string(SQLite))
 		}
 
 		query.GormDB.Clauses(clause.Returning{})
-	case MySQL, SQLServer: // RETURNING not supported
+	case MySQL: // RETURNING not supported
 		return errors.ErrUnsupportedByDatabase
 	}
 
