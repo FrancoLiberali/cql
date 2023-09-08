@@ -137,7 +137,17 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) 
 	}
 }
 
-// TODO returning
+// available for: postgres, sqlite
+func (query *Query[T]) Returning(dest *[]T) *Query[T] {
+	if dialector := query.gormQuery.Dialector(); dialector != ormQuery.Postgres && dialector != ormQuery.SQLite {
+		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "Returning"))
+	}
+
+	// TODO hacer el update del logger para que no muestre internals de ditrit/gorm
+	query.gormQuery.Returning(dest)
+
+	return query
+}
 
 func (query *Query[T]) Update(sets ...*ormQuery.Set[T]) (int64, error) {
 	setsAsInterface := []ormQuery.ISet{}

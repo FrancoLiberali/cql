@@ -2,6 +2,7 @@ package testintegration
 
 import (
 	"gorm.io/gorm"
+	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/errors"
@@ -325,6 +326,140 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 	ts.Equal(product.ID, productReturned.ID)
 	ts.Equal(1, productReturned.Int)
 	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateReturning() {
+	switch getDBDialector() {
+	// update returning only supported for postgres and sqlite
+	case query.MySQL, query.SQLServer:
+		_, err := orm.NewQuery[models.Phone](
+			ts.db,
+		).Returning(nil).Update()
+		ts.ErrorIs(err, errors.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: Returning")
+	case query.Postgres, query.SQLite:
+		product := ts.createProduct("", 0, 0, false, nil)
+
+		productsReturned := []models.Product{}
+		updated, err := orm.NewQuery[models.Product](
+			ts.db,
+			conditions.Product.IntIs().Eq(0),
+		).Returning(&productsReturned).Update(
+			conditions.Product.IntSet().Eq(1),
+		)
+		ts.Nil(err)
+		ts.Equal(int64(1), updated)
+
+		ts.Len(productsReturned, 1)
+		productReturned := productsReturned[0]
+		ts.Equal(product.ID, productReturned.ID)
+		ts.Equal(1, productReturned.Int)
+		ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+	}
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
+	switch getDBDialector() {
+	// update returning only supported for postgres and sqlite
+	case query.Postgres, query.SQLite:
+		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
+		product2 := ts.createProduct("", 2, 0.0, false, nil)
+
+		sale1 := ts.createSale(0, product1, nil)
+		ts.createSale(1, product2, nil)
+
+		salesReturned := []models.Sale{}
+		updated, err := orm.NewQuery[models.Sale](
+			ts.db,
+			conditions.Sale.CodeIs().Eq(0),
+			conditions.Sale.PreloadProduct(),
+		).Returning(&salesReturned).Update(
+			conditions.Sale.CodeSet().Eq(2),
+		)
+		ts.Nil(err)
+		ts.Equal(int64(1), updated)
+
+		ts.Len(salesReturned, 1)
+		saleReturned := salesReturned[0]
+		ts.Equal(sale1.ID, saleReturned.ID)
+		ts.Equal(2, saleReturned.Code)
+		ts.NotEqual(sale1.UpdatedAt.UnixMicro(), saleReturned.UpdatedAt.UnixMicro())
+		productPreloaded, err := saleReturned.GetProduct()
+		ts.Nil(err)
+		assert.DeepEqual(ts.T(), product1, productPreloaded)
+	}
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
+	switch getDBDialector() {
+	// update returning only supported for postgres and sqlite
+	case query.Postgres, query.SQLite:
+		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
+		product2 := ts.createProduct("", 2, 0.0, false, nil)
+
+		company := ts.createCompany("ditrit")
+
+		withCompany := ts.createSeller("with", company)
+		withoutCompany := ts.createSeller("without", nil)
+
+		sale1 := ts.createSale(0, product1, withCompany)
+		ts.createSale(1, product2, withoutCompany)
+
+		salesReturned := []models.Sale{}
+		updated, err := orm.NewQuery[models.Sale](
+			ts.db,
+			conditions.Sale.CodeIs().Eq(0),
+			conditions.Sale.Seller(
+				conditions.Seller.PreloadCompany(),
+			),
+		).Returning(&salesReturned).Update(
+			conditions.Sale.CodeSet().Eq(2),
+		)
+		ts.Nil(err)
+		ts.Equal(int64(1), updated)
+
+		ts.Len(salesReturned, 1)
+		saleReturned := salesReturned[0]
+		ts.Equal(sale1.ID, saleReturned.ID)
+		ts.Equal(2, saleReturned.Code)
+		ts.NotEqual(sale1.UpdatedAt.UnixMicro(), saleReturned.UpdatedAt.UnixMicro())
+		sellerPreloaded, err := saleReturned.GetSeller()
+		ts.Nil(err)
+		assert.DeepEqual(ts.T(), withCompany, sellerPreloaded)
+		companyPreloaded, err := sellerPreloaded.GetCompany()
+		ts.Nil(err)
+		assert.DeepEqual(ts.T(), company, companyPreloaded)
+	}
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
+	switch getDBDialector() {
+	// update returning only supported for postgres and sqlite
+	case query.Postgres, query.SQLite:
+		company := ts.createCompany("ditrit")
+		seller1 := ts.createSeller("1", company)
+		seller2 := ts.createSeller("2", company)
+
+		companiesReturned := []models.Company{}
+		updated, err := orm.NewQuery[models.Company](
+			ts.db,
+			conditions.Company.NameIs().Eq("ditrit"),
+			conditions.Company.PreloadSellers(),
+		).Returning(&companiesReturned).Update(
+			conditions.Company.NameSet().Eq("orness"),
+		)
+		ts.Nil(err)
+		ts.Equal(int64(1), updated)
+
+		ts.Len(companiesReturned, 1)
+		companyReturned := companiesReturned[0]
+		ts.Equal(company.ID, companyReturned.ID)
+		ts.Equal("orness", companyReturned.Name)
+		ts.NotEqual(company.UpdatedAt.UnixMicro(), companyReturned.UpdatedAt.UnixMicro())
+		sellersPreloaded, err := companyReturned.GetSellers()
+		ts.Nil(err)
+		EqualList(&ts.Suite, []models.Seller{*seller1, *seller2}, sellersPreloaded)
+	}
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {

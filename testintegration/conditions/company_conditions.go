@@ -72,3 +72,7 @@ func (companyConditions companyConditions) Preload() condition.Condition[models.
 func (companyConditions companyConditions) PreloadRelations() []condition.Condition[models.Company] {
 	return []condition.Condition[models.Company]{companyConditions.PreloadSellers()}
 }
+
+func (companyConditions companyConditions) NameSet() query.FieldSet[models.Company, string] {
+	return query.FieldSet[models.Company, string]{FieldID: companyConditions.Name}
+}

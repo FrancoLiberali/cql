@@ -216,6 +216,23 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 	return schemaName.Table, nil
 }
 
+func (query *GormQuery) Returning(dest any) {
+	query.GormDB.Model(dest)
+
+	columns := []clause.Column{}
+
+	for _, selectClause := range query.GormDB.Statement.Selects {
+		selectSplit := strings.Split(selectClause, ".")
+		columns = append(columns, clause.Column{
+			Table: selectSplit[0],
+			Name:  selectSplit[1],
+			Raw:   true,
+		})
+	}
+
+	query.GormDB.Clauses(clause.Returning{Columns: columns})
+}
+
 // Find finds all models matching given conditions
 func (query *GormQuery) Update(sets []ISet) (int64, error) {
 	tablesAndValues, err := getUpdateTablesAndValues(query, sets)
