@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm/condition"
-	ormErrors "github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/model"
 	ormQuery "github.com/ditrit/badaas/orm/query"
 )
@@ -110,9 +110,9 @@ func (query *Query[T]) FindOne() (*T, error) {
 	case len(models) == 1:
 		return models[0], nil
 	case len(models) == 0:
-		return nil, ormErrors.ErrObjectNotFound
+		return nil, errors.ErrObjectNotFound
 	default:
-		return nil, ormErrors.ErrMoreThanOneObjectFound
+		return nil, errors.ErrMoreThanOneObjectFound
 	}
 }
 
@@ -127,6 +127,12 @@ func (query *Query[T]) Find() ([]*T, error) {
 	return models, query.gormQuery.Find(&models)
 }
 
+func (query *Query[T]) addError(err error) {
+	if query.err == nil {
+		query.err = err
+	}
+}
+
 // Create a Query to which the conditions are applied inside transaction tx
 func NewQuery[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) *Query[T] {
 	gormQuery, err := condition.ApplyConditions[T](tx, conditions)
@@ -134,56 +140,5 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) 
 	return &Query[T]{
 		gormQuery: gormQuery,
 		err:       err,
-	}
-}
-
-// available for: postgres, sqlite
-func (query *Query[T]) Returning(dest *[]T) *Query[T] {
-	if dialector := query.gormQuery.Dialector(); dialector != ormQuery.Postgres && dialector != ormQuery.SQLite {
-		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "Returning"))
-	}
-
-	// TODO hacer el update del logger para que no muestre internals de ditrit/gorm
-	query.gormQuery.Returning(dest)
-
-	return query
-}
-
-func (query *Query[T]) Update(sets ...*ormQuery.Set[T]) (int64, error) {
-	setsAsInterface := []ormQuery.ISet{}
-	for _, set := range sets {
-		setsAsInterface = append(setsAsInterface, set)
-	}
-
-	return query.unsafeUpdate(setsAsInterface)
-}
-
-// available for: mysql
-func (query *Query[T]) UpdateMultiple(sets ...ormQuery.ISet) (int64, error) {
-	// TODO hacer lo mismo con todos los operadores
-	if query.gormQuery.Dialector() != ormQuery.MySQL {
-		query.addError(methodError(ormErrors.ErrUnsupportedByDatabase, "UpdateMultiple"))
-	}
-
-	// TODO que pasa si esta vacio?
-	return query.unsafeUpdate(sets)
-}
-
-func (query *Query[T]) unsafeUpdate(sets []ormQuery.ISet) (int64, error) {
-	if query.err != nil {
-		return 0, query.err
-	}
-
-	updated, err := query.gormQuery.Update(sets)
-	if err != nil {
-		return 0, methodError(err, "Update")
-	}
-
-	return updated, nil
-}
-
-func (query *Query[T]) addError(err error) {
-	if query.err == nil {
-		query.err = err
 	}
 }

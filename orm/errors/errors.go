@@ -21,4 +21,5 @@ var (
 	ErrRelationNotLoaded = errors.New("relation not loaded")
 
 	ErrUnsupportedByDatabase = errors.New("method not supported by database")
+	ErrOrderByMustBeCalled   = errors.New("order by must be called before limit in an update statement")
 )
