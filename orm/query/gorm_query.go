@@ -242,9 +242,6 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 
 	updateMap := map[string]any{}
 
-	// TODO tambien sacar el preload en caso de que hagan un preload collection
-	// Tambien ver el tema de los order y eso
-	// y si pongo el returning tambien ver que eso no rompa los find
 	query.GormDB.Statement.Selects = []string{}
 
 	switch query.Dialector() {
@@ -276,7 +273,6 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 		}
 
 		query.GormDB.Statement.Joins = nil
-	// TODO ver que no se cual es pero permite modifiers en el update
 	case MySQL: // support UPDATE JOIN SET
 		// if at least one join is done,
 		// allow UPDATE without WHERE as the condition can be the join

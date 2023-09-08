@@ -526,3 +526,35 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoin
 	ts.ErrorIs(err, errors.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.Brand; method: Update")
 }
+
+func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
+	// update order by limit only supported for mysql
+	if getDBDialector() != query.MySQL {
+		return
+	}
+
+	product1 := ts.createProduct("1", 0, 0, false, nil)
+	ts.createProduct("2", 0, 0, false, nil)
+
+	updated, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.BoolIs().Eq(false),
+	).Ascending(
+		conditions.Product.String,
+	).Limit(1).Update(
+		conditions.Product.IntSet().Eq(1),
+	)
+	// TODO esto no se verifica, te lo deja hacer para cualquier y para el resto de bases se borrar magicamente
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.IntIs().Eq(1),
+	).FindOne()
+	ts.Nil(err)
+
+	ts.Equal(product1.ID, productReturned.ID)
+	ts.Equal(1, productReturned.Int)
+	ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+}
