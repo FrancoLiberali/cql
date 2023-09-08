@@ -19,3 +19,10 @@ func joinMustBeSelectedError(field IFieldIdentifier) error {
 		field.GetModelType(),
 	)
 }
+
+func preloadsInReturningNotAllowed(dialector string) error {
+	return fmt.Errorf("%w; preloads in returning are not allowed for database: %s",
+		errors.ErrUnsupportedByDatabase,
+		dialector,
+	)
+}

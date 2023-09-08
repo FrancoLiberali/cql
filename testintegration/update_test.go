@@ -360,8 +360,19 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 	switch getDBDialector() {
-	// update returning only supported for postgres and sqlite
-	case query.Postgres, query.SQLite:
+	// update returning with preload only supported for postgres
+	case query.SQLite:
+		salesReturned := []models.Sale{}
+		_, err := orm.NewUpdate[models.Sale](
+			ts.db,
+			conditions.Sale.CodeIs().Eq(0),
+			conditions.Sale.PreloadProduct(),
+		).Returning(&salesReturned).Set(
+			conditions.Sale.CodeSet().Eq(2),
+		)
+		ts.ErrorIs(err, errors.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "preloads in returning are not allowed for database: sqlite; method: Returning")
+	case query.Postgres:
 		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
 		product2 := ts.createProduct("", 2, 0.0, false, nil)
 
@@ -391,45 +402,46 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
-	switch getDBDialector() {
-	// update returning only supported for postgres and sqlite
-	case query.Postgres, query.SQLite:
-		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
-		product2 := ts.createProduct("", 2, 0.0, false, nil)
-
-		company := ts.createCompany("ditrit")
-
-		withCompany := ts.createSeller("with", company)
-		withoutCompany := ts.createSeller("without", nil)
-
-		sale1 := ts.createSale(0, product1, withCompany)
-		ts.createSale(1, product2, withoutCompany)
-
-		salesReturned := []models.Sale{}
-		updated, err := orm.NewUpdate[models.Sale](
-			ts.db,
-			conditions.Sale.CodeIs().Eq(0),
-			conditions.Sale.Seller(
-				conditions.Seller.PreloadCompany(),
-			),
-		).Returning(&salesReturned).Set(
-			conditions.Sale.CodeSet().Eq(2),
-		)
-		ts.Nil(err)
-		ts.Equal(int64(1), updated)
-
-		ts.Len(salesReturned, 1)
-		saleReturned := salesReturned[0]
-		ts.Equal(sale1.ID, saleReturned.ID)
-		ts.Equal(2, saleReturned.Code)
-		ts.NotEqual(sale1.UpdatedAt.UnixMicro(), saleReturned.UpdatedAt.UnixMicro())
-		sellerPreloaded, err := saleReturned.GetSeller()
-		ts.Nil(err)
-		assert.DeepEqual(ts.T(), withCompany, sellerPreloaded)
-		companyPreloaded, err := sellerPreloaded.GetCompany()
-		ts.Nil(err)
-		assert.DeepEqual(ts.T(), company, companyPreloaded)
+	// update returning with preloads only supported for postgres
+	if getDBDialector() != query.Postgres {
+		return
 	}
+
+	product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
+	product2 := ts.createProduct("", 2, 0.0, false, nil)
+
+	company := ts.createCompany("ditrit")
+
+	withCompany := ts.createSeller("with", company)
+	withoutCompany := ts.createSeller("without", nil)
+
+	sale1 := ts.createSale(0, product1, withCompany)
+	ts.createSale(1, product2, withoutCompany)
+
+	salesReturned := []models.Sale{}
+	updated, err := orm.NewUpdate[models.Sale](
+		ts.db,
+		conditions.Sale.CodeIs().Eq(0),
+		conditions.Sale.Seller(
+			conditions.Seller.PreloadCompany(),
+		),
+	).Returning(&salesReturned).Set(
+		conditions.Sale.CodeSet().Eq(2),
+	)
+	ts.Nil(err)
+	ts.Equal(int64(1), updated)
+
+	ts.Len(salesReturned, 1)
+	saleReturned := salesReturned[0]
+	ts.Equal(sale1.ID, saleReturned.ID)
+	ts.Equal(2, saleReturned.Code)
+	ts.NotEqual(sale1.UpdatedAt.UnixMicro(), saleReturned.UpdatedAt.UnixMicro())
+	sellerPreloaded, err := saleReturned.GetSeller()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), withCompany, sellerPreloaded)
+	companyPreloaded, err := sellerPreloaded.GetCompany()
+	ts.Nil(err)
+	assert.DeepEqual(ts.T(), company, companyPreloaded)
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {

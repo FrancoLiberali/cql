@@ -12,6 +12,7 @@ import (
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 
+	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/model"
 )
 
@@ -216,21 +217,37 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 	return schemaName.Table, nil
 }
 
-func (query *GormQuery) Returning(dest any) {
+// available for: postgres, sqlite
+//
+// warning: in sqlite preloads are not allowed
+func (query *GormQuery) Returning(dest any) error {
 	query.GormDB.Model(dest)
 
-	columns := []clause.Column{}
+	switch query.Dialector() {
+	case Postgres: // support RETURNING from any table
+		columns := []clause.Column{}
 
-	for _, selectClause := range query.GormDB.Statement.Selects {
-		selectSplit := strings.Split(selectClause, ".")
-		columns = append(columns, clause.Column{
-			Table: selectSplit[0],
-			Name:  selectSplit[1],
-			Raw:   true,
-		})
+		for _, selectClause := range query.GormDB.Statement.Selects {
+			selectSplit := strings.Split(selectClause, ".")
+			columns = append(columns, clause.Column{
+				Table: selectSplit[0],
+				Name:  selectSplit[1],
+				Raw:   true,
+			})
+		}
+
+		query.GormDB.Clauses(clause.Returning{Columns: columns})
+	case SQLite: // supports RETURNING only from main table
+		if len(query.GormDB.Statement.Selects) > 1 {
+			return preloadsInReturningNotAllowed(string(SQLite))
+		}
+
+		query.GormDB.Clauses(clause.Returning{Columns: []clause.Column{{Name: "*", Raw: true}}})
+	case MySQL, SQLServer: // RETURNING not supported
+		return errors.ErrUnsupportedByDatabase
 	}
 
-	query.GormDB.Clauses(clause.Returning{Columns: columns})
+	return nil
 }
 
 // Find finds all models matching given conditions

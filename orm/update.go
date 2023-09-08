@@ -14,14 +14,15 @@ type Update[T model.Model] struct {
 	orderByCalled bool
 }
 
-// available for: postgres, sqlite
+// available for: postgres, sqlite, sqlserver
+//
+// warning: in sqlite preloads are not allowed
 func (update *Update[T]) Returning(dest *[]T) *Update[T] {
-	if dialector := update.query.gormQuery.Dialector(); dialector != query.Postgres && dialector != query.SQLite {
-		update.query.addError(methodError(errors.ErrUnsupportedByDatabase, "Returning"))
-	}
-
 	// TODO hacer el update del logger para que no muestre internals de ditrit/gorm
-	update.query.gormQuery.Returning(dest)
+	err := update.query.gormQuery.Returning(dest)
+	if err != nil {
+		update.query.addError(methodError(err, "Returning"))
+	}
 
 	return update
 }
