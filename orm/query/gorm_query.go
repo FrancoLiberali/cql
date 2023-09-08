@@ -242,7 +242,7 @@ func (query *GormQuery) Returning(dest any) error {
 			return preloadsInReturningNotAllowed(string(SQLite))
 		}
 
-		query.GormDB.Clauses(clause.Returning{Columns: []clause.Column{{Name: "*", Raw: true}}})
+		query.GormDB.Clauses(clause.Returning{})
 	case MySQL, SQLServer: // RETURNING not supported
 		return errors.ErrUnsupportedByDatabase
 	}
