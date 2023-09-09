@@ -3,79 +3,32 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/persistence/models"
-	"reflect"
 	"time"
 )
 
-var userType = reflect.TypeOf(*new(models.User))
-
-func (userConditions userConditions) IdIs() orm.FieldIs[models.User, model.UUID] {
-	return orm.FieldIs[models.User, model.UUID]{FieldID: userConditions.ID}
-}
-func (userConditions userConditions) CreatedAtIs() orm.FieldIs[models.User, time.Time] {
-	return orm.FieldIs[models.User, time.Time]{FieldID: userConditions.CreatedAt}
-}
-func (userConditions userConditions) UpdatedAtIs() orm.FieldIs[models.User, time.Time] {
-	return orm.FieldIs[models.User, time.Time]{FieldID: userConditions.UpdatedAt}
-}
-func (userConditions userConditions) DeletedAtIs() orm.FieldIs[models.User, time.Time] {
-	return orm.FieldIs[models.User, time.Time]{FieldID: userConditions.DeletedAt}
-}
-func (userConditions userConditions) UsernameIs() orm.StringFieldIs[models.User] {
-	return orm.StringFieldIs[models.User]{FieldIs: orm.FieldIs[models.User, string]{FieldID: userConditions.Username}}
-}
-func (userConditions userConditions) EmailIs() orm.StringFieldIs[models.User] {
-	return orm.StringFieldIs[models.User]{FieldIs: orm.FieldIs[models.User, string]{FieldID: userConditions.Email}}
-}
-func (userConditions userConditions) PasswordIs() orm.FieldIs[models.User, []uint8] {
-	return orm.FieldIs[models.User, []uint8]{FieldID: userConditions.Password}
-}
-
 type userConditions struct {
-	ID        query.Field[model.UUID]
-	CreatedAt query.Field[time.Time]
-	UpdatedAt query.Field[time.Time]
-	DeletedAt query.Field[time.Time]
-	Username  query.Field[string]
-	Email     query.Field[string]
-	Password  query.Field[[]uint8]
+	ID        orm.Field[models.User, model.UUID]
+	CreatedAt orm.Field[models.User, time.Time]
+	UpdatedAt orm.Field[models.User, time.Time]
+	DeletedAt orm.Field[models.User, time.Time]
+	Username  orm.StringField[models.User]
+	Email     orm.StringField[models.User]
+	Password  orm.Field[models.User, []uint8]
 }
 
 var User = userConditions{
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: userType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: userType,
-	},
-	Email: query.Field[string]{
-		Field:     "Email",
-		ModelType: userType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: userType,
-	},
-	Password: query.Field[[]uint8]{
-		Field:     "Password",
-		ModelType: userType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: userType,
-	},
-	Username: query.Field[string]{
-		Field:     "Username",
-		ModelType: userType,
-	},
+	CreatedAt: orm.Field[models.User, time.Time]{Name: "CreatedAt"},
+	DeletedAt: orm.Field[models.User, time.Time]{Name: "DeletedAt"},
+	Email:     orm.StringField[models.User]{Field: orm.Field[models.User, string]{Name: "Email"}},
+	ID:        orm.Field[models.User, model.UUID]{Name: "ID"},
+	Password:  orm.Field[models.User, []uint8]{Name: "Password"},
+	UpdatedAt: orm.Field[models.User, time.Time]{Name: "UpdatedAt"},
+	Username:  orm.StringField[models.User]{Field: orm.Field[models.User, string]{Name: "Username"}},
 }
 
-func (userConditions userConditions) Preload() condition.Condition[models.User] {
-	return condition.NewPreloadCondition[models.User](userConditions.ID, userConditions.CreatedAt, userConditions.UpdatedAt, userConditions.DeletedAt, userConditions.Username, userConditions.Email, userConditions.Password)
+// Preload allows preloading the User when doing a query
+func (userConditions userConditions) Preload() orm.Condition[models.User] {
+	return orm.NewPreloadCondition[models.User](userConditions.ID, userConditions.CreatedAt, userConditions.UpdatedAt, userConditions.DeletedAt, userConditions.Username, userConditions.Email, userConditions.Password)
 }

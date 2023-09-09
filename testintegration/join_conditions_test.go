@@ -4,7 +4,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
-	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -34,7 +33,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsUintBelongsTo() {
 	entities, err := orm.NewQuery[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
-			conditions.Brand.NameIs().Eq("google"),
+			conditions.Brand.Name.Is().Eq("google"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -52,7 +51,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsBelongsTo() {
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.IntIs().Eq(1),
+			conditions.Product.Int.Is().Eq(1),
 		),
 	).Find()
 	ts.Nil(err)
@@ -73,9 +72,9 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersTheMainEnt
 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
-		conditions.Sale.CodeIs().Eq(1),
+		conditions.Sale.Code.Is().Eq(1),
 		conditions.Sale.Product(
-			conditions.Product.IntIs().Eq(1),
+			conditions.Product.Int.Is().Eq(1),
 		),
 	).Find()
 	ts.Nil(err)
@@ -96,7 +95,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneOptional() {
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.NameIs().Eq("franco"),
+			conditions.Seller.Name.Is().Eq("franco"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -118,7 +117,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneSelfReferentia
 	entities, err := orm.NewQuery[models.Employee](
 		ts.db,
 		conditions.Employee.Boss(
-			conditions.Employee.NameIs().Eq("Xavier"),
+			conditions.Employee.Name.Is().Eq("Xavier"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -140,7 +139,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOne() {
 	entities, err := orm.NewQuery[models.City](
 		ts.db,
 		conditions.City.Country(
-			conditions.Country.NameIs().Eq("Argentina"),
+			conditions.Country.Name.Is().Eq("Argentina"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -162,7 +161,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOneReversed() {
 	entities, err := orm.NewQuery[models.Country](
 		ts.db,
 		conditions.Country.Capital(
-			conditions.City.NameIs().Eq("Buenos Aires"),
+			conditions.City.Name.Is().Eq("Buenos Aires"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -184,7 +183,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsWithEntityThatDefine
 	entities, err := orm.NewQuery[models.Bicycle](
 		ts.db,
 		conditions.Bicycle.Owner(
-			conditions.Person.NameIs().Eq("franco"),
+			conditions.Person.Name.Is().Eq("franco"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -202,7 +201,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnHasMany() {
 	entities, err := orm.NewQuery[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
-			conditions.Company.NameIs().Eq("ditrit"),
+			conditions.Company.Name.Is().Eq("ditrit"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -223,8 +222,8 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDifferentAttribute
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.IntIs().Eq(1),
-			conditions.Product.StringIs().Eq("match"),
+			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.String.Is().Eq("match"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -247,7 +246,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAddsDeletedAtAutomat
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.StringIs().Eq("match"),
+			conditions.Product.String.Is().Eq("match"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -270,7 +269,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDeletedAt() {
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.DeletedAtIs().Eq(product1.DeletedAt.Time),
+			conditions.Product.DeletedAt.Is().Eq(product1.DeletedAt.Time),
 		),
 	).Find()
 	ts.Nil(err)
@@ -289,7 +288,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersByNil() {
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.IntPointerIs().Null(),
+			conditions.Product.IntPointer.Is().Null(),
 		),
 	).Find()
 	ts.Nil(err)
@@ -312,10 +311,10 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsDifferentEntities() 
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.IntIs().Eq(1),
+			conditions.Product.Int.Is().Eq(1),
 		),
 		conditions.Sale.Seller(
-			conditions.Seller.NameIs().Eq("franco"),
+			conditions.Seller.Name.Is().Eq("franco"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -339,9 +338,9 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsMultipleTimes() {
 	entities, err := orm.NewQuery[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.NameIs().Eq("franco"),
+			conditions.Seller.Name.Is().Eq("franco"),
 			conditions.Seller.Company(
-				conditions.Company.NameIs().Eq("ditrit"),
+				conditions.Company.Name.Is().Eq("ditrit"),
 			),
 		),
 	).Find()
@@ -401,7 +400,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturns
 			orm.Not[models.Product](),
 		),
 	).Find()
-	ts.ErrorIs(err, errors.ErrEmptyConditions)
+	ts.ErrorIs(err, orm.ErrEmptyConditions)
 	ts.ErrorContains(err, "connector: Not; model: models.Product")
 }
 
@@ -415,7 +414,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
 	entities, err := orm.NewQuery[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
-			conditions.Company.NameIs().Dynamic().Eq(conditions.Seller.Name),
+			conditions.Company.Name.Is().Dynamic().Eq(conditions.Seller.Name),
 		),
 	).Find()
 	ts.Nil(err)
@@ -440,7 +439,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Company(
-				conditions.Company.NameIs().Dynamic().Eq(conditions.Seller.Name),
+				conditions.Company.Name.Is().Dynamic().Eq(conditions.Seller.Name),
 			),
 		),
 	).Find()
@@ -452,9 +451,9 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelReturnsError() {
 	_, err := orm.NewQuery[models.Child](
 		ts.db,
-		conditions.Child.IdIs().Dynamic().Eq(conditions.ParentParent.ID),
+		conditions.Child.ID.Is().Dynamic().Eq(conditions.ParentParent.ID),
 	).Find()
-	ts.ErrorIs(err, errors.ErrFieldModelNotConcerned)
+	ts.ErrorIs(err, orm.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
@@ -467,9 +466,9 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.IdIs().Dynamic().Eq(conditions.ParentParent.ID),
+		conditions.Child.ID.Is().Dynamic().Eq(conditions.ParentParent.ID),
 	).Find()
-	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
@@ -489,7 +488,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.NameIs().Dynamic().Eq(conditions.ParentParent.Name).SelectJoin(0, 0),
+		conditions.Child.Name.Is().Dynamic().Eq(conditions.ParentParent.Name).SelectJoin(0, 0),
 	).Find()
 	ts.Nil(err)
 
@@ -505,11 +504,11 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.IdIs().Dynamic().Between(
+		conditions.Child.ID.Is().Dynamic().Between(
 			conditions.ParentParent.ID,
 			conditions.ParentParent.ID,
 		),
 	).Find()
-	ts.ErrorIs(err, errors.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Between; model: models.Child, field: ID")
 }

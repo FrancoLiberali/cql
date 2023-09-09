@@ -3,64 +3,28 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var universityType = reflect.TypeOf(*new(models.University))
-
-func (universityConditions universityConditions) IdIs() orm.FieldIs[models.University, model.UUID] {
-	return orm.FieldIs[models.University, model.UUID]{FieldID: universityConditions.ID}
-}
-func (universityConditions universityConditions) CreatedAtIs() orm.FieldIs[models.University, time.Time] {
-	return orm.FieldIs[models.University, time.Time]{FieldID: universityConditions.CreatedAt}
-}
-func (universityConditions universityConditions) UpdatedAtIs() orm.FieldIs[models.University, time.Time] {
-	return orm.FieldIs[models.University, time.Time]{FieldID: universityConditions.UpdatedAt}
-}
-func (universityConditions universityConditions) DeletedAtIs() orm.FieldIs[models.University, time.Time] {
-	return orm.FieldIs[models.University, time.Time]{FieldID: universityConditions.DeletedAt}
-}
-func (universityConditions universityConditions) NameIs() orm.StringFieldIs[models.University] {
-	return orm.StringFieldIs[models.University]{FieldIs: orm.FieldIs[models.University, string]{FieldID: universityConditions.Name}}
-}
-
 type universityConditions struct {
-	ID        query.Field[model.UUID]
-	CreatedAt query.Field[time.Time]
-	UpdatedAt query.Field[time.Time]
-	DeletedAt query.Field[time.Time]
-	Name      query.Field[string]
+	ID        orm.Field[models.University, model.UUID]
+	CreatedAt orm.Field[models.University, time.Time]
+	UpdatedAt orm.Field[models.University, time.Time]
+	DeletedAt orm.Field[models.University, time.Time]
+	Name      orm.StringField[models.University]
 }
 
 var University = universityConditions{
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: universityType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: universityType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: universityType,
-	},
-	Name: query.Field[string]{
-		Field:     "Name",
-		ModelType: universityType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: universityType,
-	},
+	CreatedAt: orm.Field[models.University, time.Time]{Name: "CreatedAt"},
+	DeletedAt: orm.Field[models.University, time.Time]{Name: "DeletedAt"},
+	ID:        orm.Field[models.University, model.UUID]{Name: "ID"},
+	Name:      orm.StringField[models.University]{Field: orm.Field[models.University, string]{Name: "Name"}},
+	UpdatedAt: orm.Field[models.University, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the University when doing a query
-func (universityConditions universityConditions) Preload() condition.Condition[models.University] {
-	return condition.NewPreloadCondition[models.University](universityConditions.ID, universityConditions.CreatedAt, universityConditions.UpdatedAt, universityConditions.DeletedAt, universityConditions.Name)
+func (universityConditions universityConditions) Preload() orm.Condition[models.University] {
+	return orm.NewPreloadCondition[models.University](universityConditions.ID, universityConditions.CreatedAt, universityConditions.UpdatedAt, universityConditions.DeletedAt, universityConditions.Name)
 }

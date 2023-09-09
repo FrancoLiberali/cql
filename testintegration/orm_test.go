@@ -16,7 +16,6 @@ import (
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/logger"
-	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/persistence/database"
 	"github.com/ditrit/badaas/persistence/gormfx"
 )
@@ -65,11 +64,11 @@ func runORMTestSuites(
 	tsUpdate *UpdateIntTestSuite,
 	shutdowner fx.Shutdowner,
 ) {
-	// suite.Run(tGlobal, tsQuery)
-	// suite.Run(tGlobal, tsWhereConditions)
-	// suite.Run(tGlobal, tsJoinConditions)
-	// suite.Run(tGlobal, tsPreloadConditions)
-	// suite.Run(tGlobal, tsOperators)
+	suite.Run(tGlobal, tsQuery)
+	suite.Run(tGlobal, tsWhereConditions)
+	suite.Run(tGlobal, tsJoinConditions)
+	suite.Run(tGlobal, tsPreloadConditions)
+	suite.Run(tGlobal, tsOperators)
 	suite.Run(tGlobal, tsUpdate)
 
 	shutdowner.Shutdown()
@@ -79,13 +78,13 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case query.Postgres:
+	case orm.Postgres:
 		dialector = postgres.Open(orm.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
-	case query.SQLite:
+	case orm.SQLite:
 		dialector = sqlite.Open(orm.CreateSQLiteDSN(host))
-	case query.MySQL:
+	case orm.MySQL:
 		dialector = mysql.Open(orm.CreateMySQLDSN(host, username, password, dbName, port))
-	case query.SQLServer:
+	case orm.SQLServer:
 		dialector = sqlserver.Open(orm.CreateSQLServerDSN(host, username, password, dbName, port))
 	default:
 		return nil, fmt.Errorf("unknown db %s", getDBDialector())
@@ -98,6 +97,6 @@ func NewDBConnection() (*gorm.DB, error) {
 	)
 }
 
-func getDBDialector() query.Dialector {
-	return query.Dialector(os.Getenv(dbTypeEnvKey))
+func getDBDialector() orm.Dialector {
+	return orm.Dialector(os.Getenv(dbTypeEnvKey))
 }

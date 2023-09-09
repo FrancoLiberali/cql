@@ -3,75 +3,40 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var countryType = reflect.TypeOf(*new(models.Country))
-
-func (countryConditions countryConditions) IdIs() orm.FieldIs[models.Country, model.UUID] {
-	return orm.FieldIs[models.Country, model.UUID]{FieldID: countryConditions.ID}
+func (countryConditions countryConditions) Capital(conditions ...orm.Condition[models.City]) orm.JoinCondition[models.Country] {
+	return orm.NewJoinCondition[models.Country, models.City](conditions, "Capital", "ID", countryConditions.Preload(), "CountryID")
 }
-func (countryConditions countryConditions) CreatedAtIs() orm.FieldIs[models.Country, time.Time] {
-	return orm.FieldIs[models.Country, time.Time]{FieldID: countryConditions.CreatedAt}
-}
-func (countryConditions countryConditions) UpdatedAtIs() orm.FieldIs[models.Country, time.Time] {
-	return orm.FieldIs[models.Country, time.Time]{FieldID: countryConditions.UpdatedAt}
-}
-func (countryConditions countryConditions) DeletedAtIs() orm.FieldIs[models.Country, time.Time] {
-	return orm.FieldIs[models.Country, time.Time]{FieldID: countryConditions.DeletedAt}
-}
-func (countryConditions countryConditions) NameIs() orm.StringFieldIs[models.Country] {
-	return orm.StringFieldIs[models.Country]{FieldIs: orm.FieldIs[models.Country, string]{FieldID: countryConditions.Name}}
-}
-func (countryConditions countryConditions) Capital(conditions ...condition.Condition[models.City]) condition.JoinCondition[models.Country] {
-	return condition.NewJoinCondition[models.Country, models.City](conditions, "Capital", "ID", countryConditions.Preload(), "CountryID")
-}
-func (countryConditions countryConditions) PreloadCapital() condition.JoinCondition[models.Country] {
+func (countryConditions countryConditions) PreloadCapital() orm.JoinCondition[models.Country] {
 	return countryConditions.Capital(City.Preload())
 }
 
 type countryConditions struct {
-	ID        query.Field[model.UUID]
-	CreatedAt query.Field[time.Time]
-	UpdatedAt query.Field[time.Time]
-	DeletedAt query.Field[time.Time]
-	Name      query.Field[string]
+	ID        orm.Field[models.Country, model.UUID]
+	CreatedAt orm.Field[models.Country, time.Time]
+	UpdatedAt orm.Field[models.Country, time.Time]
+	DeletedAt orm.Field[models.Country, time.Time]
+	Name      orm.StringField[models.Country]
 }
 
 var Country = countryConditions{
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: countryType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: countryType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: countryType,
-	},
-	Name: query.Field[string]{
-		Field:     "Name",
-		ModelType: countryType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: countryType,
-	},
+	CreatedAt: orm.Field[models.Country, time.Time]{Name: "CreatedAt"},
+	DeletedAt: orm.Field[models.Country, time.Time]{Name: "DeletedAt"},
+	ID:        orm.Field[models.Country, model.UUID]{Name: "ID"},
+	Name:      orm.StringField[models.Country]{Field: orm.Field[models.Country, string]{Name: "Name"}},
+	UpdatedAt: orm.Field[models.Country, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Country when doing a query
-func (countryConditions countryConditions) Preload() condition.Condition[models.Country] {
-	return condition.NewPreloadCondition[models.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt, countryConditions.Name)
+func (countryConditions countryConditions) Preload() orm.Condition[models.Country] {
+	return orm.NewPreloadCondition[models.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt, countryConditions.Name)
 }
 
 // PreloadRelations allows preloading all the Country's relation when doing a query
-func (countryConditions countryConditions) PreloadRelations() []condition.Condition[models.Country] {
-	return []condition.Condition[models.Country]{countryConditions.PreloadCapital()}
+func (countryConditions countryConditions) PreloadRelations() []orm.Condition[models.Country] {
+	return []orm.Condition[models.Country]{countryConditions.PreloadCapital()}
 }

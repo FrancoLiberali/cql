@@ -3,64 +3,28 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var personType = reflect.TypeOf(*new(models.Person))
-
-func (personConditions personConditions) IdIs() orm.FieldIs[models.Person, model.UUID] {
-	return orm.FieldIs[models.Person, model.UUID]{FieldID: personConditions.ID}
-}
-func (personConditions personConditions) CreatedAtIs() orm.FieldIs[models.Person, time.Time] {
-	return orm.FieldIs[models.Person, time.Time]{FieldID: personConditions.CreatedAt}
-}
-func (personConditions personConditions) UpdatedAtIs() orm.FieldIs[models.Person, time.Time] {
-	return orm.FieldIs[models.Person, time.Time]{FieldID: personConditions.UpdatedAt}
-}
-func (personConditions personConditions) DeletedAtIs() orm.FieldIs[models.Person, time.Time] {
-	return orm.FieldIs[models.Person, time.Time]{FieldID: personConditions.DeletedAt}
-}
-func (personConditions personConditions) NameIs() orm.StringFieldIs[models.Person] {
-	return orm.StringFieldIs[models.Person]{FieldIs: orm.FieldIs[models.Person, string]{FieldID: personConditions.Name}}
-}
-
 type personConditions struct {
-	ID        query.Field[model.UUID]
-	CreatedAt query.Field[time.Time]
-	UpdatedAt query.Field[time.Time]
-	DeletedAt query.Field[time.Time]
-	Name      query.Field[string]
+	ID        orm.Field[models.Person, model.UUID]
+	CreatedAt orm.Field[models.Person, time.Time]
+	UpdatedAt orm.Field[models.Person, time.Time]
+	DeletedAt orm.Field[models.Person, time.Time]
+	Name      orm.StringField[models.Person]
 }
 
 var Person = personConditions{
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: personType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: personType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: personType,
-	},
-	Name: query.Field[string]{
-		Field:     "Name",
-		ModelType: personType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: personType,
-	},
+	CreatedAt: orm.Field[models.Person, time.Time]{Name: "CreatedAt"},
+	DeletedAt: orm.Field[models.Person, time.Time]{Name: "DeletedAt"},
+	ID:        orm.Field[models.Person, model.UUID]{Name: "ID"},
+	Name:      orm.StringField[models.Person]{Field: orm.Field[models.Person, string]{Name: "Name"}},
+	UpdatedAt: orm.Field[models.Person, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Person when doing a query
-func (personConditions personConditions) Preload() condition.Condition[models.Person] {
-	return condition.NewPreloadCondition[models.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt, personConditions.Name)
+func (personConditions personConditions) Preload() orm.Condition[models.Person] {
+	return orm.NewPreloadCondition[models.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt, personConditions.Name)
 }

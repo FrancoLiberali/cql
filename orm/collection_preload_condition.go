@@ -18,13 +18,13 @@ func (condition collectionPreloadCondition[T1, T2]) InterfaceVerificationMethod(
 	// that an object is of type Condition[T1]
 }
 
-func (condition collectionPreloadCondition[T1, T2]) ApplyTo(queryV *GormQuery, _ Table) error {
+func (condition collectionPreloadCondition[T1, T2]) ApplyTo(query *GormQuery, _ Table) error {
 	if len(condition.NestedPreloads) == 0 {
-		queryV.Preload(condition.CollectionField)
+		query.Preload(condition.CollectionField)
 		return nil
 	}
 
-	queryV.Preload(
+	query.Preload(
 		condition.CollectionField,
 		func(db *gorm.DB) *gorm.DB {
 			preloadsAsCondition := pie.Map(

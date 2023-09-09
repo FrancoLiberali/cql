@@ -3,68 +3,28 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var brandType = reflect.TypeOf(*new(models.Brand))
-
-func (brandConditions brandConditions) IdIs() orm.FieldIs[models.Brand, model.UIntID] {
-	return orm.FieldIs[models.Brand, model.UIntID]{FieldID: brandConditions.ID}
-}
-func (brandConditions brandConditions) CreatedAtIs() orm.FieldIs[models.Brand, time.Time] {
-	return orm.FieldIs[models.Brand, time.Time]{FieldID: brandConditions.CreatedAt}
-}
-func (brandConditions brandConditions) UpdatedAtIs() orm.FieldIs[models.Brand, time.Time] {
-	return orm.FieldIs[models.Brand, time.Time]{FieldID: brandConditions.UpdatedAt}
-}
-func (brandConditions brandConditions) DeletedAtIs() orm.FieldIs[models.Brand, time.Time] {
-	return orm.FieldIs[models.Brand, time.Time]{FieldID: brandConditions.DeletedAt}
-}
-func (brandConditions brandConditions) NameIs() orm.StringFieldIs[models.Brand] {
-	return orm.StringFieldIs[models.Brand]{FieldIs: orm.FieldIs[models.Brand, string]{FieldID: brandConditions.Name}}
-}
-
 type brandConditions struct {
-	ID        query.Field[model.UIntID]
-	CreatedAt query.Field[time.Time]
-	UpdatedAt query.Field[time.Time]
-	DeletedAt query.Field[time.Time]
-	Name      query.Field[string]
+	ID        orm.Field[models.Brand, model.UIntID]
+	CreatedAt orm.Field[models.Brand, time.Time]
+	UpdatedAt orm.Field[models.Brand, time.Time]
+	DeletedAt orm.Field[models.Brand, time.Time]
+	Name      orm.StringField[models.Brand]
 }
 
 var Brand = brandConditions{
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: brandType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: brandType,
-	},
-	ID: query.Field[model.UIntID]{
-		Field:     "ID",
-		ModelType: brandType,
-	},
-	Name: query.Field[string]{
-		Field:     "Name",
-		ModelType: brandType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: brandType,
-	},
+	CreatedAt: orm.Field[models.Brand, time.Time]{Name: "CreatedAt"},
+	DeletedAt: orm.Field[models.Brand, time.Time]{Name: "DeletedAt"},
+	ID:        orm.Field[models.Brand, model.UIntID]{Name: "ID"},
+	Name:      orm.StringField[models.Brand]{Field: orm.Field[models.Brand, string]{Name: "Name"}},
+	UpdatedAt: orm.Field[models.Brand, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Brand when doing a query
-func (brandConditions brandConditions) Preload() condition.Condition[models.Brand] {
-	return condition.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
-}
-
-func (brandConditions brandConditions) NameSet() query.FieldSet[models.Brand, string] {
-	return query.FieldSet[models.Brand, string]{FieldID: brandConditions.Name}
+func (brandConditions brandConditions) Preload() orm.Condition[models.Brand] {
+	return orm.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
 }

@@ -3,109 +3,52 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var saleType = reflect.TypeOf(*new(models.Sale))
-
-func (saleConditions saleConditions) IdIs() orm.FieldIs[models.Sale, model.UUID] {
-	return orm.FieldIs[models.Sale, model.UUID]{FieldID: saleConditions.ID}
+func (saleConditions saleConditions) Product(conditions ...orm.Condition[models.Product]) orm.JoinCondition[models.Sale] {
+	return orm.NewJoinCondition[models.Sale, models.Product](conditions, "Product", "ProductID", saleConditions.Preload(), "ID")
 }
-func (saleConditions saleConditions) CreatedAtIs() orm.FieldIs[models.Sale, time.Time] {
-	return orm.FieldIs[models.Sale, time.Time]{FieldID: saleConditions.CreatedAt}
-}
-func (saleConditions saleConditions) UpdatedAtIs() orm.FieldIs[models.Sale, time.Time] {
-	return orm.FieldIs[models.Sale, time.Time]{FieldID: saleConditions.UpdatedAt}
-}
-func (saleConditions saleConditions) DeletedAtIs() orm.FieldIs[models.Sale, time.Time] {
-	return orm.FieldIs[models.Sale, time.Time]{FieldID: saleConditions.DeletedAt}
-}
-func (saleConditions saleConditions) CodeIs() orm.FieldIs[models.Sale, int] {
-	return orm.FieldIs[models.Sale, int]{FieldID: saleConditions.Code}
-}
-func (saleConditions saleConditions) DescriptionIs() orm.StringFieldIs[models.Sale] {
-	return orm.StringFieldIs[models.Sale]{FieldIs: orm.FieldIs[models.Sale, string]{FieldID: saleConditions.Description}}
-}
-func (saleConditions saleConditions) Product(conditions ...condition.Condition[models.Product]) condition.JoinCondition[models.Sale] {
-	return condition.NewJoinCondition[models.Sale, models.Product](conditions, "Product", "ProductID", saleConditions.Preload(), "ID")
-}
-func (saleConditions saleConditions) PreloadProduct() condition.JoinCondition[models.Sale] {
+func (saleConditions saleConditions) PreloadProduct() orm.JoinCondition[models.Sale] {
 	return saleConditions.Product(Product.Preload())
 }
-func (saleConditions saleConditions) ProductIdIs() orm.FieldIs[models.Sale, model.UUID] {
-	return orm.FieldIs[models.Sale, model.UUID]{FieldID: saleConditions.ProductID}
+func (saleConditions saleConditions) Seller(conditions ...orm.Condition[models.Seller]) orm.JoinCondition[models.Sale] {
+	return orm.NewJoinCondition[models.Sale, models.Seller](conditions, "Seller", "SellerID", saleConditions.Preload(), "ID")
 }
-func (saleConditions saleConditions) Seller(conditions ...condition.Condition[models.Seller]) condition.JoinCondition[models.Sale] {
-	return condition.NewJoinCondition[models.Sale, models.Seller](conditions, "Seller", "SellerID", saleConditions.Preload(), "ID")
-}
-func (saleConditions saleConditions) PreloadSeller() condition.JoinCondition[models.Sale] {
+func (saleConditions saleConditions) PreloadSeller() orm.JoinCondition[models.Sale] {
 	return saleConditions.Seller(Seller.Preload())
-}
-func (saleConditions saleConditions) SellerIdIs() orm.FieldIs[models.Sale, model.UUID] {
-	return orm.FieldIs[models.Sale, model.UUID]{FieldID: saleConditions.SellerID}
 }
 
 type saleConditions struct {
-	ID          query.Field[model.UUID]
-	CreatedAt   query.Field[time.Time]
-	UpdatedAt   query.Field[time.Time]
-	DeletedAt   query.Field[time.Time]
-	Code        query.Field[int]
-	Description query.Field[string]
-	ProductID   query.Field[model.UUID]
-	SellerID    query.Field[model.UUID]
+	ID          orm.Field[models.Sale, model.UUID]
+	CreatedAt   orm.Field[models.Sale, time.Time]
+	UpdatedAt   orm.Field[models.Sale, time.Time]
+	DeletedAt   orm.Field[models.Sale, time.Time]
+	Code        orm.Field[models.Sale, int]
+	Description orm.StringField[models.Sale]
+	ProductID   orm.Field[models.Sale, model.UUID]
+	SellerID    orm.Field[models.Sale, model.UUID]
 }
 
 var Sale = saleConditions{
-	Code: query.Field[int]{
-		Field:     "Code",
-		ModelType: saleType,
-	},
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: saleType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: saleType,
-	},
-	Description: query.Field[string]{
-		Field:     "Description",
-		ModelType: saleType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: saleType,
-	},
-	ProductID: query.Field[model.UUID]{
-		Field:     "ProductID",
-		ModelType: saleType,
-	},
-	SellerID: query.Field[model.UUID]{
-		Field:     "SellerID",
-		ModelType: saleType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: saleType,
-	},
+	Code:        orm.Field[models.Sale, int]{Name: "Code"},
+	CreatedAt:   orm.Field[models.Sale, time.Time]{Name: "CreatedAt"},
+	DeletedAt:   orm.Field[models.Sale, time.Time]{Name: "DeletedAt"},
+	Description: orm.StringField[models.Sale]{Field: orm.Field[models.Sale, string]{Name: "Description"}},
+	ID:          orm.Field[models.Sale, model.UUID]{Name: "ID"},
+	ProductID:   orm.Field[models.Sale, model.UUID]{Name: "ProductID"},
+	SellerID:    orm.Field[models.Sale, model.UUID]{Name: "SellerID"},
+	UpdatedAt:   orm.Field[models.Sale, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Sale when doing a query
-func (saleConditions saleConditions) Preload() condition.Condition[models.Sale] {
-	return condition.NewPreloadCondition[models.Sale](saleConditions.ID, saleConditions.CreatedAt, saleConditions.UpdatedAt, saleConditions.DeletedAt, saleConditions.Code, saleConditions.Description, saleConditions.ProductID, saleConditions.SellerID)
+func (saleConditions saleConditions) Preload() orm.Condition[models.Sale] {
+	return orm.NewPreloadCondition[models.Sale](saleConditions.ID, saleConditions.CreatedAt, saleConditions.UpdatedAt, saleConditions.DeletedAt, saleConditions.Code, saleConditions.Description, saleConditions.ProductID, saleConditions.SellerID)
 }
 
 // PreloadRelations allows preloading all the Sale's relation when doing a query
-func (saleConditions saleConditions) PreloadRelations() []condition.Condition[models.Sale] {
-	return []condition.Condition[models.Sale]{saleConditions.PreloadProduct(), saleConditions.PreloadSeller()}
-}
-
-func (saleConditions saleConditions) CodeSet() query.FieldSet[models.Sale, int] {
-	return query.FieldSet[models.Sale, int]{FieldID: saleConditions.Code}
+func (saleConditions saleConditions) PreloadRelations() []orm.Condition[models.Sale] {
+	return []orm.Condition[models.Sale]{saleConditions.PreloadProduct(), saleConditions.PreloadSeller()}
 }

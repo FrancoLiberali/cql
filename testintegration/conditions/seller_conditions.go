@@ -3,97 +3,50 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var sellerType = reflect.TypeOf(*new(models.Seller))
-
-func (sellerConditions sellerConditions) IdIs() orm.FieldIs[models.Seller, model.UUID] {
-	return orm.FieldIs[models.Seller, model.UUID]{FieldID: sellerConditions.ID}
+func (sellerConditions sellerConditions) Company(conditions ...orm.Condition[models.Company]) orm.JoinCondition[models.Seller] {
+	return orm.NewJoinCondition[models.Seller, models.Company](conditions, "Company", "CompanyID", sellerConditions.Preload(), "ID")
 }
-func (sellerConditions sellerConditions) CreatedAtIs() orm.FieldIs[models.Seller, time.Time] {
-	return orm.FieldIs[models.Seller, time.Time]{FieldID: sellerConditions.CreatedAt}
-}
-func (sellerConditions sellerConditions) UpdatedAtIs() orm.FieldIs[models.Seller, time.Time] {
-	return orm.FieldIs[models.Seller, time.Time]{FieldID: sellerConditions.UpdatedAt}
-}
-func (sellerConditions sellerConditions) DeletedAtIs() orm.FieldIs[models.Seller, time.Time] {
-	return orm.FieldIs[models.Seller, time.Time]{FieldID: sellerConditions.DeletedAt}
-}
-func (sellerConditions sellerConditions) NameIs() orm.StringFieldIs[models.Seller] {
-	return orm.StringFieldIs[models.Seller]{FieldIs: orm.FieldIs[models.Seller, string]{FieldID: sellerConditions.Name}}
-}
-func (sellerConditions sellerConditions) Company(conditions ...condition.Condition[models.Company]) condition.JoinCondition[models.Seller] {
-	return condition.NewJoinCondition[models.Seller, models.Company](conditions, "Company", "CompanyID", sellerConditions.Preload(), "ID")
-}
-func (sellerConditions sellerConditions) PreloadCompany() condition.JoinCondition[models.Seller] {
+func (sellerConditions sellerConditions) PreloadCompany() orm.JoinCondition[models.Seller] {
 	return sellerConditions.Company(Company.Preload())
 }
-func (sellerConditions sellerConditions) CompanyIdIs() orm.FieldIs[models.Seller, model.UUID] {
-	return orm.FieldIs[models.Seller, model.UUID]{FieldID: sellerConditions.CompanyID}
+func (sellerConditions sellerConditions) University(conditions ...orm.Condition[models.University]) orm.JoinCondition[models.Seller] {
+	return orm.NewJoinCondition[models.Seller, models.University](conditions, "University", "UniversityID", sellerConditions.Preload(), "ID")
 }
-func (sellerConditions sellerConditions) University(conditions ...condition.Condition[models.University]) condition.JoinCondition[models.Seller] {
-	return condition.NewJoinCondition[models.Seller, models.University](conditions, "University", "UniversityID", sellerConditions.Preload(), "ID")
-}
-func (sellerConditions sellerConditions) PreloadUniversity() condition.JoinCondition[models.Seller] {
+func (sellerConditions sellerConditions) PreloadUniversity() orm.JoinCondition[models.Seller] {
 	return sellerConditions.University(University.Preload())
-}
-func (sellerConditions sellerConditions) UniversityIdIs() orm.FieldIs[models.Seller, model.UUID] {
-	return orm.FieldIs[models.Seller, model.UUID]{FieldID: sellerConditions.UniversityID}
 }
 
 type sellerConditions struct {
-	ID           query.Field[model.UUID]
-	CreatedAt    query.Field[time.Time]
-	UpdatedAt    query.Field[time.Time]
-	DeletedAt    query.Field[time.Time]
-	Name         query.Field[string]
-	CompanyID    query.Field[model.UUID]
-	UniversityID query.Field[model.UUID]
+	ID           orm.Field[models.Seller, model.UUID]
+	CreatedAt    orm.Field[models.Seller, time.Time]
+	UpdatedAt    orm.Field[models.Seller, time.Time]
+	DeletedAt    orm.Field[models.Seller, time.Time]
+	Name         orm.StringField[models.Seller]
+	CompanyID    orm.Field[models.Seller, model.UUID]
+	UniversityID orm.Field[models.Seller, model.UUID]
 }
 
 var Seller = sellerConditions{
-	CompanyID: query.Field[model.UUID]{
-		Field:     "CompanyID",
-		ModelType: sellerType,
-	},
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: sellerType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: sellerType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: sellerType,
-	},
-	Name: query.Field[string]{
-		Field:     "Name",
-		ModelType: sellerType,
-	},
-	UniversityID: query.Field[model.UUID]{
-		Field:     "UniversityID",
-		ModelType: sellerType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: sellerType,
-	},
+	CompanyID:    orm.Field[models.Seller, model.UUID]{Name: "CompanyID"},
+	CreatedAt:    orm.Field[models.Seller, time.Time]{Name: "CreatedAt"},
+	DeletedAt:    orm.Field[models.Seller, time.Time]{Name: "DeletedAt"},
+	ID:           orm.Field[models.Seller, model.UUID]{Name: "ID"},
+	Name:         orm.StringField[models.Seller]{Field: orm.Field[models.Seller, string]{Name: "Name"}},
+	UniversityID: orm.Field[models.Seller, model.UUID]{Name: "UniversityID"},
+	UpdatedAt:    orm.Field[models.Seller, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Seller when doing a query
-func (sellerConditions sellerConditions) Preload() condition.Condition[models.Seller] {
-	return condition.NewPreloadCondition[models.Seller](sellerConditions.ID, sellerConditions.CreatedAt, sellerConditions.UpdatedAt, sellerConditions.DeletedAt, sellerConditions.Name, sellerConditions.CompanyID, sellerConditions.UniversityID)
+func (sellerConditions sellerConditions) Preload() orm.Condition[models.Seller] {
+	return orm.NewPreloadCondition[models.Seller](sellerConditions.ID, sellerConditions.CreatedAt, sellerConditions.UpdatedAt, sellerConditions.DeletedAt, sellerConditions.Name, sellerConditions.CompanyID, sellerConditions.UniversityID)
 }
 
 // PreloadRelations allows preloading all the Seller's relation when doing a query
-func (sellerConditions sellerConditions) PreloadRelations() []condition.Condition[models.Seller] {
-	return []condition.Condition[models.Seller]{sellerConditions.PreloadCompany(), sellerConditions.PreloadUniversity()}
+func (sellerConditions sellerConditions) PreloadRelations() []orm.Condition[models.Seller] {
+	return []orm.Condition[models.Seller]{sellerConditions.PreloadCompany(), sellerConditions.PreloadUniversity()}
 }

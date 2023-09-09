@@ -3,109 +3,52 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var childType = reflect.TypeOf(*new(models.Child))
-
-func (childConditions childConditions) IdIs() orm.FieldIs[models.Child, model.UUID] {
-	return orm.FieldIs[models.Child, model.UUID]{FieldID: childConditions.ID}
+func (childConditions childConditions) Parent1(conditions ...orm.Condition[models.Parent1]) orm.JoinCondition[models.Child] {
+	return orm.NewJoinCondition[models.Child, models.Parent1](conditions, "Parent1", "Parent1ID", childConditions.Preload(), "ID")
 }
-func (childConditions childConditions) CreatedAtIs() orm.FieldIs[models.Child, time.Time] {
-	return orm.FieldIs[models.Child, time.Time]{FieldID: childConditions.CreatedAt}
-}
-func (childConditions childConditions) UpdatedAtIs() orm.FieldIs[models.Child, time.Time] {
-	return orm.FieldIs[models.Child, time.Time]{FieldID: childConditions.UpdatedAt}
-}
-func (childConditions childConditions) DeletedAtIs() orm.FieldIs[models.Child, time.Time] {
-	return orm.FieldIs[models.Child, time.Time]{FieldID: childConditions.DeletedAt}
-}
-func (childConditions childConditions) NameIs() orm.StringFieldIs[models.Child] {
-	return orm.StringFieldIs[models.Child]{FieldIs: orm.FieldIs[models.Child, string]{FieldID: childConditions.Name}}
-}
-func (childConditions childConditions) NumberIs() orm.FieldIs[models.Child, int] {
-	return orm.FieldIs[models.Child, int]{FieldID: childConditions.Number}
-}
-func (childConditions childConditions) Parent1(conditions ...condition.Condition[models.Parent1]) condition.JoinCondition[models.Child] {
-	return condition.NewJoinCondition[models.Child, models.Parent1](conditions, "Parent1", "Parent1ID", childConditions.Preload(), "ID")
-}
-func (childConditions childConditions) PreloadParent1() condition.JoinCondition[models.Child] {
+func (childConditions childConditions) PreloadParent1() orm.JoinCondition[models.Child] {
 	return childConditions.Parent1(Parent1.Preload())
 }
-func (childConditions childConditions) Parent1IdIs() orm.FieldIs[models.Child, model.UUID] {
-	return orm.FieldIs[models.Child, model.UUID]{FieldID: childConditions.Parent1ID}
+func (childConditions childConditions) Parent2(conditions ...orm.Condition[models.Parent2]) orm.JoinCondition[models.Child] {
+	return orm.NewJoinCondition[models.Child, models.Parent2](conditions, "Parent2", "Parent2ID", childConditions.Preload(), "ID")
 }
-func (childConditions childConditions) Parent2(conditions ...condition.Condition[models.Parent2]) condition.JoinCondition[models.Child] {
-	return condition.NewJoinCondition[models.Child, models.Parent2](conditions, "Parent2", "Parent2ID", childConditions.Preload(), "ID")
-}
-func (childConditions childConditions) PreloadParent2() condition.JoinCondition[models.Child] {
+func (childConditions childConditions) PreloadParent2() orm.JoinCondition[models.Child] {
 	return childConditions.Parent2(Parent2.Preload())
-}
-func (childConditions childConditions) Parent2IdIs() orm.FieldIs[models.Child, model.UUID] {
-	return orm.FieldIs[models.Child, model.UUID]{FieldID: childConditions.Parent2ID}
 }
 
 type childConditions struct {
-	ID        query.Field[model.UUID]
-	CreatedAt query.Field[time.Time]
-	UpdatedAt query.Field[time.Time]
-	DeletedAt query.Field[time.Time]
-	Name      query.Field[string]
-	Number    query.Field[int]
-	Parent1ID query.Field[model.UUID]
-	Parent2ID query.Field[model.UUID]
+	ID        orm.Field[models.Child, model.UUID]
+	CreatedAt orm.Field[models.Child, time.Time]
+	UpdatedAt orm.Field[models.Child, time.Time]
+	DeletedAt orm.Field[models.Child, time.Time]
+	Name      orm.StringField[models.Child]
+	Number    orm.Field[models.Child, int]
+	Parent1ID orm.Field[models.Child, model.UUID]
+	Parent2ID orm.Field[models.Child, model.UUID]
 }
 
 var Child = childConditions{
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: childType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: childType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: childType,
-	},
-	Name: query.Field[string]{
-		Field:     "Name",
-		ModelType: childType,
-	},
-	Number: query.Field[int]{
-		Field:     "Number",
-		ModelType: childType,
-	},
-	Parent1ID: query.Field[model.UUID]{
-		Field:     "Parent1ID",
-		ModelType: childType,
-	},
-	Parent2ID: query.Field[model.UUID]{
-		Field:     "Parent2ID",
-		ModelType: childType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: childType,
-	},
+	CreatedAt: orm.Field[models.Child, time.Time]{Name: "CreatedAt"},
+	DeletedAt: orm.Field[models.Child, time.Time]{Name: "DeletedAt"},
+	ID:        orm.Field[models.Child, model.UUID]{Name: "ID"},
+	Name:      orm.StringField[models.Child]{Field: orm.Field[models.Child, string]{Name: "Name"}},
+	Number:    orm.Field[models.Child, int]{Name: "Number"},
+	Parent1ID: orm.Field[models.Child, model.UUID]{Name: "Parent1ID"},
+	Parent2ID: orm.Field[models.Child, model.UUID]{Name: "Parent2ID"},
+	UpdatedAt: orm.Field[models.Child, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Child when doing a query
-func (childConditions childConditions) Preload() condition.Condition[models.Child] {
-	return condition.NewPreloadCondition[models.Child](childConditions.ID, childConditions.CreatedAt, childConditions.UpdatedAt, childConditions.DeletedAt, childConditions.Name, childConditions.Number, childConditions.Parent1ID, childConditions.Parent2ID)
+func (childConditions childConditions) Preload() orm.Condition[models.Child] {
+	return orm.NewPreloadCondition[models.Child](childConditions.ID, childConditions.CreatedAt, childConditions.UpdatedAt, childConditions.DeletedAt, childConditions.Name, childConditions.Number, childConditions.Parent1ID, childConditions.Parent2ID)
 }
 
 // PreloadRelations allows preloading all the Child's relation when doing a query
-func (childConditions childConditions) PreloadRelations() []condition.Condition[models.Child] {
-	return []condition.Condition[models.Child]{childConditions.PreloadParent1(), childConditions.PreloadParent2()}
-}
-
-func (childConditions childConditions) NameSet() query.FieldSet[models.Child, string] {
-	return query.FieldSet[models.Child, string]{FieldID: childConditions.Name}
+func (childConditions childConditions) PreloadRelations() []orm.Condition[models.Child] {
+	return []orm.Condition[models.Child]{childConditions.PreloadParent1(), childConditions.PreloadParent2()}
 }

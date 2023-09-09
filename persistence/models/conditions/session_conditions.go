@@ -3,71 +3,30 @@ package conditions
 
 import (
 	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/persistence/models"
-	"reflect"
 	"time"
 )
 
-var sessionType = reflect.TypeOf(*new(models.Session))
-
-func (sessionConditions sessionConditions) IdIs() orm.FieldIs[models.Session, model.UUID] {
-	return orm.FieldIs[models.Session, model.UUID]{FieldID: sessionConditions.ID}
-}
-func (sessionConditions sessionConditions) CreatedAtIs() orm.FieldIs[models.Session, time.Time] {
-	return orm.FieldIs[models.Session, time.Time]{FieldID: sessionConditions.CreatedAt}
-}
-func (sessionConditions sessionConditions) UpdatedAtIs() orm.FieldIs[models.Session, time.Time] {
-	return orm.FieldIs[models.Session, time.Time]{FieldID: sessionConditions.UpdatedAt}
-}
-func (sessionConditions sessionConditions) DeletedAtIs() orm.FieldIs[models.Session, time.Time] {
-	return orm.FieldIs[models.Session, time.Time]{FieldID: sessionConditions.DeletedAt}
-}
-func (sessionConditions sessionConditions) UserIdIs() orm.FieldIs[models.Session, model.UUID] {
-	return orm.FieldIs[models.Session, model.UUID]{FieldID: sessionConditions.UserID}
-}
-func (sessionConditions sessionConditions) ExpiresAtIs() orm.FieldIs[models.Session, time.Time] {
-	return orm.FieldIs[models.Session, time.Time]{FieldID: sessionConditions.ExpiresAt}
-}
-
 type sessionConditions struct {
-	ID        query.Field[model.UUID]
-	CreatedAt query.Field[time.Time]
-	UpdatedAt query.Field[time.Time]
-	DeletedAt query.Field[time.Time]
-	UserID    query.Field[model.UUID]
-	ExpiresAt query.Field[time.Time]
+	ID        orm.Field[models.Session, model.UUID]
+	CreatedAt orm.Field[models.Session, time.Time]
+	UpdatedAt orm.Field[models.Session, time.Time]
+	DeletedAt orm.Field[models.Session, time.Time]
+	UserID    orm.Field[models.Session, model.UUID]
+	ExpiresAt orm.Field[models.Session, time.Time]
 }
 
 var Session = sessionConditions{
-	CreatedAt: query.Field[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: sessionType,
-	},
-	DeletedAt: query.Field[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: sessionType,
-	},
-	ExpiresAt: query.Field[time.Time]{
-		Field:     "ExpiresAt",
-		ModelType: sessionType,
-	},
-	ID: query.Field[model.UUID]{
-		Field:     "ID",
-		ModelType: sessionType,
-	},
-	UpdatedAt: query.Field[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: sessionType,
-	},
-	UserID: query.Field[model.UUID]{
-		Field:     "UserID",
-		ModelType: sessionType,
-	},
+	CreatedAt: orm.Field[models.Session, time.Time]{Name: "CreatedAt"},
+	DeletedAt: orm.Field[models.Session, time.Time]{Name: "DeletedAt"},
+	ExpiresAt: orm.Field[models.Session, time.Time]{Name: "ExpiresAt"},
+	ID:        orm.Field[models.Session, model.UUID]{Name: "ID"},
+	UpdatedAt: orm.Field[models.Session, time.Time]{Name: "UpdatedAt"},
+	UserID:    orm.Field[models.Session, model.UUID]{Name: "UserID"},
 }
 
-func (sessionConditions sessionConditions) Preload() condition.Condition[models.Session] {
-	return condition.NewPreloadCondition[models.Session](sessionConditions.ID, sessionConditions.CreatedAt, sessionConditions.UpdatedAt, sessionConditions.DeletedAt, sessionConditions.UserID, sessionConditions.ExpiresAt)
+// Preload allows preloading the Session when doing a query
+func (sessionConditions sessionConditions) Preload() orm.Condition[models.Session] {
+	return orm.NewPreloadCondition[models.Session](sessionConditions.ID, sessionConditions.CreatedAt, sessionConditions.UpdatedAt, sessionConditions.DeletedAt, sessionConditions.UserID, sessionConditions.ExpiresAt)
 }

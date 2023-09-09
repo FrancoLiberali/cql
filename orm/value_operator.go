@@ -76,8 +76,8 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 	return operationString, values, nil
 }
 
-func getModelTable(queryV *GormQuery, field IField, joinNumber int, sqlOperator sql.Operator) (Table, error) {
-	table, err := queryV.GetModelTable(field, joinNumber)
+func getModelTable(query *GormQuery, field IField, joinNumber int, sqlOperator sql.Operator) (Table, error) {
+	table, err := query.GetModelTable(field, joinNumber)
 	if err != nil {
 		return Table{}, operatorError(err, sqlOperator)
 	}

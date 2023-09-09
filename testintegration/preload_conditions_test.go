@@ -8,7 +8,6 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
-	badaasORMErrors "github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -43,11 +42,11 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadReturnsErrorOnGetRelation(
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)       // is nil but we cant determine why directly (not loaded or really null)
 	_, err = saleLoaded.GetSeller() // GetSeller give us that information
-	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyNull() {
@@ -63,7 +62,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyN
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)                 // is nil but we cant determine why directly (not loaded or really null)
 	saleSeller, err := saleLoaded.GetSeller() // GetSeller give us that information
@@ -206,7 +205,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 		// the not null one is not loaded
 		sellerCompany, err := saleSeller.GetCompany()
-		return errors.Is(err, badaasORMErrors.ErrRelationNotLoaded) && sellerCompany == nil
+		return errors.Is(err, orm.ErrRelationNotLoaded) && sellerCompany == nil
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
 		saleSeller, err := sale.GetSeller()
@@ -296,7 +295,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithWhereConditionFilters() 
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Preload(),
-			conditions.Product.IntIs().Eq(1),
+			conditions.Product.Int.Is().Eq(1),
 		),
 	).Find()
 	ts.Nil(err)
@@ -358,7 +357,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadOneToOne() {
 
 	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
 	_, err = entities[0].GetCountry()
-	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
@@ -456,7 +455,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel
 				conditions.Employee.Preload(),
 			),
 		),
-		conditions.Employee.NameIs().Eq("franco"),
+		conditions.Employee.Name.Is().Eq("franco"),
 	).Find()
 	ts.Nil(err)
 
@@ -487,11 +486,11 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Preload(),
-			conditions.Product.IntIs().Eq(1),
+			conditions.Product.Int.Is().Eq(1),
 		),
 		conditions.Sale.Seller(
 			conditions.Seller.Preload(),
-			conditions.Seller.NameIs().Eq("franco"),
+			conditions.Seller.Name.Is().Eq("franco"),
 		),
 	).Find()
 	ts.Nil(err)
@@ -650,7 +649,7 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCond
 			conditions.Parent1.Preload(),
 			conditions.Parent1.ParentParent(
 				conditions.ParentParent.Preload(),
-				conditions.ParentParent.NameIs().Eq("parentParent1"),
+				conditions.ParentParent.Name.Is().Eq("parentParent1"),
 			),
 		),
 	).Find()
@@ -752,7 +751,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadCollection() {
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
 	_, err = entities[0].GetSellers()
-	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
+	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
@@ -871,11 +870,11 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 		conditions.Company.PreloadSellers(
 			conditions.Seller.University(
 				conditions.University.Preload(),
-				conditions.University.IdIs().Eq(model.NilUUID),
+				conditions.University.ID.Is().Eq(model.NilUUID),
 			),
 		),
 	).Find()
-	ts.ErrorIs(err, badaasORMErrors.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }
 
@@ -886,6 +885,6 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWitho
 			conditions.Seller.University(),
 		),
 	).Find()
-	ts.ErrorIs(err, badaasORMErrors.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }
