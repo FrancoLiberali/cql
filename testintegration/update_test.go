@@ -73,7 +73,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 
 	updated, err := orm.NewUpdate[models.Product](
 		ts.db,
-		conditions.Product.Bool.Is().Eq(false),
+		conditions.Product.Bool.Is().False(),
 	).Set(
 		conditions.Product.Int.Set().Eq(1),
 	)
@@ -109,7 +109,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 	productReturned, err := orm.NewQuery[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
-		conditions.Product.Bool.Is().Eq(true),
+		conditions.Product.Bool.Is().True(),
 	).FindOne()
 	ts.Nil(err)
 
@@ -542,7 +542,7 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 	if getDBDialector() != orm.MySQL {
 		_, err := orm.NewUpdate[models.Product](
 			ts.db,
-			conditions.Product.Bool.Is().Eq(false),
+			conditions.Product.Bool.Is().False(),
 		).Ascending(
 			conditions.Product.String,
 		).Limit(1).Set(
@@ -556,7 +556,7 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 
 		updated, err := orm.NewUpdate[models.Product](
 			ts.db,
-			conditions.Product.Bool.Is().Eq(false),
+			conditions.Product.Bool.Is().False(),
 		).Ascending(
 			conditions.Product.String,
 		).Limit(1).Set(
@@ -582,7 +582,7 @@ func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 	if getDBDialector() != orm.MySQL {
 		_, err := orm.NewUpdate[models.Product](
 			ts.db,
-			conditions.Product.Bool.Is().Eq(false),
+			conditions.Product.Bool.Is().False(),
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
@@ -591,7 +591,7 @@ func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 	} else {
 		_, err := orm.NewUpdate[models.Product](
 			ts.db,
-			conditions.Product.Bool.Is().Eq(false),
+			conditions.Product.Bool.Is().False(),
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)

@@ -12,12 +12,14 @@ import (
 // Example (multi): value LIKE v1 ESCAPE v2
 type ValueOperator[T any] struct {
 	Operations []operation
+	Modifier   map[Dialector]string
 }
 
 type operation struct {
-	SQLOperator sql.Operator
-	Value       any
-	JoinNumber  int
+	SQLOperator            sql.Operator
+	SQLOperatorByDialector map[Dialector]sql.Operator
+	Value                  any
+	JoinNumber             int
 }
 
 func NewValueOperator[T any](sqlOperator sql.Operator, value any) *ValueOperator[T] {
@@ -47,28 +49,38 @@ func (operator *ValueOperator[T]) SelectJoin(operationNumber, joinNumber uint) D
 
 func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (string, []any, error) {
 	operationString := columnName
+
+	if modifier, isPresent := operator.Modifier[query.Dialector()]; isPresent {
+		operationString = modifier + " " + columnName
+	}
+
 	values := []any{}
 
 	// add each operation to the sql
 	for _, operation := range operator.Operations {
+		sqlOperator := operation.SQLOperator
+		if operation.SQLOperatorByDialector != nil {
+			sqlOperator = operation.SQLOperatorByDialector[query.Dialector()]
+		}
+
 		field, isField := operation.Value.(IField)
 		if isField {
 			// if the value of the operation is a field,
 			// verify that this field is concerned by the query
 			// (a join was performed with the model to which this field belongs)
 			// and get the alias of the table of this model.
-			modelTable, err := getModelTable(query, field, operation.JoinNumber, operation.SQLOperator)
+			modelTable, err := getModelTable(query, field, operation.JoinNumber, sqlOperator)
 			if err != nil {
 				return "", nil, err
 			}
 
 			operationString += fmt.Sprintf(
 				" %s %s",
-				operation.SQLOperator,
+				sqlOperator,
 				field.ColumnSQL(query, modelTable),
 			)
 		} else {
-			operationString += " " + operation.SQLOperator.String() + " ?"
+			operationString += " " + sqlOperator.String() + " ?"
 			values = append(values, operation.Value)
 		}
 	}
@@ -85,15 +97,26 @@ func getModelTable(query *GormQuery, field IField, joinNumber int, sqlOperator s
 	return table, nil
 }
 
-func (operator *ValueOperator[T]) AddOperation(sqlOperator sql.Operator, value any) *ValueOperator[T] {
-	operator.Operations = append(
-		operator.Operations,
-		operation{
+func (operator *ValueOperator[T]) AddOperation(sqlOperator any, value any) *ValueOperator[T] {
+	var newOperation operation
+	switch sqlOperatorTyped := sqlOperator.(type) {
+	case sql.Operator:
+		newOperation = operation{
 			Value:       value,
-			SQLOperator: sqlOperator,
+			SQLOperator: sqlOperatorTyped,
 			JoinNumber:  UndefinedJoinNumber,
-		},
-	)
+		}
+	case map[Dialector]sql.Operator:
+		newOperation = operation{
+			Value:                  value,
+			SQLOperatorByDialector: sqlOperatorTyped,
+			JoinNumber:             UndefinedJoinNumber,
+		}
+	default:
+		return operator
+	}
+
+	operator.Operations = append(operator.Operations, newOperation)
 
 	return operator
 }

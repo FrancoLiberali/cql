@@ -246,26 +246,16 @@ func (ts *OperatorsIntTestSuite) TestIsTrue() {
 
 	var err error
 
-	var entities []*models.Product
-
-	switch getDBDialector() {
-	case orm.Postgres, orm.MySQL, orm.SQLite:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.Bool.Is().True(),
-		).Find()
-	case orm.SQLServer:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.Bool.Is().Eq(true),
-		).Find()
-	}
-
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.Bool.Is().True(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }
 
+//nolint:dupl // not really duplicated
 func (ts *OperatorsIntTestSuite) TestIsFalse() {
 	match := ts.createProduct("match", 0, 0, false, nil)
 	ts.createProduct("not_match", 0, 0, true, nil)
@@ -273,21 +263,10 @@ func (ts *OperatorsIntTestSuite) TestIsFalse() {
 
 	var err error
 
-	var entities []*models.Product
-
-	switch getDBDialector() {
-	case orm.Postgres, orm.MySQL, orm.SQLite:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.Bool.Is().False(),
-		).Find()
-	case orm.SQLServer:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.Bool.Is().Eq(false),
-		).Find()
-	}
-
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.Bool.Is().False(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
@@ -306,21 +285,10 @@ func (ts *OperatorsIntTestSuite) TestIsNotTrue() {
 	err = ts.db.Save(notMatch).Error
 	ts.Nil(err)
 
-	var entities []*models.Product
-
-	switch getDBDialector() {
-	case orm.Postgres, orm.MySQL, orm.SQLite:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().NotTrue(),
-		).Find()
-	case orm.SQLServer:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().Distinct(true),
-		).Find()
-	}
-
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.NullBool.Is().NotTrue(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
@@ -339,21 +307,10 @@ func (ts *OperatorsIntTestSuite) TestIsNotFalse() {
 	err = ts.db.Save(notMatch).Error
 	ts.Nil(err)
 
-	var entities []*models.Product
-
-	switch getDBDialector() {
-	case orm.Postgres, orm.MySQL, orm.SQLite:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().NotFalse(),
-		).Find()
-	case orm.SQLServer:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().Distinct(false),
-		).Find()
-	}
-
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.NullBool.Is().NotFalse(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
@@ -372,21 +329,10 @@ func (ts *OperatorsIntTestSuite) TestIsUnknown() {
 	err = ts.db.Save(notMatch2).Error
 	ts.Nil(err)
 
-	var entities []*models.Product
-
-	switch getDBDialector() {
-	case orm.Postgres, orm.MySQL:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().Unknown(),
-		).Find()
-	case orm.SQLServer, orm.SQLite:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().Null(),
-		).Find()
-	}
-
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.NullBool.Is().Unknown(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
@@ -405,62 +351,41 @@ func (ts *OperatorsIntTestSuite) TestIsNotUnknown() {
 
 	ts.createProduct("", 0, 0, false, nil)
 
-	var entities []*models.Product
-
-	switch getDBDialector() {
-	case orm.Postgres, orm.MySQL:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().NotUnknown(),
-		).Find()
-	case orm.SQLServer, orm.SQLite:
-		entities, err = orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.NullBool.Is().NotNull(),
-		).Find()
-	}
-
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.NullBool.Is().NotUnknown(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
 
 func (ts *OperatorsIntTestSuite) TestIsDistinct() {
-	switch getDBDialector() {
-	case orm.Postgres, orm.SQLServer, orm.SQLite:
-		match1 := ts.createProduct("match", 3, 0, false, nil)
-		match2 := ts.createProduct("match", 4, 0, false, nil)
-		ts.createProduct("not_match", 2, 0, false, nil)
+	match1 := ts.createProduct("match", 3, 0, false, nil)
+	match2 := ts.createProduct("match", 4, 0, false, nil)
+	ts.createProduct("not_match", 2, 0, false, nil)
 
-		entities, err := orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.Int.Is().Distinct(2),
-		).Find()
-		ts.Nil(err)
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Distinct(2),
+	).Find()
+	ts.Nil(err)
 
-		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
-	case orm.MySQL:
-		log.Println("IsDistinct not compatible")
-	}
+	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
 
 func (ts *OperatorsIntTestSuite) TestIsNotDistinct() {
-	switch getDBDialector() {
-	case orm.Postgres, orm.SQLServer, orm.SQLite:
-		match := ts.createProduct("match", 3, 0, false, nil)
-		ts.createProduct("not_match", 4, 0, false, nil)
-		ts.createProduct("not_match", 2, 0, false, nil)
+	match := ts.createProduct("match", 3, 0, false, nil)
+	ts.createProduct("not_match", 4, 0, false, nil)
+	ts.createProduct("not_match", 2, 0, false, nil)
 
-		entities, err := orm.NewQuery[models.Product](
-			ts.db,
-			conditions.Product.Int.Is().NotDistinct(3),
-		).Find()
-		ts.Nil(err)
+	entities, err := orm.NewQuery[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().NotDistinct(3),
+	).Find()
+	ts.Nil(err)
 
-		EqualList(&ts.Suite, []*models.Product{match}, entities)
-	case orm.MySQL:
-		log.Println("IsNotDistinct not compatible")
-	}
+	EqualList(&ts.Suite, []*models.Product{match}, entities)
 }
 
 func (ts *OperatorsIntTestSuite) TestArrayIn() {

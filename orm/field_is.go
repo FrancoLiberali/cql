@@ -9,7 +9,7 @@ type FieldIs[TObject model.Model, TAttribute any] struct {
 }
 
 type BoolFieldIs[TObject model.Model] struct {
-	FieldIs[TObject, bool]
+	Field Field[TObject, bool]
 }
 
 type StringFieldIs[TObject model.Model] struct {
@@ -66,44 +66,34 @@ func (is FieldIs[TObject, TAttribute]) NotNull() WhereCondition[TObject] {
 	return NewFieldCondition(is.Field, IsNotNull[TAttribute]())
 }
 
-// TODO me gustaria que el resto de metodos no estuviera y que si
-// llamas a esto en sqlserver se transforme en lo correcto
-// Not supported by: sqlserver
 func (is BoolFieldIs[TObject]) True() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.Field, IsTrue())
+	return NewFieldCondition[TObject, bool](is.Field, Eq[bool](true))
 }
 
-// Not supported by: sqlserver
 func (is BoolFieldIs[TObject]) NotTrue() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.Field, IsNotTrue())
+	return NewFieldCondition[TObject, bool](is.Field, IsDistinct[bool](true))
 }
 
-// Not supported by: sqlserver
 func (is BoolFieldIs[TObject]) False() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.Field, IsFalse())
+	return NewFieldCondition[TObject, bool](is.Field, Eq[bool](false))
 }
 
-// Not supported by: sqlserver
 func (is BoolFieldIs[TObject]) NotFalse() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.Field, IsNotFalse())
+	return NewFieldCondition[TObject, bool](is.Field, IsDistinct[bool](false))
 }
 
-// Not supported by: sqlserver, sqlite
 func (is BoolFieldIs[TObject]) Unknown() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.Field, IsUnknown())
+	return NewFieldCondition[TObject, bool](is.Field, IsNull[bool]())
 }
 
-// Not supported by: sqlserver, sqlite
 func (is BoolFieldIs[TObject]) NotUnknown() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.Field, IsNotUnknown())
+	return NewFieldCondition[TObject, bool](is.Field, IsNotNull[bool]())
 }
 
-// Not supported by: mysql
 func (is FieldIs[TObject, TAttribute]) Distinct(value TAttribute) WhereCondition[TObject] {
 	return NewFieldCondition(is.Field, IsDistinct[TAttribute](value))
 }
 
-// Not supported by: mysql
 func (is FieldIs[TObject, TAttribute]) NotDistinct(value TAttribute) WhereCondition[TObject] {
 	return NewFieldCondition(is.Field, IsNotDistinct[TAttribute](value))
 }

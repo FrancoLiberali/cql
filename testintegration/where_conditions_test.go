@@ -134,7 +134,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfBoolType() {
 
 	entities, err := orm.NewQuery[models.Product](
 		ts.db,
-		conditions.Product.Bool.Is().Eq(true),
+		conditions.Product.Bool.Is().True(),
 	).Find()
 	ts.Nil(err)
 
@@ -152,7 +152,7 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsOfDifferentTypesWor
 		ts.db,
 		conditions.Product.String.Is().Eq("match"),
 		conditions.Product.Int.Is().Eq(1),
-		conditions.Product.Bool.Is().Eq(true),
+		conditions.Product.Bool.Is().True(),
 	).Find()
 	ts.Nil(err)
 
@@ -532,7 +532,7 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsDifferentOperators(
 		ts.db,
 		conditions.Product.String.Is().Eq("match"),
 		conditions.Product.Int.Is().Lt(2),
-		conditions.Product.Bool.Is().NotEq(false),
+		conditions.Product.Bool.Is().True(),
 	).Find()
 	ts.Nil(err)
 

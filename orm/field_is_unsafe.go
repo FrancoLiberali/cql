@@ -48,12 +48,10 @@ func (is UnsafeFieldIs[TObject, TAttribute]) NotBetween(v1, v2 any) DynamicCondi
 	return NewFieldCondition(is.field, NotBetween[TAttribute](v1, v2))
 }
 
-// Not supported by: mysql
 func (is UnsafeFieldIs[TObject, TAttribute]) Distinct(value any) DynamicCondition[TObject] {
 	return NewFieldCondition(is.field, IsDistinct[TAttribute](value))
 }
 
-// Not supported by: mysql
 func (is UnsafeFieldIs[TObject, TAttribute]) NotDistinct(value any) DynamicCondition[TObject] {
 	return NewFieldCondition(is.field, IsNotDistinct[TAttribute](value))
 }

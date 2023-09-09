@@ -69,9 +69,7 @@ type BoolField[TModel model.Model] struct {
 
 func (boolField BoolField[TModel]) Is() BoolFieldIs[TModel] {
 	return BoolFieldIs[TModel]{
-		FieldIs: FieldIs[TModel, bool]{
-			Field: boolField.Field,
-		},
+		Field: boolField.Field,
 	}
 }
 

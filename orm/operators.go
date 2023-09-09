@@ -73,46 +73,33 @@ func IsNotNull[T any]() Operator[T] {
 	return NewPredicateOperator[T]("IS NOT NULL")
 }
 
-// Boolean Comparison Predicates
-
-// Not supported by: sqlserver
-func IsTrue() PredicateOperator[bool] {
-	return NewPredicateOperator[bool]("IS TRUE")
-}
-
-// Not supported by: sqlserver
-func IsNotTrue() Operator[bool] {
-	return NewPredicateOperator[bool]("IS NOT TRUE")
-}
-
-// Not supported by: sqlserver
-func IsFalse() Operator[bool] {
-	return NewPredicateOperator[bool]("IS FALSE")
-}
-
-// Not supported by: sqlserver
-func IsNotFalse() Operator[bool] {
-	return NewPredicateOperator[bool]("IS NOT FALSE")
-}
-
-// Not supported by: sqlserver, sqlite
-func IsUnknown() Operator[bool] {
-	return NewPredicateOperator[bool]("IS UNKNOWN")
-}
-
-// Not supported by: sqlserver, sqlite
-func IsNotUnknown() Operator[bool] {
-	return NewPredicateOperator[bool]("IS NOT UNKNOWN")
-}
-
-// Not supported by: mysql
 func IsDistinct[T any](value any) Operator[T] {
-	return NewValueOperator[T](sql.IsDistinct, value)
+	isNotDistinct := new(ValueOperator[T]).AddOperation(
+		map[Dialector]sql.Operator{
+			Postgres:  sql.IsDistinct,
+			SQLServer: sql.IsDistinct,
+			SQLite:    sql.IsDistinct,
+			MySQL:     sql.MySQLNullSafeEqual,
+		},
+		value,
+	)
+	isNotDistinct.Modifier = map[Dialector]string{
+		MySQL: "NOT",
+	}
+
+	return isNotDistinct
 }
 
-// Not supported by: mysql
 func IsNotDistinct[T any](value any) Operator[T] {
-	return NewValueOperator[T](sql.IsNotDistinct, value)
+	return new(ValueOperator[T]).AddOperation(
+		map[Dialector]sql.Operator{
+			Postgres:  sql.IsNotDistinct,
+			SQLServer: sql.IsNotDistinct,
+			SQLite:    sql.IsNotDistinct,
+			MySQL:     sql.MySQLNullSafeEqual,
+		},
+		value,
+	)
 }
 
 // Row and Array Comparisons

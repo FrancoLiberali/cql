@@ -62,12 +62,10 @@ func (is DynamicFieldIs[TObject, TAttribute]) NotBetween(field1, field2 FieldOfT
 	return NewFieldCondition(is.field, NotBetween[TAttribute](field1, field2))
 }
 
-// Not supported by: mysql
 func (is DynamicFieldIs[TObject, TAttribute]) Distinct(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
 	return NewFieldCondition(is.field, IsDistinct[TAttribute](field))
 }
 
-// Not supported by: mysql
 func (is DynamicFieldIs[TObject, TAttribute]) NotDistinct(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
 	return NewFieldCondition(is.field, IsNotDistinct[TAttribute](field))
 }

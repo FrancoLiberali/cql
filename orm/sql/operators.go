@@ -23,6 +23,7 @@ const (
 	// mysql
 	MySQLXor
 	MySQLRegexp
+	MySQLNullSafeEqual
 	// postgresql
 	PostgreSQLILike
 	PostgreSQLSimilarTo
@@ -56,6 +57,7 @@ var operatorToSQL = map[Operator]string{
 	Not:                   "NOT",
 	MySQLXor:              "XOR",
 	MySQLRegexp:           "REGEXP",
+	MySQLNullSafeEqual:    "<=>",
 	PostgreSQLILike:       "ILIKE",
 	PostgreSQLSimilarTo:   "SIMILAR TO",
 	PostgreSQLPosixMatch:  "~",
@@ -87,6 +89,7 @@ var operatorToName = map[Operator]string{
 	Not:                   "Not",
 	MySQLXor:              "mysql.Xor",
 	MySQLRegexp:           "mysql.Regexp",
+	MySQLNullSafeEqual:    "IsNotDistinct",
 	PostgreSQLILike:       "psql.ILike",
 	PostgreSQLSimilarTo:   "psql.SimilarTo",
 	PostgreSQLPosixMatch:  "psql.PosixMatch",
