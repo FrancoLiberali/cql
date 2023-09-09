@@ -1,11 +1,10 @@
-package condition
+package orm
 
 import (
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/query"
 )
 
 // Condition used to the preload a collection of models of a model
@@ -19,7 +18,7 @@ func (condition collectionPreloadCondition[T1, T2]) InterfaceVerificationMethod(
 	// that an object is of type Condition[T1]
 }
 
-func (condition collectionPreloadCondition[T1, T2]) ApplyTo(queryV *query.GormQuery, _ query.Table) error {
+func (condition collectionPreloadCondition[T1, T2]) ApplyTo(queryV *GormQuery, _ Table) error {
 	if len(condition.NestedPreloads) == 0 {
 		queryV.Preload(condition.CollectionField)
 		return nil

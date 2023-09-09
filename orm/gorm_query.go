@@ -1,4 +1,4 @@
-package query
+package orm
 
 import (
 	"fmt"
@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 
-	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/model"
 )
 
@@ -26,7 +25,7 @@ type GormQuery struct {
 // if descending is true, the ordering is in descending direction.
 //
 // joinNumber can be used to select the join in case the field is joined more than once.
-func (query *GormQuery) Order(field IFieldIdentifier, descending bool, joinNumber int) error {
+func (query *GormQuery) Order(field IField, descending bool, joinNumber int) error {
 	table, err := query.GetModelTable(field, joinNumber)
 	if err != nil {
 		return err
@@ -99,7 +98,7 @@ func (query *GormQuery) Find(dest any) error {
 	return query.GormDB.Find(dest).Error
 }
 
-func (query *GormQuery) AddSelect(table Table, fieldID IFieldIdentifier) {
+func (query *GormQuery) AddSelect(table Table, fieldID IField) {
 	query.GormDB.Statement.Selects = append(
 		query.GormDB.Statement.Selects,
 		fmt.Sprintf(
@@ -111,7 +110,7 @@ func (query *GormQuery) AddSelect(table Table, fieldID IFieldIdentifier) {
 	)
 }
 
-func (query *GormQuery) getSelectAlias(table Table, fieldID IFieldIdentifier) string {
+func (query *GormQuery) getSelectAlias(table Table, fieldID IField) string {
 	return fmt.Sprintf(
 		"\"%[1]s__%[2]s\"", // name used by gorm to load the fields inside the models
 		table.Alias,
@@ -160,7 +159,7 @@ func (query *GormQuery) GetTables(modelType reflect.Type) []Table {
 
 const UndefinedJoinNumber = -1
 
-func (query *GormQuery) GetModelTable(field IFieldIdentifier, joinNumber int) (Table, error) {
+func (query *GormQuery) GetModelTable(field IField, joinNumber int) (Table, error) {
 	modelTables := query.GetTables(field.GetModelType())
 	if modelTables == nil {
 		return Table{}, fieldModelNotConcernedError(field)
@@ -244,7 +243,7 @@ func (query *GormQuery) Returning(dest any) error {
 
 		query.GormDB.Clauses(clause.Returning{})
 	case MySQL: // RETURNING not supported
-		return errors.ErrUnsupportedByDatabase
+		return ErrUnsupportedByDatabase
 	}
 
 	return nil
@@ -337,8 +336,8 @@ type TableAndValue struct {
 	value any
 }
 
-func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IFieldIdentifier]TableAndValue, error) {
-	tables := map[IFieldIdentifier]TableAndValue{}
+func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAndValue, error) {
+	tables := map[IField]TableAndValue{}
 
 	for _, set := range sets {
 		field := set.Field()
@@ -365,7 +364,7 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IFieldIdentifi
 func getUpdateValue(query *GormQuery, set ISet) (any, error) {
 	value := set.Value()
 
-	if field, isField := value.(IFieldIdentifier); isField {
+	if field, isField := value.(IField); isField {
 		table, err := query.GetModelTable(field, set.JoinNumber())
 		if err != nil {
 			return nil, err

@@ -36,31 +36,31 @@ func (countryConditions countryConditions) PreloadCapital() condition.JoinCondit
 }
 
 type countryConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
+	ID        query.Field[model.UUID]
+	CreatedAt query.Field[time.Time]
+	UpdatedAt query.Field[time.Time]
+	DeletedAt query.Field[time.Time]
+	Name      query.Field[string]
 }
 
 var Country = countryConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: countryType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: countryType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: countryType,
 	},
-	Name: query.FieldIdentifier[string]{
+	Name: query.Field[string]{
 		Field:     "Name",
 		ModelType: countryType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: countryType,
 	},

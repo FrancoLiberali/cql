@@ -36,41 +36,41 @@ func (userConditions userConditions) PasswordIs() orm.FieldIs[models.User, []uin
 }
 
 type userConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Username  query.FieldIdentifier[string]
-	Email     query.FieldIdentifier[string]
-	Password  query.FieldIdentifier[[]uint8]
+	ID        query.Field[model.UUID]
+	CreatedAt query.Field[time.Time]
+	UpdatedAt query.Field[time.Time]
+	DeletedAt query.Field[time.Time]
+	Username  query.Field[string]
+	Email     query.Field[string]
+	Password  query.Field[[]uint8]
 }
 
 var User = userConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: userType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: userType,
 	},
-	Email: query.FieldIdentifier[string]{
+	Email: query.Field[string]{
 		Field:     "Email",
 		ModelType: userType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: userType,
 	},
-	Password: query.FieldIdentifier[[]uint8]{
+	Password: query.Field[[]uint8]{
 		Field:     "Password",
 		ModelType: userType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: userType,
 	},
-	Username: query.FieldIdentifier[string]{
+	Username: query.Field[string]{
 		Field:     "Username",
 		ModelType: userType,
 	},

@@ -1,13 +1,12 @@
-package condition
+package orm
 
 import (
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/query"
 )
 
 // Condition used to the preload the attributes of a model
 type preloadCondition[T model.Model] struct {
-	Fields []query.IFieldIdentifier
+	Fields []IField
 }
 
 func (condition preloadCondition[T]) InterfaceVerificationMethod(_ T) {
@@ -15,7 +14,7 @@ func (condition preloadCondition[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (condition preloadCondition[T]) ApplyTo(query *query.GormQuery, table query.Table) error {
+func (condition preloadCondition[T]) ApplyTo(query *GormQuery, table Table) error {
 	for _, fieldID := range condition.Fields {
 		query.AddSelect(table, fieldID)
 	}
@@ -24,7 +23,7 @@ func (condition preloadCondition[T]) ApplyTo(query *query.GormQuery, table query
 }
 
 // Condition used to the preload the attributes of a model
-func NewPreloadCondition[T model.Model](fields ...query.IFieldIdentifier) Condition[T] {
+func NewPreloadCondition[T model.Model](fields ...IField) Condition[T] {
 	return preloadCondition[T]{
 		Fields: fields,
 	}

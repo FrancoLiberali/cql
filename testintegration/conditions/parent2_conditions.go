@@ -36,31 +36,31 @@ func (parent2Conditions parent2Conditions) ParentParentIdIs() orm.FieldIs[models
 }
 
 type parent2Conditions struct {
-	ID             query.FieldIdentifier[model.UUID]
-	CreatedAt      query.FieldIdentifier[time.Time]
-	UpdatedAt      query.FieldIdentifier[time.Time]
-	DeletedAt      query.FieldIdentifier[time.Time]
-	ParentParentID query.FieldIdentifier[model.UUID]
+	ID             query.Field[model.UUID]
+	CreatedAt      query.Field[time.Time]
+	UpdatedAt      query.Field[time.Time]
+	DeletedAt      query.Field[time.Time]
+	ParentParentID query.Field[model.UUID]
 }
 
 var Parent2 = parent2Conditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: parent2Type,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: parent2Type,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: parent2Type,
 	},
-	ParentParentID: query.FieldIdentifier[model.UUID]{
+	ParentParentID: query.Field[model.UUID]{
 		Field:     "ParentParentID",
 		ModelType: parent2Type,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: parent2Type,
 	},

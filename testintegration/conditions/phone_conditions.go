@@ -39,36 +39,36 @@ func (phoneConditions phoneConditions) BrandIdIs() orm.FieldIs[models.Phone, uin
 }
 
 type phoneConditions struct {
-	ID        query.FieldIdentifier[model.UIntID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
-	BrandID   query.FieldIdentifier[uint]
+	ID        query.Field[model.UIntID]
+	CreatedAt query.Field[time.Time]
+	UpdatedAt query.Field[time.Time]
+	DeletedAt query.Field[time.Time]
+	Name      query.Field[string]
+	BrandID   query.Field[uint]
 }
 
 var Phone = phoneConditions{
-	BrandID: query.FieldIdentifier[uint]{
+	BrandID: query.Field[uint]{
 		Field:     "BrandID",
 		ModelType: phoneType,
 	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: phoneType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: phoneType,
 	},
-	ID: query.FieldIdentifier[model.UIntID]{
+	ID: query.Field[model.UIntID]{
 		Field:     "ID",
 		ModelType: phoneType,
 	},
-	Name: query.FieldIdentifier[string]{
+	Name: query.Field[string]{
 		Field:     "Name",
 		ModelType: phoneType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: phoneType,
 	},

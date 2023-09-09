@@ -39,36 +39,36 @@ func (bicycleConditions bicycleConditions) OwnerNameIs() orm.StringFieldIs[model
 }
 
 type bicycleConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
-	OwnerName query.FieldIdentifier[string]
+	ID        query.Field[model.UUID]
+	CreatedAt query.Field[time.Time]
+	UpdatedAt query.Field[time.Time]
+	DeletedAt query.Field[time.Time]
+	Name      query.Field[string]
+	OwnerName query.Field[string]
 }
 
 var Bicycle = bicycleConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: bicycleType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: bicycleType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: bicycleType,
 	},
-	Name: query.FieldIdentifier[string]{
+	Name: query.Field[string]{
 		Field:     "Name",
 		ModelType: bicycleType,
 	},
-	OwnerName: query.FieldIdentifier[string]{
+	OwnerName: query.Field[string]{
 		Field:     "OwnerName",
 		ModelType: bicycleType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: bicycleType,
 	},

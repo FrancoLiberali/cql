@@ -1,9 +1,8 @@
-package operator
+package orm
 
 import (
 	"fmt"
 
-	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/orm/sql"
 )
 
@@ -46,19 +45,19 @@ func (operator *ValueOperator[T]) SelectJoin(operationNumber, joinNumber uint) D
 	return operator
 }
 
-func (operator ValueOperator[T]) ToSQL(queryV *query.GormQuery, columnName string) (string, []any, error) {
+func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (string, []any, error) {
 	operationString := columnName
 	values := []any{}
 
 	// add each operation to the sql
 	for _, operation := range operator.Operations {
-		field, isField := operation.Value.(query.IFieldIdentifier)
+		field, isField := operation.Value.(IField)
 		if isField {
 			// if the value of the operation is a field,
 			// verify that this field is concerned by the query
 			// (a join was performed with the model to which this field belongs)
 			// and get the alias of the table of this model.
-			modelTable, err := getModelTable(queryV, field, operation.JoinNumber, operation.SQLOperator)
+			modelTable, err := getModelTable(query, field, operation.JoinNumber, operation.SQLOperator)
 			if err != nil {
 				return "", nil, err
 			}
@@ -66,7 +65,7 @@ func (operator ValueOperator[T]) ToSQL(queryV *query.GormQuery, columnName strin
 			operationString += fmt.Sprintf(
 				" %s %s",
 				operation.SQLOperator,
-				field.ColumnSQL(queryV, modelTable),
+				field.ColumnSQL(query, modelTable),
 			)
 		} else {
 			operationString += " " + operation.SQLOperator.String() + " ?"
@@ -77,10 +76,10 @@ func (operator ValueOperator[T]) ToSQL(queryV *query.GormQuery, columnName strin
 	return operationString, values, nil
 }
 
-func getModelTable(queryV *query.GormQuery, field query.IFieldIdentifier, joinNumber int, sqlOperator sql.Operator) (query.Table, error) {
+func getModelTable(queryV *GormQuery, field IField, joinNumber int, sqlOperator sql.Operator) (Table, error) {
 	table, err := queryV.GetModelTable(field, joinNumber)
 	if err != nil {
-		return query.Table{}, operatorError(err, sqlOperator)
+		return Table{}, operatorError(err, sqlOperator)
 	}
 
 	return table, nil
@@ -92,7 +91,7 @@ func (operator *ValueOperator[T]) AddOperation(sqlOperator sql.Operator, value a
 		operation{
 			Value:       value,
 			SQLOperator: sqlOperator,
-			JoinNumber:  query.UndefinedJoinNumber,
+			JoinNumber:  UndefinedJoinNumber,
 		},
 	)
 

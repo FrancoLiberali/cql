@@ -33,36 +33,36 @@ func (parentParentConditions parentParentConditions) NumberIs() orm.FieldIs[mode
 }
 
 type parentParentConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
-	Number    query.FieldIdentifier[int]
+	ID        query.Field[model.UUID]
+	CreatedAt query.Field[time.Time]
+	UpdatedAt query.Field[time.Time]
+	DeletedAt query.Field[time.Time]
+	Name      query.Field[string]
+	Number    query.Field[int]
 }
 
 var ParentParent = parentParentConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: parentParentType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: parentParentType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: parentParentType,
 	},
-	Name: query.FieldIdentifier[string]{
+	Name: query.Field[string]{
 		Field:     "Name",
 		ModelType: parentParentType,
 	},
-	Number: query.FieldIdentifier[int]{
+	Number: query.Field[int]{
 		Field:     "Number",
 		ModelType: parentParentType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: parentParentType,
 	},

@@ -1,9 +1,7 @@
-package condition
+package orm
 
 import (
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/operator"
-	"github.com/ditrit/badaas/orm/query"
 )
 
 const deletedAtField = "DeletedAt"
@@ -11,8 +9,8 @@ const deletedAtField = "DeletedAt"
 // Condition that verifies the value of a field,
 // using the Operator
 type fieldCondition[TObject model.Model, TAtribute any] struct {
-	FieldIdentifier query.FieldIdentifier[TAtribute]
-	Operator        operator.Operator[TAtribute]
+	FieldIdentifier Field[TObject, TAtribute]
+	Operator        Operator[TAtribute]
 }
 
 func (condition fieldCondition[TObject, TAtribute]) InterfaceVerificationMethod(_ TObject) {
@@ -22,15 +20,15 @@ func (condition fieldCondition[TObject, TAtribute]) InterfaceVerificationMethod(
 
 // Returns a gorm Where condition that can be used
 // to filter that the Field as a value of Value
-func (condition fieldCondition[TObject, TAtribute]) ApplyTo(query *query.GormQuery, table query.Table) error {
+func (condition fieldCondition[TObject, TAtribute]) ApplyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[TObject](condition, query, table)
 }
 
 func (condition fieldCondition[TObject, TAtribute]) AffectsDeletedAt() bool {
-	return condition.FieldIdentifier.Field == deletedAtField
+	return condition.FieldIdentifier.FieldName() == deletedAtField
 }
 
-func (condition fieldCondition[TObject, TAtribute]) GetSQL(query *query.GormQuery, table query.Table) (string, []any, error) {
+func (condition fieldCondition[TObject, TAtribute]) GetSQL(query *GormQuery, table Table) (string, []any, error) {
 	sqlString, values, err := condition.Operator.ToSQL(
 		query,
 		condition.FieldIdentifier.ColumnSQL(query, table),
@@ -43,7 +41,7 @@ func (condition fieldCondition[TObject, TAtribute]) GetSQL(query *query.GormQuer
 }
 
 func (condition *fieldCondition[TObject, TAtribute]) SelectJoin(operationNumber, joinNumber uint) DynamicCondition[TObject] {
-	dynamicOperator, isDynamic := condition.Operator.(operator.DynamicOperator[TAtribute])
+	dynamicOperator, isDynamic := condition.Operator.(DynamicOperator[TAtribute])
 	if isDynamic {
 		condition.Operator = dynamicOperator.SelectJoin(operationNumber, joinNumber)
 	}
@@ -51,11 +49,11 @@ func (condition *fieldCondition[TObject, TAtribute]) SelectJoin(operationNumber,
 	return condition
 }
 
-func NewFieldCondition[TObject model.Model, TAtribute any](
-	fieldIdentifier query.FieldIdentifier[TAtribute],
-	operator operator.Operator[TAtribute],
+func NewFieldCondition[TObject model.Model, TAttribute any](
+	fieldIdentifier Field[TObject, TAttribute],
+	operator Operator[TAttribute],
 ) DynamicCondition[TObject] {
-	return &fieldCondition[TObject, TAtribute]{
+	return &fieldCondition[TObject, TAttribute]{
 		FieldIdentifier: fieldIdentifier,
 		Operator:        operator,
 	}

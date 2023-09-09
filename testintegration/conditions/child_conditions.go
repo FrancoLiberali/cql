@@ -51,46 +51,46 @@ func (childConditions childConditions) Parent2IdIs() orm.FieldIs[models.Child, m
 }
 
 type childConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
-	Number    query.FieldIdentifier[int]
-	Parent1ID query.FieldIdentifier[model.UUID]
-	Parent2ID query.FieldIdentifier[model.UUID]
+	ID        query.Field[model.UUID]
+	CreatedAt query.Field[time.Time]
+	UpdatedAt query.Field[time.Time]
+	DeletedAt query.Field[time.Time]
+	Name      query.Field[string]
+	Number    query.Field[int]
+	Parent1ID query.Field[model.UUID]
+	Parent2ID query.Field[model.UUID]
 }
 
 var Child = childConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: childType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: childType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: childType,
 	},
-	Name: query.FieldIdentifier[string]{
+	Name: query.Field[string]{
 		Field:     "Name",
 		ModelType: childType,
 	},
-	Number: query.FieldIdentifier[int]{
+	Number: query.Field[int]{
 		Field:     "Number",
 		ModelType: childType,
 	},
-	Parent1ID: query.FieldIdentifier[model.UUID]{
+	Parent1ID: query.Field[model.UUID]{
 		Field:     "Parent1ID",
 		ModelType: childType,
 	},
-	Parent2ID: query.FieldIdentifier[model.UUID]{
+	Parent2ID: query.Field[model.UUID]{
 		Field:     "Parent2ID",
 		ModelType: childType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: childType,
 	},

@@ -1,14 +1,11 @@
 package orm
 
 import (
-	"github.com/ditrit/badaas/orm/condition"
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/operator"
-	"github.com/ditrit/badaas/orm/query"
 )
 
 type FieldIs[TObject model.Model, TAttribute any] struct {
-	FieldID query.FieldIdentifier[TAttribute]
+	Field Field[TObject, TAttribute]
 }
 
 type BoolFieldIs[TObject model.Model] struct {
@@ -21,100 +18,102 @@ type StringFieldIs[TObject model.Model] struct {
 
 // EqualTo
 // NotDistinct must be used in cases where value can be NULL
-func (is FieldIs[TObject, TAttribute]) Eq(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.Eq(value))
+func (is FieldIs[TObject, TAttribute]) Eq(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, Eq[TAttribute](value))
 }
 
 // NotEqualTo
 // Distinct must be used in cases where value can be NULL
-func (is FieldIs[TObject, TAttribute]) NotEq(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.NotEq(value))
+func (is FieldIs[TObject, TAttribute]) NotEq(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, NotEq[TAttribute](value))
 }
 
 // LessThan
-func (is FieldIs[TObject, TAttribute]) Lt(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.Lt(value))
+func (is FieldIs[TObject, TAttribute]) Lt(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, Lt[TAttribute](value))
 }
 
 // LessThanOrEqualTo
-func (is FieldIs[TObject, TAttribute]) LtOrEq(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.LtOrEq(value))
+func (is FieldIs[TObject, TAttribute]) LtOrEq(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, LtOrEq[TAttribute](value))
 }
 
 // GreaterThan
-func (is FieldIs[TObject, TAttribute]) Gt(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.Gt(value))
+func (is FieldIs[TObject, TAttribute]) Gt(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, Gt[TAttribute](value))
 }
 
 // GreaterThanOrEqualTo
-func (is FieldIs[TObject, TAttribute]) GtOrEq(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.GtOrEq(value))
+func (is FieldIs[TObject, TAttribute]) GtOrEq(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, GtOrEq[TAttribute](value))
 }
 
 // Equivalent to v1 < value < v2
-func (is FieldIs[TObject, TAttribute]) Between(v1, v2 TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.Between(v1, v2))
+func (is FieldIs[TObject, TAttribute]) Between(v1, v2 TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, Between[TAttribute](v1, v2))
 }
 
 // Equivalent to NOT (v1 < value < v2)
-func (is FieldIs[TObject, TAttribute]) NotBetween(v1, v2 TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.NotBetween(v1, v2))
+func (is FieldIs[TObject, TAttribute]) NotBetween(v1, v2 TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, NotBetween[TAttribute](v1, v2))
 }
 
-func (is FieldIs[TObject, TAttribute]) Null() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.IsNull[TAttribute]())
+func (is FieldIs[TObject, TAttribute]) Null() WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, IsNull[TAttribute]())
 }
 
-func (is FieldIs[TObject, TAttribute]) NotNull() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.IsNotNull[TAttribute]())
+func (is FieldIs[TObject, TAttribute]) NotNull() WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, IsNotNull[TAttribute]())
+}
+
+// TODO me gustaria que el resto de metodos no estuviera y que si
+// llamas a esto en sqlserver se transforme en lo correcto
+// Not supported by: sqlserver
+func (is BoolFieldIs[TObject]) True() WhereCondition[TObject] {
+	return NewFieldCondition[TObject, bool](is.Field, IsTrue())
 }
 
 // Not supported by: sqlserver
-func (is BoolFieldIs[TObject]) True() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, bool](is.FieldID, operator.IsTrue())
+func (is BoolFieldIs[TObject]) NotTrue() WhereCondition[TObject] {
+	return NewFieldCondition[TObject, bool](is.Field, IsNotTrue())
 }
 
 // Not supported by: sqlserver
-func (is BoolFieldIs[TObject]) NotTrue() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, bool](is.FieldID, operator.IsNotTrue())
+func (is BoolFieldIs[TObject]) False() WhereCondition[TObject] {
+	return NewFieldCondition[TObject, bool](is.Field, IsFalse())
 }
 
 // Not supported by: sqlserver
-func (is BoolFieldIs[TObject]) False() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, bool](is.FieldID, operator.IsFalse())
-}
-
-// Not supported by: sqlserver
-func (is BoolFieldIs[TObject]) NotFalse() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, bool](is.FieldID, operator.IsNotFalse())
+func (is BoolFieldIs[TObject]) NotFalse() WhereCondition[TObject] {
+	return NewFieldCondition[TObject, bool](is.Field, IsNotFalse())
 }
 
 // Not supported by: sqlserver, sqlite
-func (is BoolFieldIs[TObject]) Unknown() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, bool](is.FieldID, operator.IsUnknown())
+func (is BoolFieldIs[TObject]) Unknown() WhereCondition[TObject] {
+	return NewFieldCondition[TObject, bool](is.Field, IsUnknown())
 }
 
 // Not supported by: sqlserver, sqlite
-func (is BoolFieldIs[TObject]) NotUnknown() condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, bool](is.FieldID, operator.IsNotUnknown())
+func (is BoolFieldIs[TObject]) NotUnknown() WhereCondition[TObject] {
+	return NewFieldCondition[TObject, bool](is.Field, IsNotUnknown())
 }
 
 // Not supported by: mysql
-func (is FieldIs[TObject, TAttribute]) Distinct(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.IsDistinct(value))
+func (is FieldIs[TObject, TAttribute]) Distinct(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, IsDistinct[TAttribute](value))
 }
 
 // Not supported by: mysql
-func (is FieldIs[TObject, TAttribute]) NotDistinct(value TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.IsNotDistinct(value))
+func (is FieldIs[TObject, TAttribute]) NotDistinct(value TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, IsNotDistinct[TAttribute](value))
 }
 
-func (is FieldIs[TObject, TAttribute]) In(values ...TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.In(values))
+func (is FieldIs[TObject, TAttribute]) In(values ...TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, In(values))
 }
 
-func (is FieldIs[TObject, TAttribute]) NotIn(values ...TAttribute) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, operator.NotIn(values))
+func (is FieldIs[TObject, TAttribute]) NotIn(values ...TAttribute) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, NotIn(values))
 }
 
 // Pattern in all databases:
@@ -135,25 +134,25 @@ func (is FieldIs[TObject, TAttribute]) NotIn(values ...TAttribute) condition.Whe
 //   - postgresql: https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-LIKE
 //   - sqlserver: https://learn.microsoft.com/en-us/sql/t-sql/language-elements/like-transact-sql?view=sql-server-ver16
 //   - sqlite: https://www.sqlite.org/lang_expr.html#like
-func (is StringFieldIs[TObject]) Like(pattern string) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, string](is.FieldID, operator.Like(pattern))
+func (is StringFieldIs[TObject]) Like(pattern string) WhereCondition[TObject] {
+	return NewFieldCondition[TObject, string](is.Field, Like(pattern))
 }
 
 // Custom can be used to use other Operators, like database specific operators
-func (is FieldIs[TObject, TAttribute]) Custom(op operator.Operator[TAttribute]) condition.WhereCondition[TObject] {
-	return condition.NewFieldCondition[TObject, TAttribute](is.FieldID, op)
+func (is FieldIs[TObject, TAttribute]) Custom(op Operator[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition(is.Field, op)
 }
 
 // Dynamic transforms the FieldIs in a DynamicFieldIs to use dynamic operators
 func (is FieldIs[TObject, TAttribute]) Dynamic() DynamicFieldIs[TObject, TAttribute] {
 	return DynamicFieldIs[TObject, TAttribute]{
-		fieldID: is.FieldID,
+		field: is.Field,
 	}
 }
 
 // Unsafe transforms the FieldIs in an UnsafeFieldIs to use unsafe operators
 func (is FieldIs[TObject, TAttribute]) Unsafe() UnsafeFieldIs[TObject, TAttribute] {
 	return UnsafeFieldIs[TObject, TAttribute]{
-		fieldID: is.FieldID,
+		field: is.Field,
 	}
 }

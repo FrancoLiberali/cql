@@ -1,9 +1,7 @@
-package operator
+package orm
 
 import (
 	"fmt"
-
-	"github.com/ditrit/badaas/orm/query"
 )
 
 // Operator that verifies a predicate
@@ -17,7 +15,7 @@ func (operator PredicateOperator[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Operator[T]
 }
 
-func (operator PredicateOperator[T]) ToSQL(_ *query.GormQuery, columnName string) (string, []any, error) {
+func (operator PredicateOperator[T]) ToSQL(_ *GormQuery, columnName string) (string, []any, error) {
 	return fmt.Sprintf("%s %s", columnName, operator.SQLOperator), []any{}, nil
 }
 

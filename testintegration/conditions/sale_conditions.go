@@ -51,46 +51,46 @@ func (saleConditions saleConditions) SellerIdIs() orm.FieldIs[models.Sale, model
 }
 
 type saleConditions struct {
-	ID          query.FieldIdentifier[model.UUID]
-	CreatedAt   query.FieldIdentifier[time.Time]
-	UpdatedAt   query.FieldIdentifier[time.Time]
-	DeletedAt   query.FieldIdentifier[time.Time]
-	Code        query.FieldIdentifier[int]
-	Description query.FieldIdentifier[string]
-	ProductID   query.FieldIdentifier[model.UUID]
-	SellerID    query.FieldIdentifier[model.UUID]
+	ID          query.Field[model.UUID]
+	CreatedAt   query.Field[time.Time]
+	UpdatedAt   query.Field[time.Time]
+	DeletedAt   query.Field[time.Time]
+	Code        query.Field[int]
+	Description query.Field[string]
+	ProductID   query.Field[model.UUID]
+	SellerID    query.Field[model.UUID]
 }
 
 var Sale = saleConditions{
-	Code: query.FieldIdentifier[int]{
+	Code: query.Field[int]{
 		Field:     "Code",
 		ModelType: saleType,
 	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: saleType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: saleType,
 	},
-	Description: query.FieldIdentifier[string]{
+	Description: query.Field[string]{
 		Field:     "Description",
 		ModelType: saleType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: saleType,
 	},
-	ProductID: query.FieldIdentifier[model.UUID]{
+	ProductID: query.Field[model.UUID]{
 		Field:     "ProductID",
 		ModelType: saleType,
 	},
-	SellerID: query.FieldIdentifier[model.UUID]{
+	SellerID: query.Field[model.UUID]{
 		Field:     "SellerID",
 		ModelType: saleType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: saleType,
 	},

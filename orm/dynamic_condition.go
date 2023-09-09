@@ -1,4 +1,4 @@
-package condition
+package orm
 
 import "github.com/ditrit/badaas/orm/model"
 

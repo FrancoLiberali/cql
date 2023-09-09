@@ -1,4 +1,4 @@
-package query
+package orm
 
 import (
 	"gorm.io/gorm"

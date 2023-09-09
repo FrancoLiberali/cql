@@ -60,83 +60,83 @@ func (productConditions productConditions) GormEmbeddedIntIs() orm.FieldIs[model
 }
 
 type productConditions struct {
-	ID                      query.FieldIdentifier[model.UUID]
-	CreatedAt               query.FieldIdentifier[time.Time]
-	UpdatedAt               query.FieldIdentifier[time.Time]
-	DeletedAt               query.FieldIdentifier[time.Time]
-	String                  query.FieldIdentifier[string]
-	Int                     query.FieldIdentifier[int]
-	IntPointer              query.FieldIdentifier[int]
-	Float                   query.FieldIdentifier[float64]
-	NullFloat               query.FieldIdentifier[float64]
-	Bool                    query.FieldIdentifier[bool]
-	NullBool                query.FieldIdentifier[bool]
-	ByteArray               query.FieldIdentifier[[]uint8]
-	MultiString             query.FieldIdentifier[models.MultiString]
-	ToBeEmbeddedEmbeddedInt query.FieldIdentifier[int]
-	GormEmbeddedInt         query.FieldIdentifier[int]
+	ID                      query.Field[model.UUID]
+	CreatedAt               query.Field[time.Time]
+	UpdatedAt               query.Field[time.Time]
+	DeletedAt               query.Field[time.Time]
+	String                  query.Field[string]
+	Int                     query.Field[int]
+	IntPointer              query.Field[int]
+	Float                   query.Field[float64]
+	NullFloat               query.Field[float64]
+	Bool                    query.Field[bool]
+	NullBool                query.Field[bool]
+	ByteArray               query.Field[[]uint8]
+	MultiString             query.Field[models.MultiString]
+	ToBeEmbeddedEmbeddedInt query.Field[int]
+	GormEmbeddedInt         query.Field[int]
 }
 
 var Product = productConditions{
-	Bool: query.FieldIdentifier[bool]{
+	Bool: query.Field[bool]{
 		Field:     "Bool",
 		ModelType: productType,
 	},
-	ByteArray: query.FieldIdentifier[[]uint8]{
+	ByteArray: query.Field[[]uint8]{
 		Field:     "ByteArray",
 		ModelType: productType,
 	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: productType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: productType,
 	},
-	Float: query.FieldIdentifier[float64]{
+	Float: query.Field[float64]{
 		Field:     "Float",
 		ModelType: productType,
 	},
-	GormEmbeddedInt: query.FieldIdentifier[int]{
+	GormEmbeddedInt: query.Field[int]{
 		ColumnPrefix: "gorm_embedded_",
 		Field:        "Int",
 		ModelType:    productType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: productType,
 	},
-	Int: query.FieldIdentifier[int]{
+	Int: query.Field[int]{
 		Field:     "Int",
 		ModelType: productType,
 	},
-	IntPointer: query.FieldIdentifier[int]{
+	IntPointer: query.Field[int]{
 		Field:     "IntPointer",
 		ModelType: productType,
 	},
-	MultiString: query.FieldIdentifier[models.MultiString]{
+	MultiString: query.Field[models.MultiString]{
 		Field:     "MultiString",
 		ModelType: productType,
 	},
-	NullBool: query.FieldIdentifier[bool]{
+	NullBool: query.Field[bool]{
 		Field:     "NullBool",
 		ModelType: productType,
 	},
-	NullFloat: query.FieldIdentifier[float64]{
+	NullFloat: query.Field[float64]{
 		Field:     "NullFloat",
 		ModelType: productType,
 	},
-	String: query.FieldIdentifier[string]{
+	String: query.Field[string]{
 		Column:    "string_something_else",
 		Field:     "String",
 		ModelType: productType,
 	},
-	ToBeEmbeddedEmbeddedInt: query.FieldIdentifier[int]{
+	ToBeEmbeddedEmbeddedInt: query.Field[int]{
 		Field:     "EmbeddedInt",
 		ModelType: productType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: productType,
 	},

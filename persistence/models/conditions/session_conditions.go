@@ -33,36 +33,36 @@ func (sessionConditions sessionConditions) ExpiresAtIs() orm.FieldIs[models.Sess
 }
 
 type sessionConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	UserID    query.FieldIdentifier[model.UUID]
-	ExpiresAt query.FieldIdentifier[time.Time]
+	ID        query.Field[model.UUID]
+	CreatedAt query.Field[time.Time]
+	UpdatedAt query.Field[time.Time]
+	DeletedAt query.Field[time.Time]
+	UserID    query.Field[model.UUID]
+	ExpiresAt query.Field[time.Time]
 }
 
 var Session = sessionConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: sessionType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: sessionType,
 	},
-	ExpiresAt: query.FieldIdentifier[time.Time]{
+	ExpiresAt: query.Field[time.Time]{
 		Field:     "ExpiresAt",
 		ModelType: sessionType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: sessionType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: sessionType,
 	},
-	UserID: query.FieldIdentifier[model.UUID]{
+	UserID: query.Field[model.UUID]{
 		Field:     "UserID",
 		ModelType: sessionType,
 	},

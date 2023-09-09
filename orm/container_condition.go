@@ -1,8 +1,7 @@
-package condition
+package orm
 
 import (
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/orm/sql"
 )
 
@@ -18,11 +17,11 @@ func (condition containerCondition[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (condition containerCondition[T]) ApplyTo(query *query.GormQuery, table query.Table) error {
+func (condition containerCondition[T]) ApplyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }
 
-func (condition containerCondition[T]) GetSQL(query *query.GormQuery, table query.Table) (string, []any, error) {
+func (condition containerCondition[T]) GetSQL(query *GormQuery, table Table) (string, []any, error) {
 	sqlString, values, err := condition.ConnectionCondition.GetSQL(query, table)
 	if err != nil {
 		return "", nil, err

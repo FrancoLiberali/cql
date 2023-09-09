@@ -1,4 +1,4 @@
-package condition
+package orm
 
 import (
 	"fmt"
@@ -7,7 +7,6 @@ import (
 	"gorm.io/gorm/clause"
 
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/query"
 )
 
 // Condition that joins T with any other model
@@ -76,7 +75,7 @@ func (condition joinConditionImpl[T1, T2]) makesFilter() bool {
 // Applies a join between the tables of T1 and T2
 // previousTableName is the name of the table of T1
 // It also applies the nested conditions
-func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.GormQuery, t1Table query.Table) error {
+func (condition joinConditionImpl[T1, T2]) ApplyTo(query *GormQuery, t1Table Table) error {
 	whereConditions, joinConditions, t2PreloadCondition := divideConditionsByType(condition.Conditions)
 
 	// get the sql to do the join with T2
@@ -122,7 +121,7 @@ func (condition joinConditionImpl[T1, T2]) ApplyTo(query *query.GormQuery, t1Tab
 }
 
 // Adds the join between t1Table and t2Table to the query and the whereConditions in the "ON"
-func (condition joinConditionImpl[T1, T2]) addJoin(query *query.GormQuery, t1Table, t2Table query.Table, whereConditions []WhereCondition[T2]) error {
+func (condition joinConditionImpl[T1, T2]) addJoin(query *GormQuery, t1Table, t2Table Table, whereConditions []WhereCondition[T2]) error {
 	joinQuery := condition.getSQLJoin(
 		query,
 		t1Table,
@@ -167,9 +166,9 @@ func (condition joinConditionImpl[T1, T2]) addJoin(query *query.GormQuery, t1Tab
 // taking into account that the ID attribute necessary to do it
 // can be either in T1's or T2's table.
 func (condition joinConditionImpl[T1, T2]) getSQLJoin(
-	query *query.GormQuery,
-	t1Table query.Table,
-	t2Table query.Table,
+	query *GormQuery,
+	t1Table Table,
+	t2Table Table,
 ) string {
 	return fmt.Sprintf(
 		`%[1]s %[2]s ON %[2]s.%[3]s = %[4]s.%[5]s

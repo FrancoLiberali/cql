@@ -65,6 +65,8 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
+// TODO agregar comentario de que los de los dialectors se pueden sacar cuando se mergeen los prs
+// gorm por el contrario no porque el de los joins no se va a hacer pr porque es muy dificil hacer que ande en todos los casos
 replace gorm.io/driver/postgres v1.5.2 => github.com/ditrit/postgres v0.0.0-20230906140800-b3d5f9d4b6ad
 
 replace gorm.io/driver/sqlite v1.5.2 => github.com/ditrit/sqlite v0.0.0-20230906140046-2f37a3f972de

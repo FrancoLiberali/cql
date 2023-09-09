@@ -13,7 +13,7 @@ import (
 	"gorm.io/gorm"
 
 	repositoryMocks "github.com/ditrit/badaas/mocks/persistence/repository"
-	badaasORMErrors "github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/models/dto"
@@ -132,7 +132,7 @@ func TestGetUserNoUserFound(t *testing.T) {
 		"FindOne", gormDB, mock.Anything,
 	).Return(
 		&models.User{},
-		badaasORMErrors.ErrObjectNotFound,
+		orm.ErrObjectNotFound,
 	)
 
 	userFound, err := userService.GetUser(dto.UserLoginDTO{Email: "bobnotfound@email.com", Password: "1234"})

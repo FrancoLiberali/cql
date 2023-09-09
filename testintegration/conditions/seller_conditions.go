@@ -48,41 +48,41 @@ func (sellerConditions sellerConditions) UniversityIdIs() orm.FieldIs[models.Sel
 }
 
 type sellerConditions struct {
-	ID           query.FieldIdentifier[model.UUID]
-	CreatedAt    query.FieldIdentifier[time.Time]
-	UpdatedAt    query.FieldIdentifier[time.Time]
-	DeletedAt    query.FieldIdentifier[time.Time]
-	Name         query.FieldIdentifier[string]
-	CompanyID    query.FieldIdentifier[model.UUID]
-	UniversityID query.FieldIdentifier[model.UUID]
+	ID           query.Field[model.UUID]
+	CreatedAt    query.Field[time.Time]
+	UpdatedAt    query.Field[time.Time]
+	DeletedAt    query.Field[time.Time]
+	Name         query.Field[string]
+	CompanyID    query.Field[model.UUID]
+	UniversityID query.Field[model.UUID]
 }
 
 var Seller = sellerConditions{
-	CompanyID: query.FieldIdentifier[model.UUID]{
+	CompanyID: query.Field[model.UUID]{
 		Field:     "CompanyID",
 		ModelType: sellerType,
 	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
+	CreatedAt: query.Field[time.Time]{
 		Field:     "CreatedAt",
 		ModelType: sellerType,
 	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
+	DeletedAt: query.Field[time.Time]{
 		Field:     "DeletedAt",
 		ModelType: sellerType,
 	},
-	ID: query.FieldIdentifier[model.UUID]{
+	ID: query.Field[model.UUID]{
 		Field:     "ID",
 		ModelType: sellerType,
 	},
-	Name: query.FieldIdentifier[string]{
+	Name: query.Field[string]{
 		Field:     "Name",
 		ModelType: sellerType,
 	},
-	UniversityID: query.FieldIdentifier[model.UUID]{
+	UniversityID: query.Field[model.UUID]{
 		Field:     "UniversityID",
 		ModelType: sellerType,
 	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
+	UpdatedAt: query.Field[time.Time]{
 		Field:     "UpdatedAt",
 		ModelType: sellerType,
 	},

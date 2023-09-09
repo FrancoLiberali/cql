@@ -1,4 +1,4 @@
-package operator
+package orm
 
 import (
 	"github.com/ditrit/badaas/orm/sql"
@@ -13,33 +13,33 @@ import (
 
 // EqualTo
 // IsNotDistinct must be used in cases where value can be NULL
-func Eq[T any](value T) Operator[T] {
+func Eq[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.Eq, value)
 }
 
 // NotEqualTo
 // IsDistinct must be used in cases where value can be NULL
-func NotEq[T any](value T) Operator[T] {
+func NotEq[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.NotEq, value)
 }
 
 // LessThan
-func Lt[T any](value T) Operator[T] {
+func Lt[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.Lt, value)
 }
 
 // LessThanOrEqualTo
-func LtOrEq[T any](value T) Operator[T] {
+func LtOrEq[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.LtOrEq, value)
 }
 
 // GreaterThan
-func Gt[T any](value T) Operator[T] {
+func Gt[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.Gt, value)
 }
 
 // GreaterThanOrEqualTo
-func GtOrEq[T any](value T) Operator[T] {
+func GtOrEq[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.GtOrEq, value)
 }
 
@@ -51,16 +51,16 @@ func GtOrEq[T any](value T) Operator[T] {
 // - SQLite: https://www.sqlite.org/lang_expr.html
 
 // Equivalent to v1 < value < v2
-func Between[T any](v1 T, v2 T) Operator[T] {
-	return newBetweenOperator(sql.Between, v1, v2)
+func Between[T any](v1, v2 any) Operator[T] {
+	return newBetweenOperator[T](sql.Between, v1, v2)
 }
 
 // Equivalent to NOT (v1 < value < v2)
-func NotBetween[T any](v1 T, v2 T) Operator[T] {
-	return newBetweenOperator(sql.NotBetween, v1, v2)
+func NotBetween[T any](v1, v2 any) Operator[T] {
+	return newBetweenOperator[T](sql.NotBetween, v1, v2)
 }
 
-func newBetweenOperator[T any](sqlOperator sql.Operator, v1 T, v2 T) Operator[T] {
+func newBetweenOperator[T any](sqlOperator sql.Operator, v1, v2 any) Operator[T] {
 	operator := NewValueOperator[T](sqlOperator, v1)
 	return operator.AddOperation(sql.And, v2)
 }
@@ -106,12 +106,12 @@ func IsNotUnknown() Operator[bool] {
 }
 
 // Not supported by: mysql
-func IsDistinct[T any](value T) Operator[T] {
+func IsDistinct[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.IsDistinct, value)
 }
 
 // Not supported by: mysql
-func IsNotDistinct[T any](value T) Operator[T] {
+func IsNotDistinct[T any](value any) Operator[T] {
 	return NewValueOperator[T](sql.IsNotDistinct, value)
 }
 
