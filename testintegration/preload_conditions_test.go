@@ -8,7 +8,9 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/model"
+	"github.com/ditrit/badaas/orm/preload"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 	"github.com/ditrit/badaas/utils"
@@ -33,7 +35,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadReturnsErrorOnGetRelation(
 	seller := ts.createSeller("franco", nil)
 	sale := ts.createSale(0, product, seller)
 
-	entities, err := orm.NewQuery[models.Sale](ts.db).Find()
+	entities, err := orm.Query[models.Sale](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{sale}, entities)
@@ -42,18 +44,18 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadReturnsErrorOnGetRelation(
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)       // is nil but we cant determine why directly (not loaded or really null)
 	_, err = saleLoaded.GetSeller() // GetSeller give us that information
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyNull() {
 	product := ts.createProduct("a_string", 1, 0.0, false, nil)
 	sale := ts.createSale(10, product, nil)
 
-	entities, err := orm.NewQuery[models.Sale](ts.db).Find()
+	entities, err := orm.Query[models.Sale](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{sale}, entities)
@@ -62,7 +64,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyN
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)                 // is nil but we cant determine why directly (not loaded or really null)
 	saleSeller, err := saleLoaded.GetSeller() // GetSeller give us that information
@@ -79,7 +81,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 	withSeller := ts.createSale(0, product1, seller1)
 	withoutSeller := ts.createSale(0, product2, nil)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.PreloadSeller(),
 	).Find()
@@ -107,7 +109,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadNullableAtSecondLevel() {
 	sale1 := ts.createSale(0, product1, withoutCompany)
 	sale2 := ts.createSale(0, product2, withCompany)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.PreloadCompany(),
@@ -148,7 +150,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadAtSecondLevelWorksWithManual
 	sale1 := ts.createSale(0, product1, withoutCompany)
 	sale2 := ts.createSale(0, product2, withCompany)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Preload(),
@@ -190,7 +192,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 	sale1 := ts.createSale(0, product1, withoutCompany)
 	sale2 := ts.createSale(0, product2, withCompany)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.PreloadSeller(),
 	).Find()
@@ -205,7 +207,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 		// the not null one is not loaded
 		sellerCompany, err := saleSeller.GetCompany()
-		return errors.Is(err, orm.ErrRelationNotLoaded) && sellerCompany == nil
+		return errors.Is(err, preload.ErrRelationNotLoaded) && sellerCompany == nil
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
 		saleSeller, err := sale.GetSeller()
@@ -228,7 +230,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 	withSeller := ts.createSale(0, product1, seller1)
 	withoutSeller := ts.createSale(0, product2, nil)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.PreloadCompany(),
@@ -262,7 +264,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadUIntModel() {
 	phone1 := ts.createPhone("pixel", *brand1)
 	phone2 := ts.createPhone("iphone", *brand2)
 
-	entities, err := orm.NewQuery[models.Phone](
+	entities, err := orm.Query[models.Phone](
 		ts.db,
 		conditions.Phone.PreloadBrand(),
 	).Find()
@@ -291,7 +293,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithWhereConditionFilters() 
 	match := ts.createSale(0, product1, nil)
 	ts.createSale(0, product2, nil)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Preload(),
@@ -320,7 +322,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOne() {
 	country1 := ts.createCountry("Argentina", capital1)
 	country2 := ts.createCountry("France", capital2)
 
-	entities, err := orm.NewQuery[models.City](
+	entities, err := orm.Query[models.City](
 		ts.db,
 		conditions.City.PreloadCountry(),
 	).Find()
@@ -352,12 +354,12 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadOneToOne() {
 
 	ts.createCountry("Argentina", capital1)
 
-	entities, err := orm.NewQuery[models.City](ts.db).Find()
+	entities, err := orm.Query[models.City](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
 	_, err = entities[0].GetCountry()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
@@ -371,7 +373,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
 	country1 := ts.createCountry("Argentina", capital1)
 	country2 := ts.createCountry("France", capital2)
 
-	entities, err := orm.NewQuery[models.Country](
+	entities, err := orm.Query[models.Country](
 		ts.db,
 		conditions.Country.PreloadCapital(),
 	).Find()
@@ -395,7 +397,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadHasManyReversed() {
 	seller1 := ts.createSeller("franco", company1)
 	seller2 := ts.createSeller("agustin", company2)
 
-	entities, err := orm.NewQuery[models.Seller](
+	entities, err := orm.Query[models.Seller](
 		ts.db,
 		conditions.Seller.PreloadCompany(),
 	).Find()
@@ -420,7 +422,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferential() {
 	employee1 := ts.createEmployee("franco", boss1)
 	employee2 := ts.createEmployee("pierre", nil)
 
-	entities, err := orm.NewQuery[models.Employee](
+	entities, err := orm.Query[models.Employee](
 		ts.db,
 		conditions.Employee.PreloadBoss(),
 	).Find()
@@ -448,7 +450,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel
 	}
 	employee := ts.createEmployee("franco", boss)
 
-	entities, err := orm.NewQuery[models.Employee](
+	entities, err := orm.Query[models.Employee](
 		ts.db,
 		conditions.Employee.Boss(
 			conditions.Employee.Boss(
@@ -482,7 +484,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 	ts.createSale(0, product1, seller2)
 	ts.createSale(0, product2, seller1)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Preload(),
@@ -522,7 +524,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithoutCond
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Child](
+	entities, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.PreloadParent1(),
 		conditions.Child.PreloadParent2(),
@@ -556,7 +558,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadRelations() {
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Child](
+	entities, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.PreloadRelations()...,
 	).Find()
@@ -589,7 +591,7 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithoutC
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Child](
+	entities, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.Preload(),
@@ -643,7 +645,7 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCond
 	err = ts.db.Create(child2).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Child](
+	entities, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.Preload(),
@@ -682,7 +684,7 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadDiamond(
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Child](
+	entities, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.PreloadParentParent(),
@@ -716,7 +718,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadCollection() {
 	seller1 := ts.createSeller("1", company)
 	seller2 := ts.createSeller("2", company)
 
-	entities, err := orm.NewQuery[models.Company](
+	entities, err := orm.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(),
 	).Find()
@@ -731,7 +733,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadCollection() {
 func (ts *PreloadConditionsIntTestSuite) TestPreloadEmptyCollection() {
 	company := ts.createCompany("ditrit")
 
-	entities, err := orm.NewQuery[models.Company](
+	entities, err := orm.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(),
 	).Find()
@@ -746,12 +748,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadEmptyCollection() {
 func (ts *PreloadConditionsIntTestSuite) TestNoPreloadCollection() {
 	company := ts.createCompany("ditrit")
 
-	entities, err := orm.NewQuery[models.Company](ts.db).Find()
+	entities, err := orm.Query[models.Company](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
 	_, err = entities[0].GetSellers()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
@@ -769,7 +771,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
 	err = ts.db.Save(seller2).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Company](
+	entities, err := orm.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(
 			conditions.Seller.PreloadUniversity(),
@@ -818,7 +820,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 	err = ts.db.Save(seller4).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Company](
+	entities, err := orm.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(
 			conditions.Seller.PreloadUniversity(),
@@ -865,7 +867,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithFiltersReturnsError() {
-	_, err := orm.NewQuery[models.Company](
+	_, err := orm.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(
 			conditions.Seller.University(
@@ -874,17 +876,17 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 			),
 		),
 	).Find()
-	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, cql.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithoutPreloadReturnsError() {
-	_, err := orm.NewQuery[models.Company](
+	_, err := orm.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(
 			conditions.Seller.University(),
 		),
 	).Find()
-	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, cql.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }

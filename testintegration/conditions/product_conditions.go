@@ -2,55 +2,55 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"time"
 )
 
 type productConditions struct {
-	ID                      orm.Field[models.Product, model.UUID]
-	CreatedAt               orm.Field[models.Product, time.Time]
-	UpdatedAt               orm.Field[models.Product, time.Time]
-	DeletedAt               orm.Field[models.Product, time.Time]
-	String                  orm.StringField[models.Product]
-	Int                     orm.Field[models.Product, int]
-	IntPointer              orm.Field[models.Product, int]
-	Float                   orm.Field[models.Product, float64]
-	NullFloat               orm.Field[models.Product, float64]
-	Bool                    orm.BoolField[models.Product]
-	NullBool                orm.BoolField[models.Product]
-	ByteArray               orm.Field[models.Product, []uint8]
-	MultiString             orm.Field[models.Product, models.MultiString]
-	ToBeEmbeddedEmbeddedInt orm.Field[models.Product, int]
-	GormEmbeddedInt         orm.Field[models.Product, int]
+	ID                      cql.Field[models.Product, model.UUID]
+	CreatedAt               cql.Field[models.Product, time.Time]
+	UpdatedAt               cql.Field[models.Product, time.Time]
+	DeletedAt               cql.Field[models.Product, time.Time]
+	String                  cql.StringField[models.Product]
+	Int                     cql.Field[models.Product, int]
+	IntPointer              cql.Field[models.Product, int]
+	Float                   cql.Field[models.Product, float64]
+	NullFloat               cql.Field[models.Product, float64]
+	Bool                    cql.BoolField[models.Product]
+	NullBool                cql.BoolField[models.Product]
+	ByteArray               cql.Field[models.Product, []uint8]
+	MultiString             cql.Field[models.Product, models.MultiString]
+	ToBeEmbeddedEmbeddedInt cql.Field[models.Product, int]
+	GormEmbeddedInt         cql.Field[models.Product, int]
 }
 
 var Product = productConditions{
-	Bool:      orm.BoolField[models.Product]{Field: orm.Field[models.Product, bool]{Name: "Bool"}},
-	ByteArray: orm.Field[models.Product, []uint8]{Name: "ByteArray"},
-	CreatedAt: orm.Field[models.Product, time.Time]{Name: "CreatedAt"},
-	DeletedAt: orm.Field[models.Product, time.Time]{Name: "DeletedAt"},
-	Float:     orm.Field[models.Product, float64]{Name: "Float"},
-	GormEmbeddedInt: orm.Field[models.Product, int]{
+	Bool:      cql.BoolField[models.Product]{Field: cql.Field[models.Product, bool]{Name: "Bool"}},
+	ByteArray: cql.Field[models.Product, []uint8]{Name: "ByteArray"},
+	CreatedAt: cql.Field[models.Product, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.Product, time.Time]{Name: "DeletedAt"},
+	Float:     cql.Field[models.Product, float64]{Name: "Float"},
+	GormEmbeddedInt: cql.Field[models.Product, int]{
 		ColumnPrefix: "gorm_embedded_",
 		Name:         "Int",
 	},
-	ID:          orm.Field[models.Product, model.UUID]{Name: "ID"},
-	Int:         orm.Field[models.Product, int]{Name: "Int"},
-	IntPointer:  orm.Field[models.Product, int]{Name: "IntPointer"},
-	MultiString: orm.Field[models.Product, models.MultiString]{Name: "MultiString"},
-	NullBool:    orm.BoolField[models.Product]{Field: orm.Field[models.Product, bool]{Name: "NullBool"}},
-	NullFloat:   orm.Field[models.Product, float64]{Name: "NullFloat"},
-	String: orm.StringField[models.Product]{Field: orm.Field[models.Product, string]{
+	ID:          cql.Field[models.Product, model.UUID]{Name: "ID"},
+	Int:         cql.Field[models.Product, int]{Name: "Int"},
+	IntPointer:  cql.Field[models.Product, int]{Name: "IntPointer"},
+	MultiString: cql.Field[models.Product, models.MultiString]{Name: "MultiString"},
+	NullBool:    cql.BoolField[models.Product]{Field: cql.Field[models.Product, bool]{Name: "NullBool"}},
+	NullFloat:   cql.Field[models.Product, float64]{Name: "NullFloat"},
+	String: cql.StringField[models.Product]{Field: cql.Field[models.Product, string]{
 		Column: "string_something_else",
 		Name:   "String",
 	}},
-	ToBeEmbeddedEmbeddedInt: orm.Field[models.Product, int]{Name: "EmbeddedInt"},
-	UpdatedAt:               orm.Field[models.Product, time.Time]{Name: "UpdatedAt"},
+	ToBeEmbeddedEmbeddedInt: cql.Field[models.Product, int]{Name: "EmbeddedInt"},
+	UpdatedAt:               cql.Field[models.Product, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Product when doing a query
-func (productConditions productConditions) Preload() orm.Condition[models.Product] {
-	return orm.NewPreloadCondition[models.Product](productConditions.ID, productConditions.CreatedAt, productConditions.UpdatedAt, productConditions.DeletedAt, productConditions.String, productConditions.Int, productConditions.IntPointer, productConditions.Float, productConditions.NullFloat, productConditions.Bool, productConditions.NullBool, productConditions.ByteArray, productConditions.MultiString, productConditions.ToBeEmbeddedEmbeddedInt, productConditions.GormEmbeddedInt)
+func (productConditions productConditions) Preload() cql.Condition[models.Product] {
+	return cql.NewPreloadCondition[models.Product](productConditions.ID, productConditions.CreatedAt, productConditions.UpdatedAt, productConditions.DeletedAt, productConditions.String, productConditions.Int, productConditions.IntPointer, productConditions.Float, productConditions.NullFloat, productConditions.Bool, productConditions.NullBool, productConditions.ByteArray, productConditions.MultiString, productConditions.ToBeEmbeddedEmbeddedInt, productConditions.GormEmbeddedInt)
 }

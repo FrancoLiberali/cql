@@ -6,6 +6,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/mysql"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
@@ -27,7 +28,7 @@ func NewWhereConditionsIntTestSuite(
 }
 
 func (ts *WhereConditionsIntTestSuite) TestQueryReturnsEmptyIfNotEntitiesCreated() {
-	entities, err := orm.NewQuery[models.Product](ts.db).Find()
+	entities, err := orm.Query[models.Product](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{}, entities)
@@ -36,7 +37,7 @@ func (ts *WhereConditionsIntTestSuite) TestQueryReturnsEmptyIfNotEntitiesCreated
 func (ts *WhereConditionsIntTestSuite) TestQueryReturnsTheOnlyOneIfOneEntityCreated() {
 	match := ts.createProduct("", 0, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](ts.db).Find()
+	entities, err := orm.Query[models.Product](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
@@ -47,14 +48,14 @@ func (ts *WhereConditionsIntTestSuite) TestQueryReturnsTheListWhenMultipleCreate
 	match2 := ts.createProduct("", 0, 0, false, nil)
 	match3 := ts.createProduct("", 0, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](ts.db).Find()
+	entities, err := orm.Query[models.Product](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
 }
 
 func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsEmptyIfNotEntitiesCreated() {
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.String.Is().Eq("not_created"),
 	).Find()
@@ -66,7 +67,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsEmptyIfNotEntitiesCr
 func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsEmptyIfNothingMatch() {
 	ts.createProduct("something_else", 0, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.String.Is().Eq("not_match"),
 	).Find()
@@ -79,7 +80,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsOneIfOnlyOneMatch() 
 	match := ts.createProduct("match", 0, 0, false, nil)
 	ts.createProduct("not_match", 0, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.String.Is().Eq("match"),
 	).Find()
@@ -93,7 +94,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsMultipleIfMultipleMa
 	match2 := ts.createProduct("match", 0, 0, false, nil)
 	ts.createProduct("not_match", 0, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.String.Is().Eq("match"),
 	).Find()
@@ -106,7 +107,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfIntType() {
 	match := ts.createProduct("match", 1, 0, false, nil)
 	ts.createProduct("not_match", 2, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Find()
@@ -119,7 +120,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfFloatType() {
 	match := ts.createProduct("match", 0, 1.1, false, nil)
 	ts.createProduct("not_match", 0, 2.2, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Float.Is().Eq(1.1),
 	).Find()
@@ -132,7 +133,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfBoolType() {
 	match := ts.createProduct("match", 0, 0.0, true, nil)
 	ts.createProduct("not_match", 0, 0.0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Bool.Is().True(),
 	).Find()
@@ -148,7 +149,7 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsOfDifferentTypesWor
 	ts.createProduct("not_match", 1, 0.0, true, nil)
 	ts.createProduct("match", 2, 0.0, true, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.String.Is().Eq("match"),
 		conditions.Product.Int.Is().Eq(1),
@@ -163,7 +164,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfID() {
 	match := ts.createProduct("", 0, 0.0, false, nil)
 	ts.createProduct("", 0, 0.0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.ID.Is().Eq(match.ID),
 	).Find()
@@ -176,7 +177,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfCreatedAt() {
 	match := ts.createProduct("", 0, 0.0, false, nil)
 	ts.createProduct("", 0, 0.0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.CreatedAt.Is().Eq(match.CreatedAt),
 	).Find()
@@ -191,7 +192,7 @@ func (ts *WhereConditionsIntTestSuite) TestDeletedAtConditionIsAddedAutomaticall
 
 	ts.Nil(ts.db.Delete(deleted).Error)
 
-	entities, err := orm.NewQuery[models.Product](ts.db).Find()
+	entities, err := orm.Query[models.Product](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match}, entities)
@@ -203,7 +204,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfDeletedAt() {
 
 	ts.Nil(ts.db.Delete(match).Error)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.DeletedAt.Is().Eq(match.DeletedAt.Time),
 	).Find()
@@ -221,7 +222,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfEmbedded() {
 	err := ts.db.Save(match).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.ToBeEmbeddedEmbeddedInt.Is().Eq(1),
 	).Find()
@@ -239,7 +240,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfGormEmbedded() {
 	err := ts.db.Save(match).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.GormEmbeddedInt.Is().Eq(1),
 	).Find()
@@ -255,7 +256,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfPointerTypeWithValue() {
 	ts.createProduct("not_match", 2, 0, false, &intNotMatch)
 	ts.createProduct("not_match", 2, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.IntPointer.Is().Eq(1),
 	).Find()
@@ -278,7 +279,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfByteArrayWithContent() {
 	err = ts.db.Save(notMatch1).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.ByteArray.Is().Eq([]byte{1, 2}),
 	).Find()
@@ -301,7 +302,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfByteArrayEmpty() {
 	err = ts.db.Save(notMatch1).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.ByteArray.Is().Eq([]byte{}),
 	).Find()
@@ -324,7 +325,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfCustomType() {
 	err = ts.db.Save(notMatch1).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.MultiString.Is().Eq(models.MultiString{"salut", "hola"}),
 	).Find()
@@ -343,7 +344,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationType() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.ProductID.Is().Eq(product1.ID),
 	).Find()
@@ -362,7 +363,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationTypeOptionalWithVa
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.SellerID.Is().Eq(seller1.ID),
 	).Find()
@@ -380,7 +381,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationTypeOptionalByNil(
 	match := ts.createSale(0, product1, nil)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.SellerID.Is().Null(),
 	).Find()
@@ -393,7 +394,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsOnUIntModel() {
 	match := ts.createBrand("match")
 	ts.createBrand("not_match")
 
-	entities, err := orm.NewQuery[models.Brand](
+	entities, err := orm.Query[models.Brand](
 		ts.db,
 		conditions.Brand.Name.Is().Eq("match"),
 	).Find()
@@ -408,7 +409,7 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsAreConnectedByAnd()
 	ts.createProduct("not_match", 1, 0, false, nil)
 	ts.createProduct("not_match", 2, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().GtOrEq(3),
 		conditions.Product.Int.Is().LtOrEq(4),
@@ -426,7 +427,7 @@ func (ts *WhereConditionsIntTestSuite) TestNot() {
 	ts.createProduct("not_match", 2, 0, false, nil)
 	ts.createProduct("not_match", 2, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		orm.Not(conditions.Product.Int.Is().Eq(2)),
 	).Find()
@@ -442,7 +443,7 @@ func (ts *WhereConditionsIntTestSuite) TestNotWithMultipleConditionsAreConnected
 	ts.createProduct("not_match", 2, 0, false, nil)
 	ts.createProduct("not_match", 3, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		orm.Not(
 			conditions.Product.Int.Is().Gt(1),
@@ -462,7 +463,7 @@ func (ts *WhereConditionsIntTestSuite) TestOr() {
 	ts.createProduct("not_match", 1, 0, false, nil)
 	ts.createProduct("not_match", 4, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		orm.Or(
 			conditions.Product.Int.Is().Eq(2),
@@ -483,7 +484,7 @@ func (ts *WhereConditionsIntTestSuite) TestNotOr() {
 	ts.createProduct("not_match", 2, 0, false, nil)
 	ts.createProduct("not_match_string", 3, 0, false, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		orm.Not[models.Product](
 			orm.Or(
@@ -499,16 +500,16 @@ func (ts *WhereConditionsIntTestSuite) TestNotOr() {
 
 func (ts *WhereConditionsIntTestSuite) TestXor() {
 	switch getDBDialector() {
-	case orm.Postgres, orm.SQLite, orm.SQLServer:
+	case cql.Postgres, cql.SQLite, cql.SQLServer:
 		log.Println("Xor not compatible")
-	case orm.MySQL:
+	case cql.MySQL:
 		match1 := ts.createProduct("", 1, 0, false, nil)
 		match2 := ts.createProduct("", 7, 0, false, nil)
 
 		ts.createProduct("", 5, 0, false, nil)
 		ts.createProduct("", 4, 0, false, nil)
 
-		entities, err := orm.NewQuery[models.Product](
+		entities, err := orm.Query[models.Product](
 			ts.db,
 			mysql.Xor(
 				conditions.Product.Int.Is().Lt(6),
@@ -528,7 +529,7 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsDifferentOperators(
 	ts.createProduct("not_match", 1, 0.0, true, nil)
 	ts.createProduct("match", 2, 0.0, true, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.String.Is().Eq("match"),
 		conditions.Product.Int.Is().Lt(2),
@@ -545,7 +546,7 @@ func (ts *WhereConditionsIntTestSuite) TestUnsafeCondition() {
 
 	ts.createProduct("not_match", 2, 0.0, true, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		unsafe.NewCondition[models.Product]("%s.int = ?", 1),
 	).Find()
@@ -558,7 +559,7 @@ func (ts *WhereConditionsIntTestSuite) TestEmptyConnectionConditionMakesNothing(
 	match1 := ts.createProduct("match", 1, 0.0, true, nil)
 	match2 := ts.createProduct("match", 1, 0.0, true, nil)
 
-	entities, err := orm.NewQuery[models.Product](
+	entities, err := orm.Query[models.Product](
 		ts.db,
 		orm.And[models.Product](),
 	).Find()
@@ -568,9 +569,9 @@ func (ts *WhereConditionsIntTestSuite) TestEmptyConnectionConditionMakesNothing(
 }
 
 func (ts *WhereConditionsIntTestSuite) TestEmptyContainerConditionReturnsError() {
-	_, err := orm.NewQuery[models.Product](
+	_, err := orm.Query[models.Product](
 		ts.db,
 		orm.Not[models.Product](),
 	).Find()
-	ts.ErrorIs(err, orm.ErrEmptyConditions)
+	ts.ErrorIs(err, cql.ErrEmptyConditions)
 }

@@ -2,43 +2,43 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"time"
 )
 
-func (bicycleConditions bicycleConditions) Owner(conditions ...orm.Condition[models.Person]) orm.JoinCondition[models.Bicycle] {
-	return orm.NewJoinCondition[models.Bicycle, models.Person](conditions, "Owner", "OwnerName", bicycleConditions.Preload(), "Name")
+func (bicycleConditions bicycleConditions) Owner(conditions ...cql.Condition[models.Person]) cql.JoinCondition[models.Bicycle] {
+	return cql.NewJoinCondition[models.Bicycle, models.Person](conditions, "Owner", "OwnerName", bicycleConditions.Preload(), "Name")
 }
-func (bicycleConditions bicycleConditions) PreloadOwner() orm.JoinCondition[models.Bicycle] {
+func (bicycleConditions bicycleConditions) PreloadOwner() cql.JoinCondition[models.Bicycle] {
 	return bicycleConditions.Owner(Person.Preload())
 }
 
 type bicycleConditions struct {
-	ID        orm.Field[models.Bicycle, model.UUID]
-	CreatedAt orm.Field[models.Bicycle, time.Time]
-	UpdatedAt orm.Field[models.Bicycle, time.Time]
-	DeletedAt orm.Field[models.Bicycle, time.Time]
-	Name      orm.StringField[models.Bicycle]
-	OwnerName orm.StringField[models.Bicycle]
+	ID        cql.Field[models.Bicycle, model.UUID]
+	CreatedAt cql.Field[models.Bicycle, time.Time]
+	UpdatedAt cql.Field[models.Bicycle, time.Time]
+	DeletedAt cql.Field[models.Bicycle, time.Time]
+	Name      cql.StringField[models.Bicycle]
+	OwnerName cql.StringField[models.Bicycle]
 }
 
 var Bicycle = bicycleConditions{
-	CreatedAt: orm.Field[models.Bicycle, time.Time]{Name: "CreatedAt"},
-	DeletedAt: orm.Field[models.Bicycle, time.Time]{Name: "DeletedAt"},
-	ID:        orm.Field[models.Bicycle, model.UUID]{Name: "ID"},
-	Name:      orm.StringField[models.Bicycle]{Field: orm.Field[models.Bicycle, string]{Name: "Name"}},
-	OwnerName: orm.StringField[models.Bicycle]{Field: orm.Field[models.Bicycle, string]{Name: "OwnerName"}},
-	UpdatedAt: orm.Field[models.Bicycle, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: cql.Field[models.Bicycle, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.Bicycle, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[models.Bicycle, model.UUID]{Name: "ID"},
+	Name:      cql.StringField[models.Bicycle]{Field: cql.Field[models.Bicycle, string]{Name: "Name"}},
+	OwnerName: cql.StringField[models.Bicycle]{Field: cql.Field[models.Bicycle, string]{Name: "OwnerName"}},
+	UpdatedAt: cql.Field[models.Bicycle, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Bicycle when doing a query
-func (bicycleConditions bicycleConditions) Preload() orm.Condition[models.Bicycle] {
-	return orm.NewPreloadCondition[models.Bicycle](bicycleConditions.ID, bicycleConditions.CreatedAt, bicycleConditions.UpdatedAt, bicycleConditions.DeletedAt, bicycleConditions.Name, bicycleConditions.OwnerName)
+func (bicycleConditions bicycleConditions) Preload() cql.Condition[models.Bicycle] {
+	return cql.NewPreloadCondition[models.Bicycle](bicycleConditions.ID, bicycleConditions.CreatedAt, bicycleConditions.UpdatedAt, bicycleConditions.DeletedAt, bicycleConditions.Name, bicycleConditions.OwnerName)
 }
 
 // PreloadRelations allows preloading all the Bicycle's relation when doing a query
-func (bicycleConditions bicycleConditions) PreloadRelations() []orm.Condition[models.Bicycle] {
-	return []orm.Condition[models.Bicycle]{bicycleConditions.PreloadOwner()}
+func (bicycleConditions bicycleConditions) PreloadRelations() []cql.Condition[models.Bicycle] {
+	return []cql.Condition[models.Bicycle]{bicycleConditions.PreloadOwner()}
 }

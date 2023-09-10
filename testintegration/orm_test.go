@@ -15,6 +15,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/logger"
 	"github.com/ditrit/badaas/persistence/database"
 	"github.com/ditrit/badaas/persistence/gormfx"
@@ -78,13 +79,13 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case orm.Postgres:
+	case cql.Postgres:
 		dialector = postgres.Open(orm.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
-	case orm.SQLite:
+	case cql.SQLite:
 		dialector = sqlite.Open(orm.CreateSQLiteDSN(host))
-	case orm.MySQL:
+	case cql.MySQL:
 		dialector = mysql.Open(orm.CreateMySQLDSN(host, username, password, dbName, port))
-	case orm.SQLServer:
+	case cql.SQLServer:
 		dialector = sqlserver.Open(orm.CreateSQLServerDSN(host, username, password, dbName, port))
 	default:
 		return nil, fmt.Errorf("unknown db %s", getDBDialector())
@@ -97,6 +98,6 @@ func NewDBConnection() (*gorm.DB, error) {
 	)
 }
 
-func getDBDialector() orm.Dialector {
-	return orm.Dialector(os.Getenv(dbTypeEnvKey))
+func getDBDialector() cql.Dialector {
+	return cql.Dialector(os.Getenv(dbTypeEnvKey))
 }

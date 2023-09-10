@@ -2,41 +2,41 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"time"
 )
 
-func (countryConditions countryConditions) Capital(conditions ...orm.Condition[models.City]) orm.JoinCondition[models.Country] {
-	return orm.NewJoinCondition[models.Country, models.City](conditions, "Capital", "ID", countryConditions.Preload(), "CountryID")
+func (countryConditions countryConditions) Capital(conditions ...cql.Condition[models.City]) cql.JoinCondition[models.Country] {
+	return cql.NewJoinCondition[models.Country, models.City](conditions, "Capital", "ID", countryConditions.Preload(), "CountryID")
 }
-func (countryConditions countryConditions) PreloadCapital() orm.JoinCondition[models.Country] {
+func (countryConditions countryConditions) PreloadCapital() cql.JoinCondition[models.Country] {
 	return countryConditions.Capital(City.Preload())
 }
 
 type countryConditions struct {
-	ID        orm.Field[models.Country, model.UUID]
-	CreatedAt orm.Field[models.Country, time.Time]
-	UpdatedAt orm.Field[models.Country, time.Time]
-	DeletedAt orm.Field[models.Country, time.Time]
-	Name      orm.StringField[models.Country]
+	ID        cql.Field[models.Country, model.UUID]
+	CreatedAt cql.Field[models.Country, time.Time]
+	UpdatedAt cql.Field[models.Country, time.Time]
+	DeletedAt cql.Field[models.Country, time.Time]
+	Name      cql.StringField[models.Country]
 }
 
 var Country = countryConditions{
-	CreatedAt: orm.Field[models.Country, time.Time]{Name: "CreatedAt"},
-	DeletedAt: orm.Field[models.Country, time.Time]{Name: "DeletedAt"},
-	ID:        orm.Field[models.Country, model.UUID]{Name: "ID"},
-	Name:      orm.StringField[models.Country]{Field: orm.Field[models.Country, string]{Name: "Name"}},
-	UpdatedAt: orm.Field[models.Country, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: cql.Field[models.Country, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.Country, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[models.Country, model.UUID]{Name: "ID"},
+	Name:      cql.StringField[models.Country]{Field: cql.Field[models.Country, string]{Name: "Name"}},
+	UpdatedAt: cql.Field[models.Country, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Country when doing a query
-func (countryConditions countryConditions) Preload() orm.Condition[models.Country] {
-	return orm.NewPreloadCondition[models.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt, countryConditions.Name)
+func (countryConditions countryConditions) Preload() cql.Condition[models.Country] {
+	return cql.NewPreloadCondition[models.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt, countryConditions.Name)
 }
 
 // PreloadRelations allows preloading all the Country's relation when doing a query
-func (countryConditions countryConditions) PreloadRelations() []orm.Condition[models.Country] {
-	return []orm.Condition[models.Country]{countryConditions.PreloadCapital()}
+func (countryConditions countryConditions) PreloadRelations() []cql.Condition[models.Country] {
+	return []cql.Condition[models.Country]{countryConditions.PreloadCapital()}
 }

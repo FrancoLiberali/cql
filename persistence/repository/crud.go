@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/model"
 )
 
@@ -18,11 +19,11 @@ type CRUD[T model.Model, ID model.ID] interface {
 	GetByID(tx *gorm.DB, id ID) (*T, error)
 
 	// Get the list of models that match "conditions" inside transaction "tx"
-	Find(tx *gorm.DB, conditions ...orm.Condition[T]) ([]*T, error)
+	Find(tx *gorm.DB, conditions ...cql.Condition[T]) ([]*T, error)
 
 	// Get the only one model that match "conditions" inside transaction "tx"
 	// or returns error if 0 or more than 1 are found.
-	FindOne(tx *gorm.DB, conditions ...orm.Condition[T]) (*T, error)
+	FindOne(tx *gorm.DB, conditions ...cql.Condition[T]) (*T, error)
 
 	// Save model "model" inside transaction "tx"
 	Save(tx *gorm.DB, entity *T) error
@@ -69,12 +70,12 @@ func (repository *crudImpl[T, ID]) GetByID(tx *gorm.DB, id ID) (*T, error) {
 }
 
 // Get the list of models that match "conditions" inside transaction "tx"
-func (repository *crudImpl[T, ID]) Find(tx *gorm.DB, conditions ...orm.Condition[T]) ([]*T, error) {
-	return orm.NewQuery[T](tx, conditions...).Find()
+func (repository *crudImpl[T, ID]) Find(tx *gorm.DB, conditions ...cql.Condition[T]) ([]*T, error) {
+	return orm.Query[T](tx, conditions...).Find()
 }
 
 // Get the only one model that match "conditions" inside transaction "tx"
 // or returns error if 0 or more than 1 are found.
-func (repository *crudImpl[T, ID]) FindOne(tx *gorm.DB, conditions ...orm.Condition[T]) (*T, error) {
-	return orm.NewQuery[T](tx, conditions...).FindOne()
+func (repository *crudImpl[T, ID]) FindOne(tx *gorm.DB, conditions ...cql.Condition[T]) (*T, error) {
+	return orm.Query[T](tx, conditions...).FindOne()
 }

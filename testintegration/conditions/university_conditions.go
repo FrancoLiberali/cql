@@ -2,29 +2,29 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"time"
 )
 
 type universityConditions struct {
-	ID        orm.Field[models.University, model.UUID]
-	CreatedAt orm.Field[models.University, time.Time]
-	UpdatedAt orm.Field[models.University, time.Time]
-	DeletedAt orm.Field[models.University, time.Time]
-	Name      orm.StringField[models.University]
+	ID        cql.Field[models.University, model.UUID]
+	CreatedAt cql.Field[models.University, time.Time]
+	UpdatedAt cql.Field[models.University, time.Time]
+	DeletedAt cql.Field[models.University, time.Time]
+	Name      cql.StringField[models.University]
 }
 
 var University = universityConditions{
-	CreatedAt: orm.Field[models.University, time.Time]{Name: "CreatedAt"},
-	DeletedAt: orm.Field[models.University, time.Time]{Name: "DeletedAt"},
-	ID:        orm.Field[models.University, model.UUID]{Name: "ID"},
-	Name:      orm.StringField[models.University]{Field: orm.Field[models.University, string]{Name: "Name"}},
-	UpdatedAt: orm.Field[models.University, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: cql.Field[models.University, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.University, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[models.University, model.UUID]{Name: "ID"},
+	Name:      cql.StringField[models.University]{Field: cql.Field[models.University, string]{Name: "Name"}},
+	UpdatedAt: cql.Field[models.University, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the University when doing a query
-func (universityConditions universityConditions) Preload() orm.Condition[models.University] {
-	return orm.NewPreloadCondition[models.University](universityConditions.ID, universityConditions.CreatedAt, universityConditions.UpdatedAt, universityConditions.DeletedAt, universityConditions.Name)
+func (universityConditions universityConditions) Preload() cql.Condition[models.University] {
+	return cql.NewPreloadCondition[models.University](universityConditions.ID, universityConditions.CreatedAt, universityConditions.UpdatedAt, universityConditions.DeletedAt, universityConditions.Name)
 }

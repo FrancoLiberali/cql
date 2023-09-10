@@ -5,6 +5,7 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -34,7 +35,7 @@ func (ts *UpdateIntTestSuite) TearDownSuite() {
 func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
 	ts.createProduct("", 0, 0, false, nil)
 
-	updated, err := orm.NewUpdate[models.Product](
+	updated, err := orm.Update[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Set(
@@ -47,7 +48,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
 func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 	product := ts.createProduct("", 0, 0, false, nil)
 
-	updated, err := orm.NewUpdate[models.Product](
+	updated, err := orm.Update[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(0),
 	).Set(
@@ -56,7 +57,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	productReturned, err := orm.NewQuery[models.Product](
+	productReturned, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).FindOne()
@@ -71,7 +72,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 	product1 := ts.createProduct("1", 0, 0, false, nil)
 	product2 := ts.createProduct("2", 0, 0, false, nil)
 
-	updated, err := orm.NewUpdate[models.Product](
+	updated, err := orm.Update[models.Product](
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Set(
@@ -80,7 +81,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 	ts.Nil(err)
 	ts.Equal(int64(2), updated)
 
-	products, err := orm.NewQuery[models.Product](
+	products, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Find()
@@ -96,7 +97,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 	product := ts.createProduct("", 0, 0, false, nil)
 
-	updated, err := orm.NewUpdate[models.Product](
+	updated, err := orm.Update[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(0),
 	).Set(
@@ -106,7 +107,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	productReturned, err := orm.NewQuery[models.Product](
+	productReturned, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 		conditions.Product.Bool.Is().True(),
@@ -126,7 +127,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 	pixel := ts.createPhone("pixel", *brand1)
 	ts.createPhone("iphone", *brand2)
 
-	updated, err := orm.NewUpdate[models.Phone](
+	updated, err := orm.Update[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq("google"),
@@ -137,7 +138,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	pixel7, err := orm.NewQuery[models.Phone](
+	pixel7, err := orm.Query[models.Phone](
 		ts.db,
 		conditions.Phone.Name.Is().Eq("pixel 7"),
 	).FindOne()
@@ -160,7 +161,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() 
 	ts.createSale(0, product1, seller2)
 	ts.createSale(0, product2, seller1)
 
-	updated, err := orm.NewUpdate[models.Sale](
+	updated, err := orm.Update[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Int.Is().Eq(1),
@@ -174,7 +175,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() 
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	sale, err := orm.NewQuery[models.Sale](
+	sale, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Code.Is().Eq(1),
 	).FindOne()
@@ -198,7 +199,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	updated, err := orm.NewUpdate[models.Sale](
+	updated, err := orm.Update[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Name.Is().Eq("franco"),
@@ -212,7 +213,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	sale, err := orm.NewQuery[models.Sale](
+	sale, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Code.Is().Eq(1),
 	).FindOne()
@@ -230,7 +231,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	pixel := ts.createPhone("pixel", *google)
 	ts.createPhone("iphone", *apple)
 
-	updated, err := orm.NewUpdate[models.Phone](
+	updated, err := orm.Update[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq("google"),
@@ -242,7 +243,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	phoneReturned, err := orm.NewQuery[models.Phone](
+	phoneReturned, err := orm.Query[models.Phone](
 		ts.db,
 		conditions.Phone.Name.Is().Eq("google"),
 	).FindOne()
@@ -254,7 +255,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJoinedMoreThanOnce() {
-	_, err := orm.NewUpdate[models.Child](
+	_, err := orm.Update[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -266,7 +267,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJo
 		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name),
 	)
 
-	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; method: Set")
 }
 
@@ -278,7 +279,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
 	err := ts.db.Create(child).Error
 	ts.Nil(err)
 
-	updated, err := orm.NewUpdate[models.Child](
+	updated, err := orm.Update[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -292,7 +293,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	childReturned, err := orm.NewQuery[models.Child](
+	childReturned, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.Name.Is().Eq("franco"),
 	).FindOne()
@@ -306,7 +307,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
 func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 	product := ts.createProduct("", 0, 0, false, nil)
 
-	updated, err := orm.NewUpdate[models.Product](
+	updated, err := orm.Update[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(0),
 	).Set(
@@ -315,7 +316,7 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 	ts.Nil(err)
 	ts.Equal(int64(1), updated)
 
-	productReturned, err := orm.NewQuery[models.Product](
+	productReturned, err := orm.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).FindOne()
@@ -329,17 +330,17 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case orm.MySQL:
-		_, err := orm.NewUpdate[models.Phone](
+	case cql.MySQL:
+		_, err := orm.Update[models.Phone](
 			ts.db,
 		).Returning(nil).Set()
-		ts.ErrorIs(err, orm.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
-	case orm.Postgres, orm.SQLite, orm.SQLServer:
+	case cql.Postgres, cql.SQLite, cql.SQLServer:
 		product := ts.createProduct("", 0, 0, false, nil)
 
 		productsReturned := []models.Product{}
-		updated, err := orm.NewUpdate[models.Product](
+		updated, err := orm.Update[models.Product](
 			ts.db,
 			conditions.Product.Int.Is().Eq(0),
 		).Returning(&productsReturned).Set(
@@ -359,18 +360,18 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 	switch getDBDialector() {
 	// update returning with preload only supported for postgres
-	case orm.SQLite, orm.SQLServer:
+	case cql.SQLite, cql.SQLServer:
 		salesReturned := []models.Sale{}
-		_, err := orm.NewUpdate[models.Sale](
+		_, err := orm.Update[models.Sale](
 			ts.db,
 			conditions.Sale.Code.Is().Eq(0),
 			conditions.Sale.PreloadProduct(),
 		).Returning(&salesReturned).Set(
 			conditions.Sale.Code.Set().Eq(2),
 		)
-		ts.ErrorIs(err, orm.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database: sqlite; method: Returning")
-	case orm.Postgres:
+	case cql.Postgres:
 		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
 		product2 := ts.createProduct("", 2, 0.0, false, nil)
 
@@ -378,7 +379,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		ts.createSale(1, product2, nil)
 
 		salesReturned := []models.Sale{}
-		updated, err := orm.NewUpdate[models.Sale](
+		updated, err := orm.Update[models.Sale](
 			ts.db,
 			conditions.Sale.Code.Is().Eq(0),
 			conditions.Sale.PreloadProduct(),
@@ -401,7 +402,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 	// update returning with preloads only supported for postgres
-	if getDBDialector() != orm.Postgres {
+	if getDBDialector() != cql.Postgres {
 		return
 	}
 
@@ -417,7 +418,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 	ts.createSale(1, product2, withoutCompany)
 
 	salesReturned := []models.Sale{}
-	updated, err := orm.NewUpdate[models.Sale](
+	updated, err := orm.Update[models.Sale](
 		ts.db,
 		conditions.Sale.Code.Is().Eq(0),
 		conditions.Sale.Seller(
@@ -445,13 +446,13 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case orm.Postgres, orm.SQLite, orm.SQLServer:
+	case cql.Postgres, cql.SQLite, cql.SQLServer:
 		company := ts.createCompany("ditrit")
 		seller1 := ts.createSeller("1", company)
 		seller2 := ts.createSeller("2", company)
 
 		companiesReturned := []models.Company{}
-		updated, err := orm.NewUpdate[models.Company](
+		updated, err := orm.Update[models.Company](
 			ts.db,
 			conditions.Company.Name.Is().Eq("ditrit"),
 			conditions.Company.PreloadSellers(),
@@ -474,11 +475,11 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	// update join only supported for mysql
-	if getDBDialector() != orm.MySQL {
-		_, err := orm.NewUpdate[models.Phone](
+	if getDBDialector() != cql.MySQL {
+		_, err := orm.Update[models.Phone](
 			ts.db,
 		).SetMultiple()
-		ts.ErrorIs(err, orm.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: SetMultiple")
 	} else {
 		brand1 := ts.createBrand("google")
@@ -487,7 +488,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 		pixel := ts.createPhone("pixel", *brand1)
 		ts.createPhone("iphone", *brand2)
 
-		updated, err := orm.NewUpdate[models.Phone](
+		updated, err := orm.Update[models.Phone](
 			ts.db,
 			conditions.Phone.Brand(
 				conditions.Brand.Name.Is().Eq("google"),
@@ -499,7 +500,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 		ts.Nil(err)
 		ts.Equal(int64(2), updated)
 
-		pixel7, err := orm.NewQuery[models.Phone](
+		pixel7, err := orm.Query[models.Phone](
 			ts.db,
 			conditions.Phone.Name.Is().Eq("7"),
 		).FindOne()
@@ -509,7 +510,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 		ts.Equal("7", pixel7.Name)
 		ts.NotEqual(pixel.UpdatedAt.UnixMicro(), pixel7.UpdatedAt.UnixMicro())
 
-		googlePixel, err := orm.NewQuery[models.Brand](
+		googlePixel, err := orm.Query[models.Brand](
 			ts.db,
 			conditions.Brand.Name.Is().Eq("google pixel"),
 		).FindOne()
@@ -523,24 +524,24 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoined() {
 	// update join only supported for mysql
-	if getDBDialector() != orm.MySQL {
+	if getDBDialector() != cql.MySQL {
 		return
 	}
 
-	_, err := orm.NewUpdate[models.Phone](
+	_, err := orm.Update[models.Phone](
 		ts.db,
 	).SetMultiple(
 		conditions.Phone.Name.Set().Eq("7"),
 		conditions.Brand.Name.Set().Eq("google pixel"),
 	)
-	ts.ErrorIs(err, orm.ErrFieldModelNotConcerned)
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.Brand; method: Set")
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != orm.MySQL {
-		_, err := orm.NewUpdate[models.Product](
+	if getDBDialector() != cql.MySQL {
+		_, err := orm.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Ascending(
@@ -548,13 +549,13 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.ErrorIs(err, orm.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Ascending")
 	} else {
 		product1 := ts.createProduct("1", 0, 0, false, nil)
 		ts.createProduct("2", 0, 0, false, nil)
 
-		updated, err := orm.NewUpdate[models.Product](
+		updated, err := orm.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Ascending(
@@ -565,7 +566,7 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 		ts.Nil(err)
 		ts.Equal(int64(1), updated)
 
-		productReturned, err := orm.NewQuery[models.Product](
+		productReturned, err := orm.Query[models.Product](
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
 		).FindOne()
@@ -579,23 +580,23 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 
 func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != orm.MySQL {
-		_, err := orm.NewUpdate[models.Product](
+	if getDBDialector() != cql.MySQL {
+		_, err := orm.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.ErrorIs(err, orm.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Limit")
 	} else {
-		_, err := orm.NewUpdate[models.Product](
+		_, err := orm.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.ErrorIs(err, orm.ErrOrderByMustBeCalled)
+		ts.ErrorIs(err, cql.ErrOrderByMustBeCalled)
 		ts.ErrorContains(err, "method: Limit")
 	}
 }

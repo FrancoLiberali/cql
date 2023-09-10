@@ -2,33 +2,33 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
 	models "github.com/ditrit/badaas/persistence/models"
 	"time"
 )
 
 type userConditions struct {
-	ID        orm.Field[models.User, model.UUID]
-	CreatedAt orm.Field[models.User, time.Time]
-	UpdatedAt orm.Field[models.User, time.Time]
-	DeletedAt orm.Field[models.User, time.Time]
-	Username  orm.StringField[models.User]
-	Email     orm.StringField[models.User]
-	Password  orm.Field[models.User, []uint8]
+	ID        cql.Field[models.User, model.UUID]
+	CreatedAt cql.Field[models.User, time.Time]
+	UpdatedAt cql.Field[models.User, time.Time]
+	DeletedAt cql.Field[models.User, time.Time]
+	Username  cql.StringField[models.User]
+	Email     cql.StringField[models.User]
+	Password  cql.Field[models.User, []uint8]
 }
 
 var User = userConditions{
-	CreatedAt: orm.Field[models.User, time.Time]{Name: "CreatedAt"},
-	DeletedAt: orm.Field[models.User, time.Time]{Name: "DeletedAt"},
-	Email:     orm.StringField[models.User]{Field: orm.Field[models.User, string]{Name: "Email"}},
-	ID:        orm.Field[models.User, model.UUID]{Name: "ID"},
-	Password:  orm.Field[models.User, []uint8]{Name: "Password"},
-	UpdatedAt: orm.Field[models.User, time.Time]{Name: "UpdatedAt"},
-	Username:  orm.StringField[models.User]{Field: orm.Field[models.User, string]{Name: "Username"}},
+	CreatedAt: cql.Field[models.User, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.User, time.Time]{Name: "DeletedAt"},
+	Email:     cql.StringField[models.User]{Field: cql.Field[models.User, string]{Name: "Email"}},
+	ID:        cql.Field[models.User, model.UUID]{Name: "ID"},
+	Password:  cql.Field[models.User, []uint8]{Name: "Password"},
+	UpdatedAt: cql.Field[models.User, time.Time]{Name: "UpdatedAt"},
+	Username:  cql.StringField[models.User]{Field: cql.Field[models.User, string]{Name: "Username"}},
 }
 
 // Preload allows preloading the User when doing a query
-func (userConditions userConditions) Preload() orm.Condition[models.User] {
-	return orm.NewPreloadCondition[models.User](userConditions.ID, userConditions.CreatedAt, userConditions.UpdatedAt, userConditions.DeletedAt, userConditions.Username, userConditions.Email, userConditions.Password)
+func (userConditions userConditions) Preload() cql.Condition[models.User] {
+	return cql.NewPreloadCondition[models.User](userConditions.ID, userConditions.CreatedAt, userConditions.UpdatedAt, userConditions.DeletedAt, userConditions.Username, userConditions.Email, userConditions.Password)
 }

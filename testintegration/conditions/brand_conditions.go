@@ -2,29 +2,29 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"time"
 )
 
 type brandConditions struct {
-	ID        orm.Field[models.Brand, model.UIntID]
-	CreatedAt orm.Field[models.Brand, time.Time]
-	UpdatedAt orm.Field[models.Brand, time.Time]
-	DeletedAt orm.Field[models.Brand, time.Time]
-	Name      orm.StringField[models.Brand]
+	ID        cql.Field[models.Brand, model.UIntID]
+	CreatedAt cql.Field[models.Brand, time.Time]
+	UpdatedAt cql.Field[models.Brand, time.Time]
+	DeletedAt cql.Field[models.Brand, time.Time]
+	Name      cql.StringField[models.Brand]
 }
 
 var Brand = brandConditions{
-	CreatedAt: orm.Field[models.Brand, time.Time]{Name: "CreatedAt"},
-	DeletedAt: orm.Field[models.Brand, time.Time]{Name: "DeletedAt"},
-	ID:        orm.Field[models.Brand, model.UIntID]{Name: "ID"},
-	Name:      orm.StringField[models.Brand]{Field: orm.Field[models.Brand, string]{Name: "Name"}},
-	UpdatedAt: orm.Field[models.Brand, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: cql.Field[models.Brand, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.Brand, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[models.Brand, model.UIntID]{Name: "ID"},
+	Name:      cql.StringField[models.Brand]{Field: cql.Field[models.Brand, string]{Name: "Name"}},
+	UpdatedAt: cql.Field[models.Brand, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Brand when doing a query
-func (brandConditions brandConditions) Preload() orm.Condition[models.Brand] {
-	return orm.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
+func (brandConditions brandConditions) Preload() cql.Condition[models.Brand] {
+	return cql.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
 }

@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -30,7 +31,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsUintBelongsTo() {
 	match := ts.createPhone("pixel", *brand1)
 	ts.createPhone("iphone", *brand2)
 
-	entities, err := orm.NewQuery[models.Phone](
+	entities, err := orm.Query[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq("google"),
@@ -48,7 +49,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsBelongsTo() {
 	match := ts.createSale(0, product1, nil)
 	ts.createSale(0, product2, nil)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Int.Is().Eq(1),
@@ -70,7 +71,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersTheMainEnt
 	ts.createSale(2, product2, seller2)
 	ts.createSale(2, product1, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Code.Is().Eq(1),
 		conditions.Sale.Product(
@@ -92,7 +93,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneOptional() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Name.Is().Eq("franco"),
@@ -114,7 +115,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneSelfReferentia
 	match := ts.createEmployee("franco", boss1)
 	ts.createEmployee("pierre", boss2)
 
-	entities, err := orm.NewQuery[models.Employee](
+	entities, err := orm.Query[models.Employee](
 		ts.db,
 		conditions.Employee.Boss(
 			conditions.Employee.Name.Is().Eq("Xavier"),
@@ -136,7 +137,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOne() {
 	ts.createCountry("Argentina", capital1)
 	ts.createCountry("France", capital2)
 
-	entities, err := orm.NewQuery[models.City](
+	entities, err := orm.Query[models.City](
 		ts.db,
 		conditions.City.Country(
 			conditions.Country.Name.Is().Eq("Argentina"),
@@ -158,7 +159,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOneReversed() {
 	country1 := ts.createCountry("Argentina", capital1)
 	ts.createCountry("France", capital2)
 
-	entities, err := orm.NewQuery[models.Country](
+	entities, err := orm.Query[models.Country](
 		ts.db,
 		conditions.Country.Capital(
 			conditions.City.Name.Is().Eq("Buenos Aires"),
@@ -180,7 +181,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsWithEntityThatDefine
 	match := ts.createBicycle("BMX", person1)
 	ts.createBicycle("Shimano", person2)
 
-	entities, err := orm.NewQuery[models.Bicycle](
+	entities, err := orm.Query[models.Bicycle](
 		ts.db,
 		conditions.Bicycle.Owner(
 			conditions.Person.Name.Is().Eq("franco"),
@@ -198,7 +199,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnHasMany() {
 	match := ts.createSeller("franco", company1)
 	ts.createSeller("agustin", company2)
 
-	entities, err := orm.NewQuery[models.Seller](
+	entities, err := orm.Query[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
 			conditions.Company.Name.Is().Eq("ditrit"),
@@ -219,7 +220,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDifferentAttribute
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Int.Is().Eq(1),
@@ -243,7 +244,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAddsDeletedAtAutomat
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.String.Is().Eq("match"),
@@ -266,7 +267,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDeletedAt() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.DeletedAt.Is().Eq(product1.DeletedAt.Time),
@@ -285,7 +286,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersByNil() {
 	match := ts.createSale(0, product1, nil)
 	ts.createSale(0, product2, nil)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.IntPointer.Is().Null(),
@@ -308,7 +309,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsDifferentEntities() 
 	ts.createSale(0, product1, seller2)
 	ts.createSale(0, product2, seller1)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Int.Is().Eq(1),
@@ -335,7 +336,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsMultipleTimes() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Name.Is().Eq("franco"),
@@ -362,7 +363,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithUnsafeCondition() {
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Company(
@@ -382,7 +383,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyConnectionConditionMakesN
 	match1 := ts.createSale(0, product1, nil)
 	match2 := ts.createSale(0, product2, nil)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			orm.And[models.Product](),
@@ -394,13 +395,13 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyConnectionConditionMakesN
 }
 
 func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturnsError() {
-	_, err := orm.NewQuery[models.Sale](
+	_, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
 			orm.Not[models.Product](),
 		),
 	).Find()
-	ts.ErrorIs(err, orm.ErrEmptyConditions)
+	ts.ErrorIs(err, cql.ErrEmptyConditions)
 	ts.ErrorContains(err, "connector: Not; model: models.Product")
 }
 
@@ -411,7 +412,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
 	seller1 := ts.createSeller("ditrit", company1)
 	ts.createSeller("agustin", company2)
 
-	entities, err := orm.NewQuery[models.Seller](
+	entities, err := orm.Query[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
 			conditions.Company.Name.Is().Dynamic().Eq(conditions.Seller.Name),
@@ -435,7 +436,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
 
-	entities, err := orm.NewQuery[models.Sale](
+	entities, err := orm.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Company(
@@ -449,16 +450,16 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 }
 
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelReturnsError() {
-	_, err := orm.NewQuery[models.Child](
+	_, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.ID.Is().Dynamic().Eq(conditions.ParentParent.ID),
 	).Find()
-	ts.ErrorIs(err, orm.ErrFieldModelNotConcerned)
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinReturnsError() {
-	_, err := orm.NewQuery[models.Child](
+	_, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -468,7 +469,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		),
 		conditions.Child.ID.Is().Dynamic().Eq(conditions.ParentParent.ID),
 	).Find()
-	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
@@ -480,7 +481,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 	err := ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := orm.NewQuery[models.Child](
+	entities, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -496,7 +497,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 }
 
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinOnMultivalueOperatorReturnsError() {
-	_, err := orm.NewQuery[models.Child](
+	_, err := orm.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -509,6 +510,6 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 			conditions.ParentParent.ID,
 		),
 	).Find()
-	ts.ErrorIs(err, orm.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Between; model: models.Child, field: ID")
 }
