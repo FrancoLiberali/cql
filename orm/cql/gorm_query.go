@@ -195,7 +195,7 @@ func (query GormQuery) Dialector() Dialector {
 
 func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *GormQuery {
 	query := &GormQuery{
-		GormDB:          db.Model(initialModel).Select(initialTable.Name + ".*"),
+		GormDB:          db.Model(&initialModel).Select(initialTable.Name + ".*"),
 		ConcernedModels: map[reflect.Type][]Table{},
 	}
 
@@ -391,6 +391,12 @@ func splitJoin(joinStatement string) (string, string, string) {
 	tableSplit := strings.Split(table, " ")
 
 	return tableSplit[0], tableSplit[1], onStatement
+}
+
+func (query *GormQuery) Delete() (int64, error) {
+	deleteTx := query.GormDB.Delete(query.GormDB.Statement.Model)
+
+	return deleteTx.RowsAffected, deleteTx.Error
 }
 
 // from a list of uint, return the first or UndefinedJoinNumber in case the list is empty
