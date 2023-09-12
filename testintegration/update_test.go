@@ -370,7 +370,8 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 			conditions.Sale.Code.Set().Eq(2),
 		)
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
-		ts.ErrorContains(err, "preloads in returning are not allowed for database: sqlite; method: Returning")
+		ts.ErrorContains(err, "preloads in returning are not allowed for database")
+		ts.ErrorContains(err, "method: Returning")
 	case cql.Postgres:
 		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
 		product2 := ts.createProduct("", 2, 0.0, false, nil)

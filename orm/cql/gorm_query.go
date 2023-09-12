@@ -18,6 +18,7 @@ import (
 type GormQuery struct {
 	GormDB          *gorm.DB
 	ConcernedModels map[reflect.Type][]Table
+	initialTable    Table
 }
 
 // Order specify order when retrieving models from database.
@@ -197,6 +198,7 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *Go
 	query := &GormQuery{
 		GormDB:          db.Model(&initialModel).Select(initialTable.Name + ".*"),
 		ConcernedModels: map[reflect.Type][]Table{},
+		initialTable:    initialTable,
 	}
 
 	query.AddConcernedModel(initialModel, initialTable)
@@ -266,29 +268,7 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 			updateMap[field.ColumnName(query, tableAndValue.table)] = tableAndValue.value
 		}
 
-		joinTables := []clause.Table{}
-
-		for _, join := range query.GormDB.Statement.Joins {
-			tableName, tableAlias, onStatement := splitJoin(join.Name)
-
-			joinTables = append(joinTables, clause.Table{
-				Name:  tableName,
-				Alias: tableAlias,
-				Raw:   true, // prevent gorm from putting the alias in quotes
-			})
-
-			query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
-		}
-
-		if len(joinTables) > 0 {
-			query.GormDB.Clauses(
-				clause.From{
-					Tables: joinTables,
-				},
-			)
-		}
-
-		query.GormDB.Statement.Joins = nil
+		query.joinsToFrom()
 	case MySQL: // support UPDATE JOIN SET
 		// if at least one join is done,
 		// allow UPDATE without WHERE as the condition can be the join
@@ -329,6 +309,32 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 	update := query.GormDB.Updates(updateMap)
 
 	return update.RowsAffected, update.Error
+}
+
+func (query *GormQuery) joinsToFrom() {
+	joinTables := []clause.Table{}
+
+	for _, join := range query.GormDB.Statement.Joins {
+		tableName, tableAlias, onStatement := splitJoin(join.Name)
+
+		joinTables = append(joinTables, clause.Table{
+			Name:  tableName,
+			Alias: tableAlias,
+			Raw:   true, // prevent gorm from putting the alias in quotes
+		})
+
+		query.GormDB = query.GormDB.Where(onStatement, join.Conds...)
+	}
+
+	if len(joinTables) > 0 {
+		query.GormDB.Clauses(
+			clause.From{
+				Tables: joinTables,
+			},
+		)
+	}
+
+	query.GormDB.Statement.Joins = nil
 }
 
 type TableAndValue struct {
@@ -394,6 +400,27 @@ func splitJoin(joinStatement string) (string, string, string) {
 }
 
 func (query *GormQuery) Delete() (int64, error) {
+	switch query.Dialector() {
+	case Postgres, SQLServer, SQLite: // support UPDATE SET FROM
+		query.joinsToFrom()
+	case MySQL:
+		// if at least one join is done,
+		// allow UPDATE without WHERE as the condition can be the join
+		if len(query.GormDB.Statement.Joins) > 0 {
+			query.GormDB.AllowGlobalUpdate = true
+		}
+
+		query.GormDB.Clauses(clause.Set{clause.Assignment{
+			Column: clause.Column{
+				Name:  "deleted_at",
+				Table: query.initialTable.SQLName(),
+			},
+			Value: time.Now(),
+		}})
+	}
+
+	query.GormDB.Statement.Selects = []string{}
+
 	deleteTx := query.GormDB.Delete(query.GormDB.Statement.Model)
 
 	return deleteTx.RowsAffected, deleteTx.Error

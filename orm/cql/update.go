@@ -7,21 +7,7 @@ import (
 )
 
 type Update[T model.Model] struct {
-	query         *Query[T]
-	orderByCalled bool
-}
-
-// available for: postgres, sqlite, sqlserver
-//
-// warning: in sqlite preloads are not allowed
-func (update *Update[T]) Returning(dest *[]T) *Update[T] {
-	// TODO hacer el update del logger para que no muestre internals de ditrit/gorm
-	err := update.query.gormQuery.Returning(dest)
-	if err != nil {
-		update.query.addError(methodError(err, "Returning"))
-	}
-
-	return update
+	OrderLimitReturning[T]
 }
 
 func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
@@ -58,31 +44,23 @@ func (update *Update[T]) unsafeSet(sets []ISet) (int64, error) {
 }
 
 // Ascending specify an ascending order when updating models
+//
 // joinNumber can be used to select the join in case the field is joined more than once
 //
 // available for: mysql
 func (update *Update[T]) Ascending(field IField, joinNumber ...uint) *Update[T] {
-	if update.query.gormQuery.Dialector() != MySQL {
-		update.query.addError(methodError(ErrUnsupportedByDatabase, "Ascending"))
-	}
-
-	update.orderByCalled = true
-	update.query.order(field, false, joinNumber)
+	update.OrderLimitReturning.Ascending(field, joinNumber...)
 
 	return update
 }
 
 // Descending specify a descending order when updating models
+//
 // joinNumber can be used to select the join in case the field is joined more than once
 //
 // available for: mysql
 func (update *Update[T]) Descending(field IField, joinNumber ...uint) *Update[T] {
-	if update.query.gormQuery.Dialector() != MySQL {
-		update.query.addError(methodError(ErrUnsupportedByDatabase, "Descending"))
-	}
-
-	update.orderByCalled = true
-	update.query.order(field, true, joinNumber)
+	update.OrderLimitReturning.Descending(field, joinNumber...)
 
 	return update
 }
@@ -93,15 +71,17 @@ func (update *Update[T]) Descending(field IField, joinNumber ...uint) *Update[T]
 //
 // available for: mysql
 func (update *Update[T]) Limit(limit int) *Update[T] {
-	if update.query.gormQuery.Dialector() != MySQL {
-		update.query.addError(methodError(ErrUnsupportedByDatabase, "Limit"))
-	}
+	update.OrderLimitReturning.Limit(limit)
 
-	if !update.orderByCalled {
-		update.query.addError(methodError(ErrOrderByMustBeCalled, "Limit"))
-	}
+	return update
+}
 
-	update.query.gormQuery.Limit(limit)
+// available for: postgres, sqlite, sqlserver
+//
+// warning: in sqlite preloads are not allowed
+func (update *Update[T]) Returning(dest *[]T) *Update[T] {
+	// TODO hacer el update del logger para que no muestre internals de ditrit/gorm
+	update.OrderLimitReturning.Returning(dest)
 
 	return update
 }
@@ -109,8 +89,10 @@ func (update *Update[T]) Limit(limit int) *Update[T] {
 // Create a Update to which the conditions are applied inside transaction tx
 func NewUpdate[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Update[T] {
 	return &Update[T]{
-		query:         NewQuery(tx, conditions...),
-		orderByCalled: false,
+		OrderLimitReturning: OrderLimitReturning[T]{
+			query:         NewQuery(tx, conditions...),
+			orderByCalled: false,
+		},
 	}
 }
 
