@@ -2,34 +2,59 @@
 package conditions
 
 import (
-	belongsto "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/belongsto"
+	belongsto "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/belongsto"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var ownerType = reflect.TypeOf(*new(belongsto.Owner))
+var OwnerIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: ownerType,
+}
+
 func OwnerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[belongsto.Owner] {
 	return orm.FieldCondition[belongsto.Owner, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func OwnerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owner] {
-	return orm.FieldCondition[belongsto.Owner, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func OwnerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owner] {
-	return orm.FieldCondition[belongsto.Owner, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func OwnerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owner] {
-	return orm.FieldCondition[belongsto.Owner, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: OwnerIdField,
 		Operator:        operator,
 	}
 }
 
-var OwnerPreloadAttributes = orm.NewPreloadCondition[belongsto.Owner]()
+var OwnerCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: ownerType,
+}
+
+func OwnerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owner] {
+	return orm.FieldCondition[belongsto.Owner, time.Time]{
+		FieldIdentifier: OwnerCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var OwnerUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: ownerType,
+}
+
+func OwnerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owner] {
+	return orm.FieldCondition[belongsto.Owner, time.Time]{
+		FieldIdentifier: OwnerUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var OwnerDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: ownerType,
+}
+
+func OwnerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owner] {
+	return orm.FieldCondition[belongsto.Owner, time.Time]{
+		FieldIdentifier: OwnerDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var OwnerPreloadAttributes = orm.NewPreloadCondition[belongsto.Owner](OwnerIdField, OwnerCreatedAtField, OwnerUpdatedAtField, OwnerDeletedAtField)

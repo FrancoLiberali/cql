@@ -53,8 +53,8 @@ github.com/dave/jennifer v1.6.1/go.mod h1:nXbxhEmQfOZhWml3D1cDK5M1FLnMSozpbFN/m3
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
-github.com/ditrit/badaas v0.0.0-20230807114103-72cff2a37890 h1:Y4oG6q2kJI/G0m+bCPuwv/mrKYhtJP4cqYHsuFsAn0M=
-github.com/ditrit/badaas v0.0.0-20230807114103-72cff2a37890/go.mod h1:FS3I+obfV7FiYp3tUbZObckOclqmEPtGwTXsGOk8WJs=
+github.com/ditrit/badaas v0.0.0-20230807114456-ce08b6d549b4 h1:27Rsh0wp+563kH1LNBkRJUxf6qZXjE86B5EKvZcC3jU=
+github.com/ditrit/badaas v0.0.0-20230807114456-ce08b6d549b4/go.mod h1:FS3I+obfV7FiYp3tUbZObckOclqmEPtGwTXsGOk8WJs=
 github.com/ditrit/verdeter v0.4.0 h1:DzEOFauuXEGNQYP6OgYtHwEyb3w9riem99u0xE/l7+o=
 github.com/ditrit/verdeter v0.4.0/go.mod h1:sKpWuOvYqNabLN4aNXqeBhcWpt7nf0frwqk0B5M6ax0=
 github.com/elliotchance/pie/v2 v2.7.0 h1:FqoIKg4uj0G/CrLGuMS9ejnFKa92lxE1dEgBD3pShXg=

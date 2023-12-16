@@ -2,32 +2,57 @@
 package conditions
 
 import (
-	overrideforeignkeyinverse "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/overrideforeignkeyinverse"
+	overrideforeignkeyinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkeyinverse"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var userType = reflect.TypeOf(*new(overrideforeignkeyinverse.User))
+var UserIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: userType,
+}
+
 func UserId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: UserIdField,
 		Operator:        operator,
 	}
 }
+
+var UserCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: userType,
+}
+
 func UserCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: UserCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var UserUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: userType,
+}
+
 func UserUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: UserUpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var UserDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: userType,
+}
+
 func UserDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: UserDeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -42,5 +67,5 @@ func UserCreditCard(conditions ...orm.Condition[overrideforeignkeyinverse.Credit
 }
 
 var UserPreloadCreditCard = UserCreditCard(CreditCardPreloadAttributes)
-var UserPreloadAttributes = orm.NewPreloadCondition[overrideforeignkeyinverse.User]()
+var UserPreloadAttributes = orm.NewPreloadCondition[overrideforeignkeyinverse.User](UserIdField, UserCreatedAtField, UserUpdatedAtField, UserDeletedAtField)
 var UserPreloadRelations = []orm.Condition[overrideforeignkeyinverse.User]{UserPreloadCreditCard}

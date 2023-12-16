@@ -6,7 +6,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/ettle/strcase"
 
-	"github.com/ditrit/badaas-orm/cli/cmd/log"
+	"github.com/ditrit/badaas-cli/cmd/log"
 )
 
 const (

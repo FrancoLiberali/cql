@@ -9,7 +9,7 @@ import (
 
 	"github.com/elliotchance/pie/v2"
 
-	"github.com/ditrit/badaas-orm/cli/cmd/utils"
+	"github.com/ditrit/badaas-cli/cmd/utils"
 )
 
 var (

@@ -2,32 +2,57 @@
 package conditions
 
 import (
-	hasmany "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/hasmany"
+	hasmany "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmany"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var sellerType = reflect.TypeOf(*new(hasmany.Seller))
+var SellerIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: sellerType,
+}
+
 func SellerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: SellerIdField,
 		Operator:        operator,
 	}
 }
+
+var SellerCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: sellerType,
+}
+
 func SellerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: SellerCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var SellerUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: sellerType,
+}
+
 func SellerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: SellerUpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var SellerDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: sellerType,
+}
+
 func SellerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: SellerDeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -42,14 +67,17 @@ func SellerCompany(conditions ...orm.Condition[hasmany.Company]) orm.IJoinCondit
 }
 
 var SellerPreloadCompany = SellerCompany(CompanyPreloadAttributes)
-var sellerCompanyIdFieldID = orm.FieldIdentifier{Field: "CompanyID"}
+var SellerCompanyIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "CompanyID",
+	ModelType: sellerType,
+}
 
 func SellerCompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, orm.UUID]{
-		FieldIdentifier: sellerCompanyIdFieldID,
+		FieldIdentifier: SellerCompanyIdField,
 		Operator:        operator,
 	}
 }
 
-var SellerPreloadAttributes = orm.NewPreloadCondition[hasmany.Seller](sellerCompanyIdFieldID)
+var SellerPreloadAttributes = orm.NewPreloadCondition[hasmany.Seller](SellerIdField, SellerCreatedAtField, SellerUpdatedAtField, SellerDeletedAtField, SellerCompanyIdField)
 var SellerPreloadRelations = []orm.Condition[hasmany.Seller]{SellerPreloadCompany}

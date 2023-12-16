@@ -2,32 +2,57 @@
 package conditions
 
 import (
-	hasmanywithpointers "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/hasmanywithpointers"
+	hasmanywithpointers "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmanywithpointers"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var sellerInPointersType = reflect.TypeOf(*new(hasmanywithpointers.SellerInPointers))
+var SellerInPointersIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: sellerInPointersType,
+}
+
 func SellerInPointersId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmanywithpointers.SellerInPointers] {
 	return orm.FieldCondition[hasmanywithpointers.SellerInPointers, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: SellerInPointersIdField,
 		Operator:        operator,
 	}
 }
+
+var SellerInPointersCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: sellerInPointersType,
+}
+
 func SellerInPointersCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmanywithpointers.SellerInPointers] {
 	return orm.FieldCondition[hasmanywithpointers.SellerInPointers, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: SellerInPointersCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var SellerInPointersUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: sellerInPointersType,
+}
+
 func SellerInPointersUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmanywithpointers.SellerInPointers] {
 	return orm.FieldCondition[hasmanywithpointers.SellerInPointers, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: SellerInPointersUpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var SellerInPointersDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: sellerInPointersType,
+}
+
 func SellerInPointersDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmanywithpointers.SellerInPointers] {
 	return orm.FieldCondition[hasmanywithpointers.SellerInPointers, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: SellerInPointersDeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -42,14 +67,17 @@ func SellerInPointersCompany(conditions ...orm.Condition[hasmanywithpointers.Com
 }
 
 var SellerInPointersPreloadCompany = SellerInPointersCompany(CompanyWithPointersPreloadAttributes)
-var sellerInPointersCompanyIdFieldID = orm.FieldIdentifier{Field: "CompanyID"}
+var SellerInPointersCompanyIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "CompanyID",
+	ModelType: sellerInPointersType,
+}
 
 func SellerInPointersCompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmanywithpointers.SellerInPointers] {
 	return orm.FieldCondition[hasmanywithpointers.SellerInPointers, orm.UUID]{
-		FieldIdentifier: sellerInPointersCompanyIdFieldID,
+		FieldIdentifier: SellerInPointersCompanyIdField,
 		Operator:        operator,
 	}
 }
 
-var SellerInPointersPreloadAttributes = orm.NewPreloadCondition[hasmanywithpointers.SellerInPointers](sellerInPointersCompanyIdFieldID)
+var SellerInPointersPreloadAttributes = orm.NewPreloadCondition[hasmanywithpointers.SellerInPointers](SellerInPointersIdField, SellerInPointersCreatedAtField, SellerInPointersUpdatedAtField, SellerInPointersDeletedAtField, SellerInPointersCompanyIdField)
 var SellerInPointersPreloadRelations = []orm.Condition[hasmanywithpointers.SellerInPointers]{SellerInPointersPreloadCompany}

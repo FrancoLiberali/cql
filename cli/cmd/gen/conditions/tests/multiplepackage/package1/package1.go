@@ -1,7 +1,7 @@
 package package1
 
 import (
-	"github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/multiplepackage/package2"
+	"github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
 	"github.com/ditrit/badaas/orm"
 )
 

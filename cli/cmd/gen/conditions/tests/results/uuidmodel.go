@@ -2,34 +2,59 @@
 package conditions
 
 import (
-	uuidmodel "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/uuidmodel"
+	uuidmodel "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/uuidmodel"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var uuidModelType = reflect.TypeOf(*new(uuidmodel.UUIDModel))
+var UUIDModelIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: uuidModelType,
+}
+
 func UUIDModelId(operator orm.Operator[orm.UUID]) orm.WhereCondition[uuidmodel.UUIDModel] {
 	return orm.FieldCondition[uuidmodel.UUIDModel, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func UUIDModelCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
-	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func UUIDModelUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
-	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func UUIDModelDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
-	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: UUIDModelIdField,
 		Operator:        operator,
 	}
 }
 
-var UUIDModelPreloadAttributes = orm.NewPreloadCondition[uuidmodel.UUIDModel]()
+var UUIDModelCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: uuidModelType,
+}
+
+func UUIDModelCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
+	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
+		FieldIdentifier: UUIDModelCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var UUIDModelUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: uuidModelType,
+}
+
+func UUIDModelUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
+	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
+		FieldIdentifier: UUIDModelUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var UUIDModelDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: uuidModelType,
+}
+
+func UUIDModelDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
+	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
+		FieldIdentifier: UUIDModelDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var UUIDModelPreloadAttributes = orm.NewPreloadCondition[uuidmodel.UUIDModel](UUIDModelIdField, UUIDModelCreatedAtField, UUIDModelUpdatedAtField, UUIDModelDeletedAtField)

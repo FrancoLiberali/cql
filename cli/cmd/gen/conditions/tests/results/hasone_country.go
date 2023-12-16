@@ -2,32 +2,57 @@
 package conditions
 
 import (
-	hasone "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/hasone"
+	hasone "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasone"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var countryType = reflect.TypeOf(*new(hasone.Country))
+var CountryIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: countryType,
+}
+
 func CountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: CountryIdField,
 		Operator:        operator,
 	}
 }
+
+var CountryCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: countryType,
+}
+
 func CountryCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: CountryCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var CountryUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: countryType,
+}
+
 func CountryUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: CountryUpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var CountryDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: countryType,
+}
+
 func CountryDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: CountryDeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -42,5 +67,5 @@ func CountryCapital(conditions ...orm.Condition[hasone.City]) orm.IJoinCondition
 }
 
 var CountryPreloadCapital = CountryCapital(CityPreloadAttributes)
-var CountryPreloadAttributes = orm.NewPreloadCondition[hasone.Country]()
+var CountryPreloadAttributes = orm.NewPreloadCondition[hasone.Country](CountryIdField, CountryCreatedAtField, CountryUpdatedAtField, CountryDeletedAtField)
 var CountryPreloadRelations = []orm.Condition[hasone.Country]{CountryPreloadCapital}
