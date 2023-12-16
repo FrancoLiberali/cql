@@ -5,13 +5,20 @@ Badaas enables the effortless construction of ***distributed, resilient, highly 
 > **Warning**
 > BaDaaS is still under development. Each of its components can have a different state of evolution that you can consult in [Features and components](#features-and-components)
 
-- [Features and components](#features-and-components)
-- [Quickstart](#quickstart)
-  - [Example](#example)
-  - [Step-by-step instructions](#step-by-step-instructions)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
+- [BADAAS: Backend And Distribution As A Service](#badaas-backend-and-distribution-as-a-service)
+  - [Features and components](#features-and-components)
+  - [Quickstart](#quickstart)
+    - [Example](#example)
+    - [Step-by-step instructions](#step-by-step-instructions)
+      - [Config badaas functionalities](#config-badaas-functionalities)
+      - [Add your own functionalities](#add-your-own-functionalities)
+      - [Run it](#run-it)
+    - [Provided functionalities](#provided-functionalities)
+      - [InfoModule](#infomodule)
+      - [AuthModule](#authmodule)
+    - [Configuration](#configuration)
+  - [Contributing](#contributing)
+  - [License](#license)
 
 ## Features and components
 

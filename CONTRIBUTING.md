@@ -1,16 +1,17 @@
 # Contribute to the development of badaas
 
-- [Tests](#tests)
-  - [Dependencies](#dependencies)
-  - [Unit tests](#unit-tests)
-  - [Integration tests](#integration-tests)
-  - [Feature tests (of end to end tests)](#feature-tests-or-end-to-end-tests)
-- [Logger](#logger)
-- [Directory structure](#directory-structure)
-- [Git](#git)
-  - [Branch naming policy](#branch-naming-policy)
-  - [Default branch](#default-branch)
-  - [How to release](#how-to-release)
+- [Contribute to the development of badaas](#contribute-to-the-development-of-badaas)
+  - [Tests](#tests)
+    - [Dependencies](#dependencies)
+    - [Unit tests](#unit-tests)
+    - [Integration tests](#integration-tests)
+    - [Feature tests (or end to end tests)](#feature-tests-or-end-to-end-tests)
+  - [Logger](#logger)
+  - [Directory structure](#directory-structure)
+  - [Git](#git)
+    - [Branch naming policy](#branch-naming-policy)
+    - [Default branch](#default-branch)
+    - [How to release](#how-to-release)
 
 ## Tests
 

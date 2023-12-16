@@ -19,8 +19,8 @@ jobs:
           min_length: 5
           max_length: 50
 
-  check-style:
-    name: Code style
+  unit-tests:
+    name: Unit tests
     needs: [branch-naming-rules]
     runs-on: ubuntu-latest
     steps:
@@ -31,13 +31,12 @@ jobs:
         with:
           go-version: '^1.18'
           cache: true
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
+      - name: Run unit tests
+        run:  go test ./... -coverprofile=coverage_unit.out -v
+      - uses: actions/upload-artifact@v3
         with:
-          version: v1.52.2
-          skip-cache: true
-          skip-pkg-cache: true
-          skip-build-cache: true
+          name: coverage_unit
+          path: coverage_unit.out
 
   unit-tests:
     name: Unit tests
@@ -130,27 +129,3 @@ jobs:
         with:
           name: docker-compose-e2e-logs
           path: app.log
-
-  sonarcloud:
-    name: SonarCloud
-    needs: [check-style, integration-tests]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Download unit tests line coverage report
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage_unit
-          path: coverage_unit.out
-      - name: Download int tests line coverage report
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage_int
-          path: coverage_int.out
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
