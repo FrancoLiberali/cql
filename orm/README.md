@@ -44,4 +44,4 @@ The difference between them is the type they will use as primary key: a random u
 - `crudCompanyService orm.CRUDService[models.Company, orm.UUID]`
 - `crudCompanyRepository orm.CRUDRepository[models.Company, orm.UUID]`
 
-These classes will allow you to perform queries using the compilable query system generated with badaas-cli. For details on how to do this visit [badaas-cli docs](github.com/ditrit/badaas-cli/README.md).
+These classes will allow you to perform queries using the compilable query system generated with badaas-cli. For details on how to do this visit [badaas-cli docs](github.com/ditrit/badaas-orm/cli/README.md).
