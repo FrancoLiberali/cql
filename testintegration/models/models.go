@@ -1,6 +1,7 @@
 package models
 
 import (
+	"database/sql"
 	"database/sql/driver"
 	"fmt"
 	"strings"
@@ -69,7 +70,9 @@ type Product struct {
 	Int         int
 	IntPointer  *int
 	Float       float64
+	NullFloat   sql.NullFloat64
 	Bool        bool
+	NullBool    sql.NullBool
 	ByteArray   []byte
 	MultiString MultiString
 	ToBeEmbedded

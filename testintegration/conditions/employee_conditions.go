@@ -4,38 +4,37 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func EmployeeId(v orm.UUID) orm.WhereCondition[models.Employee] {
-	return orm.WhereCondition[models.Employee]{
-		Field: "ID",
-		Value: v,
+func EmployeeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Employee] {
+	return orm.FieldCondition[models.Employee, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func EmployeeCreatedAt(v time.Time) orm.WhereCondition[models.Employee] {
-	return orm.WhereCondition[models.Employee]{
-		Field: "CreatedAt",
-		Value: v,
+func EmployeeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Employee] {
+	return orm.FieldCondition[models.Employee, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func EmployeeUpdatedAt(v time.Time) orm.WhereCondition[models.Employee] {
-	return orm.WhereCondition[models.Employee]{
-		Field: "UpdatedAt",
-		Value: v,
+func EmployeeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Employee] {
+	return orm.FieldCondition[models.Employee, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func EmployeeDeletedAt(v gorm.DeletedAt) orm.WhereCondition[models.Employee] {
-	return orm.WhereCondition[models.Employee]{
-		Field: "DeletedAt",
-		Value: v,
+func EmployeeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Employee] {
+	return orm.FieldCondition[models.Employee, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func EmployeeName(v string) orm.WhereCondition[models.Employee] {
-	return orm.WhereCondition[models.Employee]{
-		Field: "Name",
-		Value: v,
+func EmployeeName(operator orm.Operator[string]) orm.WhereCondition[models.Employee] {
+	return orm.FieldCondition[models.Employee, string]{
+		Field:    "Name",
+		Operator: operator,
 	}
 }
 func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.Condition[models.Employee] {
@@ -45,9 +44,9 @@ func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.Condition[mo
 		T2Field:    "ID",
 	}
 }
-func EmployeeBossId(v orm.UUID) orm.WhereCondition[models.Employee] {
-	return orm.WhereCondition[models.Employee]{
-		Field: "BossID",
-		Value: v,
+func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Employee] {
+	return orm.FieldCondition[models.Employee, orm.UUID]{
+		Field:    "BossID",
+		Operator: operator,
 	}
 }

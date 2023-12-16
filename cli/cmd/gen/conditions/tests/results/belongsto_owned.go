@@ -4,32 +4,31 @@ package conditions
 import (
 	belongsto "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/belongsto"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func OwnedId(v orm.UUID) orm.WhereCondition[belongsto.Owned] {
-	return orm.WhereCondition[belongsto.Owned]{
-		Field: "ID",
-		Value: v,
+func OwnedId(operator orm.Operator[orm.UUID]) orm.WhereCondition[belongsto.Owned] {
+	return orm.FieldCondition[belongsto.Owned, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func OwnedCreatedAt(v time.Time) orm.WhereCondition[belongsto.Owned] {
-	return orm.WhereCondition[belongsto.Owned]{
-		Field: "CreatedAt",
-		Value: v,
+func OwnedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owned] {
+	return orm.FieldCondition[belongsto.Owned, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func OwnedUpdatedAt(v time.Time) orm.WhereCondition[belongsto.Owned] {
-	return orm.WhereCondition[belongsto.Owned]{
-		Field: "UpdatedAt",
-		Value: v,
+func OwnedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owned] {
+	return orm.FieldCondition[belongsto.Owned, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func OwnedDeletedAt(v gorm.DeletedAt) orm.WhereCondition[belongsto.Owned] {
-	return orm.WhereCondition[belongsto.Owned]{
-		Field: "DeletedAt",
-		Value: v,
+func OwnedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owned] {
+	return orm.FieldCondition[belongsto.Owned, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
 func OwnedOwner(conditions ...orm.Condition[belongsto.Owner]) orm.Condition[belongsto.Owned] {
@@ -39,9 +38,9 @@ func OwnedOwner(conditions ...orm.Condition[belongsto.Owner]) orm.Condition[belo
 		T2Field:    "ID",
 	}
 }
-func OwnedOwnerId(v orm.UUID) orm.WhereCondition[belongsto.Owned] {
-	return orm.WhereCondition[belongsto.Owned]{
-		Field: "OwnerID",
-		Value: v,
+func OwnedOwnerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[belongsto.Owned] {
+	return orm.FieldCondition[belongsto.Owned, orm.UUID]{
+		Field:    "OwnerID",
+		Operator: operator,
 	}
 }

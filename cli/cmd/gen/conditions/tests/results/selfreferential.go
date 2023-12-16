@@ -4,32 +4,31 @@ package conditions
 import (
 	selfreferential "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/selfreferential"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func EmployeeId(v orm.UUID) orm.WhereCondition[selfreferential.Employee] {
-	return orm.WhereCondition[selfreferential.Employee]{
-		Field: "ID",
-		Value: v,
+func EmployeeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[selfreferential.Employee] {
+	return orm.FieldCondition[selfreferential.Employee, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func EmployeeCreatedAt(v time.Time) orm.WhereCondition[selfreferential.Employee] {
-	return orm.WhereCondition[selfreferential.Employee]{
-		Field: "CreatedAt",
-		Value: v,
+func EmployeeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
+	return orm.FieldCondition[selfreferential.Employee, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func EmployeeUpdatedAt(v time.Time) orm.WhereCondition[selfreferential.Employee] {
-	return orm.WhereCondition[selfreferential.Employee]{
-		Field: "UpdatedAt",
-		Value: v,
+func EmployeeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
+	return orm.FieldCondition[selfreferential.Employee, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func EmployeeDeletedAt(v gorm.DeletedAt) orm.WhereCondition[selfreferential.Employee] {
-	return orm.WhereCondition[selfreferential.Employee]{
-		Field: "DeletedAt",
-		Value: v,
+func EmployeeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
+	return orm.FieldCondition[selfreferential.Employee, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
 func EmployeeBoss(conditions ...orm.Condition[selfreferential.Employee]) orm.Condition[selfreferential.Employee] {
@@ -39,9 +38,9 @@ func EmployeeBoss(conditions ...orm.Condition[selfreferential.Employee]) orm.Con
 		T2Field:    "ID",
 	}
 }
-func EmployeeBossId(v orm.UUID) orm.WhereCondition[selfreferential.Employee] {
-	return orm.WhereCondition[selfreferential.Employee]{
-		Field: "BossID",
-		Value: v,
+func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[selfreferential.Employee] {
+	return orm.FieldCondition[selfreferential.Employee, orm.UUID]{
+		Field:    "BossID",
+		Operator: operator,
 	}
 }

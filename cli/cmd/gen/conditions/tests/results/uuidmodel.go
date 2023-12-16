@@ -4,31 +4,30 @@ package conditions
 import (
 	uuidmodel "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/uuidmodel"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func UUIDModelId(v orm.UUID) orm.WhereCondition[uuidmodel.UUIDModel] {
-	return orm.WhereCondition[uuidmodel.UUIDModel]{
-		Field: "ID",
-		Value: v,
+func UUIDModelId(operator orm.Operator[orm.UUID]) orm.WhereCondition[uuidmodel.UUIDModel] {
+	return orm.FieldCondition[uuidmodel.UUIDModel, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func UUIDModelCreatedAt(v time.Time) orm.WhereCondition[uuidmodel.UUIDModel] {
-	return orm.WhereCondition[uuidmodel.UUIDModel]{
-		Field: "CreatedAt",
-		Value: v,
+func UUIDModelCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
+	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func UUIDModelUpdatedAt(v time.Time) orm.WhereCondition[uuidmodel.UUIDModel] {
-	return orm.WhereCondition[uuidmodel.UUIDModel]{
-		Field: "UpdatedAt",
-		Value: v,
+func UUIDModelUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
+	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func UUIDModelDeletedAt(v gorm.DeletedAt) orm.WhereCondition[uuidmodel.UUIDModel] {
-	return orm.WhereCondition[uuidmodel.UUIDModel]{
-		Field: "DeletedAt",
-		Value: v,
+func UUIDModelDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
+	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }

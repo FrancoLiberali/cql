@@ -4,139 +4,138 @@ package conditions
 import (
 	basicpointers "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/basicpointers"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func BasicPointersId(v orm.UUID) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "ID",
-		Value: v,
+func BasicPointersId(operator orm.Operator[orm.UUID]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func BasicPointersCreatedAt(v time.Time) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "CreatedAt",
-		Value: v,
+func BasicPointersCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func BasicPointersUpdatedAt(v time.Time) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "UpdatedAt",
-		Value: v,
+func BasicPointersUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func BasicPointersDeletedAt(v gorm.DeletedAt) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "DeletedAt",
-		Value: v,
+func BasicPointersDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func BasicPointersBool(v bool) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Bool",
-		Value: v,
+func BasicPointersBool(operator orm.Operator[bool]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, bool]{
+		Field:    "Bool",
+		Operator: operator,
 	}
 }
-func BasicPointersInt(v int) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Int",
-		Value: v,
+func BasicPointersInt(operator orm.Operator[int]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, int]{
+		Field:    "Int",
+		Operator: operator,
 	}
 }
-func BasicPointersInt8(v int8) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Int8",
-		Value: v,
+func BasicPointersInt8(operator orm.Operator[int8]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, int8]{
+		Field:    "Int8",
+		Operator: operator,
 	}
 }
-func BasicPointersInt16(v int16) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Int16",
-		Value: v,
+func BasicPointersInt16(operator orm.Operator[int16]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, int16]{
+		Field:    "Int16",
+		Operator: operator,
 	}
 }
-func BasicPointersInt32(v int32) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Int32",
-		Value: v,
+func BasicPointersInt32(operator orm.Operator[int32]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, int32]{
+		Field:    "Int32",
+		Operator: operator,
 	}
 }
-func BasicPointersInt64(v int64) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Int64",
-		Value: v,
+func BasicPointersInt64(operator orm.Operator[int64]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, int64]{
+		Field:    "Int64",
+		Operator: operator,
 	}
 }
-func BasicPointersUInt(v uint) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "UInt",
-		Value: v,
+func BasicPointersUInt(operator orm.Operator[uint]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, uint]{
+		Field:    "UInt",
+		Operator: operator,
 	}
 }
-func BasicPointersUInt8(v uint8) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "UInt8",
-		Value: v,
+func BasicPointersUInt8(operator orm.Operator[uint8]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, uint8]{
+		Field:    "UInt8",
+		Operator: operator,
 	}
 }
-func BasicPointersUInt16(v uint16) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "UInt16",
-		Value: v,
+func BasicPointersUInt16(operator orm.Operator[uint16]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, uint16]{
+		Field:    "UInt16",
+		Operator: operator,
 	}
 }
-func BasicPointersUInt32(v uint32) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "UInt32",
-		Value: v,
+func BasicPointersUInt32(operator orm.Operator[uint32]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, uint32]{
+		Field:    "UInt32",
+		Operator: operator,
 	}
 }
-func BasicPointersUInt64(v uint64) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "UInt64",
-		Value: v,
+func BasicPointersUInt64(operator orm.Operator[uint64]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, uint64]{
+		Field:    "UInt64",
+		Operator: operator,
 	}
 }
-func BasicPointersUIntptr(v uintptr) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "UIntptr",
-		Value: v,
+func BasicPointersUIntptr(operator orm.Operator[uintptr]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, uintptr]{
+		Field:    "UIntptr",
+		Operator: operator,
 	}
 }
-func BasicPointersFloat32(v float32) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Float32",
-		Value: v,
+func BasicPointersFloat32(operator orm.Operator[float32]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, float32]{
+		Field:    "Float32",
+		Operator: operator,
 	}
 }
-func BasicPointersFloat64(v float64) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Float64",
-		Value: v,
+func BasicPointersFloat64(operator orm.Operator[float64]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, float64]{
+		Field:    "Float64",
+		Operator: operator,
 	}
 }
-func BasicPointersComplex64(v complex64) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Complex64",
-		Value: v,
+func BasicPointersComplex64(operator orm.Operator[complex64]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, complex64]{
+		Field:    "Complex64",
+		Operator: operator,
 	}
 }
-func BasicPointersComplex128(v complex128) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Complex128",
-		Value: v,
+func BasicPointersComplex128(operator orm.Operator[complex128]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, complex128]{
+		Field:    "Complex128",
+		Operator: operator,
 	}
 }
-func BasicPointersString(v string) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "String",
-		Value: v,
+func BasicPointersString(operator orm.Operator[string]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, string]{
+		Field:    "String",
+		Operator: operator,
 	}
 }
-func BasicPointersByte(v uint8) orm.WhereCondition[basicpointers.BasicPointers] {
-	return orm.WhereCondition[basicpointers.BasicPointers]{
-		Field: "Byte",
-		Value: v,
+func BasicPointersByte(operator orm.Operator[uint8]) orm.WhereCondition[basicpointers.BasicPointers] {
+	return orm.FieldCondition[basicpointers.BasicPointers, uint8]{
+		Field:    "Byte",
+		Operator: operator,
 	}
 }

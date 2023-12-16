@@ -4,31 +4,30 @@ package conditions
 import (
 	uintmodel "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/uintmodel"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func UintModelId(v uint) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.WhereCondition[uintmodel.UintModel]{
-		Field: "ID",
-		Value: v,
+func UintModelId(operator orm.Operator[uint]) orm.WhereCondition[uintmodel.UintModel] {
+	return orm.FieldCondition[uintmodel.UintModel, uint]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func UintModelCreatedAt(v time.Time) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.WhereCondition[uintmodel.UintModel]{
-		Field: "CreatedAt",
-		Value: v,
+func UintModelCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
+	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func UintModelUpdatedAt(v time.Time) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.WhereCondition[uintmodel.UintModel]{
-		Field: "UpdatedAt",
-		Value: v,
+func UintModelUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
+	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func UintModelDeletedAt(v gorm.DeletedAt) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.WhereCondition[uintmodel.UintModel]{
-		Field: "DeletedAt",
-		Value: v,
+func UintModelDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
+	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }

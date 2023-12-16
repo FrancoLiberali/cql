@@ -4,32 +4,31 @@ package conditions
 import (
 	overrideforeignkeyinverse "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/overrideforeignkeyinverse"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func UserId(v orm.UUID) orm.WhereCondition[overrideforeignkeyinverse.User] {
-	return orm.WhereCondition[overrideforeignkeyinverse.User]{
-		Field: "ID",
-		Value: v,
+func UserId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overrideforeignkeyinverse.User] {
+	return orm.FieldCondition[overrideforeignkeyinverse.User, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func UserCreatedAt(v time.Time) orm.WhereCondition[overrideforeignkeyinverse.User] {
-	return orm.WhereCondition[overrideforeignkeyinverse.User]{
-		Field: "CreatedAt",
-		Value: v,
+func UserCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
+	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func UserUpdatedAt(v time.Time) orm.WhereCondition[overrideforeignkeyinverse.User] {
-	return orm.WhereCondition[overrideforeignkeyinverse.User]{
-		Field: "UpdatedAt",
-		Value: v,
+func UserUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
+	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func UserDeletedAt(v gorm.DeletedAt) orm.WhereCondition[overrideforeignkeyinverse.User] {
-	return orm.WhereCondition[overrideforeignkeyinverse.User]{
-		Field: "DeletedAt",
-		Value: v,
+func UserDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
+	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
 func UserCreditCard(conditions ...orm.Condition[overrideforeignkeyinverse.CreditCard]) orm.Condition[overrideforeignkeyinverse.User] {

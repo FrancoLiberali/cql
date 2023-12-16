@@ -9,8 +9,25 @@ import (
 	"github.com/elliotchance/pie/v2"
 )
 
-// badaas/orm/baseModels.go
-var badaasORMBaseModels = []string{"github.com/ditrit/badaas/orm.UUIDModel", "github.com/ditrit/badaas/orm.UIntModel", "gorm.io/gorm.Model"}
+var (
+	// badaas/orm/baseModels.go
+	badaasORMBaseModels = []string{"github.com/ditrit/badaas/orm.UUIDModel", "github.com/ditrit/badaas/orm.UIntModel", "gorm.io/gorm.Model"}
+
+	// database/sql
+	nullString       = "database/sql.NullString"
+	nullInt64        = "database/sql.NullInt64"
+	nullInt32        = "database/sql.NullInt32"
+	nullInt16        = "database/sql.NullInt16"
+	nullFloat64      = "database/sql.NullFloat64"
+	nullByte         = "database/sql.NullByte"
+	nullBool         = "database/sql.NullBool"
+	nullTime         = "database/sql.NullTime"
+	deletedAt        = "gorm.io/gorm.DeletedAt"
+	sqlNullableTypes = []string{
+		nullString, nullInt64, nullInt32, nullInt16, nullFloat64,
+		nullByte, nullBool, nullTime, deletedAt,
+	}
+)
 
 type Type struct {
 	types.Type
@@ -72,8 +89,10 @@ func (t Type) HasFK(field Field) (bool, error) {
 	}), nil
 }
 
-var scanMethod = regexp.MustCompile(`func \(\*.*\)\.Scan\([a-zA-Z0-9_-]* interface\{\}\) error$`)
-var valueMethod = regexp.MustCompile(`func \(.*\)\.Value\(\) \(database/sql/driver\.Value\, error\)$`)
+var (
+	scanMethod  = regexp.MustCompile(`func \(\*.*\)\.Scan\([a-zA-Z0-9_-]* (interface\{\}|any)\) error$`)
+	valueMethod = regexp.MustCompile(`func \(.*\)\.Value\(\) \(database/sql/driver\.Value\, error\)$`)
+)
 
 // Returns true if the type is a Gorm Custom type (https://gorm.io/docs/data_types.html)
 func (t Type) IsGormCustomType() bool {
@@ -95,4 +114,9 @@ func (t Type) IsGormCustomType() bool {
 	}
 
 	return hasScanMethod && hasValueMethod
+}
+
+// Returns true if the type is a sql nullable type (sql.NullBool, sql.NullInt, etc.)
+func (t Type) IsSQLNullableType() bool {
+	return pie.Contains(sqlNullableTypes, t.String())
 }

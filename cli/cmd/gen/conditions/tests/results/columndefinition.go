@@ -4,37 +4,36 @@ package conditions
 import (
 	columndefinition "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/columndefinition"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func ColumnDefinitionId(v orm.UUID) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.WhereCondition[columndefinition.ColumnDefinition]{
-		Field: "ID",
-		Value: v,
+func ColumnDefinitionId(operator orm.Operator[orm.UUID]) orm.WhereCondition[columndefinition.ColumnDefinition] {
+	return orm.FieldCondition[columndefinition.ColumnDefinition, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func ColumnDefinitionCreatedAt(v time.Time) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.WhereCondition[columndefinition.ColumnDefinition]{
-		Field: "CreatedAt",
-		Value: v,
+func ColumnDefinitionCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
+	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func ColumnDefinitionUpdatedAt(v time.Time) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.WhereCondition[columndefinition.ColumnDefinition]{
-		Field: "UpdatedAt",
-		Value: v,
+func ColumnDefinitionUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
+	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func ColumnDefinitionDeletedAt(v gorm.DeletedAt) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.WhereCondition[columndefinition.ColumnDefinition]{
-		Field: "DeletedAt",
-		Value: v,
+func ColumnDefinitionDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
+	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func ColumnDefinitionString(v string) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.WhereCondition[columndefinition.ColumnDefinition]{
-		Column: "string_something_else",
-		Value:  v,
+func ColumnDefinitionString(operator orm.Operator[string]) orm.WhereCondition[columndefinition.ColumnDefinition] {
+	return orm.FieldCondition[columndefinition.ColumnDefinition, string]{
+		Column:   "string_something_else",
+		Operator: operator,
 	}
 }

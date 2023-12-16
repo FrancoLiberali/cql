@@ -4,44 +4,43 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func SaleId(v orm.UUID) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "ID",
-		Value: v,
+func SaleId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func SaleCreatedAt(v time.Time) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "CreatedAt",
-		Value: v,
+func SaleCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func SaleUpdatedAt(v time.Time) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "UpdatedAt",
-		Value: v,
+func SaleUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func SaleDeletedAt(v gorm.DeletedAt) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "DeletedAt",
-		Value: v,
+func SaleDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func SaleCode(v int) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "Code",
-		Value: v,
+func SaleCode(operator orm.Operator[int]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, int]{
+		Field:    "Code",
+		Operator: operator,
 	}
 }
-func SaleDescription(v string) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "Description",
-		Value: v,
+func SaleDescription(operator orm.Operator[string]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, string]{
+		Field:    "Description",
+		Operator: operator,
 	}
 }
 func SaleProduct(conditions ...orm.Condition[models.Product]) orm.Condition[models.Sale] {
@@ -51,10 +50,10 @@ func SaleProduct(conditions ...orm.Condition[models.Product]) orm.Condition[mode
 		T2Field:    "ID",
 	}
 }
-func SaleProductId(v orm.UUID) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "ProductID",
-		Value: v,
+func SaleProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, orm.UUID]{
+		Field:    "ProductID",
+		Operator: operator,
 	}
 }
 func SaleSeller(conditions ...orm.Condition[models.Seller]) orm.Condition[models.Sale] {
@@ -64,9 +63,9 @@ func SaleSeller(conditions ...orm.Condition[models.Seller]) orm.Condition[models
 		T2Field:    "ID",
 	}
 }
-func SaleSellerId(v orm.UUID) orm.WhereCondition[models.Sale] {
-	return orm.WhereCondition[models.Sale]{
-		Field: "SellerID",
-		Value: v,
+func SaleSellerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Sale] {
+	return orm.FieldCondition[models.Sale, orm.UUID]{
+		Field:    "SellerID",
+		Operator: operator,
 	}
 }

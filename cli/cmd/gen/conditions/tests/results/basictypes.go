@@ -4,139 +4,138 @@ package conditions
 import (
 	basictypes "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/basictypes"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func BasicTypesId(v orm.UUID) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "ID",
-		Value: v,
+func BasicTypesId(operator orm.Operator[orm.UUID]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func BasicTypesCreatedAt(v time.Time) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "CreatedAt",
-		Value: v,
+func BasicTypesCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func BasicTypesUpdatedAt(v time.Time) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "UpdatedAt",
-		Value: v,
+func BasicTypesUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func BasicTypesDeletedAt(v gorm.DeletedAt) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "DeletedAt",
-		Value: v,
+func BasicTypesDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func BasicTypesBool(v bool) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Bool",
-		Value: v,
+func BasicTypesBool(operator orm.Operator[bool]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, bool]{
+		Field:    "Bool",
+		Operator: operator,
 	}
 }
-func BasicTypesInt(v int) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Int",
-		Value: v,
+func BasicTypesInt(operator orm.Operator[int]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, int]{
+		Field:    "Int",
+		Operator: operator,
 	}
 }
-func BasicTypesInt8(v int8) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Int8",
-		Value: v,
+func BasicTypesInt8(operator orm.Operator[int8]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, int8]{
+		Field:    "Int8",
+		Operator: operator,
 	}
 }
-func BasicTypesInt16(v int16) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Int16",
-		Value: v,
+func BasicTypesInt16(operator orm.Operator[int16]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, int16]{
+		Field:    "Int16",
+		Operator: operator,
 	}
 }
-func BasicTypesInt32(v int32) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Int32",
-		Value: v,
+func BasicTypesInt32(operator orm.Operator[int32]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, int32]{
+		Field:    "Int32",
+		Operator: operator,
 	}
 }
-func BasicTypesInt64(v int64) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Int64",
-		Value: v,
+func BasicTypesInt64(operator orm.Operator[int64]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, int64]{
+		Field:    "Int64",
+		Operator: operator,
 	}
 }
-func BasicTypesUInt(v uint) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "UInt",
-		Value: v,
+func BasicTypesUInt(operator orm.Operator[uint]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, uint]{
+		Field:    "UInt",
+		Operator: operator,
 	}
 }
-func BasicTypesUInt8(v uint8) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "UInt8",
-		Value: v,
+func BasicTypesUInt8(operator orm.Operator[uint8]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, uint8]{
+		Field:    "UInt8",
+		Operator: operator,
 	}
 }
-func BasicTypesUInt16(v uint16) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "UInt16",
-		Value: v,
+func BasicTypesUInt16(operator orm.Operator[uint16]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, uint16]{
+		Field:    "UInt16",
+		Operator: operator,
 	}
 }
-func BasicTypesUInt32(v uint32) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "UInt32",
-		Value: v,
+func BasicTypesUInt32(operator orm.Operator[uint32]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, uint32]{
+		Field:    "UInt32",
+		Operator: operator,
 	}
 }
-func BasicTypesUInt64(v uint64) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "UInt64",
-		Value: v,
+func BasicTypesUInt64(operator orm.Operator[uint64]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, uint64]{
+		Field:    "UInt64",
+		Operator: operator,
 	}
 }
-func BasicTypesUIntptr(v uintptr) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "UIntptr",
-		Value: v,
+func BasicTypesUIntptr(operator orm.Operator[uintptr]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, uintptr]{
+		Field:    "UIntptr",
+		Operator: operator,
 	}
 }
-func BasicTypesFloat32(v float32) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Float32",
-		Value: v,
+func BasicTypesFloat32(operator orm.Operator[float32]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, float32]{
+		Field:    "Float32",
+		Operator: operator,
 	}
 }
-func BasicTypesFloat64(v float64) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Float64",
-		Value: v,
+func BasicTypesFloat64(operator orm.Operator[float64]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, float64]{
+		Field:    "Float64",
+		Operator: operator,
 	}
 }
-func BasicTypesComplex64(v complex64) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Complex64",
-		Value: v,
+func BasicTypesComplex64(operator orm.Operator[complex64]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, complex64]{
+		Field:    "Complex64",
+		Operator: operator,
 	}
 }
-func BasicTypesComplex128(v complex128) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Complex128",
-		Value: v,
+func BasicTypesComplex128(operator orm.Operator[complex128]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, complex128]{
+		Field:    "Complex128",
+		Operator: operator,
 	}
 }
-func BasicTypesString(v string) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "String",
-		Value: v,
+func BasicTypesString(operator orm.Operator[string]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, string]{
+		Field:    "String",
+		Operator: operator,
 	}
 }
-func BasicTypesByte(v uint8) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.WhereCondition[basictypes.BasicTypes]{
-		Field: "Byte",
-		Value: v,
+func BasicTypesByte(operator orm.Operator[uint8]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, uint8]{
+		Field:    "Byte",
+		Operator: operator,
 	}
 }
