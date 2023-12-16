@@ -1,4 +1,4 @@
-package cmd
+package gen
 
 import (
 	"embed"
@@ -18,19 +18,15 @@ import (
 var genEmbedFS embed.FS
 
 // genCommand represents the badaas-cli gen command
-var genCommand = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
-	Use:   "gen",
-	Short: "Generate files and configurations necessary to use BadAss",
-	Long:  `gen is the command you can use to generate the files and configurations necessary for your project to use BadAss in a simple way.`,
+var genDockerCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
+	Use:   "docker",
+	Short: "Generate files and configurations necessary to use badaas over docker",
+	Long:  `gen docker is the command you can use to generate the files and configurations necessary for your project to use BadAss in a simple way.`,
 	Run:   generateDockerFiles,
 })
 
 // directory where the generated files will be saved
 const destBadaasDir = "badaas"
-
-func init() {
-	rootCmd.AddSubCommand(genCommand)
-}
 
 // copies all docker and configurations related files from the embed file system to the destination folder
 func generateDockerFiles(cmd *cobra.Command, args []string) {
