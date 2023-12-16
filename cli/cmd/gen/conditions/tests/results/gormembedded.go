@@ -4,38 +4,37 @@ package conditions
 import (
 	gormembedded "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/gormembedded"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func GormEmbeddedId(v uint) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.WhereCondition[gormembedded.GormEmbedded]{
-		Field: "ID",
-		Value: v,
+func GormEmbeddedId(operator orm.Operator[uint]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, uint]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func GormEmbeddedCreatedAt(v time.Time) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.WhereCondition[gormembedded.GormEmbedded]{
-		Field: "CreatedAt",
-		Value: v,
+func GormEmbeddedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func GormEmbeddedUpdatedAt(v time.Time) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.WhereCondition[gormembedded.GormEmbedded]{
-		Field: "UpdatedAt",
-		Value: v,
+func GormEmbeddedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func GormEmbeddedDeletedAt(v gorm.DeletedAt) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.WhereCondition[gormembedded.GormEmbedded]{
-		Field: "DeletedAt",
-		Value: v,
+func GormEmbeddedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func GormEmbeddedGormEmbeddedInt(v int) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.WhereCondition[gormembedded.GormEmbedded]{
+func GormEmbeddedGormEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, int]{
 		ColumnPrefix: "gorm_embedded_",
 		Field:        "Int",
-		Value:        v,
+		Operator:     operator,
 	}
 }

@@ -4,32 +4,31 @@ package conditions
 import (
 	hasone "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/hasone"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func CountryId(v orm.UUID) orm.WhereCondition[hasone.Country] {
-	return orm.WhereCondition[hasone.Country]{
-		Field: "ID",
-		Value: v,
+func CountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasone.Country] {
+	return orm.FieldCondition[hasone.Country, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func CountryCreatedAt(v time.Time) orm.WhereCondition[hasone.Country] {
-	return orm.WhereCondition[hasone.Country]{
-		Field: "CreatedAt",
-		Value: v,
+func CountryCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
+	return orm.FieldCondition[hasone.Country, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func CountryUpdatedAt(v time.Time) orm.WhereCondition[hasone.Country] {
-	return orm.WhereCondition[hasone.Country]{
-		Field: "UpdatedAt",
-		Value: v,
+func CountryUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
+	return orm.FieldCondition[hasone.Country, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func CountryDeletedAt(v gorm.DeletedAt) orm.WhereCondition[hasone.Country] {
-	return orm.WhereCondition[hasone.Country]{
-		Field: "DeletedAt",
-		Value: v,
+func CountryDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
+	return orm.FieldCondition[hasone.Country, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
 func CountryCapital(conditions ...orm.Condition[hasone.City]) orm.Condition[hasone.Country] {

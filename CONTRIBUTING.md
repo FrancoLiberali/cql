@@ -1,4 +1,4 @@
-# Contribute to the development of badaas
+# Contribute to the development of badaas 
 
 - [Contribute to the development of badaas](#contribute-to-the-development-of-badaas)
   - [Tests](#tests)

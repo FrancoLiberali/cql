@@ -4,139 +4,138 @@ package conditions
 import (
 	basicslicespointer "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/basicslicespointer"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func BasicSlicesPointerId(v orm.UUID) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "ID",
-		Value: v,
+func BasicSlicesPointerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerCreatedAt(v time.Time) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "CreatedAt",
-		Value: v,
+func BasicSlicesPointerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerUpdatedAt(v time.Time) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "UpdatedAt",
-		Value: v,
+func BasicSlicesPointerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerDeletedAt(v gorm.DeletedAt) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "DeletedAt",
-		Value: v,
+func BasicSlicesPointerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerBool(v []bool) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Bool",
-		Value: v,
+func BasicSlicesPointerBool(operator orm.Operator[[]bool]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []bool]{
+		Field:    "Bool",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerInt(v []int) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Int",
-		Value: v,
+func BasicSlicesPointerInt(operator orm.Operator[[]int]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int]{
+		Field:    "Int",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerInt8(v []int8) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Int8",
-		Value: v,
+func BasicSlicesPointerInt8(operator orm.Operator[[]int8]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int8]{
+		Field:    "Int8",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerInt16(v []int16) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Int16",
-		Value: v,
+func BasicSlicesPointerInt16(operator orm.Operator[[]int16]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int16]{
+		Field:    "Int16",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerInt32(v []int32) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Int32",
-		Value: v,
+func BasicSlicesPointerInt32(operator orm.Operator[[]int32]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int32]{
+		Field:    "Int32",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerInt64(v []int64) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Int64",
-		Value: v,
+func BasicSlicesPointerInt64(operator orm.Operator[[]int64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int64]{
+		Field:    "Int64",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerUInt(v []uint) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "UInt",
-		Value: v,
+func BasicSlicesPointerUInt(operator orm.Operator[[]uint]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint]{
+		Field:    "UInt",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerUInt8(v []uint8) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "UInt8",
-		Value: v,
+func BasicSlicesPointerUInt8(operator orm.Operator[[]uint8]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint8]{
+		Field:    "UInt8",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerUInt16(v []uint16) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "UInt16",
-		Value: v,
+func BasicSlicesPointerUInt16(operator orm.Operator[[]uint16]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint16]{
+		Field:    "UInt16",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerUInt32(v []uint32) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "UInt32",
-		Value: v,
+func BasicSlicesPointerUInt32(operator orm.Operator[[]uint32]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint32]{
+		Field:    "UInt32",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerUInt64(v []uint64) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "UInt64",
-		Value: v,
+func BasicSlicesPointerUInt64(operator orm.Operator[[]uint64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint64]{
+		Field:    "UInt64",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerUIntptr(v []uintptr) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "UIntptr",
-		Value: v,
+func BasicSlicesPointerUIntptr(operator orm.Operator[[]uintptr]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uintptr]{
+		Field:    "UIntptr",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerFloat32(v []float32) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Float32",
-		Value: v,
+func BasicSlicesPointerFloat32(operator orm.Operator[[]float32]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []float32]{
+		Field:    "Float32",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerFloat64(v []float64) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Float64",
-		Value: v,
+func BasicSlicesPointerFloat64(operator orm.Operator[[]float64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []float64]{
+		Field:    "Float64",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerComplex64(v []complex64) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Complex64",
-		Value: v,
+func BasicSlicesPointerComplex64(operator orm.Operator[[]complex64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []complex64]{
+		Field:    "Complex64",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerComplex128(v []complex128) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Complex128",
-		Value: v,
+func BasicSlicesPointerComplex128(operator orm.Operator[[]complex128]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []complex128]{
+		Field:    "Complex128",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerString(v []string) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "String",
-		Value: v,
+func BasicSlicesPointerString(operator orm.Operator[[]string]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []string]{
+		Field:    "String",
+		Operator: operator,
 	}
 }
-func BasicSlicesPointerByte(v []uint8) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.WhereCondition[basicslicespointer.BasicSlicesPointer]{
-		Field: "Byte",
-		Value: v,
+func BasicSlicesPointerByte(operator orm.Operator[[]uint8]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint8]{
+		Field:    "Byte",
+		Operator: operator,
 	}
 }

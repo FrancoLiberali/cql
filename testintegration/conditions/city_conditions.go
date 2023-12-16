@@ -4,43 +4,42 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func CityId(v orm.UUID) orm.WhereCondition[models.City] {
-	return orm.WhereCondition[models.City]{
-		Field: "ID",
-		Value: v,
+func CityId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func CityCreatedAt(v time.Time) orm.WhereCondition[models.City] {
-	return orm.WhereCondition[models.City]{
-		Field: "CreatedAt",
-		Value: v,
+func CityCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func CityUpdatedAt(v time.Time) orm.WhereCondition[models.City] {
-	return orm.WhereCondition[models.City]{
-		Field: "UpdatedAt",
-		Value: v,
+func CityUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func CityDeletedAt(v gorm.DeletedAt) orm.WhereCondition[models.City] {
-	return orm.WhereCondition[models.City]{
-		Field: "DeletedAt",
-		Value: v,
+func CityDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func CityName(v string) orm.WhereCondition[models.City] {
-	return orm.WhereCondition[models.City]{
-		Field: "Name",
-		Value: v,
+func CityName(operator orm.Operator[string]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, string]{
+		Field:    "Name",
+		Operator: operator,
 	}
 }
-func CityCountryId(v orm.UUID) orm.WhereCondition[models.City] {
-	return orm.WhereCondition[models.City]{
-		Field: "CountryID",
-		Value: v,
+func CityCountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, orm.UUID]{
+		Field:    "CountryID",
+		Operator: operator,
 	}
 }

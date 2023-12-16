@@ -68,6 +68,12 @@ func TestCustomType(t *testing.T) {
 	})
 }
 
+func TestNullableTypes(t *testing.T) {
+	doTest(t, "./tests/nullabletypes", []Comparison{
+		{Have: "nullable_types_conditions.go", Expected: "./tests/results/nullabletypes.go"},
+	})
+}
+
 func TestBelongsTo(t *testing.T) {
 	doTest(t, "./tests/belongsto", []Comparison{
 		{Have: "owner_conditions.go", Expected: "./tests/results/belongsto_owner.go"},

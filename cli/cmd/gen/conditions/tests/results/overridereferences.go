@@ -4,32 +4,31 @@ package conditions
 import (
 	overridereferences "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/overridereferences"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func PhoneId(v orm.UUID) orm.WhereCondition[overridereferences.Phone] {
-	return orm.WhereCondition[overridereferences.Phone]{
-		Field: "ID",
-		Value: v,
+func PhoneId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overridereferences.Phone] {
+	return orm.FieldCondition[overridereferences.Phone, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func PhoneCreatedAt(v time.Time) orm.WhereCondition[overridereferences.Phone] {
-	return orm.WhereCondition[overridereferences.Phone]{
-		Field: "CreatedAt",
-		Value: v,
+func PhoneCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
+	return orm.FieldCondition[overridereferences.Phone, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func PhoneUpdatedAt(v time.Time) orm.WhereCondition[overridereferences.Phone] {
-	return orm.WhereCondition[overridereferences.Phone]{
-		Field: "UpdatedAt",
-		Value: v,
+func PhoneUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
+	return orm.FieldCondition[overridereferences.Phone, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func PhoneDeletedAt(v gorm.DeletedAt) orm.WhereCondition[overridereferences.Phone] {
-	return orm.WhereCondition[overridereferences.Phone]{
-		Field: "DeletedAt",
-		Value: v,
+func PhoneDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
+	return orm.FieldCondition[overridereferences.Phone, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
 func PhoneBrand(conditions ...orm.Condition[overridereferences.Brand]) orm.Condition[overridereferences.Phone] {
@@ -39,9 +38,9 @@ func PhoneBrand(conditions ...orm.Condition[overridereferences.Brand]) orm.Condi
 		T2Field:    "Name",
 	}
 }
-func PhoneBrandName(v string) orm.WhereCondition[overridereferences.Phone] {
-	return orm.WhereCondition[overridereferences.Phone]{
-		Field: "BrandName",
-		Value: v,
+func PhoneBrandName(operator orm.Operator[string]) orm.WhereCondition[overridereferences.Phone] {
+	return orm.FieldCondition[overridereferences.Phone, string]{
+		Field:    "BrandName",
+		Operator: operator,
 	}
 }

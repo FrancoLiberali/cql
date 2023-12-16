@@ -4,38 +4,37 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func CompanyId(v orm.UUID) orm.WhereCondition[models.Company] {
-	return orm.WhereCondition[models.Company]{
-		Field: "ID",
-		Value: v,
+func CompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func CompanyCreatedAt(v time.Time) orm.WhereCondition[models.Company] {
-	return orm.WhereCondition[models.Company]{
-		Field: "CreatedAt",
-		Value: v,
+func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func CompanyUpdatedAt(v time.Time) orm.WhereCondition[models.Company] {
-	return orm.WhereCondition[models.Company]{
-		Field: "UpdatedAt",
-		Value: v,
+func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func CompanyDeletedAt(v gorm.DeletedAt) orm.WhereCondition[models.Company] {
-	return orm.WhereCondition[models.Company]{
-		Field: "DeletedAt",
-		Value: v,
+func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func CompanyName(v string) orm.WhereCondition[models.Company] {
-	return orm.WhereCondition[models.Company]{
-		Field: "Name",
-		Value: v,
+func CompanyName(operator orm.Operator[string]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, string]{
+		Field:    "Name",
+		Operator: operator,
 	}
 }
 func SellerCompany(conditions ...orm.Condition[models.Company]) orm.Condition[models.Seller] {

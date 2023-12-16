@@ -37,7 +37,7 @@ jobs:
         run: gotestsum --junitfile unit-tests.xml $(go list ./... | grep -v testintegration) -coverpkg=./... -coverprofile=coverage_unit.out
       - uses: actions/upload-artifact@v3
         with:
-          name: coverage_unit
+          name: coverage
           path: coverage_unit.out
       - name: Test Report
         uses: dorny/test-reporter@v1
@@ -74,7 +74,7 @@ jobs:
           reporter: java-junit            # Format of test results
       - uses: actions/upload-artifact@v3
         with:
-          name: coverage_int
+          name: coverage
           path: coverage_int.out
       - name: Stop containers
         run: docker stop badaas-test-db

@@ -60,6 +60,10 @@ func (field Field) getRelatedTypeFKAttribute(structName string) string {
 	return structName + "ID"
 }
 
+func (field Field) GetType() types.Type {
+	return field.Type.Type
+}
+
 // Get field's type full string (pkg + name)
 func (field Field) TypeString() string {
 	return field.Type.String()

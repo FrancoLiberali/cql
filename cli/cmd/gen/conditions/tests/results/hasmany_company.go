@@ -4,32 +4,31 @@ package conditions
 import (
 	hasmany "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/hasmany"
 	orm "github.com/ditrit/badaas/orm"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func CompanyId(v orm.UUID) orm.WhereCondition[hasmany.Company] {
-	return orm.WhereCondition[hasmany.Company]{
-		Field: "ID",
-		Value: v,
+func CompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Company] {
+	return orm.FieldCondition[hasmany.Company, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func CompanyCreatedAt(v time.Time) orm.WhereCondition[hasmany.Company] {
-	return orm.WhereCondition[hasmany.Company]{
-		Field: "CreatedAt",
-		Value: v,
+func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
+	return orm.FieldCondition[hasmany.Company, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func CompanyUpdatedAt(v time.Time) orm.WhereCondition[hasmany.Company] {
-	return orm.WhereCondition[hasmany.Company]{
-		Field: "UpdatedAt",
-		Value: v,
+func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
+	return orm.FieldCondition[hasmany.Company, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func CompanyDeletedAt(v gorm.DeletedAt) orm.WhereCondition[hasmany.Company] {
-	return orm.WhereCondition[hasmany.Company]{
-		Field: "DeletedAt",
-		Value: v,
+func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
+	return orm.FieldCondition[hasmany.Company, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
 func SellerCompany(conditions ...orm.Condition[hasmany.Company]) orm.Condition[hasmany.Seller] {

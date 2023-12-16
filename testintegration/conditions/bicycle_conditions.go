@@ -4,38 +4,37 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
 	"time"
 )
 
-func BicycleId(v orm.UUID) orm.WhereCondition[models.Bicycle] {
-	return orm.WhereCondition[models.Bicycle]{
-		Field: "ID",
-		Value: v,
+func BicycleId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, orm.UUID]{
+		Field:    "ID",
+		Operator: operator,
 	}
 }
-func BicycleCreatedAt(v time.Time) orm.WhereCondition[models.Bicycle] {
-	return orm.WhereCondition[models.Bicycle]{
-		Field: "CreatedAt",
-		Value: v,
+func BicycleCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, time.Time]{
+		Field:    "CreatedAt",
+		Operator: operator,
 	}
 }
-func BicycleUpdatedAt(v time.Time) orm.WhereCondition[models.Bicycle] {
-	return orm.WhereCondition[models.Bicycle]{
-		Field: "UpdatedAt",
-		Value: v,
+func BicycleUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, time.Time]{
+		Field:    "UpdatedAt",
+		Operator: operator,
 	}
 }
-func BicycleDeletedAt(v gorm.DeletedAt) orm.WhereCondition[models.Bicycle] {
-	return orm.WhereCondition[models.Bicycle]{
-		Field: "DeletedAt",
-		Value: v,
+func BicycleDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, time.Time]{
+		Field:    "DeletedAt",
+		Operator: operator,
 	}
 }
-func BicycleName(v string) orm.WhereCondition[models.Bicycle] {
-	return orm.WhereCondition[models.Bicycle]{
-		Field: "Name",
-		Value: v,
+func BicycleName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, string]{
+		Field:    "Name",
+		Operator: operator,
 	}
 }
 func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.Condition[models.Bicycle] {
@@ -45,9 +44,9 @@ func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.Condition[mode
 		T2Field:    "Name",
 	}
 }
-func BicycleOwnerName(v string) orm.WhereCondition[models.Bicycle] {
-	return orm.WhereCondition[models.Bicycle]{
-		Field: "OwnerName",
-		Value: v,
+func BicycleOwnerName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
+	return orm.FieldCondition[models.Bicycle, string]{
+		Field:    "OwnerName",
+		Operator: operator,
 	}
 }
