@@ -1,0 +1,13 @@
+version: '3.5'
+
+services:
+  api:
+    image: badaas-api:latest
+    build:
+      context: ../../..
+      dockerfile: ./badaas/docker/api/Dockerfile
+    container_name: "badaas-api"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
