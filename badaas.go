@@ -12,7 +12,6 @@ import (
 	"github.com/ditrit/badaas/logger"
 	"github.com/ditrit/badaas/persistence"
 	"github.com/ditrit/badaas/router"
-	"github.com/ditrit/badaas/services"
 	"github.com/ditrit/verdeter"
 )
 
@@ -69,7 +68,6 @@ func (badaas BaDaaSInitializer) runHTTPServer(cmd *cobra.Command, args []string)
 		router.RouterModule,
 		logger.LoggerModule,
 		persistence.PersistanceModule,
-		services.ServicesModule,
 
 		// logger for fx
 		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger {

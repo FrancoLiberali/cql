@@ -2,22 +2,35 @@
 
 Badaas enables the effortless construction of ***distributed, resilient, highly available and secure applications by design***, while ensuring very simple deployment and management (NoOps).
 
-Badaas provides several key features:
+> **Warning**
+> BaDaaS is still under development. Each of its components can have a different state of evolution that you can consult in [Features and components](#features-and-components)
 
-- **Authentication**: Badaas can authenticate users using its internal authentication scheme or externally by using protocols such as OIDC, SAML, Oauth2...
-- **Authorization**: On resource access, Badaas will check if the user is authorized using a RBAC model.
-- **Distribution**: Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset).
-- **Persistence**: Applicative objects are persisted as well as user files. Those resources are shared across the clusters to increase resiliency.
-- **Querying Resources**: Resources are accessible via a REST API.
-- **Posix compliant**: Badaas strives towards being a good unix citizen and respecting commonly accepted norms. (see [Configuration](#configuration))
-- **Advanced logs management**: Badaas provides an interface to interact with the logs produced by the clusters. Logs are formatted in json by default.
+- [BADAAS: Backend And Distribution As A Service](#badaas-backend-and-distribution-as-a-service)
+  - [Features and components](#features-and-components)
+  - [Quickstart](#quickstart)
+    - [Example](#example)
+    - [Step-by-step instructions](#step-by-step-instructions)
+      - [Config badaas functionalities](#config-badaas-functionalities)
+      - [Add your own functionalities](#add-your-own-functionalities)
+      - [Run it](#run-it)
+    - [Provided functionalities](#provided-functionalities)
+      - [InfoModule](#infomodule)
+      - [AuthModule](#authmodule)
+    - [Configuration](#configuration)
+  - [Contributing](#contributing)
+  - [License](#license)
 
-- [Quickstart](#quickstart)
-  - [Example](#example)
-  - [Step-by-step instructions](#step-by-step-instructions)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
+## Features and components
+
+Badaas provides several key features, each provided by a component that can be used independently and has a different state of evolution:
+
+- **Authentication**(unstable): Badaas can authenticate users using its internal authentication scheme or externally by using protocols such as OIDC, SAML, Oauth2...
+- **Authorization**(wip_unstable): On resource access, Badaas will check if the user is authorized using a RBAC model.
+- **Distribution**(todo): Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset).
+- **Persistence**(wip_unstable): Applicative objects are persisted as well as user files. Those resources are shared across the clusters to increase resiliency. To achieve this, BaDaaS uses the [BaDaaS ORM](https://github.com/ditrit/badaas/orm) component.
+- **Querying Resources**(unstable): Resources are accessible via a REST API.
+- **Posix compliant**(stable): Badaas strives towards being a good unix citizen and respecting commonly accepted norms. (see [Configuration](#configuration))
+- **Advanced logs management**(todo): Badaas provides an interface to interact with the logs produced by the clusters. Logs are formatted in json by default.
 
 ## Quickstart
 
@@ -54,8 +67,8 @@ You are free to choose which badaas functionalities you wish to use. To add them
 ```go
 func main() {
   badaas.BaDaaS.AddModules(
-    controllers.InfoControllerModule,
-    controllers.AuthControllerModule,
+    badaas.InfoModule,
+    badaas.AuthModule,
   ).Provide(
     NewAPIVersion,
   ).Start()
@@ -111,14 +124,14 @@ Once you have defined the functionalities of your project (the `/hello` route in
 
 ### Provided functionalities
 
-#### InfoControllerModule
+#### InfoModule
 
-`InfoControllerModule` adds the path `/info`, where the api version will be answered. To set the version you want to be responded you must provide a function that returns it:
+`InfoModule` adds the path `/info`, where the api version will be answered. To set the version you want to be responded you must provide a function that returns it:
 
 ```go
 func main() {
   badaas.BaDaaS.AddModules(
-    controllers.InfoControllerModule,
+    badaas.InfoModule,
   ).Provide(
     NewAPIVersion,
   ).Start()
@@ -129,14 +142,14 @@ func NewAPIVersion() *semver.Version {
 }
 ```
 
-#### AuthControllerModule
+#### AuthModule
 
-`AuthControllerModule` adds `/login` and `/logout`, which allow us to add authentication to our application in a simple way:
+`AuthModule` adds `/login` and `/logout`, which allow us to add authentication to our application in a simple way:
 
 ```go
 func main() {
   badaas.BaDaaS.AddModules(
-    controllers.AuthControllerModule,
+    badaas.AuthModule,
   ).Start()
 }
 ```

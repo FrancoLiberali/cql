@@ -5,22 +5,21 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ditrit/badaas/persistence/models/dto"
 	"go.uber.org/zap"
+
+	"github.com/ditrit/badaas/persistence/models/dto"
 )
 
-var (
-	// AnError is an HTTPError instance useful for testing.  If the code does not care
-	// about HTTPError specifics, and only needs to return the HTTPError for example, this
-	// HTTPError should be used to make the test code more readable.
-	AnError HTTPError = &HTTPErrorImpl{
-		Status:      -1,
-		Err:         "TESTING ERROR",
-		Message:     "USE ONLY FOR TESTING",
-		GolangError: nil,
-		toLog:       true,
-	}
-)
+// AnError is an HTTPError instance useful for testing.  If the code does not care
+// about HTTPError specifics, and only needs to return the HTTPError for example, this
+// HTTPError should be used to make the test code more readable.
+var AnError HTTPError = &HTTPErrorImpl{
+	Status:      -1,
+	Err:         "TESTING ERROR",
+	Message:     "USE ONLY FOR TESTING",
+	GolangError: nil,
+	toLog:       true,
+}
 
 type HTTPError interface {
 	error
@@ -113,6 +112,11 @@ func NewInternalServerError(errorName string, msg string, err error) HTTPError {
 		err,
 		true,
 	)
+}
+
+// Constructor for an HttpError "DB Error", a internal server error produced by a query
+func NewDBError(err error) HTTPError {
+	return NewInternalServerError("db error", "database query failed", err)
 }
 
 // A constructor for an HttpError "Unauthorized Error"

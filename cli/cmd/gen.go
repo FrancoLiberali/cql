@@ -29,7 +29,7 @@ var genCommand = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 const destBadaasDir = "badaas"
 
 func init() {
-	rootCommand.AddSubCommand(genCommand)
+	rootCmd.AddSubCommand(genCommand)
 }
 
 // copies all docker and configurations related files from the embed file system to the destination folder

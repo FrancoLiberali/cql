@@ -41,8 +41,10 @@ func TestMain(_ *testing.M) {
 	pflag.Parse()
 	opts.Paths = pflag.Args()
 
-	logger, _ := zap.NewDevelopment()
-	var err error
+	logger, err := zap.NewDevelopment()
+	if err != nil {
+		panic(err)
+	}
 
 	viper.Set(configuration.DatabasePortKey, 26257)
 	viper.Set(configuration.DatabaseHostKey, "localhost")
@@ -52,7 +54,8 @@ func TestMain(_ *testing.M) {
 	viper.Set(configuration.DatabaseSslmodeKey, "disable")
 	viper.Set(configuration.DatabaseRetryKey, 10)
 	viper.Set(configuration.DatabaseRetryDurationKey, 5)
-	db, err = gormdatabase.CreateDatabaseConnectionFromConfiguration(
+
+	db, err = gormdatabase.SetupDatabaseConnection(
 		logger,
 		configuration.NewDatabaseConfiguration(),
 	)
@@ -65,6 +68,9 @@ func TestMain(_ *testing.M) {
 		ScenarioInitializer: InitializeScenario,
 		Options:             &opts,
 	}.Run()
+
+	// let db cleaned
+	CleanDB(db)
 
 	os.Exit(status)
 }

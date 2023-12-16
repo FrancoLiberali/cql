@@ -5,7 +5,8 @@
 - [Install with go install](#install-with-go-install)
 - [Build from sources](#build-from-sources)
 - [Commands](#commands)
-  - [badaas-cli gen](#badaas-cli-gen)
+  - [badaas-cli gen docker](#badaas-cli-gen-docker)
+  - [badaas-cli gen conditions](#badaas-cli-gen-conditions)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -54,19 +55,25 @@ For more information about the functionality provided and how to use each comman
 badaas-cli help [command]
 ```
 
-### badaas-cli gen
+### badaas-cli gen docker
 
-gen is the command you can use to generate the files and configurations necessary for your project to use BadAss in a simple way.
+gen docker is the command you can use to generate the files and configurations necessary for your project to use badaas in a simple way.
 
-`gen` will generate the docker and configuration files needed to run the application in the `badaas/docker` and `badaas/config` folders respectively.
+`gen docker` will generate the docker and configuration files needed to run the application in the `badaas/docker` and `badaas/config` folders respectively.
 
-All these files can be modified in case you need different values than those provided by default. For more information about the configuration head to [configuration docs](../../configuration.md).
+All these files can be modified in case you need different values than those provided by default. For more information about the configuration head to [configuration docs](github.com/ditrit/badaas/configuration.md).
 
 A Makefile will be generated for the execution of a badaas server, with the command:
 
 ```bash
 make badaas_run
 ```
+
+### badaas-cli gen conditions
+
+gen conditions is the command you can use to generate conditions to query your objects using badaas-orm. For each BaDaaS Model found in the input packages a file containing all possible Conditions on that object will be generated, allowing you to use badaas-orm.
+
+Its use is recommended through `go generate`. To see an example of how to do it click [here](https://github.com/ditrit/badaa-orm-example/blob/main/standalone/conditions/orm.go).
 
 ## Contributing
 
