@@ -1,0 +1,41 @@
+name: cli
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+    - cli/**
+
+jobs:
+  branch-naming-rules:
+    name: Check branch name
+    runs-on: ubuntu-latest
+    steps:
+      - uses: deepakputhraya/action-branch-name@master
+        with:
+          regex: '^(feature|bugfix|improvement|library|prerelease|release|hotfix|poc)\/[a-z0-9_.-]+$'
+          allowed_prefixes: 'feature,bugfix,improvement,library,prerelease,release,hotfix,poc'
+          ignore: main,dev
+          min_length: 5
+          max_length: 50
+
+  unit-tests:
+    name: Unit tests
+    needs: [branch-naming-rules]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: Run unit tests
+        run: go test ./cli/... -coverprofile=coverage_unit.out -v
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage_unit
+          path: coverage_unit.out

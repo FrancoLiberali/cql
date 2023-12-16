@@ -4,12 +4,13 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ditrit/badaas/configuration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/ditrit/badaas/configuration"
 )
 
 var HTTPServerConfigurationString = `server:
@@ -27,10 +28,17 @@ func TestHTTPServerConfigurationGetPort(t *testing.T) {
 	HTTPServerConfiguration := configuration.NewHTTPServerConfiguration()
 	assert.Equal(t, 8000, HTTPServerConfiguration.GetPort())
 }
+
 func TestHTTPServerConfigurationGetHost(t *testing.T) {
 	setupViperEnvironment(HTTPServerConfigurationString)
 	HTTPServerConfiguration := configuration.NewHTTPServerConfiguration()
 	assert.Equal(t, "0.0.0.0", HTTPServerConfiguration.GetHost())
+}
+
+func TestHTTPServerConfigurationGetAddr(t *testing.T) {
+	setupViperEnvironment(HTTPServerConfigurationString)
+	HTTPServerConfiguration := configuration.NewHTTPServerConfiguration()
+	assert.Equal(t, "0.0.0.0:8000", HTTPServerConfiguration.GetAddr())
 }
 
 func TestHTTPServerConfigurationGetMaxTimeout(t *testing.T) {

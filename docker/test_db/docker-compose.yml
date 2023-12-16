@@ -1,0 +1,17 @@
+# DEVELOPMENT ONLY, DO NOT USE FOR PRODUCTION
+version: '3.5'
+
+services:
+  db:
+    container_name: "badaas-test-db"
+    image: cockroachdb/cockroach:latest
+    volumes:
+      - .:/cockroach/files
+    working_dir: /cockroach
+    entrypoint: ./files/init.sh
+    ports:
+      - "26257:26257"
+      - "8080:8080" # Web based dashboard
+    environment:
+      - COCKROACH_USER=root
+      - COCKROACH_DATABASE=badaas_db

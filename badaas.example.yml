@@ -8,6 +8,9 @@ database:
   # (mandatory)
   port: 26257
 
+  # The name of the database to use. 
+  name: badaas_db
+
   # The sslmode of the connection to the database server. 
   # (mandatory)
   sslmode: disable
@@ -34,7 +37,7 @@ database:
 server:
   # The address to bind badaas to.
   # default ("0.0.0.0")
-  host: "" 
+  host: ""
 
   # The port badaas should use.
   # default (8000)
@@ -42,7 +45,7 @@ server:
 
   # The maximum timeout for the http server in seconds.
   # default (15)
-  timeout: 15 
+  timeout: 15
 
   # The settings for the pagination.
   pagination:
@@ -61,7 +64,7 @@ logger:
     template: "Receive {{method}} request on {{url}}"
 
 # The settings for session service
-# This section contains some good defaults, don't change thoses value unless you need to.
+# This section contains some good defaults, don't change those value unless you need to.
 session:
   # The duration of a user session, in seconds
   # Default (14400) equal to 4 hours
@@ -79,4 +82,3 @@ default:
   admin:
     # The admin password for the first run. Won't change is the admin user already exists.
     password: admin
-    

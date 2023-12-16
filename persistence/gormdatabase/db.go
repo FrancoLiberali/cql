@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ditrit/badaas/configuration"
-	"github.com/ditrit/badaas/persistence/gormdatabase/gormzap"
-	"github.com/ditrit/badaas/persistence/models"
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+
+	"github.com/ditrit/badaas/configuration"
+	"github.com/ditrit/badaas/persistence/gormdatabase/gormzap"
+	"github.com/ditrit/badaas/persistence/models"
 )
 
 // Create the dsn string from the configuration
@@ -32,7 +33,25 @@ func createDsn(host, username, password, sslmode, dbname string, port int) strin
 	)
 }
 
-// Initialize the database with using the database configuration
+// Creates the database object with using the database configuration
+// and then executes the auto-migration
+func SetupDatabaseConnection(logger *zap.Logger, databaseConfiguration configuration.DatabaseConfiguration) (*gorm.DB, error) {
+	db, err := CreateDatabaseConnectionFromConfiguration(logger, databaseConfiguration)
+	if err != nil {
+		return nil, err
+	}
+
+	err = AutoMigrate(logger, db)
+	if err != nil {
+		logger.Error("migration failed")
+		return nil, err
+	}
+	logger.Info("AutoMigration was executed successfully")
+
+	return db, nil
+}
+
+// Creates the database object with using the database configuration
 func CreateDatabaseConnectionFromConfiguration(logger *zap.Logger, databaseConfiguration configuration.DatabaseConfiguration) (*gorm.DB, error) {
 	dsn := createDsnFromConf(databaseConfiguration)
 	var err error
@@ -41,12 +60,6 @@ func CreateDatabaseConnectionFromConfiguration(logger *zap.Logger, databaseConfi
 		database, err = initializeDBFromDsn(dsn, logger)
 		if err == nil {
 			logger.Sugar().Debugf("Database connection is active")
-			err = AutoMigrate(logger, database)
-			if err != nil {
-				logger.Error("migration failed")
-				return nil, err
-			}
-			logger.Info("AutoMigration was executed successfully")
 			return database, err
 		}
 		logger.Sugar().Debugf("Database connection failed with error %q", err.Error())
@@ -54,6 +67,7 @@ func CreateDatabaseConnectionFromConfiguration(logger *zap.Logger, databaseConfi
 			numberRetry+1, databaseConfiguration.GetRetry(), databaseConfiguration.GetRetryTime().String())
 		time.Sleep(databaseConfiguration.GetRetryTime())
 	}
+
 	return nil, err
 }
 
@@ -62,7 +76,6 @@ func initializeDBFromDsn(dsn string, logger *zap.Logger) (*gorm.DB, error) {
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: gormzap.New(logger),
 	})
-
 	if err != nil {
 		return nil, err
 	}
@@ -79,18 +92,9 @@ func initializeDBFromDsn(dsn string, logger *zap.Logger) (*gorm.DB, error) {
 	return database, nil
 }
 
-// Migrate the database using gorm [https://gorm.io/docs/migration.html#Auto-Migration]
-func autoMigrate(database *gorm.DB, listOfDatabaseTables []any) error {
-	err := database.AutoMigrate(listOfDatabaseTables...)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-// Run the automigration
+// Run the auto-migration
 func AutoMigrate(logger *zap.Logger, database *gorm.DB) error {
-	err := autoMigrate(database, models.ListOfTables)
+	err := database.AutoMigrate(models.ListOfTables...)
 	if err != nil {
 		return err
 	}

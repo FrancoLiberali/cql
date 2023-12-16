@@ -5,6 +5,7 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   branch-naming-rules:
     name: Check branch name
@@ -30,33 +31,12 @@ jobs:
         with:
           go-version: '^1.18'
           cache: true
-      - name: Run test
-        run:  go test $(go list ./... | sed 1d) -coverprofile=coverage.out -v
+      - name: Run unit tests
+        run:  go test ./... -coverprofile=coverage_unit.out -v
       - uses: actions/upload-artifact@v3
         with:
-          name: coverage
-          path: coverage.out
-
-  check-style:
-    name: Code style
-    needs: [branch-naming-rules]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - uses: actions/setup-go@v3
-        with:
-          go-version: '^1.18'
-          cache: true
-      
-      - name: golangci-lint
-        uses: golangci/golangci-lint-action@v3
-        with:
-          version: latest
-          skip-cache: true
-          skip-pkg-cache: true
-          skip-build-cache: true
+          name: coverage_unit
+          path: coverage_unit.out
 
   e2e-tests:
     name: E2E Tests
@@ -71,41 +51,21 @@ jobs:
           go-version: '^1.18'
           cache: true
       - name: Start containers
-        run: docker compose -f "scripts/e2e/docker-compose.yml" up -d --build
+        run: docker compose -f "docker/test_db/docker-compose.yml" -f "docker/test_api/docker-compose.yml" up -d --build
       - name: Wait for API server to be up
         uses: mydea/action-wait-for-api@v1
         with:
           url: "http://localhost:8000/info"
-          timeout: 20
+          timeout: 60
       - name: Run test
-        run:  go test -v
+        run:  go test ./test_e2e -v
       - name: Get logs 
         if: always()
-        run: docker compose -f "scripts/e2e/docker-compose.yml" logs --no-color 2>&1 | tee app.log &
+        run: docker compose -f "docker/test_db/docker-compose.yml" -f "docker/test_api/docker-compose.yml" logs --no-color 2>&1 | tee app.log &
       - name: Stop containers
         if: always()
-        run: docker compose -f "scripts/e2e/docker-compose.yml" down
+        run: docker compose -f "docker/test_db/docker-compose.yml" -f "docker/test_api/docker-compose.yml" down
       - uses: actions/upload-artifact@v3
         with:
           name: docker-compose-e2e-logs
           path: app.log
-      
-  sonarcloud:
-    name: SonarCloud
-    needs: [unit-tests, check-style]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-      - name: Download line coverage report
-        uses: actions/download-artifact@v3
-        with:
-          name: coverage
-          path: coverage.out
-      - name: SonarCloud Scan
-        uses: sonarsource/sonarcloud-github-action@master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-

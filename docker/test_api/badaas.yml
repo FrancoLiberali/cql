@@ -1,0 +1,23 @@
+server:
+  port: 8000
+  host: "0.0.0.0" # listening on all interfaces
+  timeout: 15 # in seconds
+  pagination:
+    page:
+      max: 10
+
+database:
+  host: badaas-test-db
+  port: 26257
+  sslmode: disable
+  username: root
+  password: postgres
+  name: badaas_db
+  init:
+    retry: 10
+    retryTime: 5
+
+logger:
+  mode: dev
+  request:
+    template: "Receive {{method}} request on {{url}}"

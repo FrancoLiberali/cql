@@ -110,7 +110,7 @@ func (sessionService *sessionServiceImpl) add(session *models.Session) httperror
 }
 
 // Initialize the session service
-func (sessionService *sessionServiceImpl) init() error {
+func (sessionService *sessionServiceImpl) init() {
 	sessionService.cache = make(map[uuid.UUID]*models.Session)
 	go func() {
 		for {
@@ -121,7 +121,6 @@ func (sessionService *sessionServiceImpl) init() error {
 			)
 		}
 	}()
-	return nil
 }
 
 // Get all sessions and save them in cache
@@ -228,7 +227,7 @@ func (sessionService *sessionServiceImpl) LogUserIn(user *models.User, response 
 func (sessionService *sessionServiceImpl) LogUserOut(sessionClaims *SessionClaims, response http.ResponseWriter) httperrors.HTTPError {
 	session := sessionService.get(sessionClaims.SessionUUID)
 	if session == nil {
-		return httperrors.NewUnauthorizedError("Authentification Error", "not authenticated")
+		return httperrors.NewUnauthorizedError("Authentication Error", "not authenticated")
 	}
 	err := sessionService.delete(session)
 	if err != nil {
@@ -245,8 +244,8 @@ func CreateAndSetAccessTokenCookie(w http.ResponseWriter, sessionUUID string) {
 		Path:     "/",
 		Value:    sessionUUID,
 		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode, // change to http.SameSiteStrictMode in prod
-		Secure:   false,                 // change to true in prod
+		SameSite: http.SameSiteNoneMode, // TODO change to http.SameSiteStrictMode in prod
+		Secure:   false,                 // TODO change to true in prod
 		Expires:  time.Now().Add(48 * time.Hour),
 	}
 	err := accessToken.Valid()

@@ -4,11 +4,17 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/ditrit/badaas/configuration"
+	"github.com/gorilla/mux"
 	"github.com/noirbizarre/gonja"
 	"github.com/noirbizarre/gonja/exec"
 	"go.uber.org/zap"
+
+	"github.com/ditrit/badaas/configuration"
 )
+
+func AddLoggerMiddleware(router *mux.Router, middlewareLogger MiddlewareLogger) {
+	router.Use(middlewareLogger.Handle)
+}
 
 // Log the requests data
 type MiddlewareLogger interface {
