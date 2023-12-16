@@ -3,6 +3,7 @@ package configuration
 import (
 	"time"
 
+	"github.com/ditrit/badaas/utils"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
@@ -100,7 +101,7 @@ func (databaseConfiguration *databaseConfigurationImpl) GetRetry() uint {
 
 // Return the waiting time between the database connections in seconds
 func (databaseConfiguration *databaseConfigurationImpl) GetRetryTime() time.Duration {
-	return intToSecond(int(databaseConfiguration.retryTime))
+	return utils.IntToSecond(int(databaseConfiguration.retryTime))
 }
 
 // Log the values provided by the configuration holder

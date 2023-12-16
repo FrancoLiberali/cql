@@ -5,14 +5,15 @@ import (
 	"net/http"
 
 	"github.com/Masterminds/squirrel"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
+
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/httperrors"
 	"github.com/ditrit/badaas/persistence/gormdatabase"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/pagination"
-	"go.uber.org/zap"
-	"gorm.io/gorm"
-	"gorm.io/gorm/clause"
 )
 
 // Return a database error
@@ -32,7 +33,7 @@ type CRUDRepositoryImpl[T models.Tabler, ID any] struct {
 	paginationConfiguration configuration.PaginationConfiguration
 }
 
-// Contructor of the Generic CRUD Repository
+// Constructor of the Generic CRUD Repository
 func NewCRUDRepository[T models.Tabler, ID any](
 	database *gorm.DB,
 	logger *zap.Logger,
@@ -180,7 +181,6 @@ func (repository *CRUDRepositoryImpl[T, ID]) Find(
 	defer func() {
 		if recoveredError := recover(); recoveredError != nil {
 			transaction.Rollback()
-
 		}
 	}()
 	var instances []*T

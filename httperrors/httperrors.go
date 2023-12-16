@@ -93,18 +93,18 @@ func NewHTTPError(status int, err string, message string, golangError error, toL
 	}
 }
 
-// A contructor for an HttpError "Not Found"
-func NewErrorNotFound(ressourceName string, msg string) HTTPError {
+// A constructor for an HttpError "Not Found"
+func NewErrorNotFound(resourceName string, msg string) HTTPError {
 	return NewHTTPError(
 		http.StatusNotFound,
-		fmt.Sprintf("%s not found", ressourceName),
+		fmt.Sprintf("%s not found", resourceName),
 		msg,
 		nil,
 		false,
 	)
 }
 
-// A contructor for an HttpError "Internal Server Error"
+// A constructor for an HttpError "Internal Server Error"
 func NewInternalServerError(errorName string, msg string, err error) HTTPError {
 	return NewHTTPError(
 		http.StatusInternalServerError,
@@ -115,7 +115,7 @@ func NewInternalServerError(errorName string, msg string, err error) HTTPError {
 	)
 }
 
-// A contructor for an HttpError "Unauthorized Error"
+// A constructor for an HttpError "Unauthorized Error"
 func NewUnauthorizedError(errorName string, msg string) HTTPError {
 	return NewHTTPError(
 		http.StatusUnauthorized,

@@ -1,15 +1,15 @@
 # Configuration
 
-To see a complete example of a working config file: head to [`badaas.example.yml`](./badaas.example.yml)
+To see a complete example of a working config file: head to [`badaas.example.yml`](./badaas.example.yml).
 
 As said in the README:
 
 > Badaas can be configured using environment variables, CLI flags or a configuration file.
 > CLI flags take priority on the environment variables and the environment variables take priority on the content of the configuration file.
 
-In this documentation file, we will mainly focus our attention on config files but we won't forget that we can use environement variables and CLI flags to change Badaas' config.
+In this documentation file, we will mainly focus our attention on config files but we won't forget that we can use environment variables and CLI flags to change Badaas' config.
 
-The config file can be formated in any syntax that [github.com/spf13/viper](https://github.com/spf13/viper) supports but we will only use YAML syntax in our docs.
+The config file can be formatted in any syntax that [`viper`](https://github.com/spf13/viper) supports but we will only use YAML syntax in our docs.
 
 - [Configuration](#configuration)
   - [Database](#database)
@@ -32,6 +32,9 @@ database:
   # The port of the database server. 
   # (mandatory)
   port: 26257
+
+  # The name of the database to use. 
+  name: badaas_db
 
   # The sslmode of the connection to the database server. 
   # (mandatory)
@@ -56,13 +59,13 @@ database:
     retryTime: 5
 ```
 
-Please note that the init section `init:` is not mandatory. Badaas is suited with a simple but effective retry mecanism that will retry `database.init.retry` time to establish a connection with the database. Badaas will wait `database.init.retryTime` seconds between each retry.
+Please note that the init section `init:` is not mandatory. Badaas is suited with a simple but effective retry mechanism that will retry `database.init.retry` time to establish a connection with the database. Badaas will wait `database.init.retryTime` seconds between each retry.
 
 ## Logger
 
-Badaas use a structured logger that can output json logs in production and user adapted logs for debug using the `logger.mode` key.  
+Badaas use a structured logger that can output json logs in production and user adapted logs for debug using the `logger.mode` key.
 
-Badaas offers the possibility to change the log message of the Middleware Logger but provides a sane default. It is formated using the Jinja syntax. The values available are `method`, `url` and `protocol`.
+Badaas offers the possibility to change the log message of the Middleware Logger but provides a sane default. It is formatted using the Jinja syntax. The values available are `method`, `url` and `protocol`.
 
 ```yml
 # The settings for the logger.
@@ -79,7 +82,7 @@ logger:
 
 You can change the host Badaas will bind to, the port and the timeout in seconds.
 
-Additionaly you can change the number of elements returned by default for a paginated response.
+Additionally you can change the number of elements returned by default for a paginated response.
 
 ```yml
 # The settings for the http server.
@@ -124,7 +127,6 @@ Session are extended if the user made a request to badaas in the "roll duration"
 
 Please see the diagram below to see what is the roll duration relative to the session duration.
 
-
 ```txt
      |   session duration                        |
      |<----------------------------------------->|
@@ -136,7 +138,7 @@ Please see the diagram below to see what is the roll duration relative to the se
 
 ```yml
 # The settings for session service
-# This section contains some good defaults, don't change thoses value unless you need to.
+# This section contains some good defaults, don't change those value unless you need to.
 session:
   # The duration of a user session, in seconds
   # Default (14400) equal to 4 hours
