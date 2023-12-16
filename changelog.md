@@ -34,5 +34,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add badaas-orm with the compilable query system.
 - Add operators support
 - Add preloading
+- Add dynamic and unsafe operators
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased

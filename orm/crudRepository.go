@@ -94,39 +94,16 @@ func (repository *CRUDRepositoryImpl[T, ID]) QueryOne(tx *gorm.DB, conditions ..
 
 // Get the list of models that match "conditions" inside transaction "tx"
 func (repository *CRUDRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...Condition[T]) ([]*T, error) {
-	query, err := applyConditionsToQuery(tx, conditions)
+	query, err := NewQuery(tx, conditions)
 	if err != nil {
 		return nil, err
 	}
 
 	// execute query
 	var entities []*T
-	err = query.Find(&entities).Error
+	err = query.Find(&entities)
 
 	return entities, err
-}
-
-func applyConditionsToQuery[T Model](query *gorm.DB, conditions []Condition[T]) (*gorm.DB, error) {
-	initialTableName, err := getTableName(query, *new(T))
-	if err != nil {
-		return nil, err
-	}
-
-	initialTable := Table{
-		Name:    initialTableName,
-		Alias:   initialTableName,
-		Initial: true,
-	}
-
-	query = query.Select(initialTableName + ".*")
-	for _, condition := range conditions {
-		query, err = condition.ApplyTo(query, initialTable)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return query, nil
 }
 
 // Get the name of the table in "db" in which the data for "entity" is saved

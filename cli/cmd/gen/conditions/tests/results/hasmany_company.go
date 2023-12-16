@@ -2,32 +2,57 @@
 package conditions
 
 import (
-	hasmany "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/hasmany"
+	hasmany "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmany"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var companyType = reflect.TypeOf(*new(hasmany.Company))
+var CompanyIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: companyType,
+}
+
 func CompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: CompanyIdField,
 		Operator:        operator,
 	}
 }
+
+var CompanyCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: companyType,
+}
+
 func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: CompanyCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var CompanyUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: companyType,
+}
+
 func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: CompanyUpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var CompanyDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: companyType,
+}
+
 func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: CompanyDeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -35,5 +60,5 @@ func CompanyPreloadSellers(nestedPreloads ...orm.IJoinCondition[hasmany.Seller])
 	return orm.NewCollectionPreloadCondition[hasmany.Company, hasmany.Seller]("Sellers", nestedPreloads)
 }
 
-var CompanyPreloadAttributes = orm.NewPreloadCondition[hasmany.Company]()
+var CompanyPreloadAttributes = orm.NewPreloadCondition[hasmany.Company](CompanyIdField, CompanyCreatedAtField, CompanyUpdatedAtField, CompanyDeletedAtField)
 var CompanyPreloadRelations = []orm.Condition[hasmany.Company]{CompanyPreloadSellers()}

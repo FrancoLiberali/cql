@@ -2,196 +2,275 @@
 package conditions
 
 import (
-	basictypes "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/basictypes"
+	basictypes "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/basictypes"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var basicTypesType = reflect.TypeOf(*new(basictypes.BasicTypes))
+var BasicTypesIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: basicTypesType,
+}
+
 func BasicTypesId(operator orm.Operator[orm.UUID]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func BasicTypesCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func BasicTypesUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func BasicTypesDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
-	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: BasicTypesIdField,
 		Operator:        operator,
 	}
 }
 
-var basicTypesBoolFieldID = orm.FieldIdentifier{Field: "Bool"}
+var BasicTypesCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: basicTypesType,
+}
+
+func BasicTypesCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
+		FieldIdentifier: BasicTypesCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var BasicTypesUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: basicTypesType,
+}
+
+func BasicTypesUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
+		FieldIdentifier: BasicTypesUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var BasicTypesDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: basicTypesType,
+}
+
+func BasicTypesDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basictypes.BasicTypes] {
+	return orm.FieldCondition[basictypes.BasicTypes, time.Time]{
+		FieldIdentifier: BasicTypesDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var BasicTypesBoolField = orm.FieldIdentifier[bool]{
+	Field:     "Bool",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesBool(operator orm.Operator[bool]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, bool]{
-		FieldIdentifier: basicTypesBoolFieldID,
+		FieldIdentifier: BasicTypesBoolField,
 		Operator:        operator,
 	}
 }
 
-var basicTypesIntFieldID = orm.FieldIdentifier{Field: "Int"}
+var BasicTypesIntField = orm.FieldIdentifier[int]{
+	Field:     "Int",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesInt(operator orm.Operator[int]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, int]{
-		FieldIdentifier: basicTypesIntFieldID,
+		FieldIdentifier: BasicTypesIntField,
 		Operator:        operator,
 	}
 }
 
-var basicTypesInt8FieldID = orm.FieldIdentifier{Field: "Int8"}
+var BasicTypesInt8Field = orm.FieldIdentifier[int8]{
+	Field:     "Int8",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesInt8(operator orm.Operator[int8]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, int8]{
-		FieldIdentifier: basicTypesInt8FieldID,
+		FieldIdentifier: BasicTypesInt8Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesInt16FieldID = orm.FieldIdentifier{Field: "Int16"}
+var BasicTypesInt16Field = orm.FieldIdentifier[int16]{
+	Field:     "Int16",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesInt16(operator orm.Operator[int16]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, int16]{
-		FieldIdentifier: basicTypesInt16FieldID,
+		FieldIdentifier: BasicTypesInt16Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesInt32FieldID = orm.FieldIdentifier{Field: "Int32"}
+var BasicTypesInt32Field = orm.FieldIdentifier[int32]{
+	Field:     "Int32",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesInt32(operator orm.Operator[int32]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, int32]{
-		FieldIdentifier: basicTypesInt32FieldID,
+		FieldIdentifier: BasicTypesInt32Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesInt64FieldID = orm.FieldIdentifier{Field: "Int64"}
+var BasicTypesInt64Field = orm.FieldIdentifier[int64]{
+	Field:     "Int64",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesInt64(operator orm.Operator[int64]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, int64]{
-		FieldIdentifier: basicTypesInt64FieldID,
+		FieldIdentifier: BasicTypesInt64Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesUIntFieldID = orm.FieldIdentifier{Field: "UInt"}
+var BasicTypesUIntField = orm.FieldIdentifier[uint]{
+	Field:     "UInt",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesUInt(operator orm.Operator[uint]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, uint]{
-		FieldIdentifier: basicTypesUIntFieldID,
+		FieldIdentifier: BasicTypesUIntField,
 		Operator:        operator,
 	}
 }
 
-var basicTypesUInt8FieldID = orm.FieldIdentifier{Field: "UInt8"}
+var BasicTypesUInt8Field = orm.FieldIdentifier[uint8]{
+	Field:     "UInt8",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesUInt8(operator orm.Operator[uint8]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, uint8]{
-		FieldIdentifier: basicTypesUInt8FieldID,
+		FieldIdentifier: BasicTypesUInt8Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesUInt16FieldID = orm.FieldIdentifier{Field: "UInt16"}
+var BasicTypesUInt16Field = orm.FieldIdentifier[uint16]{
+	Field:     "UInt16",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesUInt16(operator orm.Operator[uint16]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, uint16]{
-		FieldIdentifier: basicTypesUInt16FieldID,
+		FieldIdentifier: BasicTypesUInt16Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesUInt32FieldID = orm.FieldIdentifier{Field: "UInt32"}
+var BasicTypesUInt32Field = orm.FieldIdentifier[uint32]{
+	Field:     "UInt32",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesUInt32(operator orm.Operator[uint32]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, uint32]{
-		FieldIdentifier: basicTypesUInt32FieldID,
+		FieldIdentifier: BasicTypesUInt32Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesUInt64FieldID = orm.FieldIdentifier{Field: "UInt64"}
+var BasicTypesUInt64Field = orm.FieldIdentifier[uint64]{
+	Field:     "UInt64",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesUInt64(operator orm.Operator[uint64]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, uint64]{
-		FieldIdentifier: basicTypesUInt64FieldID,
+		FieldIdentifier: BasicTypesUInt64Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesUIntptrFieldID = orm.FieldIdentifier{Field: "UIntptr"}
+var BasicTypesUIntptrField = orm.FieldIdentifier[uintptr]{
+	Field:     "UIntptr",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesUIntptr(operator orm.Operator[uintptr]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, uintptr]{
-		FieldIdentifier: basicTypesUIntptrFieldID,
+		FieldIdentifier: BasicTypesUIntptrField,
 		Operator:        operator,
 	}
 }
 
-var basicTypesFloat32FieldID = orm.FieldIdentifier{Field: "Float32"}
+var BasicTypesFloat32Field = orm.FieldIdentifier[float32]{
+	Field:     "Float32",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesFloat32(operator orm.Operator[float32]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, float32]{
-		FieldIdentifier: basicTypesFloat32FieldID,
+		FieldIdentifier: BasicTypesFloat32Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesFloat64FieldID = orm.FieldIdentifier{Field: "Float64"}
+var BasicTypesFloat64Field = orm.FieldIdentifier[float64]{
+	Field:     "Float64",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesFloat64(operator orm.Operator[float64]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, float64]{
-		FieldIdentifier: basicTypesFloat64FieldID,
+		FieldIdentifier: BasicTypesFloat64Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesComplex64FieldID = orm.FieldIdentifier{Field: "Complex64"}
+var BasicTypesComplex64Field = orm.FieldIdentifier[complex64]{
+	Field:     "Complex64",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesComplex64(operator orm.Operator[complex64]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, complex64]{
-		FieldIdentifier: basicTypesComplex64FieldID,
+		FieldIdentifier: BasicTypesComplex64Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesComplex128FieldID = orm.FieldIdentifier{Field: "Complex128"}
+var BasicTypesComplex128Field = orm.FieldIdentifier[complex128]{
+	Field:     "Complex128",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesComplex128(operator orm.Operator[complex128]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, complex128]{
-		FieldIdentifier: basicTypesComplex128FieldID,
+		FieldIdentifier: BasicTypesComplex128Field,
 		Operator:        operator,
 	}
 }
 
-var basicTypesStringFieldID = orm.FieldIdentifier{Field: "String"}
+var BasicTypesStringField = orm.FieldIdentifier[string]{
+	Field:     "String",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesString(operator orm.Operator[string]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, string]{
-		FieldIdentifier: basicTypesStringFieldID,
+		FieldIdentifier: BasicTypesStringField,
 		Operator:        operator,
 	}
 }
 
-var basicTypesByteFieldID = orm.FieldIdentifier{Field: "Byte"}
+var BasicTypesByteField = orm.FieldIdentifier[uint8]{
+	Field:     "Byte",
+	ModelType: basicTypesType,
+}
 
 func BasicTypesByte(operator orm.Operator[uint8]) orm.WhereCondition[basictypes.BasicTypes] {
 	return orm.FieldCondition[basictypes.BasicTypes, uint8]{
-		FieldIdentifier: basicTypesByteFieldID,
+		FieldIdentifier: BasicTypesByteField,
 		Operator:        operator,
 	}
 }
 
-var BasicTypesPreloadAttributes = orm.NewPreloadCondition[basictypes.BasicTypes](basicTypesBoolFieldID, basicTypesIntFieldID, basicTypesInt8FieldID, basicTypesInt16FieldID, basicTypesInt32FieldID, basicTypesInt64FieldID, basicTypesUIntFieldID, basicTypesUInt8FieldID, basicTypesUInt16FieldID, basicTypesUInt32FieldID, basicTypesUInt64FieldID, basicTypesUIntptrFieldID, basicTypesFloat32FieldID, basicTypesFloat64FieldID, basicTypesComplex64FieldID, basicTypesComplex128FieldID, basicTypesStringFieldID, basicTypesByteFieldID)
+var BasicTypesPreloadAttributes = orm.NewPreloadCondition[basictypes.BasicTypes](BasicTypesIdField, BasicTypesCreatedAtField, BasicTypesUpdatedAtField, BasicTypesDeletedAtField, BasicTypesBoolField, BasicTypesIntField, BasicTypesInt8Field, BasicTypesInt16Field, BasicTypesInt32Field, BasicTypesInt64Field, BasicTypesUIntField, BasicTypesUInt8Field, BasicTypesUInt16Field, BasicTypesUInt32Field, BasicTypesUInt64Field, BasicTypesUIntptrField, BasicTypesFloat32Field, BasicTypesFloat64Field, BasicTypesComplex64Field, BasicTypesComplex128Field, BasicTypesStringField, BasicTypesByteField)

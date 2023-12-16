@@ -2,196 +2,275 @@
 package conditions
 
 import (
-	basicslicespointer "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/basicslicespointer"
+	basicslicespointer "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/basicslicespointer"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var basicSlicesPointerType = reflect.TypeOf(*new(basicslicespointer.BasicSlicesPointer))
+var BasicSlicesPointerIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: basicSlicesPointerType,
+}
+
 func BasicSlicesPointerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func BasicSlicesPointerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func BasicSlicesPointerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func BasicSlicesPointerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
-	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: BasicSlicesPointerIdField,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerBoolFieldID = orm.FieldIdentifier{Field: "Bool"}
+var BasicSlicesPointerCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: basicSlicesPointerType,
+}
+
+func BasicSlicesPointerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
+		FieldIdentifier: BasicSlicesPointerCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var BasicSlicesPointerUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: basicSlicesPointerType,
+}
+
+func BasicSlicesPointerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
+		FieldIdentifier: BasicSlicesPointerUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var BasicSlicesPointerDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: basicSlicesPointerType,
+}
+
+func BasicSlicesPointerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
+	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, time.Time]{
+		FieldIdentifier: BasicSlicesPointerDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var BasicSlicesPointerBoolField = orm.FieldIdentifier[[]bool]{
+	Field:     "Bool",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerBool(operator orm.Operator[[]bool]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []bool]{
-		FieldIdentifier: basicSlicesPointerBoolFieldID,
+		FieldIdentifier: BasicSlicesPointerBoolField,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerIntFieldID = orm.FieldIdentifier{Field: "Int"}
+var BasicSlicesPointerIntField = orm.FieldIdentifier[[]int]{
+	Field:     "Int",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerInt(operator orm.Operator[[]int]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int]{
-		FieldIdentifier: basicSlicesPointerIntFieldID,
+		FieldIdentifier: BasicSlicesPointerIntField,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerInt8FieldID = orm.FieldIdentifier{Field: "Int8"}
+var BasicSlicesPointerInt8Field = orm.FieldIdentifier[[]int8]{
+	Field:     "Int8",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerInt8(operator orm.Operator[[]int8]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int8]{
-		FieldIdentifier: basicSlicesPointerInt8FieldID,
+		FieldIdentifier: BasicSlicesPointerInt8Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerInt16FieldID = orm.FieldIdentifier{Field: "Int16"}
+var BasicSlicesPointerInt16Field = orm.FieldIdentifier[[]int16]{
+	Field:     "Int16",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerInt16(operator orm.Operator[[]int16]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int16]{
-		FieldIdentifier: basicSlicesPointerInt16FieldID,
+		FieldIdentifier: BasicSlicesPointerInt16Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerInt32FieldID = orm.FieldIdentifier{Field: "Int32"}
+var BasicSlicesPointerInt32Field = orm.FieldIdentifier[[]int32]{
+	Field:     "Int32",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerInt32(operator orm.Operator[[]int32]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int32]{
-		FieldIdentifier: basicSlicesPointerInt32FieldID,
+		FieldIdentifier: BasicSlicesPointerInt32Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerInt64FieldID = orm.FieldIdentifier{Field: "Int64"}
+var BasicSlicesPointerInt64Field = orm.FieldIdentifier[[]int64]{
+	Field:     "Int64",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerInt64(operator orm.Operator[[]int64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []int64]{
-		FieldIdentifier: basicSlicesPointerInt64FieldID,
+		FieldIdentifier: BasicSlicesPointerInt64Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerUIntFieldID = orm.FieldIdentifier{Field: "UInt"}
+var BasicSlicesPointerUIntField = orm.FieldIdentifier[[]uint]{
+	Field:     "UInt",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerUInt(operator orm.Operator[[]uint]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint]{
-		FieldIdentifier: basicSlicesPointerUIntFieldID,
+		FieldIdentifier: BasicSlicesPointerUIntField,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerUInt8FieldID = orm.FieldIdentifier{Field: "UInt8"}
+var BasicSlicesPointerUInt8Field = orm.FieldIdentifier[[]uint8]{
+	Field:     "UInt8",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerUInt8(operator orm.Operator[[]uint8]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint8]{
-		FieldIdentifier: basicSlicesPointerUInt8FieldID,
+		FieldIdentifier: BasicSlicesPointerUInt8Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerUInt16FieldID = orm.FieldIdentifier{Field: "UInt16"}
+var BasicSlicesPointerUInt16Field = orm.FieldIdentifier[[]uint16]{
+	Field:     "UInt16",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerUInt16(operator orm.Operator[[]uint16]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint16]{
-		FieldIdentifier: basicSlicesPointerUInt16FieldID,
+		FieldIdentifier: BasicSlicesPointerUInt16Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerUInt32FieldID = orm.FieldIdentifier{Field: "UInt32"}
+var BasicSlicesPointerUInt32Field = orm.FieldIdentifier[[]uint32]{
+	Field:     "UInt32",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerUInt32(operator orm.Operator[[]uint32]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint32]{
-		FieldIdentifier: basicSlicesPointerUInt32FieldID,
+		FieldIdentifier: BasicSlicesPointerUInt32Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerUInt64FieldID = orm.FieldIdentifier{Field: "UInt64"}
+var BasicSlicesPointerUInt64Field = orm.FieldIdentifier[[]uint64]{
+	Field:     "UInt64",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerUInt64(operator orm.Operator[[]uint64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint64]{
-		FieldIdentifier: basicSlicesPointerUInt64FieldID,
+		FieldIdentifier: BasicSlicesPointerUInt64Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerUIntptrFieldID = orm.FieldIdentifier{Field: "UIntptr"}
+var BasicSlicesPointerUIntptrField = orm.FieldIdentifier[[]uintptr]{
+	Field:     "UIntptr",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerUIntptr(operator orm.Operator[[]uintptr]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uintptr]{
-		FieldIdentifier: basicSlicesPointerUIntptrFieldID,
+		FieldIdentifier: BasicSlicesPointerUIntptrField,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerFloat32FieldID = orm.FieldIdentifier{Field: "Float32"}
+var BasicSlicesPointerFloat32Field = orm.FieldIdentifier[[]float32]{
+	Field:     "Float32",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerFloat32(operator orm.Operator[[]float32]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []float32]{
-		FieldIdentifier: basicSlicesPointerFloat32FieldID,
+		FieldIdentifier: BasicSlicesPointerFloat32Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerFloat64FieldID = orm.FieldIdentifier{Field: "Float64"}
+var BasicSlicesPointerFloat64Field = orm.FieldIdentifier[[]float64]{
+	Field:     "Float64",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerFloat64(operator orm.Operator[[]float64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []float64]{
-		FieldIdentifier: basicSlicesPointerFloat64FieldID,
+		FieldIdentifier: BasicSlicesPointerFloat64Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerComplex64FieldID = orm.FieldIdentifier{Field: "Complex64"}
+var BasicSlicesPointerComplex64Field = orm.FieldIdentifier[[]complex64]{
+	Field:     "Complex64",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerComplex64(operator orm.Operator[[]complex64]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []complex64]{
-		FieldIdentifier: basicSlicesPointerComplex64FieldID,
+		FieldIdentifier: BasicSlicesPointerComplex64Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerComplex128FieldID = orm.FieldIdentifier{Field: "Complex128"}
+var BasicSlicesPointerComplex128Field = orm.FieldIdentifier[[]complex128]{
+	Field:     "Complex128",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerComplex128(operator orm.Operator[[]complex128]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []complex128]{
-		FieldIdentifier: basicSlicesPointerComplex128FieldID,
+		FieldIdentifier: BasicSlicesPointerComplex128Field,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerStringFieldID = orm.FieldIdentifier{Field: "String"}
+var BasicSlicesPointerStringField = orm.FieldIdentifier[[]string]{
+	Field:     "String",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerString(operator orm.Operator[[]string]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []string]{
-		FieldIdentifier: basicSlicesPointerStringFieldID,
+		FieldIdentifier: BasicSlicesPointerStringField,
 		Operator:        operator,
 	}
 }
 
-var basicSlicesPointerByteFieldID = orm.FieldIdentifier{Field: "Byte"}
+var BasicSlicesPointerByteField = orm.FieldIdentifier[[]uint8]{
+	Field:     "Byte",
+	ModelType: basicSlicesPointerType,
+}
 
 func BasicSlicesPointerByte(operator orm.Operator[[]uint8]) orm.WhereCondition[basicslicespointer.BasicSlicesPointer] {
 	return orm.FieldCondition[basicslicespointer.BasicSlicesPointer, []uint8]{
-		FieldIdentifier: basicSlicesPointerByteFieldID,
+		FieldIdentifier: BasicSlicesPointerByteField,
 		Operator:        operator,
 	}
 }
 
-var BasicSlicesPointerPreloadAttributes = orm.NewPreloadCondition[basicslicespointer.BasicSlicesPointer](basicSlicesPointerBoolFieldID, basicSlicesPointerIntFieldID, basicSlicesPointerInt8FieldID, basicSlicesPointerInt16FieldID, basicSlicesPointerInt32FieldID, basicSlicesPointerInt64FieldID, basicSlicesPointerUIntFieldID, basicSlicesPointerUInt8FieldID, basicSlicesPointerUInt16FieldID, basicSlicesPointerUInt32FieldID, basicSlicesPointerUInt64FieldID, basicSlicesPointerUIntptrFieldID, basicSlicesPointerFloat32FieldID, basicSlicesPointerFloat64FieldID, basicSlicesPointerComplex64FieldID, basicSlicesPointerComplex128FieldID, basicSlicesPointerStringFieldID, basicSlicesPointerByteFieldID)
+var BasicSlicesPointerPreloadAttributes = orm.NewPreloadCondition[basicslicespointer.BasicSlicesPointer](BasicSlicesPointerIdField, BasicSlicesPointerCreatedAtField, BasicSlicesPointerUpdatedAtField, BasicSlicesPointerDeletedAtField, BasicSlicesPointerBoolField, BasicSlicesPointerIntField, BasicSlicesPointerInt8Field, BasicSlicesPointerInt16Field, BasicSlicesPointerInt32Field, BasicSlicesPointerInt64Field, BasicSlicesPointerUIntField, BasicSlicesPointerUInt8Field, BasicSlicesPointerUInt16Field, BasicSlicesPointerUInt32Field, BasicSlicesPointerUInt64Field, BasicSlicesPointerUIntptrField, BasicSlicesPointerFloat32Field, BasicSlicesPointerFloat64Field, BasicSlicesPointerComplex64Field, BasicSlicesPointerComplex128Field, BasicSlicesPointerStringField, BasicSlicesPointerByteField)

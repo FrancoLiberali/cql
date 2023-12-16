@@ -875,6 +875,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 		),
 	)
 	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
+	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithoutPreloadReturnsError() {
@@ -884,4 +885,5 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWitho
 		),
 	)
 	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
+	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }

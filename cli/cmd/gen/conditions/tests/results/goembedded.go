@@ -2,52 +2,83 @@
 package conditions
 
 import (
-	goembedded "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/goembedded"
+	goembedded "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/goembedded"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var goEmbeddedType = reflect.TypeOf(*new(goembedded.GoEmbedded))
+var GoEmbeddedIdField = orm.FieldIdentifier[orm.UIntID]{
+	Field:     "ID",
+	ModelType: goEmbeddedType,
+}
+
 func GoEmbeddedId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[goembedded.GoEmbedded] {
 	return orm.FieldCondition[goembedded.GoEmbedded, orm.UIntID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func GoEmbeddedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
-	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func GoEmbeddedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
-	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func GoEmbeddedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
-	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: GoEmbeddedIdField,
 		Operator:        operator,
 	}
 }
 
-var goEmbeddedIntFieldID = orm.FieldIdentifier{Field: "Int"}
+var GoEmbeddedCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: goEmbeddedType,
+}
+
+func GoEmbeddedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
+	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
+		FieldIdentifier: GoEmbeddedCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var GoEmbeddedUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: goEmbeddedType,
+}
+
+func GoEmbeddedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
+	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
+		FieldIdentifier: GoEmbeddedUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var GoEmbeddedDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: goEmbeddedType,
+}
+
+func GoEmbeddedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
+	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
+		FieldIdentifier: GoEmbeddedDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var GoEmbeddedIntField = orm.FieldIdentifier[int]{
+	Field:     "Int",
+	ModelType: goEmbeddedType,
+}
 
 func GoEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[goembedded.GoEmbedded] {
 	return orm.FieldCondition[goembedded.GoEmbedded, int]{
-		FieldIdentifier: goEmbeddedIntFieldID,
+		FieldIdentifier: GoEmbeddedIntField,
 		Operator:        operator,
 	}
 }
 
-var goEmbeddedToBeEmbeddedIntFieldID = orm.FieldIdentifier{Field: "Int"}
+var GoEmbeddedToBeEmbeddedIntField = orm.FieldIdentifier[int]{
+	Field:     "Int",
+	ModelType: goEmbeddedType,
+}
 
 func GoEmbeddedToBeEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[goembedded.GoEmbedded] {
 	return orm.FieldCondition[goembedded.GoEmbedded, int]{
-		FieldIdentifier: goEmbeddedToBeEmbeddedIntFieldID,
+		FieldIdentifier: GoEmbeddedToBeEmbeddedIntField,
 		Operator:        operator,
 	}
 }
 
-var GoEmbeddedPreloadAttributes = orm.NewPreloadCondition[goembedded.GoEmbedded](goEmbeddedIntFieldID, goEmbeddedToBeEmbeddedIntFieldID)
+var GoEmbeddedPreloadAttributes = orm.NewPreloadCondition[goembedded.GoEmbedded](GoEmbeddedIdField, GoEmbeddedCreatedAtField, GoEmbeddedUpdatedAtField, GoEmbeddedDeletedAtField, GoEmbeddedIntField, GoEmbeddedToBeEmbeddedIntField)

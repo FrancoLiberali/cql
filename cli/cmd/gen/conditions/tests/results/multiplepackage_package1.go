@@ -2,33 +2,58 @@
 package conditions
 
 import (
-	package1 "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/multiplepackage/package1"
-	package2 "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/multiplepackage/package2"
+	package1 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package1"
+	package2 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var package1Type = reflect.TypeOf(*new(package1.Package1))
+var Package1IdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: package1Type,
+}
+
 func Package1Id(operator orm.Operator[orm.UUID]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: Package1IdField,
 		Operator:        operator,
 	}
 }
+
+var Package1CreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: package1Type,
+}
+
 func Package1CreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: Package1CreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var Package1UpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: package1Type,
+}
+
 func Package1UpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: Package1UpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var Package1DeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: package1Type,
+}
+
 func Package1DeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: Package1DeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -43,5 +68,5 @@ func Package1Package2(conditions ...orm.Condition[package2.Package2]) orm.IJoinC
 }
 
 var Package1PreloadPackage2 = Package1Package2(Package2PreloadAttributes)
-var Package1PreloadAttributes = orm.NewPreloadCondition[package1.Package1]()
+var Package1PreloadAttributes = orm.NewPreloadCondition[package1.Package1](Package1IdField, Package1CreatedAtField, Package1UpdatedAtField, Package1DeletedAtField)
 var Package1PreloadRelations = []orm.Condition[package1.Package1]{Package1PreloadPackage2}

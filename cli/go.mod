@@ -1,10 +1,10 @@
-module github.com/ditrit/badaas-orm/cli
+module github.com/ditrit/badaas-cli
 
 go 1.18
 
 require (
 	github.com/dave/jennifer v1.6.1
-	github.com/ditrit/badaas v0.0.0-20230807114103-72cff2a37890
+	github.com/ditrit/badaas v0.0.0-20230807114456-ce08b6d549b4
 	github.com/ditrit/verdeter v0.4.0
 	github.com/elliotchance/pie/v2 v2.7.0
 	github.com/ettle/strcase v0.1.1

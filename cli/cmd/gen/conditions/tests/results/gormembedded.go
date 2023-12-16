@@ -2,64 +2,96 @@
 package conditions
 
 import (
-	gormembedded "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/gormembedded"
+	gormembedded "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/gormembedded"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var gormEmbeddedType = reflect.TypeOf(*new(gormembedded.GormEmbedded))
+var GormEmbeddedIdField = orm.FieldIdentifier[orm.UIntID]{
+	Field:     "ID",
+	ModelType: gormEmbeddedType,
+}
+
 func GormEmbeddedId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[gormembedded.GormEmbedded] {
 	return orm.FieldCondition[gormembedded.GormEmbedded, orm.UIntID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func GormEmbeddedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func GormEmbeddedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func GormEmbeddedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
-	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: GormEmbeddedIdField,
 		Operator:        operator,
 	}
 }
 
-var gormEmbeddedIntFieldID = orm.FieldIdentifier{Field: "Int"}
+var GormEmbeddedCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: gormEmbeddedType,
+}
+
+func GormEmbeddedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
+		FieldIdentifier: GormEmbeddedCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var GormEmbeddedUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: gormEmbeddedType,
+}
+
+func GormEmbeddedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
+		FieldIdentifier: GormEmbeddedUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var GormEmbeddedDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: gormEmbeddedType,
+}
+
+func GormEmbeddedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[gormembedded.GormEmbedded] {
+	return orm.FieldCondition[gormembedded.GormEmbedded, time.Time]{
+		FieldIdentifier: GormEmbeddedDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var GormEmbeddedIntField = orm.FieldIdentifier[int]{
+	Field:     "Int",
+	ModelType: gormEmbeddedType,
+}
 
 func GormEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[gormembedded.GormEmbedded] {
 	return orm.FieldCondition[gormembedded.GormEmbedded, int]{
-		FieldIdentifier: gormEmbeddedIntFieldID,
+		FieldIdentifier: GormEmbeddedIntField,
 		Operator:        operator,
 	}
 }
 
-var gormEmbeddedGormEmbeddedIntFieldID = orm.FieldIdentifier{
+var GormEmbeddedGormEmbeddedIntField = orm.FieldIdentifier[int]{
 	ColumnPrefix: "gorm_embedded_",
 	Field:        "Int",
+	ModelType:    gormEmbeddedType,
 }
 
 func GormEmbeddedGormEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[gormembedded.GormEmbedded] {
 	return orm.FieldCondition[gormembedded.GormEmbedded, int]{
-		FieldIdentifier: gormEmbeddedGormEmbeddedIntFieldID,
+		FieldIdentifier: GormEmbeddedGormEmbeddedIntField,
 		Operator:        operator,
 	}
 }
 
-var gormEmbeddedGormEmbeddedNoPrefixIntFieldID = orm.FieldIdentifier{Field: "Int"}
+var GormEmbeddedGormEmbeddedNoPrefixIntField = orm.FieldIdentifier[int]{
+	Field:     "Int",
+	ModelType: gormEmbeddedType,
+}
 
 func GormEmbeddedGormEmbeddedNoPrefixInt(operator orm.Operator[int]) orm.WhereCondition[gormembedded.GormEmbedded] {
 	return orm.FieldCondition[gormembedded.GormEmbedded, int]{
-		FieldIdentifier: gormEmbeddedGormEmbeddedNoPrefixIntFieldID,
+		FieldIdentifier: GormEmbeddedGormEmbeddedNoPrefixIntField,
 		Operator:        operator,
 	}
 }
 
-var GormEmbeddedPreloadAttributes = orm.NewPreloadCondition[gormembedded.GormEmbedded](gormEmbeddedIntFieldID, gormEmbeddedGormEmbeddedIntFieldID, gormEmbeddedGormEmbeddedNoPrefixIntFieldID)
+var GormEmbeddedPreloadAttributes = orm.NewPreloadCondition[gormembedded.GormEmbedded](GormEmbeddedIdField, GormEmbeddedCreatedAtField, GormEmbeddedUpdatedAtField, GormEmbeddedDeletedAtField, GormEmbeddedIntField, GormEmbeddedGormEmbeddedIntField, GormEmbeddedGormEmbeddedNoPrefixIntField)

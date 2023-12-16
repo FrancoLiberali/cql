@@ -2,32 +2,57 @@
 package conditions
 
 import (
-	overridereferences "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/overridereferences"
+	overridereferences "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferences"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var phoneType = reflect.TypeOf(*new(overridereferences.Phone))
+var PhoneIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: phoneType,
+}
+
 func PhoneId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: PhoneIdField,
 		Operator:        operator,
 	}
 }
+
+var PhoneCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: phoneType,
+}
+
 func PhoneCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: PhoneCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var PhoneUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: phoneType,
+}
+
 func PhoneUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: PhoneUpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var PhoneDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: phoneType,
+}
+
 func PhoneDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: PhoneDeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -42,14 +67,17 @@ func PhoneBrand(conditions ...orm.Condition[overridereferences.Brand]) orm.IJoin
 }
 
 var PhonePreloadBrand = PhoneBrand(BrandPreloadAttributes)
-var phoneBrandNameFieldID = orm.FieldIdentifier{Field: "BrandName"}
+var PhoneBrandNameField = orm.FieldIdentifier[string]{
+	Field:     "BrandName",
+	ModelType: phoneType,
+}
 
 func PhoneBrandName(operator orm.Operator[string]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, string]{
-		FieldIdentifier: phoneBrandNameFieldID,
+		FieldIdentifier: PhoneBrandNameField,
 		Operator:        operator,
 	}
 }
 
-var PhonePreloadAttributes = orm.NewPreloadCondition[overridereferences.Phone](phoneBrandNameFieldID)
+var PhonePreloadAttributes = orm.NewPreloadCondition[overridereferences.Phone](PhoneIdField, PhoneCreatedAtField, PhoneUpdatedAtField, PhoneDeletedAtField, PhoneBrandNameField)
 var PhonePreloadRelations = []orm.Condition[overridereferences.Phone]{PhonePreloadBrand}

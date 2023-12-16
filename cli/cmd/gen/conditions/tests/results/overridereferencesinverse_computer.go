@@ -2,41 +2,69 @@
 package conditions
 
 import (
-	overridereferencesinverse "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/overridereferencesinverse"
+	overridereferencesinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferencesinverse"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var computerType = reflect.TypeOf(*new(overridereferencesinverse.Computer))
+var ComputerIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: computerType,
+}
+
 func ComputerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overridereferencesinverse.Computer] {
 	return orm.FieldCondition[overridereferencesinverse.Computer, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func ComputerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
-	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func ComputerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
-	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func ComputerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
-	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: ComputerIdField,
 		Operator:        operator,
 	}
 }
 
-var computerNameFieldID = orm.FieldIdentifier{Field: "Name"}
+var ComputerCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: computerType,
+}
+
+func ComputerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
+	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
+		FieldIdentifier: ComputerCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var ComputerUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: computerType,
+}
+
+func ComputerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
+	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
+		FieldIdentifier: ComputerUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var ComputerDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: computerType,
+}
+
+func ComputerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
+	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
+		FieldIdentifier: ComputerDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var ComputerNameField = orm.FieldIdentifier[string]{
+	Field:     "Name",
+	ModelType: computerType,
+}
 
 func ComputerName(operator orm.Operator[string]) orm.WhereCondition[overridereferencesinverse.Computer] {
 	return orm.FieldCondition[overridereferencesinverse.Computer, string]{
-		FieldIdentifier: computerNameFieldID,
+		FieldIdentifier: ComputerNameField,
 		Operator:        operator,
 	}
 }
@@ -51,5 +79,5 @@ func ComputerProcessor(conditions ...orm.Condition[overridereferencesinverse.Pro
 }
 
 var ComputerPreloadProcessor = ComputerProcessor(ProcessorPreloadAttributes)
-var ComputerPreloadAttributes = orm.NewPreloadCondition[overridereferencesinverse.Computer](computerNameFieldID)
+var ComputerPreloadAttributes = orm.NewPreloadCondition[overridereferencesinverse.Computer](ComputerIdField, ComputerCreatedAtField, ComputerUpdatedAtField, ComputerDeletedAtField, ComputerNameField)
 var ComputerPreloadRelations = []orm.Condition[overridereferencesinverse.Computer]{ComputerPreloadProcessor}

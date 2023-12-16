@@ -3,7 +3,7 @@ package conditions
 import (
 	"github.com/dave/jennifer/jen"
 
-	"github.com/ditrit/badaas-orm/cli/cmd/version"
+	"github.com/ditrit/badaas-cli/cmd/version"
 )
 
 type File struct {
