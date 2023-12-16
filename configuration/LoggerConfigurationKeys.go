@@ -8,7 +8,6 @@ import (
 // Definition of logger configuration keys
 func getLoggerConfigurationKeys() []KeyDefinition {
 	modeValidator := validators.AuthorizedValues("prod", "dev")
-
 	return []KeyDefinition{
 		{
 			Name:     LoggerRequestTemplateKey,

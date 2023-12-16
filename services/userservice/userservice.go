@@ -57,7 +57,6 @@ func (userService *userServiceImpl) NewUser(username, email, password string) (*
 		Email:    sanitizedEmail,
 		Password: basicauth.SaltAndHashPassword(password),
 	}
-
 	err = userService.userRepository.Create(userService.db, u)
 	if err != nil {
 		return nil, err

@@ -36,7 +36,6 @@ func (model *UUIDModel) BeforeCreate(_ *gorm.DB) (err error) {
 	if model.ID == NilUUID {
 		model.ID = NewUUID()
 	}
-
 	return nil
 }
 

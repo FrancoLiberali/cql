@@ -77,7 +77,6 @@ func TestMain(_ *testing.M) {
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
 	t := &TestContext{}
-
 	jar, err := cookiejar.New(nil)
 	if err != nil {
 		panic(err)
