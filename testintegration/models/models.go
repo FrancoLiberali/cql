@@ -203,7 +203,8 @@ func (m Phone) Equal(other Phone) bool {
 type ParentParent struct {
 	orm.UUIDModel
 
-	Name string
+	Name   string
+	Number int
 }
 
 func (m ParentParent) Equal(other ParentParent) bool {
@@ -234,6 +235,9 @@ func (m Parent2) Equal(other Parent2) bool {
 
 type Child struct {
 	orm.UUIDModel
+
+	Name   string
+	Number int
 
 	Parent1   Parent1
 	Parent1ID orm.UUID

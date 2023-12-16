@@ -4,42 +4,81 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
-	gorm "gorm.io/gorm"
+	"reflect"
 	"time"
 )
 
+var parentParentType = reflect.TypeOf(*new(models.ParentParent))
+var ParentParentIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: parentParentType,
+}
+
 func ParentParentId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.ParentParent] {
 	return orm.FieldCondition[models.ParentParent, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func ParentParentCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.ParentParent] {
-	return orm.FieldCondition[models.ParentParent, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func ParentParentUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.ParentParent] {
-	return orm.FieldCondition[models.ParentParent, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func ParentParentDeletedAt(operator orm.Operator[gorm.DeletedAt]) orm.WhereCondition[models.ParentParent] {
-	return orm.FieldCondition[models.ParentParent, gorm.DeletedAt]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: ParentParentIdField,
 		Operator:        operator,
 	}
 }
 
-var parentParentNameFieldID = orm.FieldIdentifier{Field: "Name"}
+var ParentParentCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: parentParentType,
+}
+
+func ParentParentCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.ParentParent] {
+	return orm.FieldCondition[models.ParentParent, time.Time]{
+		FieldIdentifier: ParentParentCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var ParentParentUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: parentParentType,
+}
+
+func ParentParentUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.ParentParent] {
+	return orm.FieldCondition[models.ParentParent, time.Time]{
+		FieldIdentifier: ParentParentUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var ParentParentDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: parentParentType,
+}
+
+func ParentParentDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.ParentParent] {
+	return orm.FieldCondition[models.ParentParent, time.Time]{
+		FieldIdentifier: ParentParentDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var ParentParentNameField = orm.FieldIdentifier[string]{
+	Field:     "Name",
+	ModelType: parentParentType,
+}
 
 func ParentParentName(operator orm.Operator[string]) orm.WhereCondition[models.ParentParent] {
 	return orm.FieldCondition[models.ParentParent, string]{
-		FieldIdentifier: parentParentNameFieldID,
+		FieldIdentifier: ParentParentNameField,
 		Operator:        operator,
 	}
 }
 
-var ParentParentPreloadAttributes = orm.NewPreloadCondition[models.ParentParent](parentParentNameFieldID)
+var ParentParentNumberField = orm.FieldIdentifier[int]{
+	Field:     "Number",
+	ModelType: parentParentType,
+}
+
+func ParentParentNumber(operator orm.Operator[int]) orm.WhereCondition[models.ParentParent] {
+	return orm.FieldCondition[models.ParentParent, int]{
+		FieldIdentifier: ParentParentNumberField,
+		Operator:        operator,
+	}
+}
+
+var ParentParentPreloadAttributes = orm.NewPreloadCondition[models.ParentParent](ParentParentIdField, ParentParentCreatedAtField, ParentParentUpdatedAtField, ParentParentDeletedAtField, ParentParentNameField, ParentParentNumberField)

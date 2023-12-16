@@ -7,7 +7,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ditrit/badaas-orm/cli/cmd/testutils"
+	"github.com/ditrit/badaas-cli/cmd/testutils"
 )
 
 func TestGenerateDockerFilesCreateFilesWhenDestinationFolderNotExists(t *testing.T) {

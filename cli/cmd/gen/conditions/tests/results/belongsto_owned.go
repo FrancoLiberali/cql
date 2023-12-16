@@ -2,32 +2,57 @@
 package conditions
 
 import (
-	belongsto "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/belongsto"
+	belongsto "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/belongsto"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var ownedType = reflect.TypeOf(*new(belongsto.Owned))
+var OwnedIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: ownedType,
+}
+
 func OwnedId(operator orm.Operator[orm.UUID]) orm.WhereCondition[belongsto.Owned] {
 	return orm.FieldCondition[belongsto.Owned, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
+		FieldIdentifier: OwnedIdField,
 		Operator:        operator,
 	}
 }
+
+var OwnedCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: ownedType,
+}
+
 func OwnedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owned] {
 	return orm.FieldCondition[belongsto.Owned, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
+		FieldIdentifier: OwnedCreatedAtField,
 		Operator:        operator,
 	}
 }
+
+var OwnedUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: ownedType,
+}
+
 func OwnedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owned] {
 	return orm.FieldCondition[belongsto.Owned, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
+		FieldIdentifier: OwnedUpdatedAtField,
 		Operator:        operator,
 	}
 }
+
+var OwnedDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: ownedType,
+}
+
 func OwnedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[belongsto.Owned] {
 	return orm.FieldCondition[belongsto.Owned, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: OwnedDeletedAtField,
 		Operator:        operator,
 	}
 }
@@ -42,14 +67,17 @@ func OwnedOwner(conditions ...orm.Condition[belongsto.Owner]) orm.IJoinCondition
 }
 
 var OwnedPreloadOwner = OwnedOwner(OwnerPreloadAttributes)
-var ownedOwnerIdFieldID = orm.FieldIdentifier{Field: "OwnerID"}
+var OwnedOwnerIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "OwnerID",
+	ModelType: ownedType,
+}
 
 func OwnedOwnerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[belongsto.Owned] {
 	return orm.FieldCondition[belongsto.Owned, orm.UUID]{
-		FieldIdentifier: ownedOwnerIdFieldID,
+		FieldIdentifier: OwnedOwnerIdField,
 		Operator:        operator,
 	}
 }
 
-var OwnedPreloadAttributes = orm.NewPreloadCondition[belongsto.Owned](ownedOwnerIdFieldID)
+var OwnedPreloadAttributes = orm.NewPreloadCondition[belongsto.Owned](OwnedIdField, OwnedCreatedAtField, OwnedUpdatedAtField, OwnedDeletedAtField, OwnedOwnerIdField)
 var OwnedPreloadRelations = []orm.Condition[belongsto.Owned]{OwnedPreloadOwner}

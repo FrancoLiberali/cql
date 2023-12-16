@@ -5,6 +5,7 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -542,7 +543,7 @@ func (ts *WhereConditionsIntTestSuite) TestUnsafeCondition() {
 	ts.createProduct("not_match", 2, 0.0, true, nil)
 
 	entities, err := ts.crudProductService.Query(
-		orm.NewUnsafeCondition[models.Product]("%s.int = ?", []any{1}),
+		unsafe.NewCondition[models.Product]("%s.int = ?", 1),
 	)
 	ts.Nil(err)
 

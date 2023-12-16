@@ -2,43 +2,71 @@
 package conditions
 
 import (
-	customtype "github.com/ditrit/badaas-orm/cli/cmd/gen/conditions/tests/customtype"
+	customtype "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/customtype"
 	orm "github.com/ditrit/badaas/orm"
+	"reflect"
 	"time"
 )
 
+var customTypeType = reflect.TypeOf(*new(customtype.CustomType))
+var CustomTypeIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: customTypeType,
+}
+
 func CustomTypeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[customtype.CustomType] {
 	return orm.FieldCondition[customtype.CustomType, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func CustomTypeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func CustomTypeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func CustomTypeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: CustomTypeIdField,
 		Operator:        operator,
 	}
 }
 
-var customTypeCustomFieldID = orm.FieldIdentifier{Field: "Custom"}
+var CustomTypeCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: customTypeType,
+}
+
+func CustomTypeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
+	return orm.FieldCondition[customtype.CustomType, time.Time]{
+		FieldIdentifier: CustomTypeCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var CustomTypeUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: customTypeType,
+}
+
+func CustomTypeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
+	return orm.FieldCondition[customtype.CustomType, time.Time]{
+		FieldIdentifier: CustomTypeUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var CustomTypeDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: customTypeType,
+}
+
+func CustomTypeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
+	return orm.FieldCondition[customtype.CustomType, time.Time]{
+		FieldIdentifier: CustomTypeDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var CustomTypeCustomField = orm.FieldIdentifier[customtype.MultiString]{
+	Field:     "Custom",
+	ModelType: customTypeType,
+}
 
 func CustomTypeCustom(operator orm.Operator[customtype.MultiString]) orm.WhereCondition[customtype.CustomType] {
 	return orm.FieldCondition[customtype.CustomType, customtype.MultiString]{
-		FieldIdentifier: customTypeCustomFieldID,
+		FieldIdentifier: CustomTypeCustomField,
 		Operator:        operator,
 	}
 }
 
-var CustomTypePreloadAttributes = orm.NewPreloadCondition[customtype.CustomType](customTypeCustomFieldID)
+var CustomTypePreloadAttributes = orm.NewPreloadCondition[customtype.CustomType](CustomTypeIdField, CustomTypeCreatedAtField, CustomTypeUpdatedAtField, CustomTypeDeletedAtField, CustomTypeCustomField)

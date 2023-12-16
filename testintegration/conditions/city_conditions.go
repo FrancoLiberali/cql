@@ -4,39 +4,67 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
+	"reflect"
 	"time"
 )
 
+var cityType = reflect.TypeOf(*new(models.City))
+var CityIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: cityType,
+}
+
 func CityId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.City] {
 	return orm.FieldCondition[models.City, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func CityCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
-	return orm.FieldCondition[models.City, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func CityUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
-	return orm.FieldCondition[models.City, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func CityDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
-	return orm.FieldCondition[models.City, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: CityIdField,
 		Operator:        operator,
 	}
 }
 
-var cityNameFieldID = orm.FieldIdentifier{Field: "Name"}
+var CityCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: cityType,
+}
+
+func CityCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, time.Time]{
+		FieldIdentifier: CityCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var CityUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: cityType,
+}
+
+func CityUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, time.Time]{
+		FieldIdentifier: CityUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var CityDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: cityType,
+}
+
+func CityDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.City] {
+	return orm.FieldCondition[models.City, time.Time]{
+		FieldIdentifier: CityDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var CityNameField = orm.FieldIdentifier[string]{
+	Field:     "Name",
+	ModelType: cityType,
+}
 
 func CityName(operator orm.Operator[string]) orm.WhereCondition[models.City] {
 	return orm.FieldCondition[models.City, string]{
-		FieldIdentifier: cityNameFieldID,
+		FieldIdentifier: CityNameField,
 		Operator:        operator,
 	}
 }
@@ -51,14 +79,17 @@ func CityCountry(conditions ...orm.Condition[models.Country]) orm.IJoinCondition
 }
 
 var CityPreloadCountry = CityCountry(CountryPreloadAttributes)
-var cityCountryIdFieldID = orm.FieldIdentifier{Field: "CountryID"}
+var CityCountryIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "CountryID",
+	ModelType: cityType,
+}
 
 func CityCountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.City] {
 	return orm.FieldCondition[models.City, orm.UUID]{
-		FieldIdentifier: cityCountryIdFieldID,
+		FieldIdentifier: CityCountryIdField,
 		Operator:        operator,
 	}
 }
 
-var CityPreloadAttributes = orm.NewPreloadCondition[models.City](cityNameFieldID, cityCountryIdFieldID)
+var CityPreloadAttributes = orm.NewPreloadCondition[models.City](CityIdField, CityCreatedAtField, CityUpdatedAtField, CityDeletedAtField, CityNameField, CityCountryIdField)
 var CityPreloadRelations = []orm.Condition[models.City]{CityPreloadCountry}

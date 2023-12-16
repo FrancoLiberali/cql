@@ -4,39 +4,67 @@ package conditions
 import (
 	orm "github.com/ditrit/badaas/orm"
 	models "github.com/ditrit/badaas/testintegration/models"
+	"reflect"
 	"time"
 )
 
+var companyType = reflect.TypeOf(*new(models.Company))
+var CompanyIdField = orm.FieldIdentifier[orm.UUID]{
+	Field:     "ID",
+	ModelType: companyType,
+}
+
 func CompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Company] {
 	return orm.FieldCondition[models.Company, orm.UUID]{
-		FieldIdentifier: orm.IDFieldID,
-		Operator:        operator,
-	}
-}
-func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, time.Time]{
-		FieldIdentifier: orm.CreatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, time.Time]{
-		FieldIdentifier: orm.UpdatedAtFieldID,
-		Operator:        operator,
-	}
-}
-func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, time.Time]{
-		FieldIdentifier: orm.DeletedAtFieldID,
+		FieldIdentifier: CompanyIdField,
 		Operator:        operator,
 	}
 }
 
-var companyNameFieldID = orm.FieldIdentifier{Field: "Name"}
+var CompanyCreatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "CreatedAt",
+	ModelType: companyType,
+}
+
+func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, time.Time]{
+		FieldIdentifier: CompanyCreatedAtField,
+		Operator:        operator,
+	}
+}
+
+var CompanyUpdatedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "UpdatedAt",
+	ModelType: companyType,
+}
+
+func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, time.Time]{
+		FieldIdentifier: CompanyUpdatedAtField,
+		Operator:        operator,
+	}
+}
+
+var CompanyDeletedAtField = orm.FieldIdentifier[time.Time]{
+	Field:     "DeletedAt",
+	ModelType: companyType,
+}
+
+func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
+	return orm.FieldCondition[models.Company, time.Time]{
+		FieldIdentifier: CompanyDeletedAtField,
+		Operator:        operator,
+	}
+}
+
+var CompanyNameField = orm.FieldIdentifier[string]{
+	Field:     "Name",
+	ModelType: companyType,
+}
 
 func CompanyName(operator orm.Operator[string]) orm.WhereCondition[models.Company] {
 	return orm.FieldCondition[models.Company, string]{
-		FieldIdentifier: companyNameFieldID,
+		FieldIdentifier: CompanyNameField,
 		Operator:        operator,
 	}
 }
@@ -44,5 +72,5 @@ func CompanyPreloadSellers(nestedPreloads ...orm.IJoinCondition[models.Seller]) 
 	return orm.NewCollectionPreloadCondition[models.Company, models.Seller]("Sellers", nestedPreloads)
 }
 
-var CompanyPreloadAttributes = orm.NewPreloadCondition[models.Company](companyNameFieldID)
+var CompanyPreloadAttributes = orm.NewPreloadCondition[models.Company](CompanyIdField, CompanyCreatedAtField, CompanyUpdatedAtField, CompanyDeletedAtField, CompanyNameField)
 var CompanyPreloadRelations = []orm.Condition[models.Company]{CompanyPreloadSellers()}

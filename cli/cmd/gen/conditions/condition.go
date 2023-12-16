@@ -6,7 +6,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/ettle/strcase"
 
-	"github.com/ditrit/badaas-orm/cli/cmd/log"
+	"github.com/ditrit/badaas-cli/cmd/log"
 )
 
 const (
@@ -18,10 +18,6 @@ const (
 	badaasORMIJoinCondition       = "IJoinCondition"
 	badaasORMFieldIdentifier      = "FieldIdentifier"
 	badaasORMNewCollectionPreload = "NewCollectionPreloadCondition"
-	IDFieldID                     = "IDFieldID"
-	CreatedAtFieldID              = "CreatedAtFieldID"
-	UpdatedAtFieldID              = "UpdatedAtFieldID"
-	DeletedAtFieldID              = "DeletedAtFieldID"
 	// badaas/orm/operator.go
 	badaasORMOperator = "Operator"
 	// badaas/orm/baseModels.go
@@ -30,13 +26,6 @@ const (
 	uuidModel = "UUIDModel"
 	uIntModel = "UIntModel"
 )
-
-var constantFieldIdentifiers = map[string]*jen.Statement{
-	"ID":        jen.Qual(badaasORMPath, IDFieldID),
-	"CreatedAt": jen.Qual(badaasORMPath, CreatedAtFieldID),
-	"UpdatedAt": jen.Qual(badaasORMPath, UpdatedAtFieldID),
-	"DeletedAt": jen.Qual(badaasORMPath, DeletedAtFieldID),
-}
 
 type Condition struct {
 	codes           []jen.Code
@@ -190,14 +179,6 @@ func (condition *Condition) generateWhere(objectType Type, field Field) {
 	conditionName := getConditionName(objectType, field)
 	log.Logger.Debugf("Generated %q", conditionName)
 
-	var fieldIdentifier *jen.Statement
-
-	if constantFieldIdentifier, ok := constantFieldIdentifiers[field.Name]; ok {
-		fieldIdentifier = constantFieldIdentifier
-	} else {
-		fieldIdentifier = condition.createFieldIdentifier(field, conditionName)
-	}
-
 	condition.codes = append(
 		condition.codes,
 		jen.Func().Id(
@@ -209,8 +190,10 @@ func (condition *Condition) generateWhere(objectType Type, field Field) {
 		).Block(
 			jen.Return(
 				fieldCondition.Clone().Values(jen.Dict{
-					jen.Id("Operator"):        jen.Id("operator"),
-					jen.Id("FieldIdentifier"): fieldIdentifier,
+					jen.Id("Operator"): jen.Id("operator"),
+					jen.Id("FieldIdentifier"): condition.createFieldIdentifier(
+						objectType.Name(), field, conditionName,
+					),
 				}),
 			),
 		),
@@ -219,14 +202,16 @@ func (condition *Condition) generateWhere(objectType Type, field Field) {
 
 // create a variable containing the definition of the field identifier
 // to use it in the where condition and in the preload condition
-func (condition *Condition) createFieldIdentifier(field Field, conditionName string) *jen.Statement {
-	fieldIdentifierValues := jen.Dict{}
+func (condition *Condition) createFieldIdentifier(objectName string, field Field, conditionName string) *jen.Statement {
+	fieldIdentifierValues := jen.Dict{
+		jen.Id("ModelType"): jen.Id(getObjectTypeName(objectName)),
+		jen.Id("Field"):     jen.Lit(field.Name),
+	}
+
 	columnName := field.getColumnName()
 
 	if columnName != "" {
 		fieldIdentifierValues[jen.Id("Column")] = jen.Lit(columnName)
-	} else {
-		fieldIdentifierValues[jen.Id("Field")] = jen.Lit(field.Name)
 	}
 
 	columnPrefix := field.ColumnPrefix
@@ -236,9 +221,11 @@ func (condition *Condition) createFieldIdentifier(field Field, conditionName str
 
 	fieldIdentifierVar := jen.Qual(
 		badaasORMPath, badaasORMFieldIdentifier,
+	).Types(
+		condition.param.GenericType(),
 	).Values(fieldIdentifierValues)
 
-	fieldIdentifierName := strcase.ToCamel(conditionName) + "FieldID"
+	fieldIdentifierName := conditionName + "Field"
 
 	condition.codes = append(
 		condition.codes,

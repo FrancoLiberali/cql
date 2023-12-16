@@ -1,7 +1,7 @@
 package log
 
 import (
-	"github.com/ditrit/badaas-orm/cli/cmd/version"
+	"github.com/ditrit/badaas-cli/cmd/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
