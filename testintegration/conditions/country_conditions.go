@@ -9,45 +9,47 @@ import (
 
 func CountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func CountryCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CountryUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CountryDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var countryNameFieldID = orm.FieldIdentifier{Field: "Name"}
+
 func CountryName(operator orm.Operator[string]) orm.WhereCondition[models.Country] {
 	return orm.FieldCondition[models.Country, string]{
-		Field:    "Name",
-		Operator: operator,
+		FieldIdentifier: countryNameFieldID,
+		Operator:        operator,
 	}
 }
-func CountryCapital(conditions ...orm.Condition[models.City]) orm.Condition[models.Country] {
+func CountryCapital(conditions ...orm.Condition[models.City]) orm.IJoinCondition[models.Country] {
 	return orm.JoinCondition[models.Country, models.City]{
-		Conditions: conditions,
-		T1Field:    "ID",
-		T2Field:    "CountryID",
+		Conditions:         conditions,
+		RelationField:      "Capital",
+		T1Field:            "ID",
+		T1PreloadCondition: CountryPreloadAttributes,
+		T2Field:            "CountryID",
 	}
 }
-func CityCountry(conditions ...orm.Condition[models.Country]) orm.Condition[models.City] {
-	return orm.JoinCondition[models.City, models.Country]{
-		Conditions: conditions,
-		T1Field:    "CountryID",
-		T2Field:    "ID",
-	}
-}
+
+var CountryPreloadCapital = CountryCapital(CityPreloadAttributes)
+var CountryPreloadAttributes = orm.NewPreloadCondition[models.Country](countryNameFieldID)
+var CountryPreloadRelations = []orm.Condition[models.Country]{CountryPreloadCapital}

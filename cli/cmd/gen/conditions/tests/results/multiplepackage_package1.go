@@ -10,39 +10,38 @@ import (
 
 func Package1Id(operator orm.Operator[orm.UUID]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func Package1CreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func Package1UpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func Package1DeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[package1.Package1] {
 	return orm.FieldCondition[package1.Package1, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
-func Package1Package2(conditions ...orm.Condition[package2.Package2]) orm.Condition[package1.Package1] {
+func Package1Package2(conditions ...orm.Condition[package2.Package2]) orm.IJoinCondition[package1.Package1] {
 	return orm.JoinCondition[package1.Package1, package2.Package2]{
-		Conditions: conditions,
-		T1Field:    "ID",
-		T2Field:    "Package1ID",
+		Conditions:         conditions,
+		RelationField:      "Package2",
+		T1Field:            "ID",
+		T1PreloadCondition: Package1PreloadAttributes,
+		T2Field:            "Package1ID",
 	}
 }
-func Package2Package1(conditions ...orm.Condition[package1.Package1]) orm.Condition[package2.Package2] {
-	return orm.JoinCondition[package2.Package2, package1.Package1]{
-		Conditions: conditions,
-		T1Field:    "Package1ID",
-		T2Field:    "ID",
-	}
-}
+
+var Package1PreloadPackage2 = Package1Package2(Package2PreloadAttributes)
+var Package1PreloadAttributes = orm.NewPreloadCondition[package1.Package1]()
+var Package1PreloadRelations = []orm.Condition[package1.Package1]{Package1PreloadPackage2}

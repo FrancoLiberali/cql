@@ -54,8 +54,12 @@ func (id *UUID) Scan(src interface{}) error {
 	return (*uuid.UUID)(id).Scan(src)
 }
 
+func (id UUID) IsNil() bool {
+	return id == NilUUID
+}
+
 func (id UUID) GormValue(_ context.Context, _ *gorm.DB) clause.Expr {
-	if len(id) == 0 {
+	if id == NilUUID {
 		return gorm.Expr("NULL")
 	}
 

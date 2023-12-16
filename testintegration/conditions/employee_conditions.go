@@ -9,44 +9,56 @@ import (
 
 func EmployeeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Employee] {
 	return orm.FieldCondition[models.Employee, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func EmployeeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Employee] {
 	return orm.FieldCondition[models.Employee, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func EmployeeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Employee] {
 	return orm.FieldCondition[models.Employee, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func EmployeeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Employee] {
 	return orm.FieldCondition[models.Employee, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var employeeNameFieldID = orm.FieldIdentifier{Field: "Name"}
+
 func EmployeeName(operator orm.Operator[string]) orm.WhereCondition[models.Employee] {
 	return orm.FieldCondition[models.Employee, string]{
-		Field:    "Name",
-		Operator: operator,
+		FieldIdentifier: employeeNameFieldID,
+		Operator:        operator,
 	}
 }
-func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.Condition[models.Employee] {
+func EmployeeBoss(conditions ...orm.Condition[models.Employee]) orm.IJoinCondition[models.Employee] {
 	return orm.JoinCondition[models.Employee, models.Employee]{
-		Conditions: conditions,
-		T1Field:    "BossID",
-		T2Field:    "ID",
+		Conditions:         conditions,
+		RelationField:      "Boss",
+		T1Field:            "BossID",
+		T1PreloadCondition: EmployeePreloadAttributes,
+		T2Field:            "ID",
 	}
 }
+
+var EmployeePreloadBoss = EmployeeBoss(EmployeePreloadAttributes)
+var employeeBossIdFieldID = orm.FieldIdentifier{Field: "BossID"}
+
 func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Employee] {
 	return orm.FieldCondition[models.Employee, orm.UUID]{
-		Field:    "BossID",
-		Operator: operator,
+		FieldIdentifier: employeeBossIdFieldID,
+		Operator:        operator,
 	}
 }
+
+var EmployeePreloadAttributes = orm.NewPreloadCondition[models.Employee](employeeNameFieldID, employeeBossIdFieldID)
+var EmployeePreloadRelations = []orm.Condition[models.Employee]{EmployeePreloadBoss}

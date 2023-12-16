@@ -9,5 +9,7 @@ type ToBeGormEmbedded struct {
 type GormEmbedded struct {
 	orm.UIntModel
 
-	GormEmbedded ToBeGormEmbedded `gorm:"embedded;embeddedPrefix:gorm_embedded_"`
+	Int                  int
+	GormEmbedded         ToBeGormEmbedded `gorm:"embedded;embeddedPrefix:gorm_embedded_"`
+	GormEmbeddedNoPrefix ToBeGormEmbedded `gorm:"embedded"`
 }

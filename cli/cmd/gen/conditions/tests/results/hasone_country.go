@@ -9,39 +9,38 @@ import (
 
 func CountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func CountryCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CountryUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CountryDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.Country] {
 	return orm.FieldCondition[hasone.Country, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
-func CountryCapital(conditions ...orm.Condition[hasone.City]) orm.Condition[hasone.Country] {
+func CountryCapital(conditions ...orm.Condition[hasone.City]) orm.IJoinCondition[hasone.Country] {
 	return orm.JoinCondition[hasone.Country, hasone.City]{
-		Conditions: conditions,
-		T1Field:    "ID",
-		T2Field:    "CountryID",
+		Conditions:         conditions,
+		RelationField:      "Capital",
+		T1Field:            "ID",
+		T1PreloadCondition: CountryPreloadAttributes,
+		T2Field:            "CountryID",
 	}
 }
-func CityCountry(conditions ...orm.Condition[hasone.Country]) orm.Condition[hasone.City] {
-	return orm.JoinCondition[hasone.City, hasone.Country]{
-		Conditions: conditions,
-		T1Field:    "CountryID",
-		T2Field:    "ID",
-	}
-}
+
+var CountryPreloadCapital = CountryCapital(CityPreloadAttributes)
+var CountryPreloadAttributes = orm.NewPreloadCondition[hasone.Country]()
+var CountryPreloadRelations = []orm.Condition[hasone.Country]{CountryPreloadCapital}

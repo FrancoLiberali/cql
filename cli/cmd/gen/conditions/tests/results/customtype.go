@@ -9,31 +9,36 @@ import (
 
 func CustomTypeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[customtype.CustomType] {
 	return orm.FieldCondition[customtype.CustomType, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func CustomTypeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
 	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CustomTypeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
 	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CustomTypeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
 	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var customTypeCustomFieldID = orm.FieldIdentifier{Field: "Custom"}
+
 func CustomTypeCustom(operator orm.Operator[customtype.MultiString]) orm.WhereCondition[customtype.CustomType] {
 	return orm.FieldCondition[customtype.CustomType, customtype.MultiString]{
-		Field:    "Custom",
-		Operator: operator,
+		FieldIdentifier: customTypeCustomFieldID,
+		Operator:        operator,
 	}
 }
+
+var CustomTypePreloadAttributes = orm.NewPreloadCondition[customtype.CustomType](customTypeCustomFieldID)

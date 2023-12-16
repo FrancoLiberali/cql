@@ -7,27 +7,29 @@ import (
 	"time"
 )
 
-func UintModelId(operator orm.Operator[uint]) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.FieldCondition[uintmodel.UintModel, uint]{
-		Field:    "ID",
-		Operator: operator,
+func UintModelId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[uintmodel.UintModel] {
+	return orm.FieldCondition[uintmodel.UintModel, orm.UIntID]{
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func UintModelCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
 	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func UintModelUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
 	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func UintModelDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
 	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var UintModelPreloadAttributes = orm.NewPreloadCondition[uintmodel.UintModel]()

@@ -9,39 +9,38 @@ import (
 
 func UserId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func UserCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func UserUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func UserDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.User] {
 	return orm.FieldCondition[overrideforeignkeyinverse.User, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
-func UserCreditCard(conditions ...orm.Condition[overrideforeignkeyinverse.CreditCard]) orm.Condition[overrideforeignkeyinverse.User] {
+func UserCreditCard(conditions ...orm.Condition[overrideforeignkeyinverse.CreditCard]) orm.IJoinCondition[overrideforeignkeyinverse.User] {
 	return orm.JoinCondition[overrideforeignkeyinverse.User, overrideforeignkeyinverse.CreditCard]{
-		Conditions: conditions,
-		T1Field:    "ID",
-		T2Field:    "UserReference",
+		Conditions:         conditions,
+		RelationField:      "CreditCard",
+		T1Field:            "ID",
+		T1PreloadCondition: UserPreloadAttributes,
+		T2Field:            "UserReference",
 	}
 }
-func CreditCardUser(conditions ...orm.Condition[overrideforeignkeyinverse.User]) orm.Condition[overrideforeignkeyinverse.CreditCard] {
-	return orm.JoinCondition[overrideforeignkeyinverse.CreditCard, overrideforeignkeyinverse.User]{
-		Conditions: conditions,
-		T1Field:    "UserReference",
-		T2Field:    "ID",
-	}
-}
+
+var UserPreloadCreditCard = UserCreditCard(CreditCardPreloadAttributes)
+var UserPreloadAttributes = orm.NewPreloadCondition[overrideforeignkeyinverse.User]()
+var UserPreloadRelations = []orm.Condition[overrideforeignkeyinverse.User]{UserPreloadCreditCard}

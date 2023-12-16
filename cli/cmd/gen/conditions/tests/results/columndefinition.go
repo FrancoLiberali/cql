@@ -9,31 +9,36 @@ import (
 
 func ColumnDefinitionId(operator orm.Operator[orm.UUID]) orm.WhereCondition[columndefinition.ColumnDefinition] {
 	return orm.FieldCondition[columndefinition.ColumnDefinition, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func ColumnDefinitionCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
 	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func ColumnDefinitionUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
 	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func ColumnDefinitionDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
 	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var columnDefinitionStringFieldID = orm.FieldIdentifier{Column: "string_something_else"}
+
 func ColumnDefinitionString(operator orm.Operator[string]) orm.WhereCondition[columndefinition.ColumnDefinition] {
 	return orm.FieldCondition[columndefinition.ColumnDefinition, string]{
-		Column:   "string_something_else",
-		Operator: operator,
+		FieldIdentifier: columnDefinitionStringFieldID,
+		Operator:        operator,
 	}
 }
+
+var ColumnDefinitionPreloadAttributes = orm.NewPreloadCondition[columndefinition.ColumnDefinition](columnDefinitionStringFieldID)

@@ -14,7 +14,9 @@ type User struct {
 
 func UserEmailCondition(operator orm.Operator[string]) orm.WhereCondition[User] {
 	return orm.FieldCondition[User, string]{
+		FieldIdentifier: orm.FieldIdentifier{
+			Field: "Email",
+		},
 		Operator: operator,
-		Field:    "Email",
 	}
 }

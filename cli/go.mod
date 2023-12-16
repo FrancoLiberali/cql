@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/dave/jennifer v1.6.1
-	github.com/ditrit/badaas v0.0.0-20230802090641-cb55dbcce177
+	github.com/ditrit/badaas v0.0.0-20230807114103-72cff2a37890
 	github.com/ditrit/verdeter v0.4.0
 	github.com/elliotchance/pie/v2 v2.7.0
 	github.com/ettle/strcase v0.1.1
@@ -14,7 +14,6 @@ require (
 	github.com/spf13/viper v1.16.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/tools v0.11.1
-	gorm.io/gorm v1.25.1
 	gotest.tools v2.2.0+incompatible
 )
 
@@ -54,4 +53,5 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 	gorm.io/driver/postgres v1.5.2 // indirect
+	gorm.io/gorm v1.25.1 // indirect
 )

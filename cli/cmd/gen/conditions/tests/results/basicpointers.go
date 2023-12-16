@@ -9,133 +9,189 @@ import (
 
 func BasicPointersId(operator orm.Operator[orm.UUID]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func BasicPointersCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func BasicPointersUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func BasicPointersDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersBoolFieldID = orm.FieldIdentifier{Field: "Bool"}
+
 func BasicPointersBool(operator orm.Operator[bool]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, bool]{
-		Field:    "Bool",
-		Operator: operator,
+		FieldIdentifier: basicPointersBoolFieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersIntFieldID = orm.FieldIdentifier{Field: "Int"}
+
 func BasicPointersInt(operator orm.Operator[int]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, int]{
-		Field:    "Int",
-		Operator: operator,
+		FieldIdentifier: basicPointersIntFieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersInt8FieldID = orm.FieldIdentifier{Field: "Int8"}
+
 func BasicPointersInt8(operator orm.Operator[int8]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, int8]{
-		Field:    "Int8",
-		Operator: operator,
+		FieldIdentifier: basicPointersInt8FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersInt16FieldID = orm.FieldIdentifier{Field: "Int16"}
+
 func BasicPointersInt16(operator orm.Operator[int16]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, int16]{
-		Field:    "Int16",
-		Operator: operator,
+		FieldIdentifier: basicPointersInt16FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersInt32FieldID = orm.FieldIdentifier{Field: "Int32"}
+
 func BasicPointersInt32(operator orm.Operator[int32]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, int32]{
-		Field:    "Int32",
-		Operator: operator,
+		FieldIdentifier: basicPointersInt32FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersInt64FieldID = orm.FieldIdentifier{Field: "Int64"}
+
 func BasicPointersInt64(operator orm.Operator[int64]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, int64]{
-		Field:    "Int64",
-		Operator: operator,
+		FieldIdentifier: basicPointersInt64FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersUIntFieldID = orm.FieldIdentifier{Field: "UInt"}
+
 func BasicPointersUInt(operator orm.Operator[uint]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, uint]{
-		Field:    "UInt",
-		Operator: operator,
+		FieldIdentifier: basicPointersUIntFieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersUInt8FieldID = orm.FieldIdentifier{Field: "UInt8"}
+
 func BasicPointersUInt8(operator orm.Operator[uint8]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, uint8]{
-		Field:    "UInt8",
-		Operator: operator,
+		FieldIdentifier: basicPointersUInt8FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersUInt16FieldID = orm.FieldIdentifier{Field: "UInt16"}
+
 func BasicPointersUInt16(operator orm.Operator[uint16]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, uint16]{
-		Field:    "UInt16",
-		Operator: operator,
+		FieldIdentifier: basicPointersUInt16FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersUInt32FieldID = orm.FieldIdentifier{Field: "UInt32"}
+
 func BasicPointersUInt32(operator orm.Operator[uint32]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, uint32]{
-		Field:    "UInt32",
-		Operator: operator,
+		FieldIdentifier: basicPointersUInt32FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersUInt64FieldID = orm.FieldIdentifier{Field: "UInt64"}
+
 func BasicPointersUInt64(operator orm.Operator[uint64]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, uint64]{
-		Field:    "UInt64",
-		Operator: operator,
+		FieldIdentifier: basicPointersUInt64FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersUIntptrFieldID = orm.FieldIdentifier{Field: "UIntptr"}
+
 func BasicPointersUIntptr(operator orm.Operator[uintptr]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, uintptr]{
-		Field:    "UIntptr",
-		Operator: operator,
+		FieldIdentifier: basicPointersUIntptrFieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersFloat32FieldID = orm.FieldIdentifier{Field: "Float32"}
+
 func BasicPointersFloat32(operator orm.Operator[float32]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, float32]{
-		Field:    "Float32",
-		Operator: operator,
+		FieldIdentifier: basicPointersFloat32FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersFloat64FieldID = orm.FieldIdentifier{Field: "Float64"}
+
 func BasicPointersFloat64(operator orm.Operator[float64]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, float64]{
-		Field:    "Float64",
-		Operator: operator,
+		FieldIdentifier: basicPointersFloat64FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersComplex64FieldID = orm.FieldIdentifier{Field: "Complex64"}
+
 func BasicPointersComplex64(operator orm.Operator[complex64]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, complex64]{
-		Field:    "Complex64",
-		Operator: operator,
+		FieldIdentifier: basicPointersComplex64FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersComplex128FieldID = orm.FieldIdentifier{Field: "Complex128"}
+
 func BasicPointersComplex128(operator orm.Operator[complex128]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, complex128]{
-		Field:    "Complex128",
-		Operator: operator,
+		FieldIdentifier: basicPointersComplex128FieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersStringFieldID = orm.FieldIdentifier{Field: "String"}
+
 func BasicPointersString(operator orm.Operator[string]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, string]{
-		Field:    "String",
-		Operator: operator,
+		FieldIdentifier: basicPointersStringFieldID,
+		Operator:        operator,
 	}
 }
+
+var basicPointersByteFieldID = orm.FieldIdentifier{Field: "Byte"}
+
 func BasicPointersByte(operator orm.Operator[uint8]) orm.WhereCondition[basicpointers.BasicPointers] {
 	return orm.FieldCondition[basicpointers.BasicPointers, uint8]{
-		Field:    "Byte",
-		Operator: operator,
+		FieldIdentifier: basicPointersByteFieldID,
+		Operator:        operator,
 	}
 }
+
+var BasicPointersPreloadAttributes = orm.NewPreloadCondition[basicpointers.BasicPointers](basicPointersBoolFieldID, basicPointersIntFieldID, basicPointersInt8FieldID, basicPointersInt16FieldID, basicPointersInt32FieldID, basicPointersInt64FieldID, basicPointersUIntFieldID, basicPointersUInt8FieldID, basicPointersUInt16FieldID, basicPointersUInt32FieldID, basicPointersUInt64FieldID, basicPointersUIntptrFieldID, basicPointersFloat32FieldID, basicPointersFloat64FieldID, basicPointersComplex64FieldID, basicPointersComplex128FieldID, basicPointersStringFieldID, basicPointersByteFieldID)

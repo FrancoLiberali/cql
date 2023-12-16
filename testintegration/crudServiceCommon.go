@@ -125,3 +125,13 @@ func (ts *CRUDServiceCommonIntTestSuite) createPhone(name string, brand models.B
 
 	return entity
 }
+
+func (ts *CRUDServiceCommonIntTestSuite) createUniversity(name string) *models.University {
+	entity := &models.University{
+		Name: name,
+	}
+	err := ts.db.Create(entity).Error
+	ts.Nil(err)
+
+	return entity
+}

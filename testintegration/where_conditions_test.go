@@ -13,14 +13,14 @@ type WhereConditionsIntTestSuite struct {
 	CRUDServiceCommonIntTestSuite
 	crudProductService orm.CRUDService[models.Product, orm.UUID]
 	crudSaleService    orm.CRUDService[models.Sale, orm.UUID]
-	crudBrandService   orm.CRUDService[models.Brand, uint]
+	crudBrandService   orm.CRUDService[models.Brand, orm.UIntID]
 }
 
 func NewWhereConditionsIntTestSuite(
 	db *gorm.DB,
 	crudProductService orm.CRUDService[models.Product, orm.UUID],
 	crudSaleService orm.CRUDService[models.Sale, orm.UUID],
-	crudBrandService orm.CRUDService[models.Brand, uint],
+	crudBrandService orm.CRUDService[models.Brand, orm.UIntID],
 ) *WhereConditionsIntTestSuite {
 	return &WhereConditionsIntTestSuite{
 		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
@@ -258,7 +258,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfEmbedded() {
 	ts.Nil(err)
 
 	entities, err := ts.crudProductService.Query(
-		conditions.ProductEmbeddedInt(orm.Eq(1)),
+		conditions.ProductToBeEmbeddedEmbeddedInt(orm.Eq(1)),
 	)
 	ts.Nil(err)
 

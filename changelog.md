@@ -33,5 +33,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Transform BadAas into a library.
 - Add badaas-orm with the compilable query system.
 - Add operators support
+- Add preloading
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased

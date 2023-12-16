@@ -9,38 +9,47 @@ import (
 
 func EmployeeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[selfreferential.Employee] {
 	return orm.FieldCondition[selfreferential.Employee, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func EmployeeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
 	return orm.FieldCondition[selfreferential.Employee, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func EmployeeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
 	return orm.FieldCondition[selfreferential.Employee, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func EmployeeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
 	return orm.FieldCondition[selfreferential.Employee, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
-func EmployeeBoss(conditions ...orm.Condition[selfreferential.Employee]) orm.Condition[selfreferential.Employee] {
+func EmployeeBoss(conditions ...orm.Condition[selfreferential.Employee]) orm.IJoinCondition[selfreferential.Employee] {
 	return orm.JoinCondition[selfreferential.Employee, selfreferential.Employee]{
-		Conditions: conditions,
-		T1Field:    "BossID",
-		T2Field:    "ID",
+		Conditions:         conditions,
+		RelationField:      "Boss",
+		T1Field:            "BossID",
+		T1PreloadCondition: EmployeePreloadAttributes,
+		T2Field:            "ID",
 	}
 }
+
+var EmployeePreloadBoss = EmployeeBoss(EmployeePreloadAttributes)
+var employeeBossIdFieldID = orm.FieldIdentifier{Field: "BossID"}
+
 func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[selfreferential.Employee] {
 	return orm.FieldCondition[selfreferential.Employee, orm.UUID]{
-		Field:    "BossID",
-		Operator: operator,
+		FieldIdentifier: employeeBossIdFieldID,
+		Operator:        operator,
 	}
 }
+
+var EmployeePreloadAttributes = orm.NewPreloadCondition[selfreferential.Employee](employeeBossIdFieldID)
+var EmployeePreloadRelations = []orm.Condition[selfreferential.Employee]{EmployeePreloadBoss}

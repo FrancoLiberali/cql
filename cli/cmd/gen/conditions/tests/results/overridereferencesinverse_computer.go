@@ -9,45 +9,47 @@ import (
 
 func ComputerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overridereferencesinverse.Computer] {
 	return orm.FieldCondition[overridereferencesinverse.Computer, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func ComputerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
 	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func ComputerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
 	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func ComputerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Computer] {
 	return orm.FieldCondition[overridereferencesinverse.Computer, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var computerNameFieldID = orm.FieldIdentifier{Field: "Name"}
+
 func ComputerName(operator orm.Operator[string]) orm.WhereCondition[overridereferencesinverse.Computer] {
 	return orm.FieldCondition[overridereferencesinverse.Computer, string]{
-		Field:    "Name",
-		Operator: operator,
+		FieldIdentifier: computerNameFieldID,
+		Operator:        operator,
 	}
 }
-func ComputerProcessor(conditions ...orm.Condition[overridereferencesinverse.Processor]) orm.Condition[overridereferencesinverse.Computer] {
+func ComputerProcessor(conditions ...orm.Condition[overridereferencesinverse.Processor]) orm.IJoinCondition[overridereferencesinverse.Computer] {
 	return orm.JoinCondition[overridereferencesinverse.Computer, overridereferencesinverse.Processor]{
-		Conditions: conditions,
-		T1Field:    "Name",
-		T2Field:    "ComputerName",
+		Conditions:         conditions,
+		RelationField:      "Processor",
+		T1Field:            "Name",
+		T1PreloadCondition: ComputerPreloadAttributes,
+		T2Field:            "ComputerName",
 	}
 }
-func ProcessorComputer(conditions ...orm.Condition[overridereferencesinverse.Computer]) orm.Condition[overridereferencesinverse.Processor] {
-	return orm.JoinCondition[overridereferencesinverse.Processor, overridereferencesinverse.Computer]{
-		Conditions: conditions,
-		T1Field:    "ComputerName",
-		T2Field:    "Name",
-	}
-}
+
+var ComputerPreloadProcessor = ComputerProcessor(ProcessorPreloadAttributes)
+var ComputerPreloadAttributes = orm.NewPreloadCondition[overridereferencesinverse.Computer](computerNameFieldID)
+var ComputerPreloadRelations = []orm.Condition[overridereferencesinverse.Computer]{ComputerPreloadProcessor}
