@@ -3,4 +3,5 @@ go 1.18
 use (
 	.
 	./test_e2e
+	./cli
 )
