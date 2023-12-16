@@ -5,15 +5,15 @@ import (
 	"fmt"
 	"go/types"
 	"os"
+	"path/filepath"
 
 	"github.com/ettle/strcase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"golang.org/x/tools/go/packages"
 
 	"github.com/ditrit/badaas-orm/cli/cmd/log"
 	"github.com/ditrit/verdeter"
-
-	"golang.org/x/tools/go/packages"
 )
 
 var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
@@ -24,7 +24,10 @@ var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 	Args:  cobra.MinimumNArgs(1),
 })
 
-const DestPackageKey = "dest_package"
+const (
+	DestPackageKey = "dest_package"
+	badaasORMPath  = "github.com/ditrit/badaas/orm"
+)
 
 func init() {
 	err := GenConditionsCmd.LKey(
@@ -52,34 +55,46 @@ func generateConditions(_ *cobra.Command, args []string) {
 	}
 
 	// Generate conditions for each package
-	for _, pkg := range pkgs {
-		generateConditionsForPkg(destPkg, pkg)
+	for i, pkg := range pkgs {
+		generateConditionsForPkg(destPkg, args[i], pkg)
 	}
 }
 
 // Generates a file with conditions for each Badaas model in the package
-func generateConditionsForPkg(destPkg string, pkg *packages.Package) {
+func generateConditionsForPkg(destPkg string, pkgPath string, pkg *packages.Package) {
 	log.Logger.Infof("Generating conditions for types in package %q", pkg.Types.Name())
+
+	relationGettersFile := NewFile(pkg.Types.Name(), filepath.Join(pkgPath, "badaas-orm.go"))
 
 	for _, name := range pkg.Types.Scope().Names() {
 		object := getObject(pkg, name)
 		if object != nil {
-			file := NewConditionsFile(
-				destPkg,
-				strcase.ToSnake(object.Name())+"_conditions.go",
-			)
-
-			err := file.AddConditionsFor(object)
-			if err != nil {
-				// object is not a Badaas model, do not generate conditions
-				continue
-			}
-
-			err = file.Save()
-			if err != nil {
-				panic(err)
-			}
+			generateConditionsForObject(destPkg, object)
+			_ = NewRelationGettersGenerator(object).Into(relationGettersFile)
 		}
+	}
+
+	err := relationGettersFile.Save()
+	if err != nil {
+		panic(err)
+	}
+}
+
+func generateConditionsForObject(destPkg string, object types.Object) {
+	file := NewFile(
+		destPkg,
+		strcase.ToSnake(object.Name())+"_conditions.go",
+	)
+
+	err := NewConditionsGenerator(object).Into(file)
+	if err != nil {
+		// object is not a Badaas model, do not generate conditions
+		return
+	}
+
+	err = file.Save()
+	if err != nil {
+		panic(err)
 	}
 }
 

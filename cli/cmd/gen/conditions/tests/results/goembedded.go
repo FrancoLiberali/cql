@@ -7,33 +7,47 @@ import (
 	"time"
 )
 
-func GoEmbeddedId(operator orm.Operator[uint]) orm.WhereCondition[goembedded.GoEmbedded] {
-	return orm.FieldCondition[goembedded.GoEmbedded, uint]{
-		Field:    "ID",
-		Operator: operator,
+func GoEmbeddedId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[goembedded.GoEmbedded] {
+	return orm.FieldCondition[goembedded.GoEmbedded, orm.UIntID]{
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func GoEmbeddedCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
 	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func GoEmbeddedUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
 	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func GoEmbeddedDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[goembedded.GoEmbedded] {
 	return orm.FieldCondition[goembedded.GoEmbedded, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
-func GoEmbeddedEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[goembedded.GoEmbedded] {
+
+var goEmbeddedIntFieldID = orm.FieldIdentifier{Field: "Int"}
+
+func GoEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[goembedded.GoEmbedded] {
 	return orm.FieldCondition[goembedded.GoEmbedded, int]{
-		Field:    "EmbeddedInt",
-		Operator: operator,
+		FieldIdentifier: goEmbeddedIntFieldID,
+		Operator:        operator,
 	}
 }
+
+var goEmbeddedToBeEmbeddedIntFieldID = orm.FieldIdentifier{Field: "Int"}
+
+func GoEmbeddedToBeEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[goembedded.GoEmbedded] {
+	return orm.FieldCondition[goembedded.GoEmbedded, int]{
+		FieldIdentifier: goEmbeddedToBeEmbeddedIntFieldID,
+		Operator:        operator,
+	}
+}
+
+var GoEmbeddedPreloadAttributes = orm.NewPreloadCondition[goembedded.GoEmbedded](goEmbeddedIntFieldID, goEmbeddedToBeEmbeddedIntFieldID)

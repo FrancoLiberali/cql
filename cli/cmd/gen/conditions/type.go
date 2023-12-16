@@ -1,17 +1,23 @@
 package conditions
 
 import (
+	"errors"
 	"fmt"
 	"go/types"
 	"regexp"
 	"strings"
 
 	"github.com/elliotchance/pie/v2"
+
+	"github.com/ditrit/badaas-orm/cli/cmd/utils"
 )
 
 var (
 	// badaas/orm/baseModels.go
-	badaasORMBaseModels = []string{"github.com/ditrit/badaas/orm.UUIDModel", "github.com/ditrit/badaas/orm.UIntModel", "gorm.io/gorm.Model"}
+	badaasORMBaseModels = []string{
+		badaasORMPath + "." + uuidModel,
+		badaasORMPath + "." + uIntModel,
+	}
 
 	// database/sql
 	nullString       = "database/sql.NullString"
@@ -28,6 +34,8 @@ var (
 		nullByte, nullBool, nullTime, deletedAt,
 	}
 )
+
+var ErrFkNotInTypeFields = errors.New("fk not in type's fields")
 
 type Type struct {
 	types.Type
@@ -69,7 +77,7 @@ func isBadaasModel(structType *types.Struct) bool {
 	for i := 0; i < structType.NumFields(); i++ {
 		field := structType.Field(i)
 
-		if field.Embedded() && pie.Contains(badaasORMBaseModels, field.Type().String()) {
+		if field.Embedded() && isBaseModel(field.Type().String()) {
 			return true
 		}
 	}
@@ -77,16 +85,27 @@ func isBadaasModel(structType *types.Struct) bool {
 	return false
 }
 
-// Returns true is the type has a foreign key to the field's object
+func isBaseModel(fieldName string) bool {
+	return pie.Contains(badaasORMBaseModels, fieldName)
+}
+
+// Returns the fk field of the type to the "field"'s object
 // (another field that references that object)
-func (t Type) HasFK(field Field) (bool, error) {
-	objectFields, err := getFields(t, "")
+func (t Type) GetFK(field Field) (*Field, error) {
+	objectFields, err := getFields(t)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-	return pie.Any(objectFields, func(otherField Field) bool {
-		return otherField.Name == field.getFKAttribute()
-	}), nil
+
+	fk := utils.FindFirst(objectFields, func(otherField Field) bool {
+		return strings.EqualFold(otherField.Name, field.getFKAttribute())
+	})
+
+	if fk == nil {
+		return nil, ErrFkNotInTypeFields
+	}
+
+	return fk, nil
 }
 
 var (

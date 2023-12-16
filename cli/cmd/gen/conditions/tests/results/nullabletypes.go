@@ -9,73 +9,99 @@ import (
 
 func NullableTypesId(operator orm.Operator[orm.UUID]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func NullableTypesCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func NullableTypesUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func NullableTypesDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesStringFieldID = orm.FieldIdentifier{Field: "String"}
+
 func NullableTypesString(operator orm.Operator[string]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, string]{
-		Field:    "String",
-		Operator: operator,
+		FieldIdentifier: nullableTypesStringFieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesInt64FieldID = orm.FieldIdentifier{Field: "Int64"}
+
 func NullableTypesInt64(operator orm.Operator[int64]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, int64]{
-		Field:    "Int64",
-		Operator: operator,
+		FieldIdentifier: nullableTypesInt64FieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesInt32FieldID = orm.FieldIdentifier{Field: "Int32"}
+
 func NullableTypesInt32(operator orm.Operator[int32]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, int32]{
-		Field:    "Int32",
-		Operator: operator,
+		FieldIdentifier: nullableTypesInt32FieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesInt16FieldID = orm.FieldIdentifier{Field: "Int16"}
+
 func NullableTypesInt16(operator orm.Operator[int16]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, int16]{
-		Field:    "Int16",
-		Operator: operator,
+		FieldIdentifier: nullableTypesInt16FieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesByteFieldID = orm.FieldIdentifier{Field: "Byte"}
+
 func NullableTypesByte(operator orm.Operator[int8]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, int8]{
-		Field:    "Byte",
-		Operator: operator,
+		FieldIdentifier: nullableTypesByteFieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesFloat64FieldID = orm.FieldIdentifier{Field: "Float64"}
+
 func NullableTypesFloat64(operator orm.Operator[float64]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, float64]{
-		Field:    "Float64",
-		Operator: operator,
+		FieldIdentifier: nullableTypesFloat64FieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesBoolFieldID = orm.FieldIdentifier{Field: "Bool"}
+
 func NullableTypesBool(operator orm.Operator[bool]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, bool]{
-		Field:    "Bool",
-		Operator: operator,
+		FieldIdentifier: nullableTypesBoolFieldID,
+		Operator:        operator,
 	}
 }
+
+var nullableTypesTimeFieldID = orm.FieldIdentifier{Field: "Time"}
+
 func NullableTypesTime(operator orm.Operator[time.Time]) orm.WhereCondition[nullabletypes.NullableTypes] {
 	return orm.FieldCondition[nullabletypes.NullableTypes, time.Time]{
-		Field:    "Time",
-		Operator: operator,
+		FieldIdentifier: nullableTypesTimeFieldID,
+		Operator:        operator,
 	}
 }
+
+var NullableTypesPreloadAttributes = orm.NewPreloadCondition[nullabletypes.NullableTypes](nullableTypesStringFieldID, nullableTypesInt64FieldID, nullableTypesInt32FieldID, nullableTypesInt16FieldID, nullableTypesByteFieldID, nullableTypesFloat64FieldID, nullableTypesBoolFieldID, nullableTypesTimeFieldID)
