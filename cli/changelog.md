@@ -10,5 +10,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Add generation of docker and configuration files
+- Add gen conditions to generate the conditions for the badaas' compilable query system.
 
-[unreleased]: https://github.com/ditrit/badaas-cli/blob/main/changelog.md#unreleased
+[unreleased]: https://github.com/ditrit/badaas-orm/cli/blob/main/changelog.md#unreleased

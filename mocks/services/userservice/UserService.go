@@ -3,9 +3,7 @@
 package mocks
 
 import (
-	httperrors "github.com/ditrit/badaas/httperrors"
 	dto "github.com/ditrit/badaas/persistence/models/dto"
-
 	mock "github.com/stretchr/testify/mock"
 
 	models "github.com/ditrit/badaas/persistence/models"
@@ -17,12 +15,12 @@ type UserService struct {
 }
 
 // GetUser provides a mock function with given fields: _a0
-func (_m *UserService) GetUser(_a0 dto.UserLoginDTO) (*models.User, httperrors.HTTPError) {
+func (_m *UserService) GetUser(_a0 dto.UserLoginDTO) (*models.User, error) {
 	ret := _m.Called(_a0)
 
 	var r0 *models.User
-	var r1 httperrors.HTTPError
-	if rf, ok := ret.Get(0).(func(dto.UserLoginDTO) (*models.User, httperrors.HTTPError)); ok {
+	var r1 error
+	if rf, ok := ret.Get(0).(func(dto.UserLoginDTO) (*models.User, error)); ok {
 		return rf(_a0)
 	}
 	if rf, ok := ret.Get(0).(func(dto.UserLoginDTO) *models.User); ok {
@@ -33,12 +31,10 @@ func (_m *UserService) GetUser(_a0 dto.UserLoginDTO) (*models.User, httperrors.H
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(dto.UserLoginDTO) httperrors.HTTPError); ok {
+	if rf, ok := ret.Get(1).(func(dto.UserLoginDTO) error); ok {
 		r1 = rf(_a0)
 	} else {
-		if ret.Get(1) != nil {
-			r1 = ret.Get(1).(httperrors.HTTPError)
-		}
+		r1 = ret.Error(1)
 	}
 
 	return r0, r1

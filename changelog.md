@@ -31,5 +31,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add a dto that is returned on a successful login.
 - Update verdeter to version v0.4.0.
 - Transform BadAas into a library.
+- Add badaas-orm with the compilable query system.
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased

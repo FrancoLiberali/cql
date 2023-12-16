@@ -2,17 +2,16 @@ package sessionservice
 
 import (
 	"fmt"
-	"net/http"
 	"sync"
 	"time"
 
-	"github.com/Masterminds/squirrel"
+	"go.uber.org/zap"
+	"gorm.io/gorm"
+
 	"github.com/ditrit/badaas/configuration"
 	"github.com/ditrit/badaas/httperrors"
+	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/persistence/models"
-	"github.com/ditrit/badaas/persistence/repository"
-	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 // Errors
@@ -25,10 +24,11 @@ var (
 
 // SessionService handle sessions
 type SessionService interface {
-	IsValid(sessionUUID uuid.UUID) (bool, *SessionClaims)
-	RollSession(uuid.UUID) httperrors.HTTPError
-	LogUserIn(user *models.User, response http.ResponseWriter) httperrors.HTTPError
-	LogUserOut(sessionClaims *SessionClaims, response http.ResponseWriter) httperrors.HTTPError
+	IsValid(sessionUUID orm.UUID) (bool, *SessionClaims)
+	// TODO services should not work with httperrors
+	RollSession(orm.UUID) httperrors.HTTPError
+	LogUserIn(user *models.User) (*models.Session, error)
+	LogUserOut(sessionClaims *SessionClaims) httperrors.HTTPError
 }
 
 // Check interface compliance
@@ -36,40 +36,35 @@ var _ SessionService = (*sessionServiceImpl)(nil)
 
 // The SessionService concrete interface
 type sessionServiceImpl struct {
-	sessionRepository    repository.CRUDRepository[models.Session, uuid.UUID]
-	cache                map[uuid.UUID]*models.Session
+	sessionRepository    orm.CRUDRepository[models.Session, orm.UUID]
+	cache                map[orm.UUID]*models.Session
 	mutex                sync.Mutex
 	logger               *zap.Logger
 	sessionConfiguration configuration.SessionConfiguration
+	db                   *gorm.DB
 }
 
 // The SessionService constructor
 func NewSessionService(
 	logger *zap.Logger,
-	sessionRepository repository.CRUDRepository[models.Session, uuid.UUID],
+	sessionRepository orm.CRUDRepository[models.Session, orm.UUID],
 	sessionConfiguration configuration.SessionConfiguration,
+	db *gorm.DB,
 ) SessionService {
 	sessionService := &sessionServiceImpl{
-		cache:                make(map[uuid.UUID]*models.Session),
+		cache:                make(map[orm.UUID]*models.Session),
 		logger:               logger,
 		sessionRepository:    sessionRepository,
 		sessionConfiguration: sessionConfiguration,
+		db:                   db,
 	}
 	sessionService.init()
 	return sessionService
 }
 
-// Create a new session
-func newSession(userID uuid.UUID, sessionDuration time.Duration) *models.Session {
-	return &models.Session{
-		UserID:    userID,
-		ExpiresAt: time.Now().Add(sessionDuration),
-	}
-}
-
 // Return true if the session exists and is still valid.
 // A instance of SessionClaims is returned to be added to the request context if the conditions previously mentioned are met.
-func (sessionService *sessionServiceImpl) IsValid(sessionUUID uuid.UUID) (bool, *SessionClaims) {
+func (sessionService *sessionServiceImpl) IsValid(sessionUUID orm.UUID) (bool, *SessionClaims) {
 	sessionInstance := sessionService.get(sessionUUID)
 	if sessionInstance == nil {
 		return false, nil
@@ -79,39 +74,45 @@ func (sessionService *sessionServiceImpl) IsValid(sessionUUID uuid.UUID) (bool, 
 
 // Get a session from cache
 // return nil if not found
-func (sessionService *sessionServiceImpl) get(sessionUUID uuid.UUID) *models.Session {
+func (sessionService *sessionServiceImpl) get(sessionUUID orm.UUID) *models.Session {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
+
 	session, ok := sessionService.cache[sessionUUID]
 	if ok {
 		return session
 	}
-	sessionsFoundWithUUID, databaseError := sessionService.sessionRepository.Find(squirrel.Eq{"uuid": sessionUUID.String()}, nil, nil)
-	if databaseError != nil {
+
+	session, err := sessionService.sessionRepository.GetByID(
+		sessionService.db,
+		sessionUUID,
+	)
+	if err != nil {
 		return nil
 	}
-	if !sessionsFoundWithUUID.HasContent {
-		return nil // no sessions found in database
-	}
-	return sessionsFoundWithUUID.Ressources[0]
+
+	return session
 }
 
 // Add a session to the cache
-func (sessionService *sessionServiceImpl) add(session *models.Session) httperrors.HTTPError {
+func (sessionService *sessionServiceImpl) add(session *models.Session) error {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
-	herr := sessionService.sessionRepository.Create(session)
-	if herr != nil {
-		return herr
+
+	err := sessionService.sessionRepository.Create(sessionService.db, session)
+	if err != nil {
+		return err
 	}
+
 	sessionService.cache[session.ID] = session
 	sessionService.logger.Debug("Added session", zap.String("uuid", session.ID.String()))
+
 	return nil
 }
 
 // Initialize the session service
 func (sessionService *sessionServiceImpl) init() {
-	sessionService.cache = make(map[uuid.UUID]*models.Session)
+	sessionService.cache = make(map[orm.UUID]*models.Session)
 	go func() {
 		for {
 			sessionService.removeExpired()
@@ -127,11 +128,13 @@ func (sessionService *sessionServiceImpl) init() {
 func (sessionService *sessionServiceImpl) pullFromDB() {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
-	sessionsFromDatabase, err := sessionService.sessionRepository.GetAll(nil)
+
+	sessionsFromDatabase, err := sessionService.sessionRepository.Query(sessionService.db)
 	if err != nil {
 		panic(err)
 	}
-	newSessionCache := make(map[uuid.UUID]*models.Session)
+
+	newSessionCache := make(map[orm.UUID]*models.Session)
 	for _, sessionFromDatabase := range sessionsFromDatabase {
 		newSessionCache[sessionFromDatabase.ID] = sessionFromDatabase
 	}
@@ -146,11 +149,12 @@ func (sessionService *sessionServiceImpl) pullFromDB() {
 func (sessionService *sessionServiceImpl) removeExpired() {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
+
 	var i int
 	for sessionUUID, session := range sessionService.cache {
 		if session.IsExpired() {
 			// Delete the session in the database
-			err := sessionService.sessionRepository.Delete(session)
+			err := sessionService.sessionRepository.Delete(sessionService.db, session)
 			if err != nil {
 				panic(err)
 			}
@@ -171,8 +175,9 @@ func (sessionService *sessionServiceImpl) removeExpired() {
 func (sessionService *sessionServiceImpl) delete(session *models.Session) httperrors.HTTPError {
 	sessionService.mutex.Lock()
 	defer sessionService.mutex.Unlock()
+
 	sessionUUID := session.ID
-	err := sessionService.sessionRepository.Delete(session)
+	err := sessionService.sessionRepository.Delete(sessionService.db, session)
 	if err != nil {
 		return httperrors.NewInternalServerError(
 			"session error",
@@ -185,7 +190,7 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 }
 
 // Roll a session. If the session is close to expiration, extend its duration.
-func (sessionService *sessionServiceImpl) RollSession(sessionUUID uuid.UUID) httperrors.HTTPError {
+func (sessionService *sessionServiceImpl) RollSession(sessionUUID orm.UUID) httperrors.HTTPError {
 	rollInterval := sessionService.sessionConfiguration.GetRollDuration()
 	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
 	session := sessionService.get(sessionUUID)
@@ -193,64 +198,51 @@ func (sessionService *sessionServiceImpl) RollSession(sessionUUID uuid.UUID) htt
 		// no session to roll, no error
 		return nil
 	}
+
 	if session.IsExpired() {
 		return HERRSessionExpired
 	}
+
 	if session.CanBeRolled(rollInterval) {
 		sessionService.mutex.Lock()
 		defer sessionService.mutex.Unlock()
+
 		session.ExpiresAt = session.ExpiresAt.Add(sessionDuration)
-		herr := sessionService.sessionRepository.Save(session)
-		if herr != nil {
-			return herr
+		err := sessionService.sessionRepository.Save(sessionService.db, session)
+		if err != nil {
+			return httperrors.NewDBError(err)
 		}
+
 		sessionService.logger.Warn("Rolled session",
 			zap.String("userID", session.UserID.String()),
 			zap.String("sessionID", session.ID.String()))
 	}
+
 	return nil
 }
 
 // Log in a user
-func (sessionService *sessionServiceImpl) LogUserIn(user *models.User, response http.ResponseWriter) httperrors.HTTPError {
+func (sessionService *sessionServiceImpl) LogUserIn(user *models.User) (*models.Session, error) {
 	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
-	session := newSession(user.ID, sessionDuration)
+	session := models.NewSession(user.ID, sessionDuration)
 	err := sessionService.add(session)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	CreateAndSetAccessTokenCookie(response, session.ID.String())
-	return nil
+	return session, nil
 }
 
 // Log out a user.
-func (sessionService *sessionServiceImpl) LogUserOut(sessionClaims *SessionClaims, response http.ResponseWriter) httperrors.HTTPError {
+func (sessionService *sessionServiceImpl) LogUserOut(sessionClaims *SessionClaims) httperrors.HTTPError {
 	session := sessionService.get(sessionClaims.SessionUUID)
 	if session == nil {
 		return httperrors.NewUnauthorizedError("Authentication Error", "not authenticated")
 	}
+
 	err := sessionService.delete(session)
 	if err != nil {
 		return err
 	}
-	CreateAndSetAccessTokenCookie(response, "")
-	return nil
-}
 
-// Create an access token and send it in a cookie
-func CreateAndSetAccessTokenCookie(w http.ResponseWriter, sessionUUID string) {
-	accessToken := &http.Cookie{
-		Name:     "access_token",
-		Path:     "/",
-		Value:    sessionUUID,
-		HttpOnly: true,
-		SameSite: http.SameSiteNoneMode, // TODO change to http.SameSiteStrictMode in prod
-		Secure:   false,                 // TODO change to true in prod
-		Expires:  time.Now().Add(48 * time.Hour),
-	}
-	err := accessToken.Valid()
-	if err != nil {
-		panic(err)
-	}
-	http.SetCookie(w, accessToken)
+	return nil
 }
