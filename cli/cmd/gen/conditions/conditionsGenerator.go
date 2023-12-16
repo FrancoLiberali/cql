@@ -11,6 +11,7 @@ import (
 
 const badaasORMNewPreloadCondition = "NewPreloadCondition"
 
+//nolint:revive // name is correct
 type ConditionsGenerator struct {
 	object     types.Object
 	objectType Type

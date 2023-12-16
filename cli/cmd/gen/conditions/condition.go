@@ -41,6 +41,7 @@ func NewCondition(destPkg string, objectType Type, field Field) *Condition {
 		destPkg: destPkg,
 	}
 	condition.generate(objectType, field)
+
 	return condition
 }
 
@@ -114,17 +115,18 @@ func (condition *Condition) generateForSlice(objectType Type, field Field) {
 func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 	_, err := field.Type.BadaasModelStruct()
 
-	if err == nil {
+	switch {
+	case err == nil:
 		// field is a badaas model
 		condition.generateForBadaasModel(objectType, field)
-	} else if field.Type.IsSQLNullableType() {
+	case field.Type.IsSQLNullableType():
 		// field is a sql nullable type (sql.NullBool, sql.NullInt, etc.)
 		condition.param.SQLToBasicType(field.Type)
 		condition.generateWhere(
 			objectType,
 			field,
 		)
-	} else if field.Type.IsGormCustomType() || field.TypeString() == "time.Time" || field.IsModelID() {
+	case field.Type.IsGormCustomType() || field.TypeString() == "time.Time" || field.IsModelID():
 		// field is a Gorm Custom type (implements Scanner and Valuer interfaces)
 		// or a named type supported by gorm (time.Time)
 		// or a badaas-orm id (uuid or uintid)
@@ -133,7 +135,7 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 			objectType,
 			field,
 		)
-	} else {
+	default:
 		log.Logger.Debugf("struct field type not handled: %s", field.TypeString())
 	}
 }
