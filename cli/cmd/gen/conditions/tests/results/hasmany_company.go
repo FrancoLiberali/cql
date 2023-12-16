@@ -9,32 +9,31 @@ import (
 
 func CompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
 	return orm.FieldCondition[hasmany.Company, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
-func SellerCompany(conditions ...orm.Condition[hasmany.Company]) orm.Condition[hasmany.Seller] {
-	return orm.JoinCondition[hasmany.Seller, hasmany.Company]{
-		Conditions: conditions,
-		T1Field:    "CompanyID",
-		T2Field:    "ID",
-	}
+func CompanyPreloadSellers(nestedPreloads ...orm.IJoinCondition[hasmany.Seller]) orm.Condition[hasmany.Company] {
+	return orm.NewCollectionPreloadCondition[hasmany.Company, hasmany.Seller]("Sellers", nestedPreloads)
 }
+
+var CompanyPreloadAttributes = orm.NewPreloadCondition[hasmany.Company]()
+var CompanyPreloadRelations = []orm.Condition[hasmany.Company]{CompanyPreloadSellers()}

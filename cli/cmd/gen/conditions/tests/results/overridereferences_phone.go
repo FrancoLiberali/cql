@@ -9,38 +9,47 @@ import (
 
 func PhoneId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func PhoneCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func PhoneUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func PhoneDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
-func PhoneBrand(conditions ...orm.Condition[overridereferences.Brand]) orm.Condition[overridereferences.Phone] {
+func PhoneBrand(conditions ...orm.Condition[overridereferences.Brand]) orm.IJoinCondition[overridereferences.Phone] {
 	return orm.JoinCondition[overridereferences.Phone, overridereferences.Brand]{
-		Conditions: conditions,
-		T1Field:    "BrandName",
-		T2Field:    "Name",
+		Conditions:         conditions,
+		RelationField:      "Brand",
+		T1Field:            "BrandName",
+		T1PreloadCondition: PhonePreloadAttributes,
+		T2Field:            "Name",
 	}
 }
+
+var PhonePreloadBrand = PhoneBrand(BrandPreloadAttributes)
+var phoneBrandNameFieldID = orm.FieldIdentifier{Field: "BrandName"}
+
 func PhoneBrandName(operator orm.Operator[string]) orm.WhereCondition[overridereferences.Phone] {
 	return orm.FieldCondition[overridereferences.Phone, string]{
-		Field:    "BrandName",
-		Operator: operator,
+		FieldIdentifier: phoneBrandNameFieldID,
+		Operator:        operator,
 	}
 }
+
+var PhonePreloadAttributes = orm.NewPreloadCondition[overridereferences.Phone](phoneBrandNameFieldID)
+var PhonePreloadRelations = []orm.Condition[overridereferences.Phone]{PhonePreloadBrand}

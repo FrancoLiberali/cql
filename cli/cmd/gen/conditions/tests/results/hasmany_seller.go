@@ -9,31 +9,47 @@ import (
 
 func SellerId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func SellerCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func SellerUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func SellerDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+func SellerCompany(conditions ...orm.Condition[hasmany.Company]) orm.IJoinCondition[hasmany.Seller] {
+	return orm.JoinCondition[hasmany.Seller, hasmany.Company]{
+		Conditions:         conditions,
+		RelationField:      "Company",
+		T1Field:            "CompanyID",
+		T1PreloadCondition: SellerPreloadAttributes,
+		T2Field:            "ID",
+	}
+}
+
+var SellerPreloadCompany = SellerCompany(CompanyPreloadAttributes)
+var sellerCompanyIdFieldID = orm.FieldIdentifier{Field: "CompanyID"}
+
 func SellerCompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Seller] {
 	return orm.FieldCondition[hasmany.Seller, orm.UUID]{
-		Field:    "CompanyID",
-		Operator: operator,
+		FieldIdentifier: sellerCompanyIdFieldID,
+		Operator:        operator,
 	}
 }
+
+var SellerPreloadAttributes = orm.NewPreloadCondition[hasmany.Seller](sellerCompanyIdFieldID)
+var SellerPreloadRelations = []orm.Condition[hasmany.Seller]{SellerPreloadCompany}

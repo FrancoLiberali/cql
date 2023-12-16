@@ -9,25 +9,27 @@ import (
 
 func UUIDModelId(operator orm.Operator[orm.UUID]) orm.WhereCondition[uuidmodel.UUIDModel] {
 	return orm.FieldCondition[uuidmodel.UUIDModel, orm.UUID]{
-		Field:    "ID",
-		Operator: operator,
+		FieldIdentifier: orm.IDFieldID,
+		Operator:        operator,
 	}
 }
 func UUIDModelCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
 	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
-		Field:    "CreatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.CreatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func UUIDModelUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
 	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
-		Field:    "UpdatedAt",
-		Operator: operator,
+		FieldIdentifier: orm.UpdatedAtFieldID,
+		Operator:        operator,
 	}
 }
 func UUIDModelDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uuidmodel.UUIDModel] {
 	return orm.FieldCondition[uuidmodel.UUIDModel, time.Time]{
-		Field:    "DeletedAt",
-		Operator: operator,
+		FieldIdentifier: orm.DeletedAtFieldID,
+		Operator:        operator,
 	}
 }
+
+var UUIDModelPreloadAttributes = orm.NewPreloadCondition[uuidmodel.UUIDModel]()

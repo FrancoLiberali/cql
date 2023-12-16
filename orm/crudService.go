@@ -5,7 +5,7 @@ import (
 )
 
 // T can be any model whose identifier attribute is of type ID
-type CRUDService[T any, ID BadaasID] interface {
+type CRUDService[T Model, ID ModelID] interface {
 	// Get the model of type T that has the "id"
 	GetByID(id ID) (*T, error)
 
@@ -21,13 +21,13 @@ type CRUDService[T any, ID BadaasID] interface {
 var _ CRUDService[UUIDModel, UUID] = (*crudServiceImpl[UUIDModel, UUID])(nil)
 
 // Implementation of the CRUD Service
-type crudServiceImpl[T any, ID BadaasID] struct {
+type crudServiceImpl[T Model, ID ModelID] struct {
 	CRUDService[T, ID]
 	db         *gorm.DB
 	repository CRUDRepository[T, ID]
 }
 
-func NewCRUDService[T any, ID BadaasID](
+func NewCRUDService[T Model, ID ModelID](
 	db *gorm.DB,
 	repository CRUDRepository[T, ID],
 ) CRUDService[T, ID] {

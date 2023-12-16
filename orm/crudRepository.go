@@ -10,7 +10,7 @@ import (
 
 // Generic CRUD Repository
 // T can be any model whose identifier attribute is of type ID
-type CRUDRepository[T any, ID BadaasID] interface {
+type CRUDRepository[T Model, ID ModelID] interface {
 	// Create model "model" inside transaction "tx"
 	Create(tx *gorm.DB, entity *T) error
 
@@ -38,12 +38,12 @@ var (
 )
 
 // Implementation of the Generic CRUD Repository
-type CRUDRepositoryImpl[T any, ID BadaasID] struct {
+type CRUDRepositoryImpl[T Model, ID ModelID] struct {
 	CRUDRepository[T, ID]
 }
 
 // Constructor of the Generic CRUD Repository
-func NewCRUDRepository[T any, ID BadaasID]() CRUDRepository[T, ID] {
+func NewCRUDRepository[T Model, ID ModelID]() CRUDRepository[T, ID] {
 	return &CRUDRepositoryImpl[T, ID]{}
 }
 
@@ -94,17 +94,9 @@ func (repository *CRUDRepositoryImpl[T, ID]) QueryOne(tx *gorm.DB, conditions ..
 
 // Get the list of models that match "conditions" inside transaction "tx"
 func (repository *CRUDRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...Condition[T]) ([]*T, error) {
-	initialTableName, err := getTableName(tx, *new(T))
+	query, err := applyConditionsToQuery(tx, conditions)
 	if err != nil {
 		return nil, err
-	}
-
-	query := tx
-	for _, condition := range conditions {
-		query, err = condition.ApplyTo(query, initialTableName)
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	// execute query
@@ -112,6 +104,29 @@ func (repository *CRUDRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...Co
 	err = query.Find(&entities).Error
 
 	return entities, err
+}
+
+func applyConditionsToQuery[T Model](query *gorm.DB, conditions []Condition[T]) (*gorm.DB, error) {
+	initialTableName, err := getTableName(query, *new(T))
+	if err != nil {
+		return nil, err
+	}
+
+	initialTable := Table{
+		Name:    initialTableName,
+		Alias:   initialTableName,
+		Initial: true,
+	}
+
+	query = query.Select(initialTableName + ".*")
+	for _, condition := range conditions {
+		query, err = condition.ApplyTo(query, initialTable)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return query, nil
 }
 
 // Get the name of the table in "db" in which the data for "entity" is saved

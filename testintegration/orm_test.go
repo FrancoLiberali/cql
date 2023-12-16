@@ -50,6 +50,7 @@ func TestBaDaaSORM(t *testing.T) {
 
 		// create crud services for models
 		orm.GetCRUDServiceModule[models.Seller](),
+		orm.GetCRUDServiceModule[models.Company](),
 		orm.GetCRUDServiceModule[models.Product](),
 		orm.GetCRUDServiceModule[models.Sale](),
 		orm.GetCRUDServiceModule[models.City](),
@@ -58,11 +59,13 @@ func TestBaDaaSORM(t *testing.T) {
 		orm.GetCRUDServiceModule[models.Bicycle](),
 		orm.GetCRUDServiceModule[models.Phone](),
 		orm.GetCRUDServiceModule[models.Brand](),
+		orm.GetCRUDServiceModule[models.Child](),
 
 		// create test suites
 		fx.Provide(NewCRUDRepositoryIntTestSuite),
 		fx.Provide(NewWhereConditionsIntTestSuite),
 		fx.Provide(NewJoinConditionsIntTestSuite),
+		fx.Provide(NewPreloadConditionsIntTestSuite),
 		fx.Provide(NewOperatorsIntTestSuite),
 
 		// run tests
@@ -74,6 +77,7 @@ func runORMTestSuites(
 	tsCRUDRepository *CRUDRepositoryIntTestSuite,
 	tsWhereConditions *WhereConditionsIntTestSuite,
 	tsJoinConditions *JoinConditionsIntTestSuite,
+	tsPreloadConditions *PreloadConditionsIntTestSuite,
 	tsOperators *OperatorsIntTestSuite,
 	db *gorm.DB,
 	shutdowner fx.Shutdowner,
@@ -81,6 +85,7 @@ func runORMTestSuites(
 	suite.Run(tGlobal, tsCRUDRepository)
 	suite.Run(tGlobal, tsWhereConditions)
 	suite.Run(tGlobal, tsJoinConditions)
+	suite.Run(tGlobal, tsPreloadConditions)
 	suite.Run(tGlobal, tsOperators)
 
 	shutdowner.Shutdown()

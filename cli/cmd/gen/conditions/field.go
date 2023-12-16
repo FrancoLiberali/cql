@@ -3,14 +3,27 @@ package conditions
 import (
 	"errors"
 	"go/types"
+
+	"github.com/elliotchance/pie/v2"
 )
+
+// badaas/orm/baseModels.go
+var modelIDs = []string{
+	badaasORMPath + "." + uIntID,
+	badaasORMPath + "." + uuid,
+}
 
 type Field struct {
 	Name         string
+	NamePrefix   string
 	Type         Type
 	Embedded     bool
 	Tags         GormTags
 	ColumnPrefix string
+}
+
+func (field Field) IsModelID() bool {
+	return pie.Contains(modelIDs, field.TypeString())
 }
 
 // Get the name of the column where the data for a field will be saved
@@ -85,7 +98,7 @@ func (field Field) ChangeType(newType types.Type) Field {
 
 // Get fields of a Badaas model
 // Returns error is objectType is not a Badaas model
-func getFields(objectType Type, prefix string) ([]Field, error) {
+func getFields(objectType Type) ([]Field, error) {
 	// The underlying type has to be a struct and a Badaas Model
 	// (ignore const, var, func, etc.)
 	structType, err := objectType.BadaasModelStruct()
@@ -93,12 +106,12 @@ func getFields(objectType Type, prefix string) ([]Field, error) {
 		return nil, err
 	}
 
-	return getStructFields(structType, prefix)
+	return getStructFields(structType)
 }
 
 // Get fields of a struct
 // Returns errors if the struct has not fields
-func getStructFields(structType *types.Struct, prefix string) ([]Field, error) {
+func getStructFields(structType *types.Struct) ([]Field, error) {
 	numFields := structType.NumFields()
 	if numFields == 0 {
 		return nil, errors.New("struct has 0 fields")
@@ -111,11 +124,10 @@ func getStructFields(structType *types.Struct, prefix string) ([]Field, error) {
 		fieldObject := structType.Field(i)
 		gormTags := getGormTags(structType.Tag(i))
 		fields = append(fields, Field{
-			Name:         fieldObject.Name(),
-			Type:         Type{fieldObject.Type()},
-			Embedded:     fieldObject.Embedded() || gormTags.hasEmbedded(),
-			Tags:         gormTags,
-			ColumnPrefix: prefix,
+			Name:     fieldObject.Name(),
+			Type:     Type{fieldObject.Type()},
+			Embedded: fieldObject.Embedded() || gormTags.hasEmbedded(),
+			Tags:     gormTags,
 		})
 	}
 
