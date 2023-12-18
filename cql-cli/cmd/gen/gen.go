@@ -1,8 +1,9 @@
 package gen
 
 import (
-	"github.com/FrancoLiberali/cql/cql-cli/cmd/gen/conditions"
 	"github.com/ditrit/verdeter"
+
+	"github.com/FrancoLiberali/cql/cql-cli/cmd/gen/conditions"
 )
 
 var GenCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{

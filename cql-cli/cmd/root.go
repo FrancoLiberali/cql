@@ -1,10 +1,11 @@
 package cmd
 
 import (
+	"github.com/ditrit/verdeter"
+
 	"github.com/FrancoLiberali/cql/cql-cli/cmd/gen"
 	"github.com/FrancoLiberali/cql/cql-cli/cmd/log"
 	"github.com/FrancoLiberali/cql/cql-cli/cmd/version"
-	"github.com/ditrit/verdeter"
 )
 
 // rootCmd represents the base command when called without any subcommands

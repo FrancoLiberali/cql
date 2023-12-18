@@ -7,13 +7,13 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/ditrit/verdeter"
 	"github.com/ettle/strcase"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"golang.org/x/tools/go/packages"
 
 	"github.com/FrancoLiberali/cql/cql-cli/cmd/log"
-	"github.com/ditrit/verdeter"
 )
 
 var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{

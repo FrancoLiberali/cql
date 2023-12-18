@@ -52,7 +52,7 @@ func TestFindFirst(t *testing.T) {
 			if result == nil {
 				assert.Nil(t, test.expected)
 			} else {
-				assert.Equal(t, *test.expected, *result)
+				assert.InEpsilon(t, *test.expected, *result, 0)
 			}
 		})
 	}
