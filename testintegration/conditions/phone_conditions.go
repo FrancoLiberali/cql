@@ -2,84 +2,43 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var phoneType = reflect.TypeOf(*new(models.Phone))
-
-func (phoneConditions phoneConditions) IdIs() orm.FieldIs[models.Phone, model.UIntID] {
-	return orm.FieldIs[models.Phone, model.UIntID]{FieldID: phoneConditions.ID}
+func (phoneConditions phoneConditions) Brand(conditions ...cql.Condition[models.Brand]) cql.JoinCondition[models.Phone] {
+	return cql.NewJoinCondition[models.Phone, models.Brand](conditions, "Brand", "BrandID", phoneConditions.Preload(), "ID")
 }
-func (phoneConditions phoneConditions) CreatedAtIs() orm.FieldIs[models.Phone, time.Time] {
-	return orm.FieldIs[models.Phone, time.Time]{FieldID: phoneConditions.CreatedAt}
-}
-func (phoneConditions phoneConditions) UpdatedAtIs() orm.FieldIs[models.Phone, time.Time] {
-	return orm.FieldIs[models.Phone, time.Time]{FieldID: phoneConditions.UpdatedAt}
-}
-func (phoneConditions phoneConditions) DeletedAtIs() orm.FieldIs[models.Phone, time.Time] {
-	return orm.FieldIs[models.Phone, time.Time]{FieldID: phoneConditions.DeletedAt}
-}
-func (phoneConditions phoneConditions) NameIs() orm.StringFieldIs[models.Phone] {
-	return orm.StringFieldIs[models.Phone]{FieldIs: orm.FieldIs[models.Phone, string]{FieldID: phoneConditions.Name}}
-}
-func (phoneConditions phoneConditions) Brand(conditions ...condition.Condition[models.Brand]) condition.JoinCondition[models.Phone] {
-	return condition.NewJoinCondition[models.Phone, models.Brand](conditions, "Brand", "BrandID", phoneConditions.Preload(), "ID")
-}
-func (phoneConditions phoneConditions) PreloadBrand() condition.JoinCondition[models.Phone] {
+func (phoneConditions phoneConditions) PreloadBrand() cql.JoinCondition[models.Phone] {
 	return phoneConditions.Brand(Brand.Preload())
-}
-func (phoneConditions phoneConditions) BrandIdIs() orm.FieldIs[models.Phone, uint] {
-	return orm.FieldIs[models.Phone, uint]{FieldID: phoneConditions.BrandID}
 }
 
 type phoneConditions struct {
-	ID        query.FieldIdentifier[model.UIntID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
-	BrandID   query.FieldIdentifier[uint]
+	ID        cql.Field[models.Phone, model.UIntID]
+	CreatedAt cql.Field[models.Phone, time.Time]
+	UpdatedAt cql.Field[models.Phone, time.Time]
+	DeletedAt cql.Field[models.Phone, time.Time]
+	Name      cql.StringField[models.Phone]
+	BrandID   cql.Field[models.Phone, uint]
 }
 
 var Phone = phoneConditions{
-	BrandID: query.FieldIdentifier[uint]{
-		Field:     "BrandID",
-		ModelType: phoneType,
-	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: phoneType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: phoneType,
-	},
-	ID: query.FieldIdentifier[model.UIntID]{
-		Field:     "ID",
-		ModelType: phoneType,
-	},
-	Name: query.FieldIdentifier[string]{
-		Field:     "Name",
-		ModelType: phoneType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: phoneType,
-	},
+	BrandID:   cql.Field[models.Phone, uint]{Name: "BrandID"},
+	CreatedAt: cql.Field[models.Phone, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.Phone, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[models.Phone, model.UIntID]{Name: "ID"},
+	Name:      cql.StringField[models.Phone]{Field: cql.Field[models.Phone, string]{Name: "Name"}},
+	UpdatedAt: cql.Field[models.Phone, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Phone when doing a query
-func (phoneConditions phoneConditions) Preload() condition.Condition[models.Phone] {
-	return condition.NewPreloadCondition[models.Phone](phoneConditions.ID, phoneConditions.CreatedAt, phoneConditions.UpdatedAt, phoneConditions.DeletedAt, phoneConditions.Name, phoneConditions.BrandID)
+func (phoneConditions phoneConditions) Preload() cql.Condition[models.Phone] {
+	return cql.NewPreloadCondition[models.Phone](phoneConditions.ID, phoneConditions.CreatedAt, phoneConditions.UpdatedAt, phoneConditions.DeletedAt, phoneConditions.Name, phoneConditions.BrandID)
 }
 
 // PreloadRelations allows preloading all the Phone's relation when doing a query
-func (phoneConditions phoneConditions) PreloadRelations() []condition.Condition[models.Phone] {
-	return []condition.Condition[models.Phone]{phoneConditions.PreloadBrand()}
+func (phoneConditions phoneConditions) PreloadRelations() []cql.Condition[models.Phone] {
+	return []cql.Condition[models.Phone]{phoneConditions.PreloadBrand()}
 }

@@ -225,8 +225,4 @@ These operators can be found in <https://pkg.go.dev/github.com/ditrit/badaas/orm
 <https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlserver>, 
 <https://pkg.go.dev/github.com/ditrit/badaas/orm/psql> 
 and <https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlite>. 
-<<<<<<< HEAD
 To use them, use the Custom method of FieldIs type.
-=======
-To use them, use the Custom method of FieldIs type.
->>>>>>> main

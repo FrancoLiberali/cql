@@ -15,8 +15,8 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/logger"
-	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/persistence/database"
 	"github.com/ditrit/badaas/persistence/gormfx"
 )
@@ -49,6 +49,8 @@ func TestBaDaaSORM(t *testing.T) {
 		fx.Provide(NewJoinConditionsIntTestSuite),
 		fx.Provide(NewPreloadConditionsIntTestSuite),
 		fx.Provide(NewOperatorsIntTestSuite),
+		fx.Provide(NewUpdateIntTestSuite),
+		fx.Provide(NewDeleteIntTestSuite),
 
 		// run tests
 		fx.Invoke(runORMTestSuites),
@@ -61,6 +63,8 @@ func runORMTestSuites(
 	tsJoinConditions *JoinConditionsIntTestSuite,
 	tsPreloadConditions *PreloadConditionsIntTestSuite,
 	tsOperators *OperatorsIntTestSuite,
+	tsUpdate *UpdateIntTestSuite,
+	tsDelete *DeleteIntTestSuite,
 	shutdowner fx.Shutdowner,
 ) {
 	suite.Run(tGlobal, tsQuery)
@@ -68,6 +72,8 @@ func runORMTestSuites(
 	suite.Run(tGlobal, tsJoinConditions)
 	suite.Run(tGlobal, tsPreloadConditions)
 	suite.Run(tGlobal, tsOperators)
+	suite.Run(tGlobal, tsUpdate)
+	suite.Run(tGlobal, tsDelete)
 
 	shutdowner.Shutdown()
 }
@@ -76,13 +82,13 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case query.Postgres:
+	case cql.Postgres:
 		dialector = postgres.Open(orm.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
-	case query.SQLite:
+	case cql.SQLite:
 		dialector = sqlite.Open(orm.CreateSQLiteDSN(host))
-	case query.MySQL:
+	case cql.MySQL:
 		dialector = mysql.Open(orm.CreateMySQLDSN(host, username, password, dbName, port))
-	case query.SQLServer:
+	case cql.SQLServer:
 		dialector = sqlserver.Open(orm.CreateSQLServerDSN(host, username, password, dbName, port))
 	default:
 		return nil, fmt.Errorf("unknown db %s", getDBDialector())
@@ -95,6 +101,6 @@ func NewDBConnection() (*gorm.DB, error) {
 	)
 }
 
-func getDBDialector() query.Dialector {
-	return query.Dialector(os.Getenv(dbTypeEnvKey))
+func getDBDialector() cql.Dialector {
+	return cql.Dialector(os.Getenv(dbTypeEnvKey))
 }

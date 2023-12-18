@@ -1,7 +1,7 @@
 package mysql
 
 import (
-	"github.com/ditrit/badaas/orm/operator"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/sql"
 )
 
@@ -12,11 +12,11 @@ func Like[T string |
 	int | int8 | int16 | int32 | int64 |
 	uint | uint8 | uint16 | uint32 | uint64 |
 	float32 | float64](pattern string,
-) operator.Operator[T] {
-	return operator.NewValueOperator[T](sql.Like, pattern)
+) cql.Operator[T] {
+	return cql.NewValueOperator[T](sql.Like, pattern)
 }
 
 // ref: https://dev.mysql.com/doc/refman/8.0/en/regexp.html#operator_regexp
-func RegexP(pattern string) operator.Operator[string] {
-	return operator.NewValueOperator[string](sql.MySQLRegexp, pattern)
+func RegexP(pattern string) cql.Operator[string] {
+	return cql.NewValueOperator[string](sql.MySQLRegexp, pattern)
 }

@@ -2,73 +2,38 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var companyType = reflect.TypeOf(*new(models.Company))
-
-func (companyConditions companyConditions) IdIs() orm.FieldIs[models.Company, model.UUID] {
-	return orm.FieldIs[models.Company, model.UUID]{FieldID: companyConditions.ID}
-}
-func (companyConditions companyConditions) CreatedAtIs() orm.FieldIs[models.Company, time.Time] {
-	return orm.FieldIs[models.Company, time.Time]{FieldID: companyConditions.CreatedAt}
-}
-func (companyConditions companyConditions) UpdatedAtIs() orm.FieldIs[models.Company, time.Time] {
-	return orm.FieldIs[models.Company, time.Time]{FieldID: companyConditions.UpdatedAt}
-}
-func (companyConditions companyConditions) DeletedAtIs() orm.FieldIs[models.Company, time.Time] {
-	return orm.FieldIs[models.Company, time.Time]{FieldID: companyConditions.DeletedAt}
-}
-func (companyConditions companyConditions) NameIs() orm.StringFieldIs[models.Company] {
-	return orm.StringFieldIs[models.Company]{FieldIs: orm.FieldIs[models.Company, string]{FieldID: companyConditions.Name}}
-}
-func (companyConditions companyConditions) PreloadSellers(nestedPreloads ...condition.JoinCondition[models.Seller]) condition.Condition[models.Company] {
-	return condition.NewCollectionPreloadCondition[models.Company, models.Seller]("Sellers", nestedPreloads)
+func (companyConditions companyConditions) PreloadSellers(nestedPreloads ...cql.JoinCondition[models.Seller]) cql.Condition[models.Company] {
+	return cql.NewCollectionPreloadCondition[models.Company, models.Seller]("Sellers", nestedPreloads)
 }
 
 type companyConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
+	ID        cql.Field[models.Company, model.UUID]
+	CreatedAt cql.Field[models.Company, time.Time]
+	UpdatedAt cql.Field[models.Company, time.Time]
+	DeletedAt cql.Field[models.Company, time.Time]
+	Name      cql.StringField[models.Company]
 }
 
 var Company = companyConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: companyType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: companyType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: companyType,
-	},
-	Name: query.FieldIdentifier[string]{
-		Field:     "Name",
-		ModelType: companyType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: companyType,
-	},
+	CreatedAt: cql.Field[models.Company, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.Company, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[models.Company, model.UUID]{Name: "ID"},
+	Name:      cql.StringField[models.Company]{Field: cql.Field[models.Company, string]{Name: "Name"}},
+	UpdatedAt: cql.Field[models.Company, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Company when doing a query
-func (companyConditions companyConditions) Preload() condition.Condition[models.Company] {
-	return condition.NewPreloadCondition[models.Company](companyConditions.ID, companyConditions.CreatedAt, companyConditions.UpdatedAt, companyConditions.DeletedAt, companyConditions.Name)
+func (companyConditions companyConditions) Preload() cql.Condition[models.Company] {
+	return cql.NewPreloadCondition[models.Company](companyConditions.ID, companyConditions.CreatedAt, companyConditions.UpdatedAt, companyConditions.DeletedAt, companyConditions.Name)
 }
 
 // PreloadRelations allows preloading all the Company's relation when doing a query
-func (companyConditions companyConditions) PreloadRelations() []condition.Condition[models.Company] {
-	return []condition.Condition[models.Company]{companyConditions.PreloadSellers()}
+func (companyConditions companyConditions) PreloadRelations() []cql.Condition[models.Company] {
+	return []cql.Condition[models.Company]{companyConditions.PreloadSellers()}
 }

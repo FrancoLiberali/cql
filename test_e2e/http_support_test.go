@@ -114,7 +114,11 @@ func assertValue(value any, expectedValue string) bool {
 		if err != nil {
 			panic(err)
 		}
+
+		return expectedValueFloat == value
 	default:
+		panic("unsupported format")
+	}
 }
 
 // build a map from a godog.Table

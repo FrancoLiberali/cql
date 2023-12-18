@@ -3,9 +3,8 @@ package unsafe
 import (
 	"fmt"
 
-	"github.com/ditrit/badaas/orm/condition"
+	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/query"
 )
 
 // Condition that can be used to express conditions that are not supported (yet?) by badaas-orm
@@ -20,11 +19,11 @@ func (unsafeCondition unsafeCondition[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (unsafeCondition unsafeCondition[T]) ApplyTo(queryV *query.GormQuery, table query.Table) error {
-	return condition.ApplyWhereCondition[T](unsafeCondition, queryV, table)
+func (unsafeCondition unsafeCondition[T]) ApplyTo(query *cql.GormQuery, table cql.Table) error {
+	return cql.ApplyWhereCondition[T](unsafeCondition, query, table)
 }
 
-func (unsafeCondition unsafeCondition[T]) GetSQL(_ *query.GormQuery, table query.Table) (string, []any, error) {
+func (unsafeCondition unsafeCondition[T]) GetSQL(_ *cql.GormQuery, table cql.Table) (string, []any, error) {
 	return fmt.Sprintf(
 		unsafeCondition.SQLCondition,
 		table.Alias,
@@ -37,7 +36,7 @@ func (unsafeCondition unsafeCondition[T]) AffectsDeletedAt() bool {
 
 // Condition that can be used to express conditions that are not supported (yet?) by badaas-orm
 // Example: table1.columnX = table2.columnY
-func NewCondition[T model.Model](sqlCondition string, values ...any) condition.Condition[T] {
+func NewCondition[T model.Model](sqlCondition string, values ...any) cql.Condition[T] {
 	return unsafeCondition[T]{
 		SQLCondition: sqlCondition,
 		Values:       values,
