@@ -4,7 +4,7 @@ package conditions
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
-	goembedded "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/goembedded"
+	goembedded "github.com/FrancoLiberali/cql/cli/cmd/gen/conditions/tests/goembedded"
 	"time"
 )
 

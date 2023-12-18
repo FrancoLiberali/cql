@@ -12,7 +12,7 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/ditrit/badaas-cli/cmd/log"
+	"github.com/FrancoLiberali/cql/cli/cmd/log"
 	"github.com/ditrit/verdeter"
 )
 

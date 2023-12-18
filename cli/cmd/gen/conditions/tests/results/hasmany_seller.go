@@ -4,7 +4,7 @@ package conditions
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
-	hasmany "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmany"
+	hasmany "github.com/FrancoLiberali/cql/cli/cmd/gen/conditions/tests/hasmany"
 	"time"
 )
 

@@ -4,7 +4,7 @@ package conditions
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
-	overrideforeignkey "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkey"
+	overrideforeignkey "github.com/FrancoLiberali/cql/cli/cmd/gen/conditions/tests/overrideforeignkey"
 	"time"
 )
 

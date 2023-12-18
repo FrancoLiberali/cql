@@ -4,7 +4,7 @@ package conditions
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
-	basicslices "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/basicslices"
+	basicslices "github.com/FrancoLiberali/cql/cli/cmd/gen/conditions/tests/basicslices"
 	"time"
 )
 

@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/ditrit/badaas-cli/cmd/gen"
-	"github.com/ditrit/badaas-cli/cmd/log"
-	"github.com/ditrit/badaas-cli/cmd/version"
+	"github.com/FrancoLiberali/cql/cli/cmd/gen"
+	"github.com/FrancoLiberali/cql/cli/cmd/log"
+	"github.com/FrancoLiberali/cql/cli/cmd/version"
 	"github.com/ditrit/verdeter"
 )
 

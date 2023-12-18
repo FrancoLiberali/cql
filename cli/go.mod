@@ -1,4 +1,4 @@
-module github.com/ditrit/badaas-cli
+module github.com/FrancoLiberali/cql/cli
 
 go 1.18
 

@@ -7,7 +7,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/ettle/strcase"
 
-	"github.com/ditrit/badaas-cli/cmd/log"
+	"github.com/FrancoLiberali/cql/cli/cmd/log"
 )
 
 //nolint:revive // name is correct

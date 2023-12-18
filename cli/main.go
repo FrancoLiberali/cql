@@ -1,6 +1,6 @@
 package main
 
-import "github.com/ditrit/badaas-cli/cmd"
+import "github.com/FrancoLiberali/cql/cli/cmd"
 
 func main() {
 	cmd.Execute()

@@ -1,7 +1,7 @@
 package gen
 
 import (
-	"github.com/ditrit/badaas-cli/cmd/gen/conditions"
+	"github.com/FrancoLiberali/cql/cli/cmd/gen/conditions"
 	"github.com/ditrit/verdeter"
 )
 

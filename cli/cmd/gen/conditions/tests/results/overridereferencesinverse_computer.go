@@ -4,7 +4,7 @@ package conditions
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
-	overridereferencesinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferencesinverse"
+	overridereferencesinverse "github.com/FrancoLiberali/cql/cli/cmd/gen/conditions/tests/overridereferencesinverse"
 	"time"
 )
 

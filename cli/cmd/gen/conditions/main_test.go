@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 	"gotest.tools/assert"
 
-	"github.com/ditrit/badaas-cli/cmd/testutils"
+	"github.com/FrancoLiberali/cql/cli/cmd/testutils"
 )
 
 const chunkSize = 100000

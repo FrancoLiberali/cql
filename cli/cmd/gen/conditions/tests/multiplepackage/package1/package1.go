@@ -1,8 +1,8 @@
 package package1
 
 import (
+	"github.com/FrancoLiberali/cql/cli/cmd/gen/conditions/tests/multiplepackage/package2"
 	"github.com/FrancoLiberali/cql/model"
-	"github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
 )
 
 type Package1 struct {

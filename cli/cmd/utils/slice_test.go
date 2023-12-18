@@ -5,7 +5,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ditrit/badaas-cli/cmd/utils"
+	"github.com/FrancoLiberali/cql/cli/cmd/utils"
 )
 
 var (
