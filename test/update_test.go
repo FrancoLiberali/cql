@@ -11,14 +11,14 @@ import (
 )
 
 type UpdateIntTestSuite struct {
-	TestSuite
+	testSuite
 }
 
 func NewUpdateIntTestSuite(
 	db *gorm.DB,
 ) *UpdateIntTestSuite {
 	return &UpdateIntTestSuite{
-		TestSuite: TestSuite{
+		testSuite: testSuite{
 			db: db,
 		},
 	}
@@ -33,7 +33,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
 	).Set(
 		conditions.Product.Int.Set().Eq(0),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(0), updated)
 }
 
@@ -46,14 +46,14 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 	).Set(
 		conditions.Product.Int.Set().Eq(1),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(product.ID, productReturned.ID)
 	ts.Equal(1, productReturned.Int)
@@ -70,14 +70,14 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 	).Set(
 		conditions.Product.Int.Set().Eq(1),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(2), updated)
 
 	products, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Product{product1, product2}, products)
 	ts.Equal(1, products[0].Int)
@@ -96,7 +96,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 		conditions.Product.Int.Set().Eq(1),
 		conditions.Product.Bool.Set().Eq(true),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	productReturned, err := cql.Query[models.Product](
@@ -104,7 +104,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 		conditions.Product.Int.Is().Eq(1),
 		conditions.Product.Bool.Is().True(),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(product.ID, productReturned.ID)
 	ts.Equal(1, productReturned.Int)
@@ -127,14 +127,14 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 	).Set(
 		conditions.Phone.Name.Set().Eq("pixel 7"),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	pixel7, err := cql.Query[models.Phone](
 		ts.db,
 		conditions.Phone.Name.Is().Eq("pixel 7"),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(pixel.ID, pixel7.ID)
 	ts.Equal("pixel 7", pixel7.Name)
@@ -164,14 +164,14 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() 
 	).Set(
 		conditions.Sale.Code.Set().Eq(1),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	sale, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Code.Is().Eq(1),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(match.ID, sale.ID)
 	ts.Equal(1, sale.Code)
@@ -202,14 +202,14 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	).Set(
 		conditions.Sale.Code.Set().Eq(1),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	sale, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Code.Is().Eq(1),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(match.ID, sale.ID)
 	ts.Equal(1, sale.Code)
@@ -232,14 +232,14 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 		conditions.Phone.Name.Set().Dynamic(conditions.Brand.Name),
 	)
 
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	phoneReturned, err := cql.Query[models.Phone](
 		ts.db,
 		conditions.Phone.Name.Is().Eq("google"),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(pixel.ID, phoneReturned.ID)
 	ts.Equal("google", phoneReturned.Name)
@@ -269,7 +269,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
 	parent2 := &models.Parent2{ParentParent: *parentParent}
 	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "not_franco"}
 	err := ts.db.Create(child).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	updated, err := cql.Update[models.Child](
 		ts.db,
@@ -282,14 +282,14 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
 	).Set(
 		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name, 0),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	childReturned, err := cql.Query[models.Child](
 		ts.db,
 		conditions.Child.Name.Is().Eq("franco"),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(child.ID, childReturned.ID)
 	ts.Equal("franco", childReturned.Name)
@@ -305,14 +305,14 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 	).Set(
 		conditions.Product.Int.Set().Unsafe("1"),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Equal(product.ID, productReturned.ID)
 	ts.Equal(1, productReturned.Int)
@@ -338,7 +338,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 		).Returning(&productsReturned).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.Nil(err)
+		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
 
 		ts.Len(productsReturned, 1)
@@ -379,7 +379,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		).Returning(&salesReturned).Set(
 			conditions.Sale.Code.Set().Eq(2),
 		)
-		ts.Nil(err)
+		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
 
 		ts.Len(salesReturned, 1)
@@ -388,7 +388,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		ts.Equal(2, saleReturned.Code)
 		ts.NotEqual(sale1.UpdatedAt.UnixMicro(), saleReturned.UpdatedAt.UnixMicro())
 		productPreloaded, err := saleReturned.GetProduct()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 		assert.DeepEqual(ts.T(), product1, productPreloaded)
 	}
 }
@@ -420,7 +420,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 	).Returning(&salesReturned).Set(
 		conditions.Sale.Code.Set().Eq(2),
 	)
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	ts.Len(salesReturned, 1)
@@ -429,10 +429,10 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 	ts.Equal(2, saleReturned.Code)
 	ts.NotEqual(sale1.UpdatedAt.UnixMicro(), saleReturned.UpdatedAt.UnixMicro())
 	sellerPreloaded, err := saleReturned.GetSeller()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	assert.DeepEqual(ts.T(), withCompany, sellerPreloaded)
 	companyPreloaded, err := sellerPreloaded.GetCompany()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 	assert.DeepEqual(ts.T(), company, companyPreloaded)
 }
 
@@ -452,7 +452,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 		).Returning(&companiesReturned).Set(
 			conditions.Company.Name.Set().Eq("orness"),
 		)
-		ts.Nil(err)
+		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
 
 		ts.Len(companiesReturned, 1)
@@ -461,7 +461,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 		ts.Equal("orness", companyReturned.Name)
 		ts.NotEqual(company.UpdatedAt.UnixMicro(), companyReturned.UpdatedAt.UnixMicro())
 		sellersPreloaded, err := companyReturned.GetSellers()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 		EqualList(&ts.Suite, []models.Seller{*seller1, *seller2}, sellersPreloaded)
 	}
 }
@@ -490,14 +490,14 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 			conditions.Phone.Name.Set().Eq("7"),
 			conditions.Brand.Name.Set().Eq("google pixel"),
 		)
-		ts.Nil(err)
+		ts.Require().NoError(err)
 		ts.Equal(int64(2), updated)
 
 		pixel7, err := cql.Query[models.Phone](
 			ts.db,
 			conditions.Phone.Name.Is().Eq("7"),
 		).FindOne()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 
 		ts.Equal(pixel.ID, pixel7.ID)
 		ts.Equal("7", pixel7.Name)
@@ -507,7 +507,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 			ts.db,
 			conditions.Brand.Name.Is().Eq("google pixel"),
 		).FindOne()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 
 		ts.Equal(brand1.ID, googlePixel.ID)
 		ts.Equal("google pixel", googlePixel.Name)
@@ -556,14 +556,14 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.Nil(err)
+		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
 
 		productReturned, err := cql.Query[models.Product](
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
 		).FindOne()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 
 		ts.Equal(product1.ID, productReturned.ID)
 		ts.Equal(1, productReturned.Int)

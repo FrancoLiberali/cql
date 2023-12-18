@@ -12,14 +12,14 @@ import (
 )
 
 type QueryIntTestSuite struct {
-	TestSuite
+	testSuite
 }
 
 func NewQueryIntTestSuite(
 	db *gorm.DB,
 ) *QueryIntTestSuite {
 	return &QueryIntTestSuite{
-		TestSuite: TestSuite{
+		testSuite: testSuite{
 			db: db,
 		},
 	}
@@ -42,7 +42,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsEntityIfConditionsMatch() {
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).FindOne()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	assert.DeepEqual(ts.T(), product, productReturned)
 }
@@ -76,7 +76,7 @@ func (ts *QueryIntTestSuite) TestFirstReturnsFirstEntityIfConditionsMatch() {
 		ts.db,
 		conditions.Brand.Name.Is().Eq("a"),
 	).First()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	assert.DeepEqual(ts.T(), brand1, brandReturned)
 }
@@ -100,7 +100,7 @@ func (ts *QueryIntTestSuite) TestLastReturnsLastEntityIfConditionsMatch() {
 		ts.db,
 		conditions.Brand.Name.Is().Eq("a"),
 	).Last()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	assert.DeepEqual(ts.T(), brand2, brandReturned)
 }
@@ -123,7 +123,7 @@ func (ts *QueryIntTestSuite) TestTakeReturnsFirstCreatedEntityIfConditionsMatch(
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Take()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.True(cmp.Equal(productReturned, product1) || cmp.Equal(productReturned, product2))
 }
@@ -137,7 +137,7 @@ func (ts *QueryIntTestSuite) TestAscendingReturnsResultsInAscendingOrder() {
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Ascending(conditions.Product.Float).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Len(products, 2)
 	assert.DeepEqual(ts.T(), product1, products[0])
@@ -151,7 +151,7 @@ func (ts *QueryIntTestSuite) TestDescendingReturnsResultsInDescendingOrder() {
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Descending(conditions.Product.Float).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Len(products, 2)
 	assert.DeepEqual(ts.T(), product2, products[0])
@@ -169,7 +169,7 @@ func (ts *QueryIntTestSuite) TestOrderByFieldThatIsJoined() {
 		ts.db,
 		conditions.Sale.Product(),
 	).Descending(conditions.Product.Float).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Len(sales, 2)
 	assert.DeepEqual(ts.T(), sale2, sales[0])
@@ -205,14 +205,14 @@ func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndJoinIsS
 	parent12 := &models.Parent2{ParentParent: *parentParent1}
 	child1 := &models.Child{Parent1: *parent11, Parent2: *parent12, Name: "franco"}
 	err := ts.db.Create(child1).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	parentParent2 := &models.ParentParent{Name: "b"}
 	parent21 := &models.Parent1{ParentParent: *parentParent2}
 	parent22 := &models.Parent2{ParentParent: *parentParent2}
 	child2 := &models.Child{Parent1: *parent21, Parent2: *parent22, Name: "franco"}
 	err = ts.db.Create(child2).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	children, err := cql.Query[models.Child](
 		ts.db,
@@ -223,7 +223,7 @@ func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndJoinIsS
 			conditions.Parent2.ParentParent(),
 		),
 	).Ascending(conditions.ParentParent.Name, 0).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Len(children, 2)
 	assert.DeepEqual(ts.T(), child1, children[0])
@@ -239,7 +239,7 @@ func (ts *QueryIntTestSuite) TestLimitLimitsTheAmountOfModelsReturned() {
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Limit(1).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	ts.Len(products, 1)
 	ts.True(cmp.Equal(products[0], product1) || cmp.Equal(products[0], product2))
@@ -252,7 +252,7 @@ func (ts *QueryIntTestSuite) TestLimitCanBeCanceled() {
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Limit(1).Limit(-1).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Product{product1, product2}, products)
 }
@@ -269,7 +269,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
 		).Ascending(conditions.Product.Float).Offset(1).Find()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{product2}, products)
 	case condition.MySQL:
@@ -277,7 +277,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
 		).Ascending(conditions.Product.Float).Offset(1).Limit(10).Find()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{product2}, products)
 	}
@@ -293,7 +293,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
 		).Offset(2).Find()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{}, products)
 	case condition.MySQL:
@@ -301,7 +301,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
 		).Offset(2).Limit(10).Find()
-		ts.Nil(err)
+		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{}, products)
 	}
@@ -315,7 +315,7 @@ func (ts *QueryIntTestSuite) TestOffsetAndLimitWorkTogether() {
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Ascending(conditions.Product.Float).Offset(1).Limit(1).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Product{product2}, products)
 }

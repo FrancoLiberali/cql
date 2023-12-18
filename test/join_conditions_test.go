@@ -491,7 +491,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 		),
 		conditions.Child.Name.Is().Dynamic().Eq(conditions.ParentParent.Name).SelectJoin(0, 0),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
 }

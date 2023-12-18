@@ -8,16 +8,16 @@ import (
 	"github.com/FrancoLiberali/cql/test/models"
 )
 
-type TestSuite struct {
+type testSuite struct {
 	suite.Suite
 	db *gorm.DB
 }
 
-func (ts *TestSuite) SetupTest() {
+func (ts *testSuite) SetupTest() {
 	CleanDB(ts.db)
 }
 
-func (ts *TestSuite) createProduct(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.Product {
+func (ts *testSuite) createProduct(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.Product {
 	entity := &models.Product{
 		String:     stringV,
 		Int:        intV,
@@ -26,24 +26,24 @@ func (ts *TestSuite) createProduct(stringV string, intV int, floatV float64, boo
 		IntPointer: intP,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createSale(code int, product *models.Product, seller *models.Seller) *models.Sale {
+func (ts *testSuite) createSale(code int, product *models.Product, seller *models.Seller) *models.Sale {
 	entity := &models.Sale{
 		Code:    code,
 		Product: *product,
 		Seller:  seller,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createSeller(name string, company *models.Company) *models.Seller {
+func (ts *testSuite) createSeller(name string, company *models.Company) *models.Seller {
 	var companyID *model.UUID
 	if company != nil {
 		companyID = &company.ID
@@ -54,81 +54,81 @@ func (ts *TestSuite) createSeller(name string, company *models.Company) *models.
 		CompanyID: companyID,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createCompany(name string) *models.Company {
+func (ts *testSuite) createCompany(name string) *models.Company {
 	entity := &models.Company{
 		Name: name,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createCountry(name string, capital models.City) *models.Country {
+func (ts *testSuite) createCountry(name string, capital models.City) *models.Country {
 	entity := &models.Country{
 		Name:    name,
 		Capital: capital,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createEmployee(name string, boss *models.Employee) *models.Employee {
+func (ts *testSuite) createEmployee(name string, boss *models.Employee) *models.Employee {
 	entity := &models.Employee{
 		Name: name,
 		Boss: boss,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createBicycle(name string, owner models.Person) *models.Bicycle {
+func (ts *testSuite) createBicycle(name string, owner models.Person) *models.Bicycle {
 	entity := &models.Bicycle{
 		Name:  name,
 		Owner: owner,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createBrand(name string) *models.Brand {
+func (ts *testSuite) createBrand(name string) *models.Brand {
 	entity := &models.Brand{
 		Name: name,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createPhone(name string, brand models.Brand) *models.Phone {
+func (ts *testSuite) createPhone(name string, brand models.Brand) *models.Phone {
 	entity := &models.Phone{
 		Name:  name,
 		Brand: brand,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
 
-func (ts *TestSuite) createUniversity(name string) *models.University {
+func (ts *testSuite) createUniversity(name string) *models.University {
 	entity := &models.University{
 		Name: name,
 	}
 	err := ts.db.Create(entity).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	return entity
 }
