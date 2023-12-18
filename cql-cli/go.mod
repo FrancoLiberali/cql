@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/dave/jennifer v1.6.1
-	github.com/FrancoLiberali/cql v0.0.0-20231218153431-f28237f17d3c
+	github.com/ditrit/badaas v0.0.0-20230829122312-83f5e8a9f307
 	github.com/ditrit/verdeter v0.4.0
 	github.com/elliotchance/pie/v2 v2.7.0
 	github.com/ettle/strcase v0.1.1
