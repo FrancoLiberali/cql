@@ -3,8 +3,9 @@ package validator_test
 import (
 	"testing"
 
-	validator "github.com/ditrit/badaas/validators"
 	"github.com/stretchr/testify/assert"
+
+	validator "github.com/ditrit/badaas/validators"
 )
 
 func TestValidEmail(t *testing.T) {

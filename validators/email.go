@@ -8,5 +8,6 @@ func ValidEmail(email string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return addr.Address, nil
 }

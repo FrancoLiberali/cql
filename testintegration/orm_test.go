@@ -79,7 +79,6 @@ func runORMTestSuites(
 	tsJoinConditions *JoinConditionsIntTestSuite,
 	tsPreloadConditions *PreloadConditionsIntTestSuite,
 	tsOperators *OperatorsIntTestSuite,
-	db *gorm.DB,
 	shutdowner fx.Shutdowner,
 ) {
 	suite.Run(tGlobal, tsCRUDRepository)

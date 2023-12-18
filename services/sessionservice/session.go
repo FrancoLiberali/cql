@@ -59,6 +59,7 @@ func NewSessionService(
 		db:                   db,
 	}
 	sessionService.init()
+
 	return sessionService
 }
 
@@ -69,6 +70,7 @@ func (sessionService *sessionServiceImpl) IsValid(sessionUUID orm.UUID) (bool, *
 	if sessionInstance == nil {
 		return false, nil
 	}
+
 	return true, makeSessionClaims(sessionInstance)
 }
 
@@ -138,6 +140,7 @@ func (sessionService *sessionServiceImpl) pullFromDB() {
 	for _, sessionFromDatabase := range sessionsFromDatabase {
 		newSessionCache[sessionFromDatabase.ID] = sessionFromDatabase
 	}
+
 	sessionService.cache = newSessionCache
 	sessionService.logger.Debug(
 		"Pulled sessions from DB",
@@ -151,6 +154,7 @@ func (sessionService *sessionServiceImpl) removeExpired() {
 	defer sessionService.mutex.Unlock()
 
 	var i int
+
 	for sessionUUID, session := range sessionService.cache {
 		if session.IsExpired() {
 			// Delete the session in the database
@@ -165,6 +169,7 @@ func (sessionService *sessionServiceImpl) removeExpired() {
 			i++
 		}
 	}
+
 	sessionService.logger.Debug(
 		"Removed expired session",
 		zap.Int("expiredSessionCount", i),
@@ -185,7 +190,9 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 			err,
 		)
 	}
+
 	delete(sessionService.cache, sessionUUID)
+
 	return nil
 }
 
@@ -193,6 +200,7 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 func (sessionService *sessionServiceImpl) RollSession(sessionUUID orm.UUID) httperrors.HTTPError {
 	rollInterval := sessionService.sessionConfiguration.GetRollDuration()
 	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
+
 	session := sessionService.get(sessionUUID)
 	if session == nil {
 		// no session to roll, no error

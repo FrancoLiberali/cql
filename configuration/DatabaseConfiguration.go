@@ -22,7 +22,7 @@ const (
 
 // Hold the configuration values for the database connection
 type DatabaseConfiguration interface {
-	ConfigurationHolder
+	Holder
 	GetPort() int
 	GetHost() string
 	GetDBName() string
@@ -49,6 +49,7 @@ type databaseConfigurationImpl struct {
 func NewDatabaseConfiguration() DatabaseConfiguration {
 	databaseConfiguration := new(databaseConfigurationImpl)
 	databaseConfiguration.Reload()
+
 	return databaseConfiguration
 }
 

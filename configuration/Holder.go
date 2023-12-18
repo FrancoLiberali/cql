@@ -3,7 +3,7 @@ package configuration
 import "go.uber.org/zap"
 
 // Every configuration holder must implement this interface
-type ConfigurationHolder interface {
+type Holder interface {
 	// Reload the values provided by the configuration holder
 	Reload()
 

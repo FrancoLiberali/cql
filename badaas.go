@@ -15,14 +15,14 @@ import (
 	"github.com/ditrit/verdeter"
 )
 
-var BaDaaS = BaDaaSInitializer{}
+var BaDaaS = Initializer{}
 
-type BaDaaSInitializer struct {
+type Initializer struct {
 	modules []fx.Option
 }
 
 // Allows to select which modules provided by badaas must be added to the application
-func (badaas *BaDaaSInitializer) AddModules(modules ...fx.Option) *BaDaaSInitializer {
+func (badaas *Initializer) AddModules(modules ...fx.Option) *Initializer {
 	badaas.modules = append(badaas.modules, modules...)
 
 	return badaas
@@ -30,7 +30,7 @@ func (badaas *BaDaaSInitializer) AddModules(modules ...fx.Option) *BaDaaSInitial
 
 // Allows to provide constructors to the application
 // so that the constructed objects will be available via dependency injection
-func (badaas *BaDaaSInitializer) Provide(constructors ...any) *BaDaaSInitializer {
+func (badaas *Initializer) Provide(constructors ...any) *Initializer {
 	badaas.modules = append(badaas.modules, fx.Provide(constructors...))
 
 	return badaas
@@ -38,14 +38,14 @@ func (badaas *BaDaaSInitializer) Provide(constructors ...any) *BaDaaSInitializer
 
 // Allows to invoke functions when the application starts.
 // They can take advantage of dependency injection
-func (badaas *BaDaaSInitializer) Invoke(funcs ...any) *BaDaaSInitializer {
+func (badaas *Initializer) Invoke(funcs ...any) *Initializer {
 	badaas.modules = append(badaas.modules, fx.Invoke(funcs...))
 
 	return badaas
 }
 
 // Start the application
-func (badaas BaDaaSInitializer) Start() {
+func (badaas Initializer) Start() {
 	rootCommand := verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 		Use:   "badaas",
 		Short: "BaDaaS",
@@ -61,7 +61,7 @@ func (badaas BaDaaSInitializer) Start() {
 }
 
 // Run the http server for badaas
-func (badaas BaDaaSInitializer) runHTTPServer(cmd *cobra.Command, args []string) {
+func (badaas Initializer) runHTTPServer(_ *cobra.Command, _ []string) {
 	modules := []fx.Option{
 		// internal modules
 		configuration.ConfigurationModule,

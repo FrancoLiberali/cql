@@ -3,8 +3,9 @@ package basicauth_test
 import (
 	"testing"
 
-	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/ditrit/badaas/services/auth/protocols/basicauth"
 )
 
 func TestSaltAndHashPassword(t *testing.T) {
@@ -18,5 +19,4 @@ func TestCheckUserPassword(t *testing.T) {
 	hash := basicauth.SaltAndHashPassword(password)
 	assert.True(t, basicauth.CheckUserPassword(hash, password), "the password and it's hash should match")
 	assert.False(t, basicauth.CheckUserPassword(hash, "wrong password"), "the password and it's hash should match")
-
 }

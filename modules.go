@@ -50,6 +50,7 @@ func createSuperUser(
 			logger.Sugar().Errorf("failed to save the super admin %w", err)
 			return err
 		}
+
 		logger.Sugar().Infof("The superadmin user already exists in database")
 	}
 

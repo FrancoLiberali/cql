@@ -3,12 +3,13 @@ package configuration_test
 import (
 	"testing"
 
-	"github.com/ditrit/badaas/configuration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
+
+	"github.com/ditrit/badaas/configuration"
 )
 
 var LoggerConfigurationString = `logger:
@@ -18,19 +19,21 @@ var LoggerConfigurationString = `logger:
 `
 
 func TestLoggerConfigurationNewLoggerConfiguration(t *testing.T) {
-	assert.NotNil(t, configuration.NewLoggerConfiguration(), "the contructor for LoggerConfiguration should not return a nil value")
+	assert.NotNil(t, configuration.NewLoggerConfiguration(), "the constructor for LoggerConfiguration should not return a nil value")
 }
 
 func TestLoggerConfigurationLoggerGetMode(t *testing.T) {
 	setupViperEnvironment(LoggerConfigurationString)
-	LoggerConfiguration := configuration.NewLoggerConfiguration()
-	assert.Equal(t, "prod", LoggerConfiguration.GetMode())
+
+	loggerConfiguration := configuration.NewLoggerConfiguration()
+	assert.Equal(t, "prod", loggerConfiguration.GetMode())
 }
 
 func TestLoggerConfigurationLoggerRequestTemplate(t *testing.T) {
 	setupViperEnvironment(LoggerConfigurationString)
-	LoggerConfiguration := configuration.NewLoggerConfiguration()
-	assert.Equal(t, "{proto} {method} {url}", LoggerConfiguration.GetRequestTemplate())
+
+	loggerConfiguration := configuration.NewLoggerConfiguration()
+	assert.Equal(t, "{proto} {method} {url}", loggerConfiguration.GetRequestTemplate())
 }
 
 func TestLoggerConfigurationLog(t *testing.T) {
@@ -39,8 +42,8 @@ func TestLoggerConfigurationLog(t *testing.T) {
 	observedZapCore, observedLogs := observer.New(zap.DebugLevel)
 	observedLogger := zap.New(observedZapCore)
 
-	LoggerConfiguration := configuration.NewLoggerConfiguration()
-	LoggerConfiguration.Log(observedLogger)
+	loggerConfiguration := configuration.NewLoggerConfiguration()
+	loggerConfiguration.Log(observedLogger)
 
 	require.Equal(t, 1, observedLogs.Len())
 	log := observedLogs.All()[0]

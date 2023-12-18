@@ -19,6 +19,35 @@ jobs:
           min_length: 5
           max_length: 50
 
+  check-style:
+    name: Code style
+    needs: [branch-naming-rules]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: badaas lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.53.3
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+      - name: teste2e lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          version: v1.53.3
+          working-directory: test_e2e
+          args: --config=../.golangci.yml
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+
   unit-tests:
     name: Unit tests
     needs: [branch-naming-rules]

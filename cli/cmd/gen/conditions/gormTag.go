@@ -49,6 +49,7 @@ func getGormTags(tag string) GormTags {
 	for _, tag := range gormTags {
 		splitted := strings.Split(tag, ":")
 		tagName := GormTag(splitted[0])
+
 		if len(splitted) == 1 {
 			tagMap[tagName] = ""
 		} else {

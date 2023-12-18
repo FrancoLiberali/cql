@@ -10,10 +10,10 @@ import (
 	"github.com/ditrit/badaas/persistence/models/dto"
 )
 
-// AnError is an HTTPError instance useful for testing.  If the code does not care
+// ErrForTests is an HTTPError instance useful for testing. If the code does not care
 // about HTTPError specifics, and only needs to return the HTTPError for example, this
 // HTTPError should be used to make the test code more readable.
-var AnError HTTPError = &HTTPErrorImpl{
+var ErrForTests HTTPError = &HTTPErrorImpl{
 	Status:      -1,
 	Err:         "TESTING ERROR",
 	Message:     "USE ONLY FOR TESTING",
@@ -35,6 +35,8 @@ type HTTPError interface {
 }
 
 // Describe an HTTP error
+//
+//nolint:errname // this name is correct for a type name
 type HTTPErrorImpl struct {
 	Status      int
 	Err         string
@@ -45,12 +47,15 @@ type HTTPErrorImpl struct {
 
 // Convert an HTTPError to a json string
 func (httpError *HTTPErrorImpl) ToJSON() string {
-	dto := &dto.DTOHTTPError{
+	dto := &dto.HTTPError{
 		Error:   httpError.Err,
 		Message: httpError.Message,
 		Status:  http.StatusText(httpError.Status),
 	}
+
+	//nolint:errchkjson // TODO fix it
 	payload, _ := json.Marshal(dto)
+
 	return string(payload)
 }
 
@@ -69,6 +74,7 @@ func (httpError *HTTPErrorImpl) Write(httpResponse http.ResponseWriter, logger *
 	if httpError.toLog && logger != nil {
 		logHTTPError(httpError, logger)
 	}
+
 	http.Error(httpResponse, httpError.ToJSON(), httpError.Status)
 }
 

@@ -1,9 +1,10 @@
 package log
 
 import (
-	"github.com/ditrit/badaas-cli/cmd/version"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
+
+	"github.com/ditrit/badaas-cli/cmd/version"
 )
 
 var Logger = log.WithField("version", version.Version)

@@ -122,6 +122,7 @@ func (t Type) IsGormCustomType() bool {
 
 	hasScanMethod := false
 	hasValueMethod := false
+
 	for i := 0; i < typeNamed.NumMethods(); i++ {
 		methodSignature := typeNamed.Method(i).String()
 

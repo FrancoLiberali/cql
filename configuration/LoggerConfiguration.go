@@ -13,7 +13,7 @@ const (
 
 // Hold the configuration values for the logger
 type LoggerConfiguration interface {
-	ConfigurationHolder
+	Holder
 	GetMode() string
 	GetRequestTemplate() string
 }
@@ -27,6 +27,7 @@ type loggerConfigurationImpl struct {
 func NewLoggerConfiguration() LoggerConfiguration {
 	loggerConfiguration := new(loggerConfigurationImpl)
 	loggerConfiguration.Reload()
+
 	return loggerConfiguration
 }
 

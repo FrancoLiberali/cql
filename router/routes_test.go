@@ -31,7 +31,7 @@ func TestAddInfoRoutes(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
-		"GET",
+		http.MethodGet,
 		"/info",
 		nil,
 	)
@@ -61,7 +61,7 @@ func TestAddLoginRoutes(t *testing.T) {
 
 	response := httptest.NewRecorder()
 	request := httptest.NewRequest(
-		"POST",
+		http.MethodPost,
 		"/login",
 		nil,
 	)
