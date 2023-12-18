@@ -6,6 +6,8 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 )
@@ -13,12 +15,12 @@ import (
 type CRUDRepositoryIntTestSuite struct {
 	suite.Suite
 	db                    *gorm.DB
-	crudProductRepository orm.CRUDRepository[models.Product, orm.UUID]
+	crudProductRepository orm.CRUDRepository[models.Product, model.UUID]
 }
 
 func NewCRUDRepositoryIntTestSuite(
 	db *gorm.DB,
-	crudProductRepository orm.CRUDRepository[models.Product, orm.UUID],
+	crudProductRepository orm.CRUDRepository[models.Product, model.UUID],
 ) *CRUDRepositoryIntTestSuite {
 	return &CRUDRepositoryIntTestSuite{
 		db:                    db,
@@ -38,7 +40,7 @@ func (ts *CRUDRepositoryIntTestSuite) TearDownSuite() {
 
 func (ts *CRUDRepositoryIntTestSuite) TestGetByIDReturnsErrorIfIDDontMatch() {
 	ts.createProduct(0)
-	_, err := ts.crudProductRepository.GetByID(ts.db, orm.NilUUID)
+	_, err := ts.crudProductRepository.GetByID(ts.db, model.NilUUID)
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
 
@@ -80,7 +82,7 @@ func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsErrorIfMoreThanOneMatch
 		ts.db,
 		conditions.ProductInt(orm.Eq(0)),
 	)
-	ts.Error(err, orm.ErrMoreThanOneObjectFound)
+	ts.Error(err, errors.ErrMoreThanOneObjectFound)
 }
 
 // ------------------------- utils -------------------------

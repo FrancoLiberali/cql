@@ -1,9 +1,9 @@
 package basicslices
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type BasicSlices struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Bool       []bool
 	Int        []int

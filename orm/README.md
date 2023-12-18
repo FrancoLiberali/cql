@@ -1,47 +1,23 @@
 # BaDaaS ORM: Backend and Distribution ORM (Object Relational Mapping) <!-- omit in toc -->
 
-BaDaaS ORM is the BaDaaS component that allows for easy persistence and querying of objects. It is built on top of gorm and adds for each entity a service and a repository that allows complex queries without any extra effort.
+Badaas-orm is the BaDaaS' component that allows for easy and safe persistence and querying of objects but it can be used both within a BaDaaS application and independently.
 
-BaDaaS ORM can be used both within a BaDaaS application and as a stand-alone application.
+It's built on top of `gorm <https://gorm.io/>`_, a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. While gorm does this job well with its automatic migration then performing queries on these objects is somewhat limited, forcing us to write SQL queries directly when they are complex. Badaas-orm seeks to address these limitations with a query system that:
 
-- [Installation](#installation)
-- [Provided functionalities](#provided-functionalities)
-  - [Base models](#base-models)
-  - [CRUDServiceModule](#crudservicemodule)
+- Is compile-time safe: its query system is validated at compile time to avoid errors such as comparing attributes that are of different types, trying to use attributes or navigate relationships that do not exist, using information from tables that are not included in the query, etc.
+- Is easy to use: the use of this system does not require knowledge of databases, SQL languages or complex concepts. Writing queries only requires programming in go and the result is easy to read.
+- Is designed for real applications: the query system is designed to work well in real-world cases where queries are complex, require navigating multiple relationships, performing multiple comparisons, etc.
+- Is designed so that developers can focus on the business model: its queries allow easy retrieval of model relationships to apply business logic to the model and it provides mechanisms to avoid errors in the business logic due to mistakes in loading information from the database.
+- It is designed for high performance: the query system avoids as much as possible the use of reflection and aims that all the necessary model data can be retrieved in a single query to the database.
 
-## Installation
+## Documentation
 
-Once you have started your project with `go init`, you must add the dependency to BaDaaS:
+<!-- TODO add link to docs -->
 
-```bash
-go get -u github.com/ditrit/badaas
-```
+## Contributing
 
-## Provided functionalities
+See [this section](../docs/contributing/contributing.md) to view the badaas contribution guidelines.
 
-### Base models
+## License
 
-badaas-orm gives you two types of base models for your classes: `orm.UUIDModel` and `orm.UIntModel`.
-
-To use them, simply embed the desired model in any of your classes:
-
-```go
-type MyClass struct {
-  orm.UUIDModel
-
-  // your code here
-}
-```
-
-Once done your class will be considered a **BaDaaS Model**.
-
-The difference between them is the type they will use as primary key: a random uuid and an auto incremental uint respectively. Both provide date created, edited and deleted (<https://gorm.io/docs/delete.html#Soft-Delete>).
-
-### CRUDServiceModule
-
-`CRUDServiceModule` provides you a CRUDService and a CRUDRepository for your badaas Model. After calling it as, for example, `orm.GetCRUDServiceModule[models.Company](),` the following can be used by dependency injection:
-
-- `crudCompanyService orm.CRUDService[models.Company, orm.UUID]`
-- `crudCompanyRepository orm.CRUDRepository[models.Company, orm.UUID]`
-
-These classes will allow you to perform queries using the compilable query system generated with badaas-cli. For details on how to do this visit [badaas-cli docs](github.com/ditrit/badaas-cli/README.md).
+Badaas is Licensed under the [Mozilla Public License Version 2.0](../LICENSE).

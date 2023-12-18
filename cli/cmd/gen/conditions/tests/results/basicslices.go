@@ -3,274 +3,211 @@ package conditions
 
 import (
 	basicslices "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/basicslices"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var basicSlicesType = reflect.TypeOf(*new(basicslices.BasicSlices))
-var BasicSlicesIdField = orm.FieldIdentifier[orm.UUID]{
+var BasicSlicesIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesId(operator orm.Operator[orm.UUID]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, orm.UUID]{
-		FieldIdentifier: BasicSlicesIdField,
-		Operator:        operator,
-	}
+func BasicSlicesId(operator operator.Operator[model.UUID]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, model.UUID](BasicSlicesIdField, operator)
 }
 
-var BasicSlicesCreatedAtField = orm.FieldIdentifier[time.Time]{
+var BasicSlicesCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, time.Time]{
-		FieldIdentifier: BasicSlicesCreatedAtField,
-		Operator:        operator,
-	}
+func BasicSlicesCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, time.Time](BasicSlicesCreatedAtField, operator)
 }
 
-var BasicSlicesUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var BasicSlicesUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, time.Time]{
-		FieldIdentifier: BasicSlicesUpdatedAtField,
-		Operator:        operator,
-	}
+func BasicSlicesUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, time.Time](BasicSlicesUpdatedAtField, operator)
 }
 
-var BasicSlicesDeletedAtField = orm.FieldIdentifier[time.Time]{
+var BasicSlicesDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, time.Time]{
-		FieldIdentifier: BasicSlicesDeletedAtField,
-		Operator:        operator,
-	}
+func BasicSlicesDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, time.Time](BasicSlicesDeletedAtField, operator)
 }
 
-var BasicSlicesBoolField = orm.FieldIdentifier[[]bool]{
+var BasicSlicesBoolField = query.FieldIdentifier[[]bool]{
 	Field:     "Bool",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesBool(operator orm.Operator[[]bool]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []bool]{
-		FieldIdentifier: BasicSlicesBoolField,
-		Operator:        operator,
-	}
+func BasicSlicesBool(operator operator.Operator[[]bool]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []bool](BasicSlicesBoolField, operator)
 }
 
-var BasicSlicesIntField = orm.FieldIdentifier[[]int]{
+var BasicSlicesIntField = query.FieldIdentifier[[]int]{
 	Field:     "Int",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesInt(operator orm.Operator[[]int]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []int]{
-		FieldIdentifier: BasicSlicesIntField,
-		Operator:        operator,
-	}
+func BasicSlicesInt(operator operator.Operator[[]int]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []int](BasicSlicesIntField, operator)
 }
 
-var BasicSlicesInt8Field = orm.FieldIdentifier[[]int8]{
+var BasicSlicesInt8Field = query.FieldIdentifier[[]int8]{
 	Field:     "Int8",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesInt8(operator orm.Operator[[]int8]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []int8]{
-		FieldIdentifier: BasicSlicesInt8Field,
-		Operator:        operator,
-	}
+func BasicSlicesInt8(operator operator.Operator[[]int8]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []int8](BasicSlicesInt8Field, operator)
 }
 
-var BasicSlicesInt16Field = orm.FieldIdentifier[[]int16]{
+var BasicSlicesInt16Field = query.FieldIdentifier[[]int16]{
 	Field:     "Int16",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesInt16(operator orm.Operator[[]int16]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []int16]{
-		FieldIdentifier: BasicSlicesInt16Field,
-		Operator:        operator,
-	}
+func BasicSlicesInt16(operator operator.Operator[[]int16]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []int16](BasicSlicesInt16Field, operator)
 }
 
-var BasicSlicesInt32Field = orm.FieldIdentifier[[]int32]{
+var BasicSlicesInt32Field = query.FieldIdentifier[[]int32]{
 	Field:     "Int32",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesInt32(operator orm.Operator[[]int32]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []int32]{
-		FieldIdentifier: BasicSlicesInt32Field,
-		Operator:        operator,
-	}
+func BasicSlicesInt32(operator operator.Operator[[]int32]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []int32](BasicSlicesInt32Field, operator)
 }
 
-var BasicSlicesInt64Field = orm.FieldIdentifier[[]int64]{
+var BasicSlicesInt64Field = query.FieldIdentifier[[]int64]{
 	Field:     "Int64",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesInt64(operator orm.Operator[[]int64]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []int64]{
-		FieldIdentifier: BasicSlicesInt64Field,
-		Operator:        operator,
-	}
+func BasicSlicesInt64(operator operator.Operator[[]int64]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []int64](BasicSlicesInt64Field, operator)
 }
 
-var BasicSlicesUIntField = orm.FieldIdentifier[[]uint]{
+var BasicSlicesUIntField = query.FieldIdentifier[[]uint]{
 	Field:     "UInt",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesUInt(operator orm.Operator[[]uint]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []uint]{
-		FieldIdentifier: BasicSlicesUIntField,
-		Operator:        operator,
-	}
+func BasicSlicesUInt(operator operator.Operator[[]uint]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []uint](BasicSlicesUIntField, operator)
 }
 
-var BasicSlicesUInt8Field = orm.FieldIdentifier[[]uint8]{
+var BasicSlicesUInt8Field = query.FieldIdentifier[[]uint8]{
 	Field:     "UInt8",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesUInt8(operator orm.Operator[[]uint8]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []uint8]{
-		FieldIdentifier: BasicSlicesUInt8Field,
-		Operator:        operator,
-	}
+func BasicSlicesUInt8(operator operator.Operator[[]uint8]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []uint8](BasicSlicesUInt8Field, operator)
 }
 
-var BasicSlicesUInt16Field = orm.FieldIdentifier[[]uint16]{
+var BasicSlicesUInt16Field = query.FieldIdentifier[[]uint16]{
 	Field:     "UInt16",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesUInt16(operator orm.Operator[[]uint16]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []uint16]{
-		FieldIdentifier: BasicSlicesUInt16Field,
-		Operator:        operator,
-	}
+func BasicSlicesUInt16(operator operator.Operator[[]uint16]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []uint16](BasicSlicesUInt16Field, operator)
 }
 
-var BasicSlicesUInt32Field = orm.FieldIdentifier[[]uint32]{
+var BasicSlicesUInt32Field = query.FieldIdentifier[[]uint32]{
 	Field:     "UInt32",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesUInt32(operator orm.Operator[[]uint32]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []uint32]{
-		FieldIdentifier: BasicSlicesUInt32Field,
-		Operator:        operator,
-	}
+func BasicSlicesUInt32(operator operator.Operator[[]uint32]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []uint32](BasicSlicesUInt32Field, operator)
 }
 
-var BasicSlicesUInt64Field = orm.FieldIdentifier[[]uint64]{
+var BasicSlicesUInt64Field = query.FieldIdentifier[[]uint64]{
 	Field:     "UInt64",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesUInt64(operator orm.Operator[[]uint64]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []uint64]{
-		FieldIdentifier: BasicSlicesUInt64Field,
-		Operator:        operator,
-	}
+func BasicSlicesUInt64(operator operator.Operator[[]uint64]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []uint64](BasicSlicesUInt64Field, operator)
 }
 
-var BasicSlicesUIntptrField = orm.FieldIdentifier[[]uintptr]{
+var BasicSlicesUIntptrField = query.FieldIdentifier[[]uintptr]{
 	Field:     "UIntptr",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesUIntptr(operator orm.Operator[[]uintptr]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []uintptr]{
-		FieldIdentifier: BasicSlicesUIntptrField,
-		Operator:        operator,
-	}
+func BasicSlicesUIntptr(operator operator.Operator[[]uintptr]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []uintptr](BasicSlicesUIntptrField, operator)
 }
 
-var BasicSlicesFloat32Field = orm.FieldIdentifier[[]float32]{
+var BasicSlicesFloat32Field = query.FieldIdentifier[[]float32]{
 	Field:     "Float32",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesFloat32(operator orm.Operator[[]float32]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []float32]{
-		FieldIdentifier: BasicSlicesFloat32Field,
-		Operator:        operator,
-	}
+func BasicSlicesFloat32(operator operator.Operator[[]float32]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []float32](BasicSlicesFloat32Field, operator)
 }
 
-var BasicSlicesFloat64Field = orm.FieldIdentifier[[]float64]{
+var BasicSlicesFloat64Field = query.FieldIdentifier[[]float64]{
 	Field:     "Float64",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesFloat64(operator orm.Operator[[]float64]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []float64]{
-		FieldIdentifier: BasicSlicesFloat64Field,
-		Operator:        operator,
-	}
+func BasicSlicesFloat64(operator operator.Operator[[]float64]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []float64](BasicSlicesFloat64Field, operator)
 }
 
-var BasicSlicesComplex64Field = orm.FieldIdentifier[[]complex64]{
+var BasicSlicesComplex64Field = query.FieldIdentifier[[]complex64]{
 	Field:     "Complex64",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesComplex64(operator orm.Operator[[]complex64]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []complex64]{
-		FieldIdentifier: BasicSlicesComplex64Field,
-		Operator:        operator,
-	}
+func BasicSlicesComplex64(operator operator.Operator[[]complex64]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []complex64](BasicSlicesComplex64Field, operator)
 }
 
-var BasicSlicesComplex128Field = orm.FieldIdentifier[[]complex128]{
+var BasicSlicesComplex128Field = query.FieldIdentifier[[]complex128]{
 	Field:     "Complex128",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesComplex128(operator orm.Operator[[]complex128]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []complex128]{
-		FieldIdentifier: BasicSlicesComplex128Field,
-		Operator:        operator,
-	}
+func BasicSlicesComplex128(operator operator.Operator[[]complex128]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []complex128](BasicSlicesComplex128Field, operator)
 }
 
-var BasicSlicesStringField = orm.FieldIdentifier[[]string]{
+var BasicSlicesStringField = query.FieldIdentifier[[]string]{
 	Field:     "String",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesString(operator orm.Operator[[]string]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []string]{
-		FieldIdentifier: BasicSlicesStringField,
-		Operator:        operator,
-	}
+func BasicSlicesString(operator operator.Operator[[]string]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []string](BasicSlicesStringField, operator)
 }
 
-var BasicSlicesByteField = orm.FieldIdentifier[[]uint8]{
+var BasicSlicesByteField = query.FieldIdentifier[[]uint8]{
 	Field:     "Byte",
 	ModelType: basicSlicesType,
 }
 
-func BasicSlicesByte(operator orm.Operator[[]uint8]) orm.WhereCondition[basicslices.BasicSlices] {
-	return orm.FieldCondition[basicslices.BasicSlices, []uint8]{
-		FieldIdentifier: BasicSlicesByteField,
-		Operator:        operator,
-	}
+func BasicSlicesByte(operator operator.Operator[[]uint8]) condition.WhereCondition[basicslices.BasicSlices] {
+	return condition.NewFieldCondition[basicslices.BasicSlices, []uint8](BasicSlicesByteField, operator)
 }
 
-var BasicSlicesPreloadAttributes = orm.NewPreloadCondition[basicslices.BasicSlices](BasicSlicesIdField, BasicSlicesCreatedAtField, BasicSlicesUpdatedAtField, BasicSlicesDeletedAtField, BasicSlicesBoolField, BasicSlicesIntField, BasicSlicesInt8Field, BasicSlicesInt16Field, BasicSlicesInt32Field, BasicSlicesInt64Field, BasicSlicesUIntField, BasicSlicesUInt8Field, BasicSlicesUInt16Field, BasicSlicesUInt32Field, BasicSlicesUInt64Field, BasicSlicesUIntptrField, BasicSlicesFloat32Field, BasicSlicesFloat64Field, BasicSlicesComplex64Field, BasicSlicesComplex128Field, BasicSlicesStringField, BasicSlicesByteField)
+var BasicSlicesPreloadAttributes = condition.NewPreloadCondition[basicslices.BasicSlices](BasicSlicesIdField, BasicSlicesCreatedAtField, BasicSlicesUpdatedAtField, BasicSlicesDeletedAtField, BasicSlicesBoolField, BasicSlicesIntField, BasicSlicesInt8Field, BasicSlicesInt16Field, BasicSlicesInt32Field, BasicSlicesInt64Field, BasicSlicesUIntField, BasicSlicesUInt8Field, BasicSlicesUInt16Field, BasicSlicesUInt32Field, BasicSlicesUInt64Field, BasicSlicesUIntptrField, BasicSlicesFloat32Field, BasicSlicesFloat64Field, BasicSlicesComplex64Field, BasicSlicesComplex128Field, BasicSlicesStringField, BasicSlicesByteField)

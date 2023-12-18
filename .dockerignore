@@ -22,3 +22,4 @@ test_e2e/
 mocks/
 docker/
 **/*_test.go
+docs/

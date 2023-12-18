@@ -1,18 +1,18 @@
 package hasmanywithpointers
 
 import (
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 )
 
 type CompanyWithPointers struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Sellers *[]*SellerInPointers // CompanyWithPointers HasMany SellerInPointers
 }
 
 type SellerInPointers struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Company   *CompanyWithPointers
-	CompanyID *orm.UUID // Company HasMany Seller
+	CompanyID *model.UUID // Company HasMany Seller
 }

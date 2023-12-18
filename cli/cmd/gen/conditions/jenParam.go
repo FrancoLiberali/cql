@@ -15,7 +15,7 @@ type JenParam struct {
 func NewJenParam() *JenParam {
 	return &JenParam{
 		statement: jen.Id("operator").Qual(
-			badaasORMPath, badaasORMOperator,
+			operatorPath, badaasORMOperator,
 		),
 		internalType: &jen.Statement{},
 	}

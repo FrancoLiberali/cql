@@ -2,75 +2,63 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
 	"time"
 )
 
 var companyType = reflect.TypeOf(*new(models.Company))
-var CompanyIdField = orm.FieldIdentifier[orm.UUID]{
+var CompanyIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: companyType,
 }
 
-func CompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, orm.UUID]{
-		FieldIdentifier: CompanyIdField,
-		Operator:        operator,
-	}
+func CompanyId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Company] {
+	return condition.NewFieldCondition[models.Company, model.UUID](CompanyIdField, operator)
 }
 
-var CompanyCreatedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: companyType,
 }
 
-func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, time.Time]{
-		FieldIdentifier: CompanyCreatedAtField,
-		Operator:        operator,
-	}
+func CompanyCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Company] {
+	return condition.NewFieldCondition[models.Company, time.Time](CompanyCreatedAtField, operator)
 }
 
-var CompanyUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: companyType,
 }
 
-func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, time.Time]{
-		FieldIdentifier: CompanyUpdatedAtField,
-		Operator:        operator,
-	}
+func CompanyUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Company] {
+	return condition.NewFieldCondition[models.Company, time.Time](CompanyUpdatedAtField, operator)
 }
 
-var CompanyDeletedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: companyType,
 }
 
-func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, time.Time]{
-		FieldIdentifier: CompanyDeletedAtField,
-		Operator:        operator,
-	}
+func CompanyDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Company] {
+	return condition.NewFieldCondition[models.Company, time.Time](CompanyDeletedAtField, operator)
 }
 
-var CompanyNameField = orm.FieldIdentifier[string]{
+var CompanyNameField = query.FieldIdentifier[string]{
 	Field:     "Name",
 	ModelType: companyType,
 }
 
-func CompanyName(operator orm.Operator[string]) orm.WhereCondition[models.Company] {
-	return orm.FieldCondition[models.Company, string]{
-		FieldIdentifier: CompanyNameField,
-		Operator:        operator,
-	}
+func CompanyName(operator operator.Operator[string]) condition.WhereCondition[models.Company] {
+	return condition.NewFieldCondition[models.Company, string](CompanyNameField, operator)
 }
-func CompanyPreloadSellers(nestedPreloads ...orm.IJoinCondition[models.Seller]) orm.Condition[models.Company] {
-	return orm.NewCollectionPreloadCondition[models.Company, models.Seller]("Sellers", nestedPreloads)
+func CompanyPreloadSellers(nestedPreloads ...condition.JoinCondition[models.Seller]) condition.Condition[models.Company] {
+	return condition.NewCollectionPreloadCondition[models.Company, models.Seller]("Sellers", nestedPreloads)
 }
 
-var CompanyPreloadAttributes = orm.NewPreloadCondition[models.Company](CompanyIdField, CompanyCreatedAtField, CompanyUpdatedAtField, CompanyDeletedAtField, CompanyNameField)
-var CompanyPreloadRelations = []orm.Condition[models.Company]{CompanyPreloadSellers()}
+var CompanyPreloadAttributes = condition.NewPreloadCondition[models.Company](CompanyIdField, CompanyCreatedAtField, CompanyUpdatedAtField, CompanyDeletedAtField, CompanyNameField)
+var CompanyPreloadRelations = []condition.Condition[models.Company]{CompanyPreloadSellers()}

@@ -3,71 +3,59 @@ package conditions
 
 import (
 	columndefinition "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/columndefinition"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var columnDefinitionType = reflect.TypeOf(*new(columndefinition.ColumnDefinition))
-var ColumnDefinitionIdField = orm.FieldIdentifier[orm.UUID]{
+var ColumnDefinitionIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: columnDefinitionType,
 }
 
-func ColumnDefinitionId(operator orm.Operator[orm.UUID]) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.FieldCondition[columndefinition.ColumnDefinition, orm.UUID]{
-		FieldIdentifier: ColumnDefinitionIdField,
-		Operator:        operator,
-	}
+func ColumnDefinitionId(operator operator.Operator[model.UUID]) condition.WhereCondition[columndefinition.ColumnDefinition] {
+	return condition.NewFieldCondition[columndefinition.ColumnDefinition, model.UUID](ColumnDefinitionIdField, operator)
 }
 
-var ColumnDefinitionCreatedAtField = orm.FieldIdentifier[time.Time]{
+var ColumnDefinitionCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: columnDefinitionType,
 }
 
-func ColumnDefinitionCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
-		FieldIdentifier: ColumnDefinitionCreatedAtField,
-		Operator:        operator,
-	}
+func ColumnDefinitionCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[columndefinition.ColumnDefinition] {
+	return condition.NewFieldCondition[columndefinition.ColumnDefinition, time.Time](ColumnDefinitionCreatedAtField, operator)
 }
 
-var ColumnDefinitionUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var ColumnDefinitionUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: columnDefinitionType,
 }
 
-func ColumnDefinitionUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
-		FieldIdentifier: ColumnDefinitionUpdatedAtField,
-		Operator:        operator,
-	}
+func ColumnDefinitionUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[columndefinition.ColumnDefinition] {
+	return condition.NewFieldCondition[columndefinition.ColumnDefinition, time.Time](ColumnDefinitionUpdatedAtField, operator)
 }
 
-var ColumnDefinitionDeletedAtField = orm.FieldIdentifier[time.Time]{
+var ColumnDefinitionDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: columnDefinitionType,
 }
 
-func ColumnDefinitionDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.FieldCondition[columndefinition.ColumnDefinition, time.Time]{
-		FieldIdentifier: ColumnDefinitionDeletedAtField,
-		Operator:        operator,
-	}
+func ColumnDefinitionDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[columndefinition.ColumnDefinition] {
+	return condition.NewFieldCondition[columndefinition.ColumnDefinition, time.Time](ColumnDefinitionDeletedAtField, operator)
 }
 
-var ColumnDefinitionStringField = orm.FieldIdentifier[string]{
+var ColumnDefinitionStringField = query.FieldIdentifier[string]{
 	Column:    "string_something_else",
 	Field:     "String",
 	ModelType: columnDefinitionType,
 }
 
-func ColumnDefinitionString(operator orm.Operator[string]) orm.WhereCondition[columndefinition.ColumnDefinition] {
-	return orm.FieldCondition[columndefinition.ColumnDefinition, string]{
-		FieldIdentifier: ColumnDefinitionStringField,
-		Operator:        operator,
-	}
+func ColumnDefinitionString(operator operator.Operator[string]) condition.WhereCondition[columndefinition.ColumnDefinition] {
+	return condition.NewFieldCondition[columndefinition.ColumnDefinition, string](ColumnDefinitionStringField, operator)
 }
 
-var ColumnDefinitionPreloadAttributes = orm.NewPreloadCondition[columndefinition.ColumnDefinition](ColumnDefinitionIdField, ColumnDefinitionCreatedAtField, ColumnDefinitionUpdatedAtField, ColumnDefinitionDeletedAtField, ColumnDefinitionStringField)
+var ColumnDefinitionPreloadAttributes = condition.NewPreloadCondition[columndefinition.ColumnDefinition](ColumnDefinitionIdField, ColumnDefinitionCreatedAtField, ColumnDefinitionUpdatedAtField, ColumnDefinitionDeletedAtField, ColumnDefinitionStringField)

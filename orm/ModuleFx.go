@@ -6,6 +6,8 @@ import (
 	"reflect"
 
 	"go.uber.org/fx"
+
+	"github.com/ditrit/badaas/orm/model"
 )
 
 type GetModelsResult struct {
@@ -24,7 +26,7 @@ var AutoMigrate = fx.Module(
 	),
 )
 
-func GetCRUDServiceModule[T Model]() fx.Option {
+func GetCRUDServiceModule[T model.Model]() fx.Option {
 	entity := *new(T)
 
 	moduleName := fmt.Sprintf(
@@ -34,23 +36,23 @@ func GetCRUDServiceModule[T Model]() fx.Option {
 
 	kind := getModelKind(entity)
 	switch kind {
-	case KindUUIDModel:
+	case kindUUIDModel:
 		return fx.Module(
 			moduleName,
 			// repository
-			fx.Provide(NewCRUDRepository[T, UUID]),
+			fx.Provide(NewCRUDRepository[T, model.UUID]),
 			// service
-			fx.Provide(NewCRUDService[T, UUID]),
+			fx.Provide(NewCRUDService[T, model.UUID]),
 		)
-	case KindUIntModel:
+	case kindUIntModel:
 		return fx.Module(
 			moduleName,
 			// repository
-			fx.Provide(NewCRUDRepository[T, UIntID]),
+			fx.Provide(NewCRUDRepository[T, model.UIntID]),
 			// service
-			fx.Provide(NewCRUDService[T, UIntID]),
+			fx.Provide(NewCRUDService[T, model.UIntID]),
 		)
-	case KindNotModel:
+	case kindNotModel:
 		log.Printf("type %T is not a BaDaaS model\n", entity)
 		return fx.Invoke(failNotBaDaaSModel())
 	}
@@ -65,25 +67,25 @@ func failNotBaDaaSModel() error {
 type modelKind uint
 
 const (
-	KindUUIDModel modelKind = iota
-	KindUIntModel
-	KindNotModel
+	kindUUIDModel modelKind = iota
+	kindUIntModel
+	kindNotModel
 )
 
-func getModelKind(entity Model) modelKind {
+func getModelKind(entity model.Model) modelKind {
 	entityType := getEntityType(entity)
 
 	_, isUUIDModel := entityType.FieldByName("UUIDModel")
 	if isUUIDModel {
-		return KindUUIDModel
+		return kindUUIDModel
 	}
 
 	_, isUIntModel := entityType.FieldByName("UIntModel")
 	if isUIntModel {
-		return KindUIntModel
+		return kindUIntModel
 	}
 
-	return KindNotModel
+	return kindNotModel
 }
 
 // Get the reflect.Type of any entity or pointer to entity

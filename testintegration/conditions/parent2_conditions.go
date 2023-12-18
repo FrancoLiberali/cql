@@ -2,82 +2,64 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
 	"time"
 )
 
 var parent2Type = reflect.TypeOf(*new(models.Parent2))
-var Parent2IdField = orm.FieldIdentifier[orm.UUID]{
+var Parent2IdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: parent2Type,
 }
 
-func Parent2Id(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Parent2] {
-	return orm.FieldCondition[models.Parent2, orm.UUID]{
-		FieldIdentifier: Parent2IdField,
-		Operator:        operator,
-	}
+func Parent2Id(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Parent2] {
+	return condition.NewFieldCondition[models.Parent2, model.UUID](Parent2IdField, operator)
 }
 
-var Parent2CreatedAtField = orm.FieldIdentifier[time.Time]{
+var Parent2CreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: parent2Type,
 }
 
-func Parent2CreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Parent2] {
-	return orm.FieldCondition[models.Parent2, time.Time]{
-		FieldIdentifier: Parent2CreatedAtField,
-		Operator:        operator,
-	}
+func Parent2CreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Parent2] {
+	return condition.NewFieldCondition[models.Parent2, time.Time](Parent2CreatedAtField, operator)
 }
 
-var Parent2UpdatedAtField = orm.FieldIdentifier[time.Time]{
+var Parent2UpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: parent2Type,
 }
 
-func Parent2UpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Parent2] {
-	return orm.FieldCondition[models.Parent2, time.Time]{
-		FieldIdentifier: Parent2UpdatedAtField,
-		Operator:        operator,
-	}
+func Parent2UpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Parent2] {
+	return condition.NewFieldCondition[models.Parent2, time.Time](Parent2UpdatedAtField, operator)
 }
 
-var Parent2DeletedAtField = orm.FieldIdentifier[time.Time]{
+var Parent2DeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: parent2Type,
 }
 
-func Parent2DeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Parent2] {
-	return orm.FieldCondition[models.Parent2, time.Time]{
-		FieldIdentifier: Parent2DeletedAtField,
-		Operator:        operator,
-	}
+func Parent2DeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Parent2] {
+	return condition.NewFieldCondition[models.Parent2, time.Time](Parent2DeletedAtField, operator)
 }
-func Parent2ParentParent(conditions ...orm.Condition[models.ParentParent]) orm.IJoinCondition[models.Parent2] {
-	return orm.JoinCondition[models.Parent2, models.ParentParent]{
-		Conditions:         conditions,
-		RelationField:      "ParentParent",
-		T1Field:            "ParentParentID",
-		T1PreloadCondition: Parent2PreloadAttributes,
-		T2Field:            "ID",
-	}
+func Parent2ParentParent(conditions ...condition.Condition[models.ParentParent]) condition.JoinCondition[models.Parent2] {
+	return condition.NewJoinCondition[models.Parent2, models.ParentParent](conditions, "ParentParent", "ParentParentID", Parent2PreloadAttributes, "ID")
 }
 
 var Parent2PreloadParentParent = Parent2ParentParent(ParentParentPreloadAttributes)
-var Parent2ParentParentIdField = orm.FieldIdentifier[orm.UUID]{
+var Parent2ParentParentIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ParentParentID",
 	ModelType: parent2Type,
 }
 
-func Parent2ParentParentId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Parent2] {
-	return orm.FieldCondition[models.Parent2, orm.UUID]{
-		FieldIdentifier: Parent2ParentParentIdField,
-		Operator:        operator,
-	}
+func Parent2ParentParentId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Parent2] {
+	return condition.NewFieldCondition[models.Parent2, model.UUID](Parent2ParentParentIdField, operator)
 }
 
-var Parent2PreloadAttributes = orm.NewPreloadCondition[models.Parent2](Parent2IdField, Parent2CreatedAtField, Parent2UpdatedAtField, Parent2DeletedAtField, Parent2ParentParentIdField)
-var Parent2PreloadRelations = []orm.Condition[models.Parent2]{Parent2PreloadParentParent}
+var Parent2PreloadAttributes = condition.NewPreloadCondition[models.Parent2](Parent2IdField, Parent2CreatedAtField, Parent2UpdatedAtField, Parent2DeletedAtField, Parent2ParentParentIdField)
+var Parent2PreloadRelations = []condition.Condition[models.Parent2]{Parent2PreloadParentParent}

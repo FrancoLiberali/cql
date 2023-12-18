@@ -7,15 +7,15 @@ import (
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 )
 
 func TestSessionCtx(t *testing.T) {
 	ctx := context.Background()
-	sessionClaims := &SessionClaims{orm.NilUUID, orm.UUID(uuid.New())}
+	sessionClaims := &SessionClaims{model.NilUUID, model.UUID(uuid.New())}
 	ctx = SetSessionClaimsContext(ctx, sessionClaims)
 	claims := GetSessionClaimsFromContext(ctx)
-	assert.Equal(t, orm.NilUUID, claims.UserID)
+	assert.Equal(t, model.NilUUID, claims.UserID)
 }
 
 func TestSessionCtxPanic(t *testing.T) {

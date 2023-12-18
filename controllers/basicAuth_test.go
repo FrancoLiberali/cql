@@ -15,7 +15,7 @@ import (
 	"github.com/ditrit/badaas/httperrors"
 	mocksSessionService "github.com/ditrit/badaas/mocks/services/sessionservice"
 	mocksUserService "github.com/ditrit/badaas/mocks/services/userservice"
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 	"github.com/ditrit/badaas/persistence/models/dto"
 )
@@ -96,7 +96,7 @@ func Test_BasicLoginHandler_LoginFailed(t *testing.T) {
 	)
 	userService := mocksUserService.NewUserService(t)
 	user := &models.User{
-		UUIDModel: orm.UUIDModel{},
+		UUIDModel: model.UUIDModel{},
 		Username:  "bob",
 		Email:     "bob@email.com",
 		Password:  []byte("hash of 1234"),
@@ -139,8 +139,8 @@ func Test_BasicLoginHandler_LoginSuccess(t *testing.T) {
 	)
 	userService := mocksUserService.NewUserService(t)
 	user := &models.User{
-		UUIDModel: orm.UUIDModel{
-			ID: orm.NilUUID,
+		UUIDModel: model.UUIDModel{
+			ID: model.NilUUID,
 		},
 		Username: "bob",
 		Email:    "bob@email.com",

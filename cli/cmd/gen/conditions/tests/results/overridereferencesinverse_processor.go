@@ -3,70 +3,58 @@ package conditions
 
 import (
 	overridereferencesinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferencesinverse"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var processorType = reflect.TypeOf(*new(overridereferencesinverse.Processor))
-var ProcessorIdField = orm.FieldIdentifier[orm.UUID]{
+var ProcessorIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: processorType,
 }
 
-func ProcessorId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overridereferencesinverse.Processor] {
-	return orm.FieldCondition[overridereferencesinverse.Processor, orm.UUID]{
-		FieldIdentifier: ProcessorIdField,
-		Operator:        operator,
-	}
+func ProcessorId(operator operator.Operator[model.UUID]) condition.WhereCondition[overridereferencesinverse.Processor] {
+	return condition.NewFieldCondition[overridereferencesinverse.Processor, model.UUID](ProcessorIdField, operator)
 }
 
-var ProcessorCreatedAtField = orm.FieldIdentifier[time.Time]{
+var ProcessorCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: processorType,
 }
 
-func ProcessorCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Processor] {
-	return orm.FieldCondition[overridereferencesinverse.Processor, time.Time]{
-		FieldIdentifier: ProcessorCreatedAtField,
-		Operator:        operator,
-	}
+func ProcessorCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overridereferencesinverse.Processor] {
+	return condition.NewFieldCondition[overridereferencesinverse.Processor, time.Time](ProcessorCreatedAtField, operator)
 }
 
-var ProcessorUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var ProcessorUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: processorType,
 }
 
-func ProcessorUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Processor] {
-	return orm.FieldCondition[overridereferencesinverse.Processor, time.Time]{
-		FieldIdentifier: ProcessorUpdatedAtField,
-		Operator:        operator,
-	}
+func ProcessorUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overridereferencesinverse.Processor] {
+	return condition.NewFieldCondition[overridereferencesinverse.Processor, time.Time](ProcessorUpdatedAtField, operator)
 }
 
-var ProcessorDeletedAtField = orm.FieldIdentifier[time.Time]{
+var ProcessorDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: processorType,
 }
 
-func ProcessorDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferencesinverse.Processor] {
-	return orm.FieldCondition[overridereferencesinverse.Processor, time.Time]{
-		FieldIdentifier: ProcessorDeletedAtField,
-		Operator:        operator,
-	}
+func ProcessorDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overridereferencesinverse.Processor] {
+	return condition.NewFieldCondition[overridereferencesinverse.Processor, time.Time](ProcessorDeletedAtField, operator)
 }
 
-var ProcessorComputerNameField = orm.FieldIdentifier[string]{
+var ProcessorComputerNameField = query.FieldIdentifier[string]{
 	Field:     "ComputerName",
 	ModelType: processorType,
 }
 
-func ProcessorComputerName(operator orm.Operator[string]) orm.WhereCondition[overridereferencesinverse.Processor] {
-	return orm.FieldCondition[overridereferencesinverse.Processor, string]{
-		FieldIdentifier: ProcessorComputerNameField,
-		Operator:        operator,
-	}
+func ProcessorComputerName(operator operator.Operator[string]) condition.WhereCondition[overridereferencesinverse.Processor] {
+	return condition.NewFieldCondition[overridereferencesinverse.Processor, string](ProcessorComputerNameField, operator)
 }
 
-var ProcessorPreloadAttributes = orm.NewPreloadCondition[overridereferencesinverse.Processor](ProcessorIdField, ProcessorCreatedAtField, ProcessorUpdatedAtField, ProcessorDeletedAtField, ProcessorComputerNameField)
+var ProcessorPreloadAttributes = condition.NewPreloadCondition[overridereferencesinverse.Processor](ProcessorIdField, ProcessorCreatedAtField, ProcessorUpdatedAtField, ProcessorDeletedAtField, ProcessorComputerNameField)

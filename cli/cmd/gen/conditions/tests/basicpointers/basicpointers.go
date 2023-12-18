@@ -1,9 +1,9 @@
 package basicpointers
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type BasicPointers struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Bool       *bool
 	Int        *int

@@ -3,70 +3,58 @@ package conditions
 
 import (
 	overridereferences "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferences"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var brandType = reflect.TypeOf(*new(overridereferences.Brand))
-var BrandIdField = orm.FieldIdentifier[orm.UUID]{
+var BrandIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: brandType,
 }
 
-func BrandId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overridereferences.Brand] {
-	return orm.FieldCondition[overridereferences.Brand, orm.UUID]{
-		FieldIdentifier: BrandIdField,
-		Operator:        operator,
-	}
+func BrandId(operator operator.Operator[model.UUID]) condition.WhereCondition[overridereferences.Brand] {
+	return condition.NewFieldCondition[overridereferences.Brand, model.UUID](BrandIdField, operator)
 }
 
-var BrandCreatedAtField = orm.FieldIdentifier[time.Time]{
+var BrandCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: brandType,
 }
 
-func BrandCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Brand] {
-	return orm.FieldCondition[overridereferences.Brand, time.Time]{
-		FieldIdentifier: BrandCreatedAtField,
-		Operator:        operator,
-	}
+func BrandCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overridereferences.Brand] {
+	return condition.NewFieldCondition[overridereferences.Brand, time.Time](BrandCreatedAtField, operator)
 }
 
-var BrandUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var BrandUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: brandType,
 }
 
-func BrandUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Brand] {
-	return orm.FieldCondition[overridereferences.Brand, time.Time]{
-		FieldIdentifier: BrandUpdatedAtField,
-		Operator:        operator,
-	}
+func BrandUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overridereferences.Brand] {
+	return condition.NewFieldCondition[overridereferences.Brand, time.Time](BrandUpdatedAtField, operator)
 }
 
-var BrandDeletedAtField = orm.FieldIdentifier[time.Time]{
+var BrandDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: brandType,
 }
 
-func BrandDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overridereferences.Brand] {
-	return orm.FieldCondition[overridereferences.Brand, time.Time]{
-		FieldIdentifier: BrandDeletedAtField,
-		Operator:        operator,
-	}
+func BrandDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overridereferences.Brand] {
+	return condition.NewFieldCondition[overridereferences.Brand, time.Time](BrandDeletedAtField, operator)
 }
 
-var BrandNameField = orm.FieldIdentifier[string]{
+var BrandNameField = query.FieldIdentifier[string]{
 	Field:     "Name",
 	ModelType: brandType,
 }
 
-func BrandName(operator orm.Operator[string]) orm.WhereCondition[overridereferences.Brand] {
-	return orm.FieldCondition[overridereferences.Brand, string]{
-		FieldIdentifier: BrandNameField,
-		Operator:        operator,
-	}
+func BrandName(operator operator.Operator[string]) condition.WhereCondition[overridereferences.Brand] {
+	return condition.NewFieldCondition[overridereferences.Brand, string](BrandNameField, operator)
 }
 
-var BrandPreloadAttributes = orm.NewPreloadCondition[overridereferences.Brand](BrandIdField, BrandCreatedAtField, BrandUpdatedAtField, BrandDeletedAtField, BrandNameField)
+var BrandPreloadAttributes = condition.NewPreloadCondition[overridereferences.Brand](BrandIdField, BrandCreatedAtField, BrandUpdatedAtField, BrandDeletedAtField, BrandNameField)

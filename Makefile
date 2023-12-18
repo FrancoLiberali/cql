@@ -4,6 +4,7 @@ install_dependencies:
 	go install gotest.tools/gotestsum@latest
 	go install github.com/vektra/mockery/v2@v2.20.0
 	go install github.com/ditrit/badaas-cli@latest
+	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 lint:
 	golangci-lint run

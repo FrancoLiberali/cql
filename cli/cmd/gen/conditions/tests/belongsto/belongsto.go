@@ -1,14 +1,16 @@
 package belongsto
 
-import "github.com/ditrit/badaas/orm"
+import (
+	"github.com/ditrit/badaas/orm/model"
+)
 
 type Owner struct {
-	orm.UUIDModel
+	model.UUIDModel
 }
 type Owned struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	// Owned belongsTo Owner (Owned 0..* -> 1 Owner)
 	Owner   Owner
-	OwnerID orm.UUID
+	OwnerID model.UUID
 }

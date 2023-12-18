@@ -2,7 +2,7 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: Bug
+labels: bug
 ---
 
 ## Describe the bug
@@ -31,6 +31,8 @@ If applicable, add screenshots to help explain your problem.
 Please complete the following information:
 
 - badaas version [X.X.X] or commit hash
+- go version
+- database vendor and version (in case of bugs related with badaas-orm)
 
 ## Additional context
 

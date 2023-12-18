@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 )
 
 type MultiString []string
@@ -38,7 +38,7 @@ func (MultiString) GormDataType() string {
 }
 
 type CustomType struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Custom MultiString
 }
