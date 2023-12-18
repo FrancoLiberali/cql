@@ -3,8 +3,8 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	model "github.com/FrancoLiberali/cql/model"
 	nullabletypes "github.com/FrancoLiberali/cql/cql-cli/cmd/gen/conditions/tests/nullabletypes"
+	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )
 

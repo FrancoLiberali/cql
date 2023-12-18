@@ -2,8 +2,8 @@
 package package1
 
 import (
-	preload "github.com/FrancoLiberali/cql/preload"
 	package2 "github.com/FrancoLiberali/cql/cql-cli/cmd/gen/conditions/tests/multiplepackage/package2"
+	preload "github.com/FrancoLiberali/cql/preload"
 )
 
 func (m Package1) GetPackage2() (*package2.Package2, error) {

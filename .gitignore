@@ -32,6 +32,6 @@ test/sqlite:*
 docs/_build/
 
 # cli
-cli/badaas-cli
-cli/cmd/gen/conditions/*_conditions.go
-cli/cmd/gen/conditions/tests/**/badaas-orm.go
+cql-cli/cql-cli
+cql-cli/cmd/gen/conditions/*_conditions.go
+cql-cli/cmd/gen/conditions/tests/**/badaas-orm.go

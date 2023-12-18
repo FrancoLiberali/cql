@@ -3,8 +3,8 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	model "github.com/FrancoLiberali/cql/model"
 	belongsto "github.com/FrancoLiberali/cql/cql-cli/cmd/gen/conditions/tests/belongsto"
+	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )
 

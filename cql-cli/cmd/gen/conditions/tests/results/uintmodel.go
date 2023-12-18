@@ -3,8 +3,8 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	model "github.com/FrancoLiberali/cql/model"
 	uintmodel "github.com/FrancoLiberali/cql/cql-cli/cmd/gen/conditions/tests/uintmodel"
+	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )
 
