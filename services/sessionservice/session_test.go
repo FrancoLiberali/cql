@@ -51,7 +51,6 @@ func TestLogInUser(t *testing.T) {
 	sessionRepositoryMock.On("Create", gormDB, mock.Anything).Return(nil)
 
 	sessionConfigurationMock.On("GetSessionDuration").Return(time.Minute)
-
 	user := &models.User{
 		Username: "bob",
 		Email:    "bob@email.com",

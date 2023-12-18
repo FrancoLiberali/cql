@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/Masterminds/semver/v3"
-
 	"github.com/ditrit/badaas/httperrors"
 )
 

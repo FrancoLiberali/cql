@@ -22,6 +22,8 @@ require (
 	gotest.tools v2.2.0+incompatible
 )
 
+require github.com/felixge/httpsnoop v1.0.1 // indirect
+
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/felixge/httpsnoop v1.0.1 // indirect
