@@ -3,81 +3,63 @@ package conditions
 
 import (
 	selfreferential "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/selfreferential"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var employeeType = reflect.TypeOf(*new(selfreferential.Employee))
-var EmployeeIdField = orm.FieldIdentifier[orm.UUID]{
+var EmployeeIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: employeeType,
 }
 
-func EmployeeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[selfreferential.Employee] {
-	return orm.FieldCondition[selfreferential.Employee, orm.UUID]{
-		FieldIdentifier: EmployeeIdField,
-		Operator:        operator,
-	}
+func EmployeeId(operator operator.Operator[model.UUID]) condition.WhereCondition[selfreferential.Employee] {
+	return condition.NewFieldCondition[selfreferential.Employee, model.UUID](EmployeeIdField, operator)
 }
 
-var EmployeeCreatedAtField = orm.FieldIdentifier[time.Time]{
+var EmployeeCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: employeeType,
 }
 
-func EmployeeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
-	return orm.FieldCondition[selfreferential.Employee, time.Time]{
-		FieldIdentifier: EmployeeCreatedAtField,
-		Operator:        operator,
-	}
+func EmployeeCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[selfreferential.Employee] {
+	return condition.NewFieldCondition[selfreferential.Employee, time.Time](EmployeeCreatedAtField, operator)
 }
 
-var EmployeeUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var EmployeeUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: employeeType,
 }
 
-func EmployeeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
-	return orm.FieldCondition[selfreferential.Employee, time.Time]{
-		FieldIdentifier: EmployeeUpdatedAtField,
-		Operator:        operator,
-	}
+func EmployeeUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[selfreferential.Employee] {
+	return condition.NewFieldCondition[selfreferential.Employee, time.Time](EmployeeUpdatedAtField, operator)
 }
 
-var EmployeeDeletedAtField = orm.FieldIdentifier[time.Time]{
+var EmployeeDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: employeeType,
 }
 
-func EmployeeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[selfreferential.Employee] {
-	return orm.FieldCondition[selfreferential.Employee, time.Time]{
-		FieldIdentifier: EmployeeDeletedAtField,
-		Operator:        operator,
-	}
+func EmployeeDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[selfreferential.Employee] {
+	return condition.NewFieldCondition[selfreferential.Employee, time.Time](EmployeeDeletedAtField, operator)
 }
-func EmployeeBoss(conditions ...orm.Condition[selfreferential.Employee]) orm.IJoinCondition[selfreferential.Employee] {
-	return orm.JoinCondition[selfreferential.Employee, selfreferential.Employee]{
-		Conditions:         conditions,
-		RelationField:      "Boss",
-		T1Field:            "BossID",
-		T1PreloadCondition: EmployeePreloadAttributes,
-		T2Field:            "ID",
-	}
+func EmployeeBoss(conditions ...condition.Condition[selfreferential.Employee]) condition.JoinCondition[selfreferential.Employee] {
+	return condition.NewJoinCondition[selfreferential.Employee, selfreferential.Employee](conditions, "Boss", "BossID", EmployeePreloadAttributes, "ID")
 }
 
 var EmployeePreloadBoss = EmployeeBoss(EmployeePreloadAttributes)
-var EmployeeBossIdField = orm.FieldIdentifier[orm.UUID]{
+var EmployeeBossIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "BossID",
 	ModelType: employeeType,
 }
 
-func EmployeeBossId(operator orm.Operator[orm.UUID]) orm.WhereCondition[selfreferential.Employee] {
-	return orm.FieldCondition[selfreferential.Employee, orm.UUID]{
-		FieldIdentifier: EmployeeBossIdField,
-		Operator:        operator,
-	}
+func EmployeeBossId(operator operator.Operator[model.UUID]) condition.WhereCondition[selfreferential.Employee] {
+	return condition.NewFieldCondition[selfreferential.Employee, model.UUID](EmployeeBossIdField, operator)
 }
 
-var EmployeePreloadAttributes = orm.NewPreloadCondition[selfreferential.Employee](EmployeeIdField, EmployeeCreatedAtField, EmployeeUpdatedAtField, EmployeeDeletedAtField, EmployeeBossIdField)
-var EmployeePreloadRelations = []orm.Condition[selfreferential.Employee]{EmployeePreloadBoss}
+var EmployeePreloadAttributes = condition.NewPreloadCondition[selfreferential.Employee](EmployeeIdField, EmployeeCreatedAtField, EmployeeUpdatedAtField, EmployeeDeletedAtField, EmployeeBossIdField)
+var EmployeePreloadRelations = []condition.Condition[selfreferential.Employee]{EmployeePreloadBoss}

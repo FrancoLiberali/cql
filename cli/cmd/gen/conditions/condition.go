@@ -10,17 +10,23 @@ import (
 )
 
 const (
-	// badaas/orm/condition.go
+	// badaas/orm/condition
+	conditionPath                 = badaasORMPath + "/condition"
 	badaasORMCondition            = "Condition"
-	badaasORMFieldCondition       = "FieldCondition"
 	badaasORMWhereCondition       = "WhereCondition"
 	badaasORMJoinCondition        = "JoinCondition"
-	badaasORMIJoinCondition       = "IJoinCondition"
-	badaasORMFieldIdentifier      = "FieldIdentifier"
+	badaasORMNewFieldCondition    = "NewFieldCondition"
+	badaasORMNewJoinCondition     = "NewJoinCondition"
 	badaasORMNewCollectionPreload = "NewCollectionPreloadCondition"
-	// badaas/orm/operator.go
+	badaasORMNewPreloadCondition  = "NewPreloadCondition"
+	// badaas/orm/query
+	queryPath                = badaasORMPath + "/query"
+	badaasORMFieldIdentifier = "FieldIdentifier"
+	// badaas/orm/operator
+	operatorPath      = badaasORMPath + "/operator"
 	badaasORMOperator = "Operator"
-	// badaas/orm/baseModels.go
+	// badaas/orm/model
+	modelPath = badaasORMPath + "/model"
 	uIntID    = "UIntID"
 	uuid      = "UUID"
 	uuidModel = "UUIDModel"
@@ -166,14 +172,14 @@ func (condition *Condition) generateWhere(objectType Type, field Field) {
 	)
 
 	fieldCondition := jen.Qual(
-		badaasORMPath, badaasORMFieldCondition,
+		conditionPath, badaasORMNewFieldCondition,
 	).Types(
 		objectTypeQual,
 		condition.param.GenericType(),
 	)
 
 	whereCondition := jen.Qual(
-		badaasORMPath, badaasORMWhereCondition,
+		conditionPath, badaasORMWhereCondition,
 	).Types(
 		objectTypeQual,
 	)
@@ -191,12 +197,12 @@ func (condition *Condition) generateWhere(objectType Type, field Field) {
 			whereCondition,
 		).Block(
 			jen.Return(
-				fieldCondition.Clone().Values(jen.Dict{
-					jen.Id("Operator"): jen.Id("operator"),
-					jen.Id("FieldIdentifier"): condition.createFieldIdentifier(
+				fieldCondition.Call(
+					condition.createFieldIdentifier(
 						objectType.Name(), field, conditionName,
 					),
-				}),
+					jen.Id("operator"),
+				),
 			),
 		),
 	)
@@ -222,7 +228,7 @@ func (condition *Condition) createFieldIdentifier(objectName string, field Field
 	}
 
 	fieldIdentifierVar := jen.Qual(
-		badaasORMPath, badaasORMFieldIdentifier,
+		queryPath, badaasORMFieldIdentifier,
 	).Types(
 		condition.param.GenericType(),
 	).Values(fieldIdentifierValues)
@@ -280,13 +286,13 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 	log.Logger.Debugf("Generated %q", conditionName)
 
 	ormT1IJoinCondition := jen.Qual(
-		badaasORMPath, badaasORMIJoinCondition,
+		conditionPath, badaasORMJoinCondition,
 	).Types(t1)
 	ormT2Condition := jen.Qual(
-		badaasORMPath, badaasORMCondition,
+		conditionPath, badaasORMCondition,
 	).Types(t2)
 	ormJoinCondition := jen.Qual(
-		badaasORMPath, badaasORMJoinCondition,
+		conditionPath, badaasORMNewJoinCondition,
 	).Types(
 		t1, t2,
 	)
@@ -301,13 +307,13 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 			ormT1IJoinCondition,
 		).Block(
 			jen.Return(
-				ormJoinCondition.Values(jen.Dict{
-					jen.Id("T1Field"):            jen.Lit(t1Field),
-					jen.Id("T2Field"):            jen.Lit(t2Field),
-					jen.Id("RelationField"):      jen.Lit(field.Name),
-					jen.Id("Conditions"):         jen.Id("conditions"),
-					jen.Id("T1PreloadCondition"): jen.Id(getPreloadAttributesName(objectType.Name())),
-				}),
+				ormJoinCondition.Call(
+					jen.Id("conditions"),
+					jen.Lit(field.Name),
+					jen.Lit(t1Field),
+					jen.Id(getPreloadAttributesName(objectType.Name())),
+					jen.Lit(t2Field),
+				),
 			),
 		),
 	)
@@ -341,13 +347,13 @@ func (condition *Condition) generateCollectionPreload(objectType Type, field Fie
 	)
 
 	ormT1Condition := jen.Qual(
-		badaasORMPath, badaasORMCondition,
+		conditionPath, badaasORMCondition,
 	).Types(t1)
 	ormT2IJoinCondition := jen.Qual(
-		badaasORMPath, badaasORMIJoinCondition,
+		conditionPath, badaasORMJoinCondition,
 	).Types(t2)
 	ormNewCollectionPreload := jen.Qual(
-		badaasORMPath, badaasORMNewCollectionPreload,
+		conditionPath, badaasORMNewCollectionPreload,
 	).Types(
 		t1, t2,
 	)

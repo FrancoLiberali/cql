@@ -3,70 +3,58 @@ package conditions
 
 import (
 	customtype "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/customtype"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var customTypeType = reflect.TypeOf(*new(customtype.CustomType))
-var CustomTypeIdField = orm.FieldIdentifier[orm.UUID]{
+var CustomTypeIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: customTypeType,
 }
 
-func CustomTypeId(operator orm.Operator[orm.UUID]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, orm.UUID]{
-		FieldIdentifier: CustomTypeIdField,
-		Operator:        operator,
-	}
+func CustomTypeId(operator operator.Operator[model.UUID]) condition.WhereCondition[customtype.CustomType] {
+	return condition.NewFieldCondition[customtype.CustomType, model.UUID](CustomTypeIdField, operator)
 }
 
-var CustomTypeCreatedAtField = orm.FieldIdentifier[time.Time]{
+var CustomTypeCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: customTypeType,
 }
 
-func CustomTypeCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		FieldIdentifier: CustomTypeCreatedAtField,
-		Operator:        operator,
-	}
+func CustomTypeCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[customtype.CustomType] {
+	return condition.NewFieldCondition[customtype.CustomType, time.Time](CustomTypeCreatedAtField, operator)
 }
 
-var CustomTypeUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var CustomTypeUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: customTypeType,
 }
 
-func CustomTypeUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		FieldIdentifier: CustomTypeUpdatedAtField,
-		Operator:        operator,
-	}
+func CustomTypeUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[customtype.CustomType] {
+	return condition.NewFieldCondition[customtype.CustomType, time.Time](CustomTypeUpdatedAtField, operator)
 }
 
-var CustomTypeDeletedAtField = orm.FieldIdentifier[time.Time]{
+var CustomTypeDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: customTypeType,
 }
 
-func CustomTypeDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, time.Time]{
-		FieldIdentifier: CustomTypeDeletedAtField,
-		Operator:        operator,
-	}
+func CustomTypeDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[customtype.CustomType] {
+	return condition.NewFieldCondition[customtype.CustomType, time.Time](CustomTypeDeletedAtField, operator)
 }
 
-var CustomTypeCustomField = orm.FieldIdentifier[customtype.MultiString]{
+var CustomTypeCustomField = query.FieldIdentifier[customtype.MultiString]{
 	Field:     "Custom",
 	ModelType: customTypeType,
 }
 
-func CustomTypeCustom(operator orm.Operator[customtype.MultiString]) orm.WhereCondition[customtype.CustomType] {
-	return orm.FieldCondition[customtype.CustomType, customtype.MultiString]{
-		FieldIdentifier: CustomTypeCustomField,
-		Operator:        operator,
-	}
+func CustomTypeCustom(operator operator.Operator[customtype.MultiString]) condition.WhereCondition[customtype.CustomType] {
+	return condition.NewFieldCondition[customtype.CustomType, customtype.MultiString](CustomTypeCustomField, operator)
 }
 
-var CustomTypePreloadAttributes = orm.NewPreloadCondition[customtype.CustomType](CustomTypeIdField, CustomTypeCreatedAtField, CustomTypeUpdatedAtField, CustomTypeDeletedAtField, CustomTypeCustomField)
+var CustomTypePreloadAttributes = condition.NewPreloadCondition[customtype.CustomType](CustomTypeIdField, CustomTypeCreatedAtField, CustomTypeUpdatedAtField, CustomTypeDeletedAtField, CustomTypeCustomField)

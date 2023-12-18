@@ -1,7 +1,7 @@
 package uuidmodel
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type UUIDModel struct {
-	orm.UUIDModel
+	model.UUIDModel
 }

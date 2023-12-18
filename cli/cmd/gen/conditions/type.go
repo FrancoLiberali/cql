@@ -15,8 +15,8 @@ import (
 var (
 	// badaas/orm/baseModels.go
 	badaasORMBaseModels = []string{
-		badaasORMPath + "." + uuidModel,
-		badaasORMPath + "." + uIntModel,
+		modelPath + "." + uuidModel,
+		modelPath + "." + uIntModel,
 	}
 
 	// database/sql

@@ -1,9 +1,9 @@
 package columndefinition
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type ColumnDefinition struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	String string `gorm:"column:string_something_else"`
 }

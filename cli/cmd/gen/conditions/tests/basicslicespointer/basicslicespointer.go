@@ -1,9 +1,9 @@
 package basicslicespointer
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type BasicSlicesPointer struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Bool       []*bool
 	Int        []*int

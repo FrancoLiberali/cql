@@ -1,7 +1,7 @@
 package uintmodel
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type UintModel struct {
-	orm.UIntModel
+	model.UIntModel
 }

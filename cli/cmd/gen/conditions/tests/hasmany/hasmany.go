@@ -1,16 +1,18 @@
 package hasmany
 
-import "github.com/ditrit/badaas/orm"
+import (
+	"github.com/ditrit/badaas/orm/model"
+)
 
 type Company struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Sellers *[]Seller // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
 }
 
 type Seller struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Company   *Company
-	CompanyID *orm.UUID // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
+	CompanyID *model.UUID // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
 }

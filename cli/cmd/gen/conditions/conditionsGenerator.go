@@ -9,8 +9,6 @@ import (
 	"github.com/ditrit/badaas-cli/cmd/log"
 )
 
-const badaasORMNewPreloadCondition = "NewPreloadCondition"
-
 //nolint:revive // name is correct
 type ConditionsGenerator struct {
 	object     types.Object
@@ -45,7 +43,7 @@ func (cg ConditionsGenerator) Into(file *File) error {
 	preloadAttributesCondition := jen.Var().Id(
 		getPreloadAttributesName(objectName),
 	).Op("=").Add(jen.Qual(
-		badaasORMPath, badaasORMNewPreloadCondition,
+		conditionPath, badaasORMNewPreloadCondition,
 	)).Types(
 		objectQual,
 	)
@@ -54,7 +52,7 @@ func (cg ConditionsGenerator) Into(file *File) error {
 	preloadRelationsCondition := jen.Var().Id(
 		objectName + "PreloadRelations",
 	).Op("=").Index().Add(jen.Qual(
-		badaasORMPath, badaasORMCondition,
+		conditionPath, badaasORMCondition,
 	)).Types(
 		objectQual,
 	)

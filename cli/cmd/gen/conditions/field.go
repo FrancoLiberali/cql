@@ -9,8 +9,8 @@ import (
 
 // badaas/orm/baseModels.go
 var modelIDs = []string{
-	badaasORMPath + "." + uIntID,
-	badaasORMPath + "." + uuid,
+	modelPath + "." + uIntID,
+	modelPath + "." + uuid,
 }
 
 type Field struct {

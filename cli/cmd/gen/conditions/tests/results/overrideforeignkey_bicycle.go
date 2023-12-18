@@ -3,81 +3,63 @@ package conditions
 
 import (
 	overrideforeignkey "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkey"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var bicycleType = reflect.TypeOf(*new(overrideforeignkey.Bicycle))
-var BicycleIdField = orm.FieldIdentifier[orm.UUID]{
+var BicycleIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: bicycleType,
 }
 
-func BicycleId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overrideforeignkey.Bicycle] {
-	return orm.FieldCondition[overrideforeignkey.Bicycle, orm.UUID]{
-		FieldIdentifier: BicycleIdField,
-		Operator:        operator,
-	}
+func BicycleId(operator operator.Operator[model.UUID]) condition.WhereCondition[overrideforeignkey.Bicycle] {
+	return condition.NewFieldCondition[overrideforeignkey.Bicycle, model.UUID](BicycleIdField, operator)
 }
 
-var BicycleCreatedAtField = orm.FieldIdentifier[time.Time]{
+var BicycleCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: bicycleType,
 }
 
-func BicycleCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkey.Bicycle] {
-	return orm.FieldCondition[overrideforeignkey.Bicycle, time.Time]{
-		FieldIdentifier: BicycleCreatedAtField,
-		Operator:        operator,
-	}
+func BicycleCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Bicycle] {
+	return condition.NewFieldCondition[overrideforeignkey.Bicycle, time.Time](BicycleCreatedAtField, operator)
 }
 
-var BicycleUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var BicycleUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: bicycleType,
 }
 
-func BicycleUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkey.Bicycle] {
-	return orm.FieldCondition[overrideforeignkey.Bicycle, time.Time]{
-		FieldIdentifier: BicycleUpdatedAtField,
-		Operator:        operator,
-	}
+func BicycleUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Bicycle] {
+	return condition.NewFieldCondition[overrideforeignkey.Bicycle, time.Time](BicycleUpdatedAtField, operator)
 }
 
-var BicycleDeletedAtField = orm.FieldIdentifier[time.Time]{
+var BicycleDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: bicycleType,
 }
 
-func BicycleDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkey.Bicycle] {
-	return orm.FieldCondition[overrideforeignkey.Bicycle, time.Time]{
-		FieldIdentifier: BicycleDeletedAtField,
-		Operator:        operator,
-	}
+func BicycleDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Bicycle] {
+	return condition.NewFieldCondition[overrideforeignkey.Bicycle, time.Time](BicycleDeletedAtField, operator)
 }
-func BicycleOwner(conditions ...orm.Condition[overrideforeignkey.Person]) orm.IJoinCondition[overrideforeignkey.Bicycle] {
-	return orm.JoinCondition[overrideforeignkey.Bicycle, overrideforeignkey.Person]{
-		Conditions:         conditions,
-		RelationField:      "Owner",
-		T1Field:            "OwnerSomethingID",
-		T1PreloadCondition: BicyclePreloadAttributes,
-		T2Field:            "ID",
-	}
+func BicycleOwner(conditions ...condition.Condition[overrideforeignkey.Person]) condition.JoinCondition[overrideforeignkey.Bicycle] {
+	return condition.NewJoinCondition[overrideforeignkey.Bicycle, overrideforeignkey.Person](conditions, "Owner", "OwnerSomethingID", BicyclePreloadAttributes, "ID")
 }
 
 var BicyclePreloadOwner = BicycleOwner(PersonPreloadAttributes)
-var BicycleOwnerSomethingIdField = orm.FieldIdentifier[string]{
+var BicycleOwnerSomethingIdField = query.FieldIdentifier[string]{
 	Field:     "OwnerSomethingID",
 	ModelType: bicycleType,
 }
 
-func BicycleOwnerSomethingId(operator orm.Operator[string]) orm.WhereCondition[overrideforeignkey.Bicycle] {
-	return orm.FieldCondition[overrideforeignkey.Bicycle, string]{
-		FieldIdentifier: BicycleOwnerSomethingIdField,
-		Operator:        operator,
-	}
+func BicycleOwnerSomethingId(operator operator.Operator[string]) condition.WhereCondition[overrideforeignkey.Bicycle] {
+	return condition.NewFieldCondition[overrideforeignkey.Bicycle, string](BicycleOwnerSomethingIdField, operator)
 }
 
-var BicyclePreloadAttributes = orm.NewPreloadCondition[overrideforeignkey.Bicycle](BicycleIdField, BicycleCreatedAtField, BicycleUpdatedAtField, BicycleDeletedAtField, BicycleOwnerSomethingIdField)
-var BicyclePreloadRelations = []orm.Condition[overrideforeignkey.Bicycle]{BicyclePreloadOwner}
+var BicyclePreloadAttributes = condition.NewPreloadCondition[overrideforeignkey.Bicycle](BicycleIdField, BicycleCreatedAtField, BicycleUpdatedAtField, BicycleDeletedAtField, BicycleOwnerSomethingIdField)
+var BicyclePreloadRelations = []condition.Condition[overrideforeignkey.Bicycle]{BicyclePreloadOwner}

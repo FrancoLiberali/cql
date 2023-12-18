@@ -3,62 +3,53 @@ package conditions
 
 import (
 	hasmany "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmany"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var companyType = reflect.TypeOf(*new(hasmany.Company))
-var CompanyIdField = orm.FieldIdentifier[orm.UUID]{
+var CompanyIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: companyType,
 }
 
-func CompanyId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmany.Company] {
-	return orm.FieldCondition[hasmany.Company, orm.UUID]{
-		FieldIdentifier: CompanyIdField,
-		Operator:        operator,
-	}
+func CompanyId(operator operator.Operator[model.UUID]) condition.WhereCondition[hasmany.Company] {
+	return condition.NewFieldCondition[hasmany.Company, model.UUID](CompanyIdField, operator)
 }
 
-var CompanyCreatedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: companyType,
 }
 
-func CompanyCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
-	return orm.FieldCondition[hasmany.Company, time.Time]{
-		FieldIdentifier: CompanyCreatedAtField,
-		Operator:        operator,
-	}
+func CompanyCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmany.Company] {
+	return condition.NewFieldCondition[hasmany.Company, time.Time](CompanyCreatedAtField, operator)
 }
 
-var CompanyUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: companyType,
 }
 
-func CompanyUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
-	return orm.FieldCondition[hasmany.Company, time.Time]{
-		FieldIdentifier: CompanyUpdatedAtField,
-		Operator:        operator,
-	}
+func CompanyUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmany.Company] {
+	return condition.NewFieldCondition[hasmany.Company, time.Time](CompanyUpdatedAtField, operator)
 }
 
-var CompanyDeletedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: companyType,
 }
 
-func CompanyDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmany.Company] {
-	return orm.FieldCondition[hasmany.Company, time.Time]{
-		FieldIdentifier: CompanyDeletedAtField,
-		Operator:        operator,
-	}
+func CompanyDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmany.Company] {
+	return condition.NewFieldCondition[hasmany.Company, time.Time](CompanyDeletedAtField, operator)
 }
-func CompanyPreloadSellers(nestedPreloads ...orm.IJoinCondition[hasmany.Seller]) orm.Condition[hasmany.Company] {
-	return orm.NewCollectionPreloadCondition[hasmany.Company, hasmany.Seller]("Sellers", nestedPreloads)
+func CompanyPreloadSellers(nestedPreloads ...condition.JoinCondition[hasmany.Seller]) condition.Condition[hasmany.Company] {
+	return condition.NewCollectionPreloadCondition[hasmany.Company, hasmany.Seller]("Sellers", nestedPreloads)
 }
 
-var CompanyPreloadAttributes = orm.NewPreloadCondition[hasmany.Company](CompanyIdField, CompanyCreatedAtField, CompanyUpdatedAtField, CompanyDeletedAtField)
-var CompanyPreloadRelations = []orm.Condition[hasmany.Company]{CompanyPreloadSellers()}
+var CompanyPreloadAttributes = condition.NewPreloadCondition[hasmany.Company](CompanyIdField, CompanyCreatedAtField, CompanyUpdatedAtField, CompanyDeletedAtField)
+var CompanyPreloadRelations = []condition.Condition[hasmany.Company]{CompanyPreloadSellers()}

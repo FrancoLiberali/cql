@@ -3,70 +3,58 @@ package conditions
 
 import (
 	overrideforeignkeyinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkeyinverse"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var creditCardType = reflect.TypeOf(*new(overrideforeignkeyinverse.CreditCard))
-var CreditCardIdField = orm.FieldIdentifier[orm.UUID]{
+var CreditCardIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: creditCardType,
 }
 
-func CreditCardId(operator orm.Operator[orm.UUID]) orm.WhereCondition[overrideforeignkeyinverse.CreditCard] {
-	return orm.FieldCondition[overrideforeignkeyinverse.CreditCard, orm.UUID]{
-		FieldIdentifier: CreditCardIdField,
-		Operator:        operator,
-	}
+func CreditCardId(operator operator.Operator[model.UUID]) condition.WhereCondition[overrideforeignkeyinverse.CreditCard] {
+	return condition.NewFieldCondition[overrideforeignkeyinverse.CreditCard, model.UUID](CreditCardIdField, operator)
 }
 
-var CreditCardCreatedAtField = orm.FieldIdentifier[time.Time]{
+var CreditCardCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: creditCardType,
 }
 
-func CreditCardCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.CreditCard] {
-	return orm.FieldCondition[overrideforeignkeyinverse.CreditCard, time.Time]{
-		FieldIdentifier: CreditCardCreatedAtField,
-		Operator:        operator,
-	}
+func CreditCardCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkeyinverse.CreditCard] {
+	return condition.NewFieldCondition[overrideforeignkeyinverse.CreditCard, time.Time](CreditCardCreatedAtField, operator)
 }
 
-var CreditCardUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var CreditCardUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: creditCardType,
 }
 
-func CreditCardUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.CreditCard] {
-	return orm.FieldCondition[overrideforeignkeyinverse.CreditCard, time.Time]{
-		FieldIdentifier: CreditCardUpdatedAtField,
-		Operator:        operator,
-	}
+func CreditCardUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkeyinverse.CreditCard] {
+	return condition.NewFieldCondition[overrideforeignkeyinverse.CreditCard, time.Time](CreditCardUpdatedAtField, operator)
 }
 
-var CreditCardDeletedAtField = orm.FieldIdentifier[time.Time]{
+var CreditCardDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: creditCardType,
 }
 
-func CreditCardDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[overrideforeignkeyinverse.CreditCard] {
-	return orm.FieldCondition[overrideforeignkeyinverse.CreditCard, time.Time]{
-		FieldIdentifier: CreditCardDeletedAtField,
-		Operator:        operator,
-	}
+func CreditCardDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkeyinverse.CreditCard] {
+	return condition.NewFieldCondition[overrideforeignkeyinverse.CreditCard, time.Time](CreditCardDeletedAtField, operator)
 }
 
-var CreditCardUserReferenceField = orm.FieldIdentifier[orm.UUID]{
+var CreditCardUserReferenceField = query.FieldIdentifier[model.UUID]{
 	Field:     "UserReference",
 	ModelType: creditCardType,
 }
 
-func CreditCardUserReference(operator orm.Operator[orm.UUID]) orm.WhereCondition[overrideforeignkeyinverse.CreditCard] {
-	return orm.FieldCondition[overrideforeignkeyinverse.CreditCard, orm.UUID]{
-		FieldIdentifier: CreditCardUserReferenceField,
-		Operator:        operator,
-	}
+func CreditCardUserReference(operator operator.Operator[model.UUID]) condition.WhereCondition[overrideforeignkeyinverse.CreditCard] {
+	return condition.NewFieldCondition[overrideforeignkeyinverse.CreditCard, model.UUID](CreditCardUserReferenceField, operator)
 }
 
-var CreditCardPreloadAttributes = orm.NewPreloadCondition[overrideforeignkeyinverse.CreditCard](CreditCardIdField, CreditCardCreatedAtField, CreditCardUpdatedAtField, CreditCardDeletedAtField, CreditCardUserReferenceField)
+var CreditCardPreloadAttributes = condition.NewPreloadCondition[overrideforeignkeyinverse.CreditCard](CreditCardIdField, CreditCardCreatedAtField, CreditCardUpdatedAtField, CreditCardDeletedAtField, CreditCardUserReferenceField)

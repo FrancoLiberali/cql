@@ -1,9 +1,9 @@
 package basictypes
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type BasicTypes struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	Bool       bool
 	Int        int
