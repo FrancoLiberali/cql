@@ -1,7 +1,11 @@
 cloud.google.com/go v0.105.0/go.mod h1:PrLgOJNe5nfE9UMxKxgXj4mD3voiP+YQ6gdt6KMFOKM=
 cloud.google.com/go v0.107.0/go.mod h1:wpc2eNrD7hXUTy8EKS10jkxpZBjASrORK7goS+3YX2I=
-github.com/ditrit/gorm v0.0.0-20230912092052-cfff75e01a3a h1:i9ncQHtSIXrt2BSThaIHKyHneTes1rwFHpnEEDJ3U60=
-github.com/ditrit/gorm v0.0.0-20230912092052-cfff75e01a3a/go.mod h1:hbnx/Oo0ChWMn1BIhpy1oYozzpM15i4YPuHDmfYtwg8=
-github.com/ditrit/sqlserver v0.0.0-20230908120642-af1820b994f4 h1:2NK/K2i+VRcbplSWkFQt6BM7bBmgJB08xJ8qNilHvjU=
-github.com/ditrit/sqlserver v0.0.0-20230908120642-af1820b994f4/go.mod h1:nt+jwGhgDPKgeanqDCFeZHirOJhJsyK3ULeQUnJTuio=
+github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
+github.com/felixge/httpsnoop v1.0.1 h1:lvB5Jl89CsZtGIWuTcDM1E/vkVs49/Ml7JJe07l8SPQ=
+github.com/goph/emperror v0.17.2 h1:yLapQcmEsO0ipe9p5TaN22djm3OFV/TfM/fcYP0/J18=
+github.com/gorilla/handlers v1.5.1 h1:9lRY6j8DEeeBT10CvO9hGW0gmky0BprnvDI5vfhUHH4=
+github.com/gorilla/mux v1.8.0 h1:i40aqfkR1h2SlN9hojwV5ZA91wcXFOvkdNIeFDP5koI=
+github.com/hashicorp/go-immutable-radix v1.3.1 h1:DKHmCUm2hRBK510BaiZlwvpD40f8bJFeZnpfm2KLowc=
+github.com/hashicorp/golang-lru v0.5.4 h1:YDjusn29QI/Das2iO9M0BHnIbxPeyuCHsjMW+lJfyTc=
+github.com/noirbizarre/gonja v0.0.0-20200629003239-4d051fd0be61 h1:8HaKr2WO2B5XKEFbJE9Z7W8mWC6+dL3jZCw53Dbl0oI=
 github.com/pelletier/go-toml v1.9.5 h1:4yBQzkHv+7BHq2PQUZF3Mx0IYxG7LsP222s7Agd3ve8=

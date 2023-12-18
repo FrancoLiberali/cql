@@ -17,7 +17,6 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/logger"
-	"github.com/ditrit/badaas/persistence/database"
 	"github.com/ditrit/badaas/persistence/gormfx"
 )
 
@@ -94,7 +93,7 @@ func NewDBConnection() (*gorm.DB, error) {
 		return nil, fmt.Errorf("unknown db %s", getDBDialector())
 	}
 
-	return database.OpenWithRetry(
+	return OpenWithRetry(
 		dialector,
 		logger.Default.ToLogMode(logger.Info),
 		10, time.Duration(5)*time.Second,

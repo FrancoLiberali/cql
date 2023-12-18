@@ -8,7 +8,7 @@ install_dependencies:
 
 lint:
 	golangci-lint run
-	cd test_e2e && golangci-lint run --config ../.golangci.yml
+	cd cli && golangci-lint run --config ../.golangci.yml
 
 test_unit:
 	gotestsum --format pkgname $(PATHS)
@@ -44,11 +44,6 @@ test_integration_sqlserver: sqlserver
 	DB=sqlserver gotestsum --format testname ./testintegration
 
 test_integration: test_integration_postgresql
-
-test_e2e:
-	docker compose -f "docker/cockroachdb/docker-compose.yml" -f "docker/test_api/docker-compose.yml" up -d
-	./docker/wait_for_api.sh 8000/info
-	go test ./test_e2e -v
 
 test_generate_mocks:
 	mockery --all --keeptree

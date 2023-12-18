@@ -28,9 +28,5 @@ testintegration/sqlite:*
 # vscode conf
 .vscode
 
-# binary output
-badaas
-!docs/badaas
-
 # Sphinx documentation
 docs/_build/
