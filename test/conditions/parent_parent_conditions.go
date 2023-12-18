@@ -2,31 +2,31 @@
 package conditions
 
 import (
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
 	"time"
 )
 
 type parentParentConditions struct {
-	ID        cql.Field[models.ParentParent, model.UUID]
-	CreatedAt cql.Field[models.ParentParent, time.Time]
-	UpdatedAt cql.Field[models.ParentParent, time.Time]
-	DeletedAt cql.Field[models.ParentParent, time.Time]
-	Name      cql.StringField[models.ParentParent]
-	Number    cql.Field[models.ParentParent, int]
+	ID        condition.Field[models.ParentParent, model.UUID]
+	CreatedAt condition.Field[models.ParentParent, time.Time]
+	UpdatedAt condition.Field[models.ParentParent, time.Time]
+	DeletedAt condition.Field[models.ParentParent, time.Time]
+	Name      condition.StringField[models.ParentParent]
+	Number    condition.Field[models.ParentParent, int]
 }
 
 var ParentParent = parentParentConditions{
-	CreatedAt: cql.Field[models.ParentParent, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[models.ParentParent, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[models.ParentParent, model.UUID]{Name: "ID"},
-	Name:      cql.StringField[models.ParentParent]{Field: cql.Field[models.ParentParent, string]{Name: "Name"}},
-	Number:    cql.Field[models.ParentParent, int]{Name: "Number"},
-	UpdatedAt: cql.Field[models.ParentParent, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[models.ParentParent, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.ParentParent, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.ParentParent, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.ParentParent]{Field: condition.Field[models.ParentParent, string]{Name: "Name"}},
+	Number:    condition.Field[models.ParentParent, int]{Name: "Number"},
+	UpdatedAt: condition.Field[models.ParentParent, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the ParentParent when doing a query
-func (parentParentConditions parentParentConditions) Preload() cql.Condition[models.ParentParent] {
-	return cql.NewPreloadCondition[models.ParentParent](parentParentConditions.ID, parentParentConditions.CreatedAt, parentParentConditions.UpdatedAt, parentParentConditions.DeletedAt, parentParentConditions.Name, parentParentConditions.Number)
+func (parentParentConditions parentParentConditions) Preload() condition.Condition[models.ParentParent] {
+	return condition.NewPreloadCondition[models.ParentParent](parentParentConditions.ID, parentParentConditions.CreatedAt, parentParentConditions.UpdatedAt, parentParentConditions.DeletedAt, parentParentConditions.Name, parentParentConditions.Number)
 }

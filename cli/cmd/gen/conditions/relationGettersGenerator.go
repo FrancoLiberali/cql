@@ -11,7 +11,7 @@ import (
 
 const (
 	// badaas/orm/preload
-	preloadPath                        = badaasORMPath + "/preload"
+	preloadPath                        = cqlPath + "/preload"
 	badaasORMVerifyStructLoaded        = "VerifyStructLoaded"
 	badaasORMVerifyPointerLoaded       = "VerifyPointerLoaded"
 	badaasORMVerifyPointerWithIDLoaded = "VerifyPointerWithIDLoaded"

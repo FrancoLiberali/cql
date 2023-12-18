@@ -2,29 +2,29 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	overridereferencesinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferencesinverse"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type processorConditions struct {
-	ID           cql.Field[overridereferencesinverse.Processor, model.UUID]
-	CreatedAt    cql.Field[overridereferencesinverse.Processor, time.Time]
-	UpdatedAt    cql.Field[overridereferencesinverse.Processor, time.Time]
-	DeletedAt    cql.Field[overridereferencesinverse.Processor, time.Time]
-	ComputerName cql.StringField[overridereferencesinverse.Processor]
+	ID           condition.Field[overridereferencesinverse.Processor, model.UUID]
+	CreatedAt    condition.Field[overridereferencesinverse.Processor, time.Time]
+	UpdatedAt    condition.Field[overridereferencesinverse.Processor, time.Time]
+	DeletedAt    condition.Field[overridereferencesinverse.Processor, time.Time]
+	ComputerName condition.StringField[overridereferencesinverse.Processor]
 }
 
 var Processor = processorConditions{
-	ComputerName: cql.StringField[overridereferencesinverse.Processor]{Field: cql.Field[overridereferencesinverse.Processor, string]{Name: "ComputerName"}},
-	CreatedAt:    cql.Field[overridereferencesinverse.Processor, time.Time]{Name: "CreatedAt"},
-	DeletedAt:    cql.Field[overridereferencesinverse.Processor, time.Time]{Name: "DeletedAt"},
-	ID:           cql.Field[overridereferencesinverse.Processor, model.UUID]{Name: "ID"},
-	UpdatedAt:    cql.Field[overridereferencesinverse.Processor, time.Time]{Name: "UpdatedAt"},
+	ComputerName: condition.StringField[overridereferencesinverse.Processor]{Field: condition.Field[overridereferencesinverse.Processor, string]{Name: "ComputerName"}},
+	CreatedAt:    condition.Field[overridereferencesinverse.Processor, time.Time]{Name: "CreatedAt"},
+	DeletedAt:    condition.Field[overridereferencesinverse.Processor, time.Time]{Name: "DeletedAt"},
+	ID:           condition.Field[overridereferencesinverse.Processor, model.UUID]{Name: "ID"},
+	UpdatedAt:    condition.Field[overridereferencesinverse.Processor, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Processor when doing a query
-func (processorConditions processorConditions) Preload() cql.Condition[overridereferencesinverse.Processor] {
-	return cql.NewPreloadCondition[overridereferencesinverse.Processor](processorConditions.ID, processorConditions.CreatedAt, processorConditions.UpdatedAt, processorConditions.DeletedAt, processorConditions.ComputerName)
+func (processorConditions processorConditions) Preload() condition.Condition[overridereferencesinverse.Processor] {
+	return condition.NewPreloadCondition[overridereferencesinverse.Processor](processorConditions.ID, processorConditions.CreatedAt, processorConditions.UpdatedAt, processorConditions.DeletedAt, processorConditions.ComputerName)
 }

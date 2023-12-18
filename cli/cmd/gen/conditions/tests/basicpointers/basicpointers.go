@@ -1,6 +1,6 @@
 package basicpointers
 
-import "github.com/FrancoLiberali/cql/orm/model"
+import "github.com/FrancoLiberali/cql/model"
 
 type BasicPointers struct {
 	model.UUIDModel

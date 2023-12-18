@@ -1,7 +1,7 @@
 package package2
 
 import (
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type Package2 struct {

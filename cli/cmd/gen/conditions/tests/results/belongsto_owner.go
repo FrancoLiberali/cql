@@ -2,27 +2,27 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	belongsto "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/belongsto"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type ownerConditions struct {
-	ID        cql.Field[belongsto.Owner, model.UUID]
-	CreatedAt cql.Field[belongsto.Owner, time.Time]
-	UpdatedAt cql.Field[belongsto.Owner, time.Time]
-	DeletedAt cql.Field[belongsto.Owner, time.Time]
+	ID        condition.Field[belongsto.Owner, model.UUID]
+	CreatedAt condition.Field[belongsto.Owner, time.Time]
+	UpdatedAt condition.Field[belongsto.Owner, time.Time]
+	DeletedAt condition.Field[belongsto.Owner, time.Time]
 }
 
 var Owner = ownerConditions{
-	CreatedAt: cql.Field[belongsto.Owner, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[belongsto.Owner, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[belongsto.Owner, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[belongsto.Owner, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[belongsto.Owner, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[belongsto.Owner, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[belongsto.Owner, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[belongsto.Owner, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Owner when doing a query
-func (ownerConditions ownerConditions) Preload() cql.Condition[belongsto.Owner] {
-	return cql.NewPreloadCondition[belongsto.Owner](ownerConditions.ID, ownerConditions.CreatedAt, ownerConditions.UpdatedAt, ownerConditions.DeletedAt)
+func (ownerConditions ownerConditions) Preload() condition.Condition[belongsto.Owner] {
+	return condition.NewPreloadCondition[belongsto.Owner](ownerConditions.ID, ownerConditions.CreatedAt, ownerConditions.UpdatedAt, ownerConditions.DeletedAt)
 }

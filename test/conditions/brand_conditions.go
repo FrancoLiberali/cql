@@ -2,29 +2,29 @@
 package conditions
 
 import (
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
 	"time"
 )
 
 type brandConditions struct {
-	ID        cql.Field[models.Brand, model.UIntID]
-	CreatedAt cql.Field[models.Brand, time.Time]
-	UpdatedAt cql.Field[models.Brand, time.Time]
-	DeletedAt cql.Field[models.Brand, time.Time]
-	Name      cql.StringField[models.Brand]
+	ID        condition.Field[models.Brand, model.UIntID]
+	CreatedAt condition.Field[models.Brand, time.Time]
+	UpdatedAt condition.Field[models.Brand, time.Time]
+	DeletedAt condition.Field[models.Brand, time.Time]
+	Name      condition.StringField[models.Brand]
 }
 
 var Brand = brandConditions{
-	CreatedAt: cql.Field[models.Brand, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[models.Brand, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[models.Brand, model.UIntID]{Name: "ID"},
-	Name:      cql.StringField[models.Brand]{Field: cql.Field[models.Brand, string]{Name: "Name"}},
-	UpdatedAt: cql.Field[models.Brand, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[models.Brand, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.Brand, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.Brand, model.UIntID]{Name: "ID"},
+	Name:      condition.StringField[models.Brand]{Field: condition.Field[models.Brand, string]{Name: "Name"}},
+	UpdatedAt: condition.Field[models.Brand, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Brand when doing a query
-func (brandConditions brandConditions) Preload() cql.Condition[models.Brand] {
-	return cql.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
+func (brandConditions brandConditions) Preload() condition.Condition[models.Brand] {
+	return condition.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
 }

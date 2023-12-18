@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type MultiString []string

@@ -31,5 +31,7 @@ test/sqlite:*
 # Sphinx documentation
 docs/_build/
 
-# cli binary
+# cli
 cli/badaas-cli
+cli/cmd/gen/conditions/*_conditions.go
+cli/cmd/gen/conditions/tests/**/badaas-orm.go

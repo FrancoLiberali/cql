@@ -2,43 +2,43 @@
 package conditions
 
 import (
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
 	"time"
 )
 
-func (employeeConditions employeeConditions) Boss(conditions ...cql.Condition[models.Employee]) cql.JoinCondition[models.Employee] {
-	return cql.NewJoinCondition[models.Employee, models.Employee](conditions, "Boss", "BossID", employeeConditions.Preload(), "ID")
+func (employeeConditions employeeConditions) Boss(conditions ...condition.Condition[models.Employee]) condition.JoinCondition[models.Employee] {
+	return condition.NewJoinCondition[models.Employee, models.Employee](conditions, "Boss", "BossID", employeeConditions.Preload(), "ID")
 }
-func (employeeConditions employeeConditions) PreloadBoss() cql.JoinCondition[models.Employee] {
+func (employeeConditions employeeConditions) PreloadBoss() condition.JoinCondition[models.Employee] {
 	return employeeConditions.Boss(Employee.Preload())
 }
 
 type employeeConditions struct {
-	ID        cql.Field[models.Employee, model.UUID]
-	CreatedAt cql.Field[models.Employee, time.Time]
-	UpdatedAt cql.Field[models.Employee, time.Time]
-	DeletedAt cql.Field[models.Employee, time.Time]
-	Name      cql.StringField[models.Employee]
-	BossID    cql.Field[models.Employee, model.UUID]
+	ID        condition.Field[models.Employee, model.UUID]
+	CreatedAt condition.Field[models.Employee, time.Time]
+	UpdatedAt condition.Field[models.Employee, time.Time]
+	DeletedAt condition.Field[models.Employee, time.Time]
+	Name      condition.StringField[models.Employee]
+	BossID    condition.Field[models.Employee, model.UUID]
 }
 
 var Employee = employeeConditions{
-	BossID:    cql.Field[models.Employee, model.UUID]{Name: "BossID"},
-	CreatedAt: cql.Field[models.Employee, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[models.Employee, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[models.Employee, model.UUID]{Name: "ID"},
-	Name:      cql.StringField[models.Employee]{Field: cql.Field[models.Employee, string]{Name: "Name"}},
-	UpdatedAt: cql.Field[models.Employee, time.Time]{Name: "UpdatedAt"},
+	BossID:    condition.Field[models.Employee, model.UUID]{Name: "BossID"},
+	CreatedAt: condition.Field[models.Employee, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.Employee, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.Employee, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.Employee]{Field: condition.Field[models.Employee, string]{Name: "Name"}},
+	UpdatedAt: condition.Field[models.Employee, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Employee when doing a query
-func (employeeConditions employeeConditions) Preload() cql.Condition[models.Employee] {
-	return cql.NewPreloadCondition[models.Employee](employeeConditions.ID, employeeConditions.CreatedAt, employeeConditions.UpdatedAt, employeeConditions.DeletedAt, employeeConditions.Name, employeeConditions.BossID)
+func (employeeConditions employeeConditions) Preload() condition.Condition[models.Employee] {
+	return condition.NewPreloadCondition[models.Employee](employeeConditions.ID, employeeConditions.CreatedAt, employeeConditions.UpdatedAt, employeeConditions.DeletedAt, employeeConditions.Name, employeeConditions.BossID)
 }
 
 // PreloadRelations allows preloading all the Employee's relation when doing a query
-func (employeeConditions employeeConditions) PreloadRelations() []cql.Condition[models.Employee] {
-	return []cql.Condition[models.Employee]{employeeConditions.PreloadBoss()}
+func (employeeConditions employeeConditions) PreloadRelations() []condition.Condition[models.Employee] {
+	return []condition.Condition[models.Employee]{employeeConditions.PreloadBoss()}
 }

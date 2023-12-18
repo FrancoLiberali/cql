@@ -2,40 +2,40 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	package1 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package1"
 	package2 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
-func (package1Conditions package1Conditions) Package2(conditions ...cql.Condition[package2.Package2]) cql.JoinCondition[package1.Package1] {
-	return cql.NewJoinCondition[package1.Package1, package2.Package2](conditions, "Package2", "ID", package1Conditions.Preload(), "Package1ID")
+func (package1Conditions package1Conditions) Package2(conditions ...condition.Condition[package2.Package2]) condition.JoinCondition[package1.Package1] {
+	return condition.NewJoinCondition[package1.Package1, package2.Package2](conditions, "Package2", "ID", package1Conditions.Preload(), "Package1ID")
 }
-func (package1Conditions package1Conditions) PreloadPackage2() cql.JoinCondition[package1.Package1] {
+func (package1Conditions package1Conditions) PreloadPackage2() condition.JoinCondition[package1.Package1] {
 	return package1Conditions.Package2(Package2.Preload())
 }
 
 type package1Conditions struct {
-	ID        cql.Field[package1.Package1, model.UUID]
-	CreatedAt cql.Field[package1.Package1, time.Time]
-	UpdatedAt cql.Field[package1.Package1, time.Time]
-	DeletedAt cql.Field[package1.Package1, time.Time]
+	ID        condition.Field[package1.Package1, model.UUID]
+	CreatedAt condition.Field[package1.Package1, time.Time]
+	UpdatedAt condition.Field[package1.Package1, time.Time]
+	DeletedAt condition.Field[package1.Package1, time.Time]
 }
 
 var Package1 = package1Conditions{
-	CreatedAt: cql.Field[package1.Package1, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[package1.Package1, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[package1.Package1, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[package1.Package1, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[package1.Package1, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[package1.Package1, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[package1.Package1, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[package1.Package1, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Package1 when doing a query
-func (package1Conditions package1Conditions) Preload() cql.Condition[package1.Package1] {
-	return cql.NewPreloadCondition[package1.Package1](package1Conditions.ID, package1Conditions.CreatedAt, package1Conditions.UpdatedAt, package1Conditions.DeletedAt)
+func (package1Conditions package1Conditions) Preload() condition.Condition[package1.Package1] {
+	return condition.NewPreloadCondition[package1.Package1](package1Conditions.ID, package1Conditions.CreatedAt, package1Conditions.UpdatedAt, package1Conditions.DeletedAt)
 }
 
 // PreloadRelations allows preloading all the Package1's relation when doing a query
-func (package1Conditions package1Conditions) PreloadRelations() []cql.Condition[package1.Package1] {
-	return []cql.Condition[package1.Package1]{package1Conditions.PreloadPackage2()}
+func (package1Conditions package1Conditions) PreloadRelations() []condition.Condition[package1.Package1] {
+	return []condition.Condition[package1.Package1]{package1Conditions.PreloadPackage2()}
 }

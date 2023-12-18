@@ -2,41 +2,41 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	selfreferential "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/selfreferential"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
-func (employeeConditions employeeConditions) Boss(conditions ...cql.Condition[selfreferential.Employee]) cql.JoinCondition[selfreferential.Employee] {
-	return cql.NewJoinCondition[selfreferential.Employee, selfreferential.Employee](conditions, "Boss", "BossID", employeeConditions.Preload(), "ID")
+func (employeeConditions employeeConditions) Boss(conditions ...condition.Condition[selfreferential.Employee]) condition.JoinCondition[selfreferential.Employee] {
+	return condition.NewJoinCondition[selfreferential.Employee, selfreferential.Employee](conditions, "Boss", "BossID", employeeConditions.Preload(), "ID")
 }
-func (employeeConditions employeeConditions) PreloadBoss() cql.JoinCondition[selfreferential.Employee] {
+func (employeeConditions employeeConditions) PreloadBoss() condition.JoinCondition[selfreferential.Employee] {
 	return employeeConditions.Boss(Employee.Preload())
 }
 
 type employeeConditions struct {
-	ID        cql.Field[selfreferential.Employee, model.UUID]
-	CreatedAt cql.Field[selfreferential.Employee, time.Time]
-	UpdatedAt cql.Field[selfreferential.Employee, time.Time]
-	DeletedAt cql.Field[selfreferential.Employee, time.Time]
-	BossID    cql.Field[selfreferential.Employee, model.UUID]
+	ID        condition.Field[selfreferential.Employee, model.UUID]
+	CreatedAt condition.Field[selfreferential.Employee, time.Time]
+	UpdatedAt condition.Field[selfreferential.Employee, time.Time]
+	DeletedAt condition.Field[selfreferential.Employee, time.Time]
+	BossID    condition.Field[selfreferential.Employee, model.UUID]
 }
 
 var Employee = employeeConditions{
-	BossID:    cql.Field[selfreferential.Employee, model.UUID]{Name: "BossID"},
-	CreatedAt: cql.Field[selfreferential.Employee, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[selfreferential.Employee, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[selfreferential.Employee, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[selfreferential.Employee, time.Time]{Name: "UpdatedAt"},
+	BossID:    condition.Field[selfreferential.Employee, model.UUID]{Name: "BossID"},
+	CreatedAt: condition.Field[selfreferential.Employee, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[selfreferential.Employee, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[selfreferential.Employee, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[selfreferential.Employee, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Employee when doing a query
-func (employeeConditions employeeConditions) Preload() cql.Condition[selfreferential.Employee] {
-	return cql.NewPreloadCondition[selfreferential.Employee](employeeConditions.ID, employeeConditions.CreatedAt, employeeConditions.UpdatedAt, employeeConditions.DeletedAt, employeeConditions.BossID)
+func (employeeConditions employeeConditions) Preload() condition.Condition[selfreferential.Employee] {
+	return condition.NewPreloadCondition[selfreferential.Employee](employeeConditions.ID, employeeConditions.CreatedAt, employeeConditions.UpdatedAt, employeeConditions.DeletedAt, employeeConditions.BossID)
 }
 
 // PreloadRelations allows preloading all the Employee's relation when doing a query
-func (employeeConditions employeeConditions) PreloadRelations() []cql.Condition[selfreferential.Employee] {
-	return []cql.Condition[selfreferential.Employee]{employeeConditions.PreloadBoss()}
+func (employeeConditions employeeConditions) PreloadRelations() []condition.Condition[selfreferential.Employee] {
+	return []condition.Condition[selfreferential.Employee]{employeeConditions.PreloadBoss()}
 }

@@ -1,7 +1,7 @@
 package hasmanywithpointers
 
 import (
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type CompanyWithPointers struct {

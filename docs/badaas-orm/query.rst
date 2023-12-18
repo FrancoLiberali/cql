@@ -26,7 +26,7 @@ Using this method will also allow the transaction execution time to be logged.
 Query methods
 ------------------------
 
-The `orm.Query` object obtained using `orm.NewQuery` has different methods that 
+The `cql.Query` object obtained using `orm.NewQuery` has different methods that 
 will allow you to obtain the results of the query:
 
 Modifier methods
@@ -110,7 +110,7 @@ This variable is called the condition model and it has:
   which will allow you to perform joins in your queries.
 - Methods for :doc:`/badaas-orm/preloading`.
 
-Then, combining these conditions, the Connection Conditions (orm.And, orm.Or, orm.Not) 
+Then, combining these conditions, the Connection Conditions (cql.And, cql.Or, cql.Not) 
 you will be able to make all the queries you need in a safe way.
 
 Examples

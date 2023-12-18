@@ -1,6 +1,6 @@
 package overrideforeignkey
 
-import "github.com/FrancoLiberali/cql/orm/model"
+import "github.com/FrancoLiberali/cql/model"
 
 type Person struct {
 	model.UUIDModel

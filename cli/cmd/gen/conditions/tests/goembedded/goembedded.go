@@ -1,6 +1,6 @@
 package goembedded
 
-import "github.com/FrancoLiberali/cql/orm/model"
+import "github.com/FrancoLiberali/cql/model"
 
 type ToBeEmbedded struct {
 	Int int

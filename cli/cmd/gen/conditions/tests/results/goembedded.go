@@ -2,31 +2,31 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	goembedded "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/goembedded"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type goEmbeddedConditions struct {
-	ID              cql.Field[goembedded.GoEmbedded, model.UIntID]
-	CreatedAt       cql.Field[goembedded.GoEmbedded, time.Time]
-	UpdatedAt       cql.Field[goembedded.GoEmbedded, time.Time]
-	DeletedAt       cql.Field[goembedded.GoEmbedded, time.Time]
-	Int             cql.Field[goembedded.GoEmbedded, int]
-	ToBeEmbeddedInt cql.Field[goembedded.GoEmbedded, int]
+	ID              condition.Field[goembedded.GoEmbedded, model.UIntID]
+	CreatedAt       condition.Field[goembedded.GoEmbedded, time.Time]
+	UpdatedAt       condition.Field[goembedded.GoEmbedded, time.Time]
+	DeletedAt       condition.Field[goembedded.GoEmbedded, time.Time]
+	Int             condition.Field[goembedded.GoEmbedded, int]
+	ToBeEmbeddedInt condition.Field[goembedded.GoEmbedded, int]
 }
 
 var GoEmbedded = goEmbeddedConditions{
-	CreatedAt:       cql.Field[goembedded.GoEmbedded, time.Time]{Name: "CreatedAt"},
-	DeletedAt:       cql.Field[goembedded.GoEmbedded, time.Time]{Name: "DeletedAt"},
-	ID:              cql.Field[goembedded.GoEmbedded, model.UIntID]{Name: "ID"},
-	Int:             cql.Field[goembedded.GoEmbedded, int]{Name: "Int"},
-	ToBeEmbeddedInt: cql.Field[goembedded.GoEmbedded, int]{Name: "Int"},
-	UpdatedAt:       cql.Field[goembedded.GoEmbedded, time.Time]{Name: "UpdatedAt"},
+	CreatedAt:       condition.Field[goembedded.GoEmbedded, time.Time]{Name: "CreatedAt"},
+	DeletedAt:       condition.Field[goembedded.GoEmbedded, time.Time]{Name: "DeletedAt"},
+	ID:              condition.Field[goembedded.GoEmbedded, model.UIntID]{Name: "ID"},
+	Int:             condition.Field[goembedded.GoEmbedded, int]{Name: "Int"},
+	ToBeEmbeddedInt: condition.Field[goembedded.GoEmbedded, int]{Name: "Int"},
+	UpdatedAt:       condition.Field[goembedded.GoEmbedded, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the GoEmbedded when doing a query
-func (goEmbeddedConditions goEmbeddedConditions) Preload() cql.Condition[goembedded.GoEmbedded] {
-	return cql.NewPreloadCondition[goembedded.GoEmbedded](goEmbeddedConditions.ID, goEmbeddedConditions.CreatedAt, goEmbeddedConditions.UpdatedAt, goEmbeddedConditions.DeletedAt, goEmbeddedConditions.Int, goEmbeddedConditions.ToBeEmbeddedInt)
+func (goEmbeddedConditions goEmbeddedConditions) Preload() condition.Condition[goembedded.GoEmbedded] {
+	return condition.NewPreloadCondition[goembedded.GoEmbedded](goEmbeddedConditions.ID, goEmbeddedConditions.CreatedAt, goEmbeddedConditions.UpdatedAt, goEmbeddedConditions.DeletedAt, goEmbeddedConditions.Int, goEmbeddedConditions.ToBeEmbeddedInt)
 }

@@ -3,7 +3,7 @@ package nullabletypes
 import (
 	"database/sql"
 
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type NullableTypes struct {

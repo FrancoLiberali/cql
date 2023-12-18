@@ -2,29 +2,29 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	customtype "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/customtype"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type customTypeConditions struct {
-	ID        cql.Field[customtype.CustomType, model.UUID]
-	CreatedAt cql.Field[customtype.CustomType, time.Time]
-	UpdatedAt cql.Field[customtype.CustomType, time.Time]
-	DeletedAt cql.Field[customtype.CustomType, time.Time]
-	Custom    cql.Field[customtype.CustomType, customtype.MultiString]
+	ID        condition.Field[customtype.CustomType, model.UUID]
+	CreatedAt condition.Field[customtype.CustomType, time.Time]
+	UpdatedAt condition.Field[customtype.CustomType, time.Time]
+	DeletedAt condition.Field[customtype.CustomType, time.Time]
+	Custom    condition.Field[customtype.CustomType, customtype.MultiString]
 }
 
 var CustomType = customTypeConditions{
-	CreatedAt: cql.Field[customtype.CustomType, time.Time]{Name: "CreatedAt"},
-	Custom:    cql.Field[customtype.CustomType, customtype.MultiString]{Name: "Custom"},
-	DeletedAt: cql.Field[customtype.CustomType, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[customtype.CustomType, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[customtype.CustomType, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[customtype.CustomType, time.Time]{Name: "CreatedAt"},
+	Custom:    condition.Field[customtype.CustomType, customtype.MultiString]{Name: "Custom"},
+	DeletedAt: condition.Field[customtype.CustomType, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[customtype.CustomType, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[customtype.CustomType, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the CustomType when doing a query
-func (customTypeConditions customTypeConditions) Preload() cql.Condition[customtype.CustomType] {
-	return cql.NewPreloadCondition[customtype.CustomType](customTypeConditions.ID, customTypeConditions.CreatedAt, customTypeConditions.UpdatedAt, customTypeConditions.DeletedAt, customTypeConditions.Custom)
+func (customTypeConditions customTypeConditions) Preload() condition.Condition[customtype.CustomType] {
+	return condition.NewPreloadCondition[customtype.CustomType](customTypeConditions.ID, customTypeConditions.CreatedAt, customTypeConditions.UpdatedAt, customTypeConditions.DeletedAt, customTypeConditions.Custom)
 }

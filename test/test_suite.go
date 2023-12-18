@@ -4,7 +4,7 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 	"github.com/FrancoLiberali/cql/test/models"
 )
 

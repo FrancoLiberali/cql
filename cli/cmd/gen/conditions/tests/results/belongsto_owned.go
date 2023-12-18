@@ -2,41 +2,41 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	belongsto "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/belongsto"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
-func (ownedConditions ownedConditions) Owner(conditions ...cql.Condition[belongsto.Owner]) cql.JoinCondition[belongsto.Owned] {
-	return cql.NewJoinCondition[belongsto.Owned, belongsto.Owner](conditions, "Owner", "OwnerID", ownedConditions.Preload(), "ID")
+func (ownedConditions ownedConditions) Owner(conditions ...condition.Condition[belongsto.Owner]) condition.JoinCondition[belongsto.Owned] {
+	return condition.NewJoinCondition[belongsto.Owned, belongsto.Owner](conditions, "Owner", "OwnerID", ownedConditions.Preload(), "ID")
 }
-func (ownedConditions ownedConditions) PreloadOwner() cql.JoinCondition[belongsto.Owned] {
+func (ownedConditions ownedConditions) PreloadOwner() condition.JoinCondition[belongsto.Owned] {
 	return ownedConditions.Owner(Owner.Preload())
 }
 
 type ownedConditions struct {
-	ID        cql.Field[belongsto.Owned, model.UUID]
-	CreatedAt cql.Field[belongsto.Owned, time.Time]
-	UpdatedAt cql.Field[belongsto.Owned, time.Time]
-	DeletedAt cql.Field[belongsto.Owned, time.Time]
-	OwnerID   cql.Field[belongsto.Owned, model.UUID]
+	ID        condition.Field[belongsto.Owned, model.UUID]
+	CreatedAt condition.Field[belongsto.Owned, time.Time]
+	UpdatedAt condition.Field[belongsto.Owned, time.Time]
+	DeletedAt condition.Field[belongsto.Owned, time.Time]
+	OwnerID   condition.Field[belongsto.Owned, model.UUID]
 }
 
 var Owned = ownedConditions{
-	CreatedAt: cql.Field[belongsto.Owned, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[belongsto.Owned, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[belongsto.Owned, model.UUID]{Name: "ID"},
-	OwnerID:   cql.Field[belongsto.Owned, model.UUID]{Name: "OwnerID"},
-	UpdatedAt: cql.Field[belongsto.Owned, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[belongsto.Owned, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[belongsto.Owned, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[belongsto.Owned, model.UUID]{Name: "ID"},
+	OwnerID:   condition.Field[belongsto.Owned, model.UUID]{Name: "OwnerID"},
+	UpdatedAt: condition.Field[belongsto.Owned, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Owned when doing a query
-func (ownedConditions ownedConditions) Preload() cql.Condition[belongsto.Owned] {
-	return cql.NewPreloadCondition[belongsto.Owned](ownedConditions.ID, ownedConditions.CreatedAt, ownedConditions.UpdatedAt, ownedConditions.DeletedAt, ownedConditions.OwnerID)
+func (ownedConditions ownedConditions) Preload() condition.Condition[belongsto.Owned] {
+	return condition.NewPreloadCondition[belongsto.Owned](ownedConditions.ID, ownedConditions.CreatedAt, ownedConditions.UpdatedAt, ownedConditions.DeletedAt, ownedConditions.OwnerID)
 }
 
 // PreloadRelations allows preloading all the Owned's relation when doing a query
-func (ownedConditions ownedConditions) PreloadRelations() []cql.Condition[belongsto.Owned] {
-	return []cql.Condition[belongsto.Owned]{ownedConditions.PreloadOwner()}
+func (ownedConditions ownedConditions) PreloadRelations() []condition.Condition[belongsto.Owned] {
+	return []condition.Condition[belongsto.Owned]{ownedConditions.PreloadOwner()}
 }

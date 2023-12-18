@@ -2,41 +2,41 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	hasone "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasone"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
-func (cityConditions cityConditions) Country(conditions ...cql.Condition[hasone.Country]) cql.JoinCondition[hasone.City] {
-	return cql.NewJoinCondition[hasone.City, hasone.Country](conditions, "Country", "CountryID", cityConditions.Preload(), "ID")
+func (cityConditions cityConditions) Country(conditions ...condition.Condition[hasone.Country]) condition.JoinCondition[hasone.City] {
+	return condition.NewJoinCondition[hasone.City, hasone.Country](conditions, "Country", "CountryID", cityConditions.Preload(), "ID")
 }
-func (cityConditions cityConditions) PreloadCountry() cql.JoinCondition[hasone.City] {
+func (cityConditions cityConditions) PreloadCountry() condition.JoinCondition[hasone.City] {
 	return cityConditions.Country(Country.Preload())
 }
 
 type cityConditions struct {
-	ID        cql.Field[hasone.City, model.UUID]
-	CreatedAt cql.Field[hasone.City, time.Time]
-	UpdatedAt cql.Field[hasone.City, time.Time]
-	DeletedAt cql.Field[hasone.City, time.Time]
-	CountryID cql.Field[hasone.City, model.UUID]
+	ID        condition.Field[hasone.City, model.UUID]
+	CreatedAt condition.Field[hasone.City, time.Time]
+	UpdatedAt condition.Field[hasone.City, time.Time]
+	DeletedAt condition.Field[hasone.City, time.Time]
+	CountryID condition.Field[hasone.City, model.UUID]
 }
 
 var City = cityConditions{
-	CountryID: cql.Field[hasone.City, model.UUID]{Name: "CountryID"},
-	CreatedAt: cql.Field[hasone.City, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[hasone.City, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[hasone.City, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[hasone.City, time.Time]{Name: "UpdatedAt"},
+	CountryID: condition.Field[hasone.City, model.UUID]{Name: "CountryID"},
+	CreatedAt: condition.Field[hasone.City, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[hasone.City, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[hasone.City, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[hasone.City, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the City when doing a query
-func (cityConditions cityConditions) Preload() cql.Condition[hasone.City] {
-	return cql.NewPreloadCondition[hasone.City](cityConditions.ID, cityConditions.CreatedAt, cityConditions.UpdatedAt, cityConditions.DeletedAt, cityConditions.CountryID)
+func (cityConditions cityConditions) Preload() condition.Condition[hasone.City] {
+	return condition.NewPreloadCondition[hasone.City](cityConditions.ID, cityConditions.CreatedAt, cityConditions.UpdatedAt, cityConditions.DeletedAt, cityConditions.CountryID)
 }
 
 // PreloadRelations allows preloading all the City's relation when doing a query
-func (cityConditions cityConditions) PreloadRelations() []cql.Condition[hasone.City] {
-	return []cql.Condition[hasone.City]{cityConditions.PreloadCountry()}
+func (cityConditions cityConditions) PreloadRelations() []condition.Condition[hasone.City] {
+	return []condition.Condition[hasone.City]{cityConditions.PreloadCountry()}
 }

@@ -2,29 +2,29 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	package2 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type package2Conditions struct {
-	ID         cql.Field[package2.Package2, model.UUID]
-	CreatedAt  cql.Field[package2.Package2, time.Time]
-	UpdatedAt  cql.Field[package2.Package2, time.Time]
-	DeletedAt  cql.Field[package2.Package2, time.Time]
-	Package1ID cql.Field[package2.Package2, model.UUID]
+	ID         condition.Field[package2.Package2, model.UUID]
+	CreatedAt  condition.Field[package2.Package2, time.Time]
+	UpdatedAt  condition.Field[package2.Package2, time.Time]
+	DeletedAt  condition.Field[package2.Package2, time.Time]
+	Package1ID condition.Field[package2.Package2, model.UUID]
 }
 
 var Package2 = package2Conditions{
-	CreatedAt:  cql.Field[package2.Package2, time.Time]{Name: "CreatedAt"},
-	DeletedAt:  cql.Field[package2.Package2, time.Time]{Name: "DeletedAt"},
-	ID:         cql.Field[package2.Package2, model.UUID]{Name: "ID"},
-	Package1ID: cql.Field[package2.Package2, model.UUID]{Name: "Package1ID"},
-	UpdatedAt:  cql.Field[package2.Package2, time.Time]{Name: "UpdatedAt"},
+	CreatedAt:  condition.Field[package2.Package2, time.Time]{Name: "CreatedAt"},
+	DeletedAt:  condition.Field[package2.Package2, time.Time]{Name: "DeletedAt"},
+	ID:         condition.Field[package2.Package2, model.UUID]{Name: "ID"},
+	Package1ID: condition.Field[package2.Package2, model.UUID]{Name: "Package1ID"},
+	UpdatedAt:  condition.Field[package2.Package2, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Package2 when doing a query
-func (package2Conditions package2Conditions) Preload() cql.Condition[package2.Package2] {
-	return cql.NewPreloadCondition[package2.Package2](package2Conditions.ID, package2Conditions.CreatedAt, package2Conditions.UpdatedAt, package2Conditions.DeletedAt, package2Conditions.Package1ID)
+func (package2Conditions package2Conditions) Preload() condition.Condition[package2.Package2] {
+	return condition.NewPreloadCondition[package2.Package2](package2Conditions.ID, package2Conditions.CreatedAt, package2Conditions.UpdatedAt, package2Conditions.DeletedAt, package2Conditions.Package1ID)
 }

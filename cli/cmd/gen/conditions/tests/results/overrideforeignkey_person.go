@@ -2,27 +2,27 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	overrideforeignkey "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkey"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type personConditions struct {
-	ID        cql.Field[overrideforeignkey.Person, model.UUID]
-	CreatedAt cql.Field[overrideforeignkey.Person, time.Time]
-	UpdatedAt cql.Field[overrideforeignkey.Person, time.Time]
-	DeletedAt cql.Field[overrideforeignkey.Person, time.Time]
+	ID        condition.Field[overrideforeignkey.Person, model.UUID]
+	CreatedAt condition.Field[overrideforeignkey.Person, time.Time]
+	UpdatedAt condition.Field[overrideforeignkey.Person, time.Time]
+	DeletedAt condition.Field[overrideforeignkey.Person, time.Time]
 }
 
 var Person = personConditions{
-	CreatedAt: cql.Field[overrideforeignkey.Person, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[overrideforeignkey.Person, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[overrideforeignkey.Person, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[overrideforeignkey.Person, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[overrideforeignkey.Person, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[overrideforeignkey.Person, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[overrideforeignkey.Person, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[overrideforeignkey.Person, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Person when doing a query
-func (personConditions personConditions) Preload() cql.Condition[overrideforeignkey.Person] {
-	return cql.NewPreloadCondition[overrideforeignkey.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt)
+func (personConditions personConditions) Preload() condition.Condition[overrideforeignkey.Person] {
+	return condition.NewPreloadCondition[overrideforeignkey.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt)
 }

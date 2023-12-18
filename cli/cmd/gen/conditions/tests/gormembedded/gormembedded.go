@@ -1,6 +1,6 @@
 package gormembedded
 
-import "github.com/FrancoLiberali/cql/orm/model"
+import "github.com/FrancoLiberali/cql/model"
 
 type ToBeGormEmbedded struct {
 	Int int

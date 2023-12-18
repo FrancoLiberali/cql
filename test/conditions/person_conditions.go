@@ -2,29 +2,29 @@
 package conditions
 
 import (
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
 	"time"
 )
 
 type personConditions struct {
-	ID        cql.Field[models.Person, model.UUID]
-	CreatedAt cql.Field[models.Person, time.Time]
-	UpdatedAt cql.Field[models.Person, time.Time]
-	DeletedAt cql.Field[models.Person, time.Time]
-	Name      cql.StringField[models.Person]
+	ID        condition.Field[models.Person, model.UUID]
+	CreatedAt condition.Field[models.Person, time.Time]
+	UpdatedAt condition.Field[models.Person, time.Time]
+	DeletedAt condition.Field[models.Person, time.Time]
+	Name      condition.StringField[models.Person]
 }
 
 var Person = personConditions{
-	CreatedAt: cql.Field[models.Person, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[models.Person, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[models.Person, model.UUID]{Name: "ID"},
-	Name:      cql.StringField[models.Person]{Field: cql.Field[models.Person, string]{Name: "Name"}},
-	UpdatedAt: cql.Field[models.Person, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[models.Person, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.Person, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.Person, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.Person]{Field: condition.Field[models.Person, string]{Name: "Name"}},
+	UpdatedAt: condition.Field[models.Person, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Person when doing a query
-func (personConditions personConditions) Preload() cql.Condition[models.Person] {
-	return cql.NewPreloadCondition[models.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt, personConditions.Name)
+func (personConditions personConditions) Preload() condition.Condition[models.Person] {
+	return condition.NewPreloadCondition[models.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt, personConditions.Name)
 }

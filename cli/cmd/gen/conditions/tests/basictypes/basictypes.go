@@ -1,6 +1,6 @@
 package basictypes
 
-import "github.com/FrancoLiberali/cql/orm/model"
+import "github.com/FrancoLiberali/cql/model"
 
 type BasicTypes struct {
 	model.UUIDModel

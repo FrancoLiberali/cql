@@ -1,7 +1,7 @@
 package hasone
 
 import (
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type Country struct {

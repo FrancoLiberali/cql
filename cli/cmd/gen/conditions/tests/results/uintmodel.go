@@ -2,27 +2,27 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	uintmodel "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/uintmodel"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type uintModelConditions struct {
-	ID        cql.Field[uintmodel.UintModel, model.UIntID]
-	CreatedAt cql.Field[uintmodel.UintModel, time.Time]
-	UpdatedAt cql.Field[uintmodel.UintModel, time.Time]
-	DeletedAt cql.Field[uintmodel.UintModel, time.Time]
+	ID        condition.Field[uintmodel.UintModel, model.UIntID]
+	CreatedAt condition.Field[uintmodel.UintModel, time.Time]
+	UpdatedAt condition.Field[uintmodel.UintModel, time.Time]
+	DeletedAt condition.Field[uintmodel.UintModel, time.Time]
 }
 
 var UintModel = uintModelConditions{
-	CreatedAt: cql.Field[uintmodel.UintModel, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[uintmodel.UintModel, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[uintmodel.UintModel, model.UIntID]{Name: "ID"},
-	UpdatedAt: cql.Field[uintmodel.UintModel, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[uintmodel.UintModel, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[uintmodel.UintModel, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[uintmodel.UintModel, model.UIntID]{Name: "ID"},
+	UpdatedAt: condition.Field[uintmodel.UintModel, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the UintModel when doing a query
-func (uintModelConditions uintModelConditions) Preload() cql.Condition[uintmodel.UintModel] {
-	return cql.NewPreloadCondition[uintmodel.UintModel](uintModelConditions.ID, uintModelConditions.CreatedAt, uintModelConditions.UpdatedAt, uintModelConditions.DeletedAt)
+func (uintModelConditions uintModelConditions) Preload() condition.Condition[uintmodel.UintModel] {
+	return condition.NewPreloadCondition[uintmodel.UintModel](uintModelConditions.ID, uintModelConditions.CreatedAt, uintModelConditions.UpdatedAt, uintModelConditions.DeletedAt)
 }

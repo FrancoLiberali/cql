@@ -1,7 +1,7 @@
 package package1
 
 import (
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 	"github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
 )
 

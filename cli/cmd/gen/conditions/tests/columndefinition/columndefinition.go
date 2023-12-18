@@ -1,6 +1,6 @@
 package columndefinition
 
-import "github.com/FrancoLiberali/cql/orm/model"
+import "github.com/FrancoLiberali/cql/model"
 
 type ColumnDefinition struct {
 	model.UUIDModel

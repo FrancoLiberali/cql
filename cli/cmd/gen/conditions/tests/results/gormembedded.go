@@ -2,36 +2,36 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	gormembedded "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/gormembedded"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type gormEmbeddedConditions struct {
-	ID                      cql.Field[gormembedded.GormEmbedded, model.UIntID]
-	CreatedAt               cql.Field[gormembedded.GormEmbedded, time.Time]
-	UpdatedAt               cql.Field[gormembedded.GormEmbedded, time.Time]
-	DeletedAt               cql.Field[gormembedded.GormEmbedded, time.Time]
-	Int                     cql.Field[gormembedded.GormEmbedded, int]
-	GormEmbeddedInt         cql.Field[gormembedded.GormEmbedded, int]
-	GormEmbeddedNoPrefixInt cql.Field[gormembedded.GormEmbedded, int]
+	ID                      condition.Field[gormembedded.GormEmbedded, model.UIntID]
+	CreatedAt               condition.Field[gormembedded.GormEmbedded, time.Time]
+	UpdatedAt               condition.Field[gormembedded.GormEmbedded, time.Time]
+	DeletedAt               condition.Field[gormembedded.GormEmbedded, time.Time]
+	Int                     condition.Field[gormembedded.GormEmbedded, int]
+	GormEmbeddedInt         condition.Field[gormembedded.GormEmbedded, int]
+	GormEmbeddedNoPrefixInt condition.Field[gormembedded.GormEmbedded, int]
 }
 
 var GormEmbedded = gormEmbeddedConditions{
-	CreatedAt: cql.Field[gormembedded.GormEmbedded, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[gormembedded.GormEmbedded, time.Time]{Name: "DeletedAt"},
-	GormEmbeddedInt: cql.Field[gormembedded.GormEmbedded, int]{
+	CreatedAt: condition.Field[gormembedded.GormEmbedded, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[gormembedded.GormEmbedded, time.Time]{Name: "DeletedAt"},
+	GormEmbeddedInt: condition.Field[gormembedded.GormEmbedded, int]{
 		ColumnPrefix: "gorm_embedded_",
 		Name:         "Int",
 	},
-	GormEmbeddedNoPrefixInt: cql.Field[gormembedded.GormEmbedded, int]{Name: "Int"},
-	ID:                      cql.Field[gormembedded.GormEmbedded, model.UIntID]{Name: "ID"},
-	Int:                     cql.Field[gormembedded.GormEmbedded, int]{Name: "Int"},
-	UpdatedAt:               cql.Field[gormembedded.GormEmbedded, time.Time]{Name: "UpdatedAt"},
+	GormEmbeddedNoPrefixInt: condition.Field[gormembedded.GormEmbedded, int]{Name: "Int"},
+	ID:                      condition.Field[gormembedded.GormEmbedded, model.UIntID]{Name: "ID"},
+	Int:                     condition.Field[gormembedded.GormEmbedded, int]{Name: "Int"},
+	UpdatedAt:               condition.Field[gormembedded.GormEmbedded, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the GormEmbedded when doing a query
-func (gormEmbeddedConditions gormEmbeddedConditions) Preload() cql.Condition[gormembedded.GormEmbedded] {
-	return cql.NewPreloadCondition[gormembedded.GormEmbedded](gormEmbeddedConditions.ID, gormEmbeddedConditions.CreatedAt, gormEmbeddedConditions.UpdatedAt, gormEmbeddedConditions.DeletedAt, gormEmbeddedConditions.Int, gormEmbeddedConditions.GormEmbeddedInt, gormEmbeddedConditions.GormEmbeddedNoPrefixInt)
+func (gormEmbeddedConditions gormEmbeddedConditions) Preload() condition.Condition[gormembedded.GormEmbedded] {
+	return condition.NewPreloadCondition[gormembedded.GormEmbedded](gormEmbeddedConditions.ID, gormEmbeddedConditions.CreatedAt, gormEmbeddedConditions.UpdatedAt, gormEmbeddedConditions.DeletedAt, gormEmbeddedConditions.Int, gormEmbeddedConditions.GormEmbeddedInt, gormEmbeddedConditions.GormEmbeddedNoPrefixInt)
 }

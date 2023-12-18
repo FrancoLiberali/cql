@@ -1,7 +1,7 @@
 package hasmany
 
 import (
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type Company struct {

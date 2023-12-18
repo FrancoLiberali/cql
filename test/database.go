@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/FrancoLiberali/cql/orm"
-	"github.com/FrancoLiberali/cql/orm/logger"
+	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/logger"
 	"gorm.io/gorm"
 )
 
@@ -20,7 +20,7 @@ func OpenWithRetry(
 	var gormDB *gorm.DB
 
 	for retryNumber := uint(0); retryNumber < connectionTries; retryNumber++ {
-		gormDB, err = orm.Open(
+		gormDB, err = cql.Open(
 			dialector,
 			&gorm.Config{
 				Logger: logger,

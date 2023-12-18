@@ -2,41 +2,41 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	hasmanywithpointers "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmanywithpointers"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
-func (sellerInPointersConditions sellerInPointersConditions) Company(conditions ...cql.Condition[hasmanywithpointers.CompanyWithPointers]) cql.JoinCondition[hasmanywithpointers.SellerInPointers] {
-	return cql.NewJoinCondition[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers](conditions, "Company", "CompanyID", sellerInPointersConditions.Preload(), "ID")
+func (sellerInPointersConditions sellerInPointersConditions) Company(conditions ...condition.Condition[hasmanywithpointers.CompanyWithPointers]) condition.JoinCondition[hasmanywithpointers.SellerInPointers] {
+	return condition.NewJoinCondition[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers](conditions, "Company", "CompanyID", sellerInPointersConditions.Preload(), "ID")
 }
-func (sellerInPointersConditions sellerInPointersConditions) PreloadCompany() cql.JoinCondition[hasmanywithpointers.SellerInPointers] {
+func (sellerInPointersConditions sellerInPointersConditions) PreloadCompany() condition.JoinCondition[hasmanywithpointers.SellerInPointers] {
 	return sellerInPointersConditions.Company(CompanyWithPointers.Preload())
 }
 
 type sellerInPointersConditions struct {
-	ID        cql.Field[hasmanywithpointers.SellerInPointers, model.UUID]
-	CreatedAt cql.Field[hasmanywithpointers.SellerInPointers, time.Time]
-	UpdatedAt cql.Field[hasmanywithpointers.SellerInPointers, time.Time]
-	DeletedAt cql.Field[hasmanywithpointers.SellerInPointers, time.Time]
-	CompanyID cql.Field[hasmanywithpointers.SellerInPointers, model.UUID]
+	ID        condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]
+	CreatedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
+	UpdatedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
+	DeletedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
+	CompanyID condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]
 }
 
 var SellerInPointers = sellerInPointersConditions{
-	CompanyID: cql.Field[hasmanywithpointers.SellerInPointers, model.UUID]{Name: "CompanyID"},
-	CreatedAt: cql.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[hasmanywithpointers.SellerInPointers, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "UpdatedAt"},
+	CompanyID: condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]{Name: "CompanyID"},
+	CreatedAt: condition.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the SellerInPointers when doing a query
-func (sellerInPointersConditions sellerInPointersConditions) Preload() cql.Condition[hasmanywithpointers.SellerInPointers] {
-	return cql.NewPreloadCondition[hasmanywithpointers.SellerInPointers](sellerInPointersConditions.ID, sellerInPointersConditions.CreatedAt, sellerInPointersConditions.UpdatedAt, sellerInPointersConditions.DeletedAt, sellerInPointersConditions.CompanyID)
+func (sellerInPointersConditions sellerInPointersConditions) Preload() condition.Condition[hasmanywithpointers.SellerInPointers] {
+	return condition.NewPreloadCondition[hasmanywithpointers.SellerInPointers](sellerInPointersConditions.ID, sellerInPointersConditions.CreatedAt, sellerInPointersConditions.UpdatedAt, sellerInPointersConditions.DeletedAt, sellerInPointersConditions.CompanyID)
 }
 
 // PreloadRelations allows preloading all the SellerInPointers's relation when doing a query
-func (sellerInPointersConditions sellerInPointersConditions) PreloadRelations() []cql.Condition[hasmanywithpointers.SellerInPointers] {
-	return []cql.Condition[hasmanywithpointers.SellerInPointers]{sellerInPointersConditions.PreloadCompany()}
+func (sellerInPointersConditions sellerInPointersConditions) PreloadRelations() []condition.Condition[hasmanywithpointers.SellerInPointers] {
+	return []condition.Condition[hasmanywithpointers.SellerInPointers]{sellerInPointersConditions.PreloadCompany()}
 }

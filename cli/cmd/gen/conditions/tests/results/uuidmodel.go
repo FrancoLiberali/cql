@@ -2,27 +2,27 @@
 package conditions
 
 import (
+	condition "github.com/FrancoLiberali/cql/condition"
+	model "github.com/FrancoLiberali/cql/model"
 	uuidmodel "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/uuidmodel"
-	cql "github.com/FrancoLiberali/cql/orm/cql"
-	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 
 type uuidModelConditions struct {
-	ID        cql.Field[uuidmodel.UUIDModel, model.UUID]
-	CreatedAt cql.Field[uuidmodel.UUIDModel, time.Time]
-	UpdatedAt cql.Field[uuidmodel.UUIDModel, time.Time]
-	DeletedAt cql.Field[uuidmodel.UUIDModel, time.Time]
+	ID        condition.Field[uuidmodel.UUIDModel, model.UUID]
+	CreatedAt condition.Field[uuidmodel.UUIDModel, time.Time]
+	UpdatedAt condition.Field[uuidmodel.UUIDModel, time.Time]
+	DeletedAt condition.Field[uuidmodel.UUIDModel, time.Time]
 }
 
 var UUIDModel = uuidModelConditions{
-	CreatedAt: cql.Field[uuidmodel.UUIDModel, time.Time]{Name: "CreatedAt"},
-	DeletedAt: cql.Field[uuidmodel.UUIDModel, time.Time]{Name: "DeletedAt"},
-	ID:        cql.Field[uuidmodel.UUIDModel, model.UUID]{Name: "ID"},
-	UpdatedAt: cql.Field[uuidmodel.UUIDModel, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.Field[uuidmodel.UUIDModel, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[uuidmodel.UUIDModel, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[uuidmodel.UUIDModel, model.UUID]{Name: "ID"},
+	UpdatedAt: condition.Field[uuidmodel.UUIDModel, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the UUIDModel when doing a query
-func (uuidModelConditions uuidModelConditions) Preload() cql.Condition[uuidmodel.UUIDModel] {
-	return cql.NewPreloadCondition[uuidmodel.UUIDModel](uuidModelConditions.ID, uuidModelConditions.CreatedAt, uuidModelConditions.UpdatedAt, uuidModelConditions.DeletedAt)
+func (uuidModelConditions uuidModelConditions) Preload() condition.Condition[uuidmodel.UUIDModel] {
+	return condition.NewPreloadCondition[uuidmodel.UUIDModel](uuidModelConditions.ID, uuidModelConditions.CreatedAt, uuidModelConditions.UpdatedAt, uuidModelConditions.DeletedAt)
 }

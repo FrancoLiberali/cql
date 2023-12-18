@@ -13,9 +13,9 @@ import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 
-	"github.com/FrancoLiberali/cql/orm"
-	"github.com/FrancoLiberali/cql/orm/cql"
-	"github.com/FrancoLiberali/cql/orm/logger"
+	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/condition"
+	"github.com/FrancoLiberali/cql/logger"
 )
 
 const dbTypeEnvKey = "DB"
@@ -53,14 +53,14 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case cql.SQLite:
-		dialector = sqlite.Open(orm.CreateSQLiteDSN(host))
-	case cql.MySQL:
-		dialector = mysql.Open(orm.CreateMySQLDSN(host, username, password, dbName, port))
-	case cql.SQLServer:
-		dialector = sqlserver.Open(orm.CreateSQLServerDSN(host, username, password, dbName, port))
+	case condition.SQLite:
+		dialector = sqlite.Open(cql.CreateSQLiteDSN(host))
+	case condition.MySQL:
+		dialector = mysql.Open(cql.CreateMySQLDSN(host, username, password, dbName, port))
+	case condition.SQLServer:
+		dialector = sqlserver.Open(cql.CreateSQLServerDSN(host, username, password, dbName, port))
 	default:
-		dialector = postgres.Open(orm.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
+		dialector = postgres.Open(cql.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
 	}
 
 	return OpenWithRetry(
@@ -70,6 +70,6 @@ func NewDBConnection() (*gorm.DB, error) {
 	)
 }
 
-func getDBDialector() cql.Dialector {
-	return cql.Dialector(os.Getenv(dbTypeEnvKey))
+func getDBDialector() condition.Dialector {
+	return condition.Dialector(os.Getenv(dbTypeEnvKey))
 }

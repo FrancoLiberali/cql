@@ -1,7 +1,7 @@
 package overrideforeignkeyinverse
 
 import (
-	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type User struct {
