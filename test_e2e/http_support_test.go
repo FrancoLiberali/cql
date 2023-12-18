@@ -46,7 +46,6 @@ func (t *TestContext) request(url, method string, query map[string]string, jsonT
 	for k, v := range query {
 		q.Add(k, v)
 	}
-
 	request.URL.RawQuery = q.Encode()
 
 	response, err := t.httpClient.Do(request)
@@ -73,7 +72,6 @@ func (t *TestContext) assertStatusCode(expectedStatusCode int) error {
 	if t.statusCode != expectedStatusCode {
 		return fmt.Errorf("expect status code %d but is %d", expectedStatusCode, t.statusCode)
 	}
-
 	return nil
 }
 
@@ -86,7 +84,6 @@ func (t *TestContext) assertResponseFieldIsEquals(field string, expectedValue st
 		if !present {
 			return fmt.Errorf("expected response field %s to be %s but it is not present", field, expectedValue)
 		}
-
 		jsonMap = intValue.(map[string]any)
 	}
 
@@ -111,7 +108,6 @@ func assertValue(value any, expectedValue string) bool {
 		if err != nil {
 			panic(err)
 		}
-
 		return expectedValueInt == value
 	case float64:
 		expectedValueFloat, err := strconv.ParseFloat(expectedValue, 64)
