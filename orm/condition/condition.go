@@ -11,7 +11,7 @@ type Condition[T model.Model] interface {
 	// Applies the condition to the "query"
 	// using the table holding
 	// the data for object of type T
-	ApplyTo(*query.Query, query.Table) error
+	ApplyTo(*query.GormQuery, query.Table) error
 
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T],
@@ -20,8 +20,8 @@ type Condition[T model.Model] interface {
 	InterfaceVerificationMethod(T)
 }
 
-// Create a Query to which the conditions are applied
-func ApplyConditions[T model.Model](db *gorm.DB, conditions []Condition[T]) (*query.Query, error) {
+// Create a GormQuery to which the conditions are applied
+func ApplyConditions[T model.Model](db *gorm.DB, conditions []Condition[T]) (*query.GormQuery, error) {
 	model := *new(T)
 
 	initialTable, err := query.NewTable(db, model)
@@ -29,7 +29,7 @@ func ApplyConditions[T model.Model](db *gorm.DB, conditions []Condition[T]) (*qu
 		return nil, err
 	}
 
-	query := query.NewQuery(db, model, initialTable)
+	query := query.NewGormQuery(db, model, initialTable)
 
 	for _, condition := range conditions {
 		err := condition.ApplyTo(query, initialTable)

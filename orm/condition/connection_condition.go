@@ -22,11 +22,11 @@ func (condition connectionCondition[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (condition connectionCondition[T]) ApplyTo(query *query.Query, table query.Table) error {
+func (condition connectionCondition[T]) ApplyTo(query *query.GormQuery, table query.Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }
 
-func (condition connectionCondition[T]) GetSQL(query *query.Query, table query.Table) (string, []any, error) {
+func (condition connectionCondition[T]) GetSQL(query *query.GormQuery, table query.Table) (string, []any, error) {
 	sqlStrings := []string{}
 	values := []any{}
 

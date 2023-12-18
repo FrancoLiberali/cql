@@ -48,7 +48,7 @@ func (operator *ValueOperator[T]) SelectJoin(operationNumber, joinNumber uint) D
 	return operator
 }
 
-func (operator ValueOperator[T]) ToSQL(queryV *query.Query, columnName string) (string, []any, error) {
+func (operator ValueOperator[T]) ToSQL(queryV *query.GormQuery, columnName string) (string, []any, error) {
 	operationString := columnName
 	values := []any{}
 
@@ -79,7 +79,7 @@ func (operator ValueOperator[T]) ToSQL(queryV *query.Query, columnName string) (
 	return operationString, values, nil
 }
 
-func getModelTable(queryV *query.Query, field query.IFieldIdentifier, joinNumber int, sqlOperator sql.Operator) (query.Table, error) {
+func getModelTable(queryV *query.GormQuery, field query.IFieldIdentifier, joinNumber int, sqlOperator sql.Operator) (query.Table, error) {
 	modelTables := queryV.GetTables(field.GetModelType())
 	if modelTables == nil {
 		return query.Table{}, fieldModelNotConcernedError(field, sqlOperator)

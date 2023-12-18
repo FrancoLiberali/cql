@@ -40,7 +40,11 @@ For details visit :ref:`badaas-orm/connecting_to_a_database:migration`.
 GormDB
 -----------------------------
 
-GormDB is a gorm.DB object that allows communication with the database.
+GormDB is a gorm.DB object that allows communication with the database. 
+This object allows us to perform CUD (create, update and delete)
+operations. While read operations are also possible, 
+badaas-orm provides us the :ref:`badaas-orm/concepts:compilable query system` 
+that is more complete and secure that gorm's query system.
 
 For details visit :ref:`badaas-orm/connecting_to_a_database:connection`.
 
@@ -132,34 +136,14 @@ sql.NullBool, sql.NullFloat64, etc..
 
 For details visit <https://pkg.go.dev/database/sql>.
 
-CRUDService
------------------------------
-
-A CrudService is a service that allows us to perform CRUD (create, read, update and delete) 
-operations on a specific model, executing all the necessary operations within a transaction. 
-Internally they use the CRUDRepository of that model.
-
-For details visit :ref:`badaas-orm/crud:CRUDServices and CRUDRepositories`.
-
-CRUDRepository
------------------------------
-
-A CRUDRepository is an object that allows us to perform CRUD operations (create, read, update, delete) 
-on a model but, unlike services, its internal operations are performed within a transaction received 
-by parameter. 
-This is useful to be able to define services that perform multiple CRUD 
-operations within the same transaction.
-
-For details visit :ref:`badaas-orm/crud:CRUDServices and CRUDRepositories`.
-
 Compilable query system
 -----------------------------
 
-The set of conditions that are received by the read operations of the CRUDService 
-and CRUDRepository form the badaas-orm compilable query system. 
+The set of conditions that are received by the read operations of the 
+`orm.NewQuery` method form the badaas-orm compilable query system. 
 It is so named because the conditions will verify at compile time that the query to be executed is correct.
 
-For details visit :ref:`badaas-orm/query:compilable query system`.
+For details visit :ref:`badaas-orm/query:conditions`.
 
 Conditions generation
 ----------------------------
@@ -169,14 +153,6 @@ They are generated for each model and attribute and can then be used.
 Their generation is done with badaas-cli.
 
 For details visit :ref:`badaas-orm/query:Conditions generation`.
-
-Dependency injection
------------------------------------
-
-Dependency injection is a programming technique in which an object or function 
-receives other objects or functions that it depends on. badaas-orm is compatible with 
-`uber fx <https://uber-go.github.io/fx/>`_ to inject the CRUDServices and 
-CRUDRepositories in your objects and functions.
 
 Relation getter
 -----------------------------------

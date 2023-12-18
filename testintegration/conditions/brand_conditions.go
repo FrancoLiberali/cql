@@ -2,9 +2,9 @@
 package conditions
 
 import (
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
@@ -12,49 +12,55 @@ import (
 )
 
 var brandType = reflect.TypeOf(*new(models.Brand))
-var BrandIdField = query.FieldIdentifier[model.UIntID]{
-	Field:     "ID",
-	ModelType: brandType,
+
+func (brandConditions brandConditions) IdIs() orm.FieldIs[models.Brand, model.UIntID] {
+	return orm.FieldIs[models.Brand, model.UIntID]{FieldID: brandConditions.ID}
+}
+func (brandConditions brandConditions) CreatedAtIs() orm.FieldIs[models.Brand, time.Time] {
+	return orm.FieldIs[models.Brand, time.Time]{FieldID: brandConditions.CreatedAt}
+}
+func (brandConditions brandConditions) UpdatedAtIs() orm.FieldIs[models.Brand, time.Time] {
+	return orm.FieldIs[models.Brand, time.Time]{FieldID: brandConditions.UpdatedAt}
+}
+func (brandConditions brandConditions) DeletedAtIs() orm.FieldIs[models.Brand, time.Time] {
+	return orm.FieldIs[models.Brand, time.Time]{FieldID: brandConditions.DeletedAt}
+}
+func (brandConditions brandConditions) NameIs() orm.StringFieldIs[models.Brand] {
+	return orm.StringFieldIs[models.Brand]{FieldIs: orm.FieldIs[models.Brand, string]{FieldID: brandConditions.Name}}
 }
 
-func BrandId(operator operator.Operator[model.UIntID]) condition.WhereCondition[models.Brand] {
-	return condition.NewFieldCondition[models.Brand, model.UIntID](BrandIdField, operator)
+type brandConditions struct {
+	ID        query.FieldIdentifier[model.UIntID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
+	Name      query.FieldIdentifier[string]
 }
 
-var BrandCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: brandType,
+var Brand = brandConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: brandType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: brandType,
+	},
+	ID: query.FieldIdentifier[model.UIntID]{
+		Field:     "ID",
+		ModelType: brandType,
+	},
+	Name: query.FieldIdentifier[string]{
+		Field:     "Name",
+		ModelType: brandType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: brandType,
+	},
 }
 
-func BrandCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Brand] {
-	return condition.NewFieldCondition[models.Brand, time.Time](BrandCreatedAtField, operator)
+// Preload allows preloading the Brand when doing a query
+func (brandConditions brandConditions) Preload() condition.Condition[models.Brand] {
+	return condition.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
 }
-
-var BrandUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: brandType,
-}
-
-func BrandUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Brand] {
-	return condition.NewFieldCondition[models.Brand, time.Time](BrandUpdatedAtField, operator)
-}
-
-var BrandDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: brandType,
-}
-
-func BrandDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Brand] {
-	return condition.NewFieldCondition[models.Brand, time.Time](BrandDeletedAtField, operator)
-}
-
-var BrandNameField = query.FieldIdentifier[string]{
-	Field:     "Name",
-	ModelType: brandType,
-}
-
-func BrandName(operator operator.Operator[string]) condition.WhereCondition[models.Brand] {
-	return condition.NewFieldCondition[models.Brand, string](BrandNameField, operator)
-}
-
-var BrandPreloadAttributes = condition.NewPreloadCondition[models.Brand](BrandIdField, BrandCreatedAtField, BrandUpdatedAtField, BrandDeletedAtField, BrandNameField)

@@ -3,54 +3,67 @@ package conditions
 
 import (
 	hasone "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasone"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var countryType = reflect.TypeOf(*new(hasone.Country))
-var CountryIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: countryType,
+
+func (countryConditions countryConditions) IdIs() orm.FieldIs[hasone.Country, model.UUID] {
+	return orm.FieldIs[hasone.Country, model.UUID]{FieldID: countryConditions.ID}
+}
+func (countryConditions countryConditions) CreatedAtIs() orm.FieldIs[hasone.Country, time.Time] {
+	return orm.FieldIs[hasone.Country, time.Time]{FieldID: countryConditions.CreatedAt}
+}
+func (countryConditions countryConditions) UpdatedAtIs() orm.FieldIs[hasone.Country, time.Time] {
+	return orm.FieldIs[hasone.Country, time.Time]{FieldID: countryConditions.UpdatedAt}
+}
+func (countryConditions countryConditions) DeletedAtIs() orm.FieldIs[hasone.Country, time.Time] {
+	return orm.FieldIs[hasone.Country, time.Time]{FieldID: countryConditions.DeletedAt}
+}
+func (countryConditions countryConditions) Capital(conditions ...condition.Condition[hasone.City]) condition.JoinCondition[hasone.Country] {
+	return condition.NewJoinCondition[hasone.Country, hasone.City](conditions, "Capital", "ID", countryConditions.Preload(), "CountryID")
+}
+func (countryConditions countryConditions) PreloadCapital() condition.JoinCondition[hasone.Country] {
+	return countryConditions.Capital(City.Preload())
 }
 
-func CountryId(operator operator.Operator[model.UUID]) condition.WhereCondition[hasone.Country] {
-	return condition.NewFieldCondition[hasone.Country, model.UUID](CountryIdField, operator)
+type countryConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
 }
 
-var CountryCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: countryType,
+var Country = countryConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: countryType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: countryType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: countryType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: countryType,
+	},
 }
 
-func CountryCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasone.Country] {
-	return condition.NewFieldCondition[hasone.Country, time.Time](CountryCreatedAtField, operator)
+// Preload allows preloading the Country when doing a query
+func (countryConditions countryConditions) Preload() condition.Condition[hasone.Country] {
+	return condition.NewPreloadCondition[hasone.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt)
 }
 
-var CountryUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: countryType,
+// PreloadRelations allows preloading all the Country's relation when doing a query
+func (countryConditions countryConditions) PreloadRelations() []condition.Condition[hasone.Country] {
+	return []condition.Condition[hasone.Country]{countryConditions.PreloadCapital()}
 }
-
-func CountryUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasone.Country] {
-	return condition.NewFieldCondition[hasone.Country, time.Time](CountryUpdatedAtField, operator)
-}
-
-var CountryDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: countryType,
-}
-
-func CountryDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasone.Country] {
-	return condition.NewFieldCondition[hasone.Country, time.Time](CountryDeletedAtField, operator)
-}
-func CountryCapital(conditions ...condition.Condition[hasone.City]) condition.JoinCondition[hasone.Country] {
-	return condition.NewJoinCondition[hasone.Country, hasone.City](conditions, "Capital", "ID", CountryPreloadAttributes, "CountryID")
-}
-
-var CountryPreloadCapital = CountryCapital(CityPreloadAttributes)
-var CountryPreloadAttributes = condition.NewPreloadCondition[hasone.Country](CountryIdField, CountryCreatedAtField, CountryUpdatedAtField, CountryDeletedAtField)
-var CountryPreloadRelations = []condition.Condition[hasone.Country]{CountryPreloadCapital}

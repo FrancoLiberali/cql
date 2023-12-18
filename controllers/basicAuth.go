@@ -129,5 +129,6 @@ func createAndSetAccessTokenCookie(w http.ResponseWriter, sessionUUID string) ht
 	}
 
 	http.SetCookie(w, accessToken)
+
 	return nil
 }

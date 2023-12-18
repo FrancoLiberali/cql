@@ -16,40 +16,16 @@ import (
 )
 
 type PreloadConditionsIntTestSuite struct {
-	CRUDServiceCommonIntTestSuite
-	crudSaleService     orm.CRUDService[models.Sale, model.UUID]
-	crudCompanyService  orm.CRUDService[models.Company, model.UUID]
-	crudSellerService   orm.CRUDService[models.Seller, model.UUID]
-	crudCountryService  orm.CRUDService[models.Country, model.UUID]
-	crudCityService     orm.CRUDService[models.City, model.UUID]
-	crudEmployeeService orm.CRUDService[models.Employee, model.UUID]
-	crudPhoneService    orm.CRUDService[models.Phone, model.UIntID]
-	crudChildService    orm.CRUDService[models.Child, model.UUID]
+	ORMIntTestSuite
 }
 
 func NewPreloadConditionsIntTestSuite(
 	db *gorm.DB,
-	crudSaleService orm.CRUDService[models.Sale, model.UUID],
-	crudCompanyService orm.CRUDService[models.Company, model.UUID],
-	crudSellerService orm.CRUDService[models.Seller, model.UUID],
-	crudCountryService orm.CRUDService[models.Country, model.UUID],
-	crudCityService orm.CRUDService[models.City, model.UUID],
-	crudEmployeeService orm.CRUDService[models.Employee, model.UUID],
-	crudPhoneService orm.CRUDService[models.Phone, model.UIntID],
-	crudChildService orm.CRUDService[models.Child, model.UUID],
 ) *PreloadConditionsIntTestSuite {
 	return &PreloadConditionsIntTestSuite{
-		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
+		ORMIntTestSuite: ORMIntTestSuite{
 			db: db,
 		},
-		crudSaleService:     crudSaleService,
-		crudCompanyService:  crudCompanyService,
-		crudSellerService:   crudSellerService,
-		crudCountryService:  crudCountryService,
-		crudCityService:     crudCityService,
-		crudEmployeeService: crudEmployeeService,
-		crudPhoneService:    crudPhoneService,
-		crudChildService:    crudChildService,
 	}
 }
 
@@ -58,7 +34,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadReturnsErrorOnGetRelation(
 	seller := ts.createSeller("franco", nil)
 	sale := ts.createSale(0, product, seller)
 
-	entities, err := ts.crudSaleService.Query()
+	entities, err := orm.NewQuery[models.Sale](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{sale}, entities)
@@ -78,7 +54,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyN
 	product := ts.createProduct("a_string", 1, 0.0, false, nil)
 	sale := ts.createSale(10, product, nil)
 
-	entities, err := ts.crudSaleService.Query()
+	entities, err := orm.NewQuery[models.Sale](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{sale}, entities)
@@ -104,9 +80,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 	withSeller := ts.createSale(0, product1, seller1)
 	withoutSeller := ts.createSale(0, product2, nil)
 
-	entities, err := ts.crudSaleService.Query(
-		conditions.SalePreloadSeller,
-	)
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.PreloadSeller(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{withSeller, withoutSeller}, entities)
@@ -131,11 +108,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadNullableAtSecondLevel() {
 	sale1 := ts.createSale(0, product1, withoutCompany)
 	sale2 := ts.createSale(0, product2, withCompany)
 
-	entities, err := ts.crudSaleService.Query(
-		conditions.SaleSeller(
-			conditions.SellerPreloadCompany,
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.Seller(
+			conditions.Seller.PreloadCompany(),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{sale1, sale2}, entities)
@@ -171,12 +149,13 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadAtSecondLevelWorksWithManual
 	sale1 := ts.createSale(0, product1, withoutCompany)
 	sale2 := ts.createSale(0, product2, withCompany)
 
-	entities, err := ts.crudSaleService.Query(
-		conditions.SaleSeller(
-			conditions.SellerPreloadAttributes,
-			conditions.SellerPreloadCompany,
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.Seller(
+			conditions.Seller.Preload(),
+			conditions.Seller.PreloadCompany(),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{sale1, sale2}, entities)
@@ -212,9 +191,10 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 	sale1 := ts.createSale(0, product1, withoutCompany)
 	sale2 := ts.createSale(0, product2, withCompany)
 
-	entities, err := ts.crudSaleService.Query(
-		conditions.SalePreloadSeller,
-	)
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.PreloadSeller(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{sale1, sale2}, entities)
@@ -249,11 +229,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 	withSeller := ts.createSale(0, product1, seller1)
 	withoutSeller := ts.createSale(0, product2, nil)
 
-	entities, err := ts.crudSaleService.Query(
-		conditions.SaleSeller(
-			conditions.SellerPreloadCompany,
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.Seller(
+			conditions.Seller.PreloadCompany(),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{withSeller, withoutSeller}, entities)
@@ -282,9 +263,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadUIntModel() {
 	phone1 := ts.createPhone("pixel", *brand1)
 	phone2 := ts.createPhone("iphone", *brand2)
 
-	entities, err := ts.crudPhoneService.Query(
-		conditions.PhonePreloadBrand,
-	)
+	entities, err := orm.NewQuery[models.Phone](
+		ts.db,
+		conditions.Phone.PreloadBrand(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Phone{phone1, phone2}, entities)
@@ -310,12 +292,13 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithWhereConditionFilters() 
 	match := ts.createSale(0, product1, nil)
 	ts.createSale(0, product2, nil)
 
-	entities, err := ts.crudSaleService.Query(
-		conditions.SaleProduct(
-			conditions.ProductPreloadAttributes,
-			conditions.ProductInt(orm.Eq(1)),
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.Product(
+			conditions.Product.Preload(),
+			conditions.Product.IntIs().Eq(1),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -338,9 +321,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOne() {
 	country1 := ts.createCountry("Argentina", capital1)
 	country2 := ts.createCountry("France", capital2)
 
-	entities, err := ts.crudCityService.Query(
-		conditions.CityPreloadCountry,
-	)
+	entities, err := orm.NewQuery[models.City](
+		ts.db,
+		conditions.City.PreloadCountry(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.City{&capital1, &capital2}, entities)
@@ -369,7 +353,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadOneToOne() {
 
 	ts.createCountry("Argentina", capital1)
 
-	entities, err := ts.crudCityService.Query()
+	entities, err := orm.NewQuery[models.City](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
@@ -388,9 +372,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
 	country1 := ts.createCountry("Argentina", capital1)
 	country2 := ts.createCountry("France", capital2)
 
-	entities, err := ts.crudCountryService.Query(
-		conditions.CountryPreloadCapital,
-	)
+	entities, err := orm.NewQuery[models.Country](
+		ts.db,
+		conditions.Country.PreloadCapital(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Country{country1, country2}, entities)
@@ -411,9 +396,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadHasManyReversed() {
 	seller1 := ts.createSeller("franco", company1)
 	seller2 := ts.createSeller("agustin", company2)
 
-	entities, err := ts.crudSellerService.Query(
-		conditions.SellerPreloadCompany,
-	)
+	entities, err := orm.NewQuery[models.Seller](
+		ts.db,
+		conditions.Seller.PreloadCompany(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Seller{seller1, seller2}, entities)
@@ -435,9 +421,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferential() {
 	employee1 := ts.createEmployee("franco", boss1)
 	employee2 := ts.createEmployee("pierre", nil)
 
-	entities, err := ts.crudEmployeeService.Query(
-		conditions.EmployeePreloadBoss,
-	)
+	entities, err := orm.NewQuery[models.Employee](
+		ts.db,
+		conditions.Employee.PreloadBoss(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Employee{boss1, employee1, employee2}, entities)
@@ -462,14 +449,15 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel
 	}
 	employee := ts.createEmployee("franco", boss)
 
-	entities, err := ts.crudEmployeeService.Query(
-		conditions.EmployeeBoss(
-			conditions.EmployeeBoss(
-				conditions.EmployeePreloadAttributes,
+	entities, err := orm.NewQuery[models.Employee](
+		ts.db,
+		conditions.Employee.Boss(
+			conditions.Employee.Boss(
+				conditions.Employee.Preload(),
 			),
 		),
-		conditions.EmployeeName(orm.Eq("franco")),
-	)
+		conditions.Employee.NameIs().Eq("franco"),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Employee{employee}, entities)
@@ -495,16 +483,17 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 	ts.createSale(0, product1, seller2)
 	ts.createSale(0, product2, seller1)
 
-	entities, err := ts.crudSaleService.Query(
-		conditions.SaleProduct(
-			conditions.ProductPreloadAttributes,
-			conditions.ProductInt(orm.Eq(1)),
+	entities, err := orm.NewQuery[models.Sale](
+		ts.db,
+		conditions.Sale.Product(
+			conditions.Product.Preload(),
+			conditions.Product.IntIs().Eq(1),
 		),
-		conditions.SaleSeller(
-			conditions.SellerPreloadAttributes,
-			conditions.SellerName(orm.Eq("franco")),
+		conditions.Sale.Seller(
+			conditions.Seller.Preload(),
+			conditions.Seller.NameIs().Eq("franco"),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
@@ -534,10 +523,11 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithoutCond
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudChildService.Query(
-		conditions.ChildPreloadParent1,
-		conditions.ChildPreloadParent2,
-	)
+	entities, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.PreloadParent1(),
+		conditions.Child.PreloadParent2(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
@@ -567,9 +557,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadRelations() {
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudChildService.Query(
-		conditions.ChildPreloadRelations...,
-	)
+	entities, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.PreloadRelations()...,
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
@@ -599,12 +590,13 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithoutC
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudChildService.Query(
-		conditions.ChildParent1(
-			conditions.Parent1PreloadAttributes,
-			conditions.Parent1PreloadParentParent,
+	entities, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.Preload(),
+			conditions.Parent1.PreloadParentParent(),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
@@ -652,15 +644,16 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCond
 	err = ts.db.Create(child2).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudChildService.Query(
-		conditions.ChildParent1(
-			conditions.Parent1PreloadAttributes,
-			conditions.Parent1ParentParent(
-				conditions.ParentParentPreloadAttributes,
-				conditions.ParentParentName(orm.Eq("parentParent1")),
+	entities, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.Preload(),
+			conditions.Parent1.ParentParent(
+				conditions.ParentParent.Preload(),
+				conditions.ParentParent.NameIs().Eq("parentParent1"),
 			),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child1}, entities)
@@ -690,14 +683,15 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadDiamond(
 	err = ts.db.Create(child).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudChildService.Query(
-		conditions.ChildParent1(
-			conditions.Parent1PreloadParentParent,
+	entities, err := orm.NewQuery[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.PreloadParentParent(),
 		),
-		conditions.ChildParent2(
-			conditions.Parent2PreloadParentParent,
+		conditions.Child.Parent2(
+			conditions.Parent2.PreloadParentParent(),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
@@ -723,9 +717,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadCollection() {
 	seller1 := ts.createSeller("1", company)
 	seller2 := ts.createSeller("2", company)
 
-	entities, err := ts.crudCompanyService.Query(
-		conditions.CompanyPreloadSellers(),
-	)
+	entities, err := orm.NewQuery[models.Company](
+		ts.db,
+		conditions.Company.PreloadSellers(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
@@ -737,9 +732,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadCollection() {
 func (ts *PreloadConditionsIntTestSuite) TestPreloadEmptyCollection() {
 	company := ts.createCompany("ditrit")
 
-	entities, err := ts.crudCompanyService.Query(
-		conditions.CompanyPreloadSellers(),
-	)
+	entities, err := orm.NewQuery[models.Company](
+		ts.db,
+		conditions.Company.PreloadSellers(),
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
@@ -751,7 +747,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadEmptyCollection() {
 func (ts *PreloadConditionsIntTestSuite) TestNoPreloadCollection() {
 	company := ts.createCompany("ditrit")
 
-	entities, err := ts.crudCompanyService.Query()
+	entities, err := orm.NewQuery[models.Company](ts.db).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
@@ -774,11 +770,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
 	err = ts.db.Save(seller2).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudCompanyService.Query(
-		conditions.CompanyPreloadSellers(
-			conditions.SellerPreloadUniversity,
+	entities, err := orm.NewQuery[models.Company](
+		ts.db,
+		conditions.Company.PreloadSellers(
+			conditions.Seller.PreloadUniversity(),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
@@ -822,11 +819,12 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 	err = ts.db.Save(seller4).Error
 	ts.Nil(err)
 
-	entities, err := ts.crudCompanyService.Query(
-		conditions.CompanyPreloadSellers(
-			conditions.SellerPreloadUniversity,
+	entities, err := orm.NewQuery[models.Company](
+		ts.db,
+		conditions.Company.PreloadSellers(
+			conditions.Seller.PreloadUniversity(),
 		),
-	)
+	).Find()
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Company{company1, company2}, entities)
@@ -868,24 +866,26 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithFiltersReturnsError() {
-	_, err := ts.crudCompanyService.Query(
-		conditions.CompanyPreloadSellers(
-			conditions.SellerUniversity(
-				conditions.UniversityPreloadAttributes,
-				conditions.UniversityId(orm.Eq(model.NilUUID)),
+	_, err := orm.NewQuery[models.Company](
+		ts.db,
+		conditions.Company.PreloadSellers(
+			conditions.Seller.University(
+				conditions.University.Preload(),
+				conditions.University.IdIs().Eq(model.NilUUID),
 			),
 		),
-	)
+	).Find()
 	ts.ErrorIs(err, badaasORMErrors.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithoutPreloadReturnsError() {
-	_, err := ts.crudCompanyService.Query(
-		conditions.CompanyPreloadSellers(
-			conditions.SellerUniversity(),
+	_, err := orm.NewQuery[models.Company](
+		ts.db,
+		conditions.Company.PreloadSellers(
+			conditions.Seller.University(),
 		),
-	)
+	).Find()
 	ts.ErrorIs(err, badaasORMErrors.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }

@@ -8,31 +8,26 @@ import (
 )
 
 type JenParam struct {
-	statement    *jen.Statement
 	internalType *jen.Statement
+	isBool       bool
+	isString     bool
+	isSlice      bool
 }
 
 func NewJenParam() *JenParam {
 	return &JenParam{
-		statement: jen.Id("operator").Qual(
-			operatorPath, badaasORMOperator,
-		),
 		internalType: &jen.Statement{},
 	}
-}
-
-func (param JenParam) Statement() *jen.Statement {
-	return param.statement.Types(param.internalType)
 }
 
 func (param JenParam) GenericType() *jen.Statement {
 	return param.internalType
 }
 
-func (param JenParam) ToBasicKind(basicType *types.Basic) {
+func (param *JenParam) ToBasicKind(basicType *types.Basic) {
 	switch basicType.Kind() {
 	case types.Bool:
-		param.internalType.Bool()
+		param.ToBool()
 	case types.Int:
 		param.internalType.Int()
 	case types.Int8:
@@ -64,7 +59,7 @@ func (param JenParam) ToBasicKind(basicType *types.Basic) {
 	case types.Complex128:
 		param.internalType.Complex128()
 	case types.String:
-		param.internalType.String()
+		param.ToString()
 	case types.Invalid, types.UnsafePointer,
 		types.UntypedBool, types.UntypedInt,
 		types.UntypedRune, types.UntypedFloat,
@@ -74,7 +69,8 @@ func (param JenParam) ToBasicKind(basicType *types.Basic) {
 	}
 }
 
-func (param JenParam) ToSlice() {
+func (param *JenParam) ToSlice() {
+	param.isSlice = true
 	param.internalType.Index()
 }
 
@@ -85,10 +81,10 @@ func (param JenParam) ToCustomType(destPkg string, typeV Type) {
 	)
 }
 
-func (param JenParam) SQLToBasicType(typeV Type) {
+func (param *JenParam) SQLToBasicType(typeV Type) {
 	switch typeV.String() {
 	case nullString:
-		param.internalType.String()
+		param.ToString()
 	case nullInt64:
 		param.internalType.Int64()
 	case nullInt32:
@@ -100,11 +96,27 @@ func (param JenParam) SQLToBasicType(typeV Type) {
 	case nullFloat64:
 		param.internalType.Float64()
 	case nullBool:
-		param.internalType.Bool()
+		param.ToBool()
 	case nullTime, deletedAt:
 		param.internalType.Qual(
 			"time",
 			"Time",
 		)
 	}
+}
+
+func (param *JenParam) ToBool() {
+	if !param.isSlice {
+		param.isBool = true
+	}
+
+	param.internalType.Bool()
+}
+
+func (param *JenParam) ToString() {
+	if !param.isSlice {
+		param.isString = true
+	}
+
+	param.internalType.String()
 }

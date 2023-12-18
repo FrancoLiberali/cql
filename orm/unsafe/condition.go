@@ -20,11 +20,11 @@ func (unsafeCondition unsafeCondition[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (unsafeCondition unsafeCondition[T]) ApplyTo(queryV *query.Query, table query.Table) error {
+func (unsafeCondition unsafeCondition[T]) ApplyTo(queryV *query.GormQuery, table query.Table) error {
 	return condition.ApplyWhereCondition[T](unsafeCondition, queryV, table)
 }
 
-func (unsafeCondition unsafeCondition[T]) GetSQL(_ *query.Query, table query.Table) (string, []any, error) {
+func (unsafeCondition unsafeCondition[T]) GetSQL(_ *query.GormQuery, table query.Table) (string, []any, error) {
 	return fmt.Sprintf(
 		unsafeCondition.SQLCondition,
 		table.Alias,

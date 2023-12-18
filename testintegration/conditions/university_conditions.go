@@ -2,9 +2,9 @@
 package conditions
 
 import (
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
@@ -12,49 +12,55 @@ import (
 )
 
 var universityType = reflect.TypeOf(*new(models.University))
-var UniversityIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: universityType,
+
+func (universityConditions universityConditions) IdIs() orm.FieldIs[models.University, model.UUID] {
+	return orm.FieldIs[models.University, model.UUID]{FieldID: universityConditions.ID}
+}
+func (universityConditions universityConditions) CreatedAtIs() orm.FieldIs[models.University, time.Time] {
+	return orm.FieldIs[models.University, time.Time]{FieldID: universityConditions.CreatedAt}
+}
+func (universityConditions universityConditions) UpdatedAtIs() orm.FieldIs[models.University, time.Time] {
+	return orm.FieldIs[models.University, time.Time]{FieldID: universityConditions.UpdatedAt}
+}
+func (universityConditions universityConditions) DeletedAtIs() orm.FieldIs[models.University, time.Time] {
+	return orm.FieldIs[models.University, time.Time]{FieldID: universityConditions.DeletedAt}
+}
+func (universityConditions universityConditions) NameIs() orm.StringFieldIs[models.University] {
+	return orm.StringFieldIs[models.University]{FieldIs: orm.FieldIs[models.University, string]{FieldID: universityConditions.Name}}
 }
 
-func UniversityId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.University] {
-	return condition.NewFieldCondition[models.University, model.UUID](UniversityIdField, operator)
+type universityConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
+	Name      query.FieldIdentifier[string]
 }
 
-var UniversityCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: universityType,
+var University = universityConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: universityType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: universityType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: universityType,
+	},
+	Name: query.FieldIdentifier[string]{
+		Field:     "Name",
+		ModelType: universityType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: universityType,
+	},
 }
 
-func UniversityCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.University] {
-	return condition.NewFieldCondition[models.University, time.Time](UniversityCreatedAtField, operator)
+// Preload allows preloading the University when doing a query
+func (universityConditions universityConditions) Preload() condition.Condition[models.University] {
+	return condition.NewPreloadCondition[models.University](universityConditions.ID, universityConditions.CreatedAt, universityConditions.UpdatedAt, universityConditions.DeletedAt, universityConditions.Name)
 }
-
-var UniversityUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: universityType,
-}
-
-func UniversityUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.University] {
-	return condition.NewFieldCondition[models.University, time.Time](UniversityUpdatedAtField, operator)
-}
-
-var UniversityDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: universityType,
-}
-
-func UniversityDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.University] {
-	return condition.NewFieldCondition[models.University, time.Time](UniversityDeletedAtField, operator)
-}
-
-var UniversityNameField = query.FieldIdentifier[string]{
-	Field:     "Name",
-	ModelType: universityType,
-}
-
-func UniversityName(operator operator.Operator[string]) condition.WhereCondition[models.University] {
-	return condition.NewFieldCondition[models.University, string](UniversityNameField, operator)
-}
-
-var UniversityPreloadAttributes = condition.NewPreloadCondition[models.University](UniversityIdField, UniversityCreatedAtField, UniversityUpdatedAtField, UniversityDeletedAtField, UniversityNameField)

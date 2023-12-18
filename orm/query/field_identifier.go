@@ -1,10 +1,12 @@
 package query
 
-import "reflect"
+import (
+	"reflect"
+)
 
 type IFieldIdentifier interface {
-	ColumnName(query *Query, table Table) string
-	ColumnSQL(query *Query, table Table) string
+	ColumnName(query *GormQuery, table Table) string
+	ColumnSQL(query *GormQuery, table Table) string
 	GetModelType() reflect.Type
 }
 
@@ -20,7 +22,7 @@ func (fieldID FieldIdentifier[T]) GetModelType() reflect.Type {
 }
 
 // Returns the name of the column in which the field is saved in the table
-func (fieldID FieldIdentifier[T]) ColumnName(query *Query, table Table) string {
+func (fieldID FieldIdentifier[T]) ColumnName(query *GormQuery, table Table) string {
 	columnName := fieldID.Column
 	if columnName == "" {
 		columnName = query.ColumnName(table, fieldID.Field)
@@ -31,6 +33,6 @@ func (fieldID FieldIdentifier[T]) ColumnName(query *Query, table Table) string {
 }
 
 // Returns the SQL to get the value of the field in the table
-func (fieldID FieldIdentifier[T]) ColumnSQL(query *Query, table Table) string {
+func (fieldID FieldIdentifier[T]) ColumnSQL(query *GormQuery, table Table) string {
 	return table.Alias + "." + fieldID.ColumnName(query, table)
 }

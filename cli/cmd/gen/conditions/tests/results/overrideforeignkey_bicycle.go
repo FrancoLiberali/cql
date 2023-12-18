@@ -3,63 +3,75 @@ package conditions
 
 import (
 	overrideforeignkey "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkey"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var bicycleType = reflect.TypeOf(*new(overrideforeignkey.Bicycle))
-var BicycleIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: bicycleType,
+
+func (bicycleConditions bicycleConditions) IdIs() orm.FieldIs[overrideforeignkey.Bicycle, model.UUID] {
+	return orm.FieldIs[overrideforeignkey.Bicycle, model.UUID]{FieldID: bicycleConditions.ID}
+}
+func (bicycleConditions bicycleConditions) CreatedAtIs() orm.FieldIs[overrideforeignkey.Bicycle, time.Time] {
+	return orm.FieldIs[overrideforeignkey.Bicycle, time.Time]{FieldID: bicycleConditions.CreatedAt}
+}
+func (bicycleConditions bicycleConditions) UpdatedAtIs() orm.FieldIs[overrideforeignkey.Bicycle, time.Time] {
+	return orm.FieldIs[overrideforeignkey.Bicycle, time.Time]{FieldID: bicycleConditions.UpdatedAt}
+}
+func (bicycleConditions bicycleConditions) DeletedAtIs() orm.FieldIs[overrideforeignkey.Bicycle, time.Time] {
+	return orm.FieldIs[overrideforeignkey.Bicycle, time.Time]{FieldID: bicycleConditions.DeletedAt}
+}
+func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Condition[overrideforeignkey.Person]) condition.JoinCondition[overrideforeignkey.Bicycle] {
+	return condition.NewJoinCondition[overrideforeignkey.Bicycle, overrideforeignkey.Person](conditions, "Owner", "OwnerSomethingID", bicycleConditions.Preload(), "ID")
+}
+func (bicycleConditions bicycleConditions) PreloadOwner() condition.JoinCondition[overrideforeignkey.Bicycle] {
+	return bicycleConditions.Owner(Person.Preload())
+}
+func (bicycleConditions bicycleConditions) OwnerSomethingIdIs() orm.StringFieldIs[overrideforeignkey.Bicycle] {
+	return orm.StringFieldIs[overrideforeignkey.Bicycle]{FieldIs: orm.FieldIs[overrideforeignkey.Bicycle, string]{FieldID: bicycleConditions.OwnerSomethingID}}
 }
 
-func BicycleId(operator operator.Operator[model.UUID]) condition.WhereCondition[overrideforeignkey.Bicycle] {
-	return condition.NewFieldCondition[overrideforeignkey.Bicycle, model.UUID](BicycleIdField, operator)
+type bicycleConditions struct {
+	ID               query.FieldIdentifier[model.UUID]
+	CreatedAt        query.FieldIdentifier[time.Time]
+	UpdatedAt        query.FieldIdentifier[time.Time]
+	DeletedAt        query.FieldIdentifier[time.Time]
+	OwnerSomethingID query.FieldIdentifier[string]
 }
 
-var BicycleCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: bicycleType,
+var Bicycle = bicycleConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: bicycleType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: bicycleType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: bicycleType,
+	},
+	OwnerSomethingID: query.FieldIdentifier[string]{
+		Field:     "OwnerSomethingID",
+		ModelType: bicycleType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: bicycleType,
+	},
 }
 
-func BicycleCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Bicycle] {
-	return condition.NewFieldCondition[overrideforeignkey.Bicycle, time.Time](BicycleCreatedAtField, operator)
+// Preload allows preloading the Bicycle when doing a query
+func (bicycleConditions bicycleConditions) Preload() condition.Condition[overrideforeignkey.Bicycle] {
+	return condition.NewPreloadCondition[overrideforeignkey.Bicycle](bicycleConditions.ID, bicycleConditions.CreatedAt, bicycleConditions.UpdatedAt, bicycleConditions.DeletedAt, bicycleConditions.OwnerSomethingID)
 }
 
-var BicycleUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: bicycleType,
+// PreloadRelations allows preloading all the Bicycle's relation when doing a query
+func (bicycleConditions bicycleConditions) PreloadRelations() []condition.Condition[overrideforeignkey.Bicycle] {
+	return []condition.Condition[overrideforeignkey.Bicycle]{bicycleConditions.PreloadOwner()}
 }
-
-func BicycleUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Bicycle] {
-	return condition.NewFieldCondition[overrideforeignkey.Bicycle, time.Time](BicycleUpdatedAtField, operator)
-}
-
-var BicycleDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: bicycleType,
-}
-
-func BicycleDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Bicycle] {
-	return condition.NewFieldCondition[overrideforeignkey.Bicycle, time.Time](BicycleDeletedAtField, operator)
-}
-func BicycleOwner(conditions ...condition.Condition[overrideforeignkey.Person]) condition.JoinCondition[overrideforeignkey.Bicycle] {
-	return condition.NewJoinCondition[overrideforeignkey.Bicycle, overrideforeignkey.Person](conditions, "Owner", "OwnerSomethingID", BicyclePreloadAttributes, "ID")
-}
-
-var BicyclePreloadOwner = BicycleOwner(PersonPreloadAttributes)
-var BicycleOwnerSomethingIdField = query.FieldIdentifier[string]{
-	Field:     "OwnerSomethingID",
-	ModelType: bicycleType,
-}
-
-func BicycleOwnerSomethingId(operator operator.Operator[string]) condition.WhereCondition[overrideforeignkey.Bicycle] {
-	return condition.NewFieldCondition[overrideforeignkey.Bicycle, string](BicycleOwnerSomethingIdField, operator)
-}
-
-var BicyclePreloadAttributes = condition.NewPreloadCondition[overrideforeignkey.Bicycle](BicycleIdField, BicycleCreatedAtField, BicycleUpdatedAtField, BicycleDeletedAtField, BicycleOwnerSomethingIdField)
-var BicyclePreloadRelations = []condition.Condition[overrideforeignkey.Bicycle]{BicyclePreloadOwner}

@@ -15,7 +15,7 @@ import (
 
 	"github.com/ditrit/badaas/httperrors"
 	configurationMocks "github.com/ditrit/badaas/mocks/configuration"
-	ormMocks "github.com/ditrit/badaas/mocks/orm"
+	repositoryMocks "github.com/ditrit/badaas/mocks/persistence/repository"
 	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/persistence/models"
 )
@@ -26,14 +26,14 @@ var gormDB *gorm.DB
 func setupTest(
 	t *testing.T,
 ) (
-	*ormMocks.CRUDRepository[models.Session, model.UUID],
+	*repositoryMocks.CRUD[models.Session, model.UUID],
 	*sessionServiceImpl,
 	*observer.ObservedLogs,
 	*configurationMocks.SessionConfiguration,
 ) {
 	core, logs := observer.New(zap.DebugLevel)
 	logger := zap.New(core)
-	sessionRepositoryMock := ormMocks.NewCRUDRepository[models.Session, model.UUID](t)
+	sessionRepositoryMock := repositoryMocks.NewCRUD[models.Session, model.UUID](t)
 	sessionConfiguration := configurationMocks.NewSessionConfiguration(t)
 	service := &sessionServiceImpl{
 		sessionRepository:    sessionRepositoryMock,
@@ -269,7 +269,7 @@ func Test_pullFromDB(t *testing.T) {
 		UserID:    model.NilUUID,
 		ExpiresAt: time.Now().Add(time.Hour),
 	}
-	sessionRepositoryMock.On("Query", gormDB).Return([]*models.Session{session}, nil)
+	sessionRepositoryMock.On("Find", gormDB).Return([]*models.Session{session}, nil)
 
 	service.pullFromDB()
 	assert.Len(t, service.cache, 1)
@@ -283,7 +283,7 @@ func Test_pullFromDB(t *testing.T) {
 
 func Test_pullFromDB_repoError(t *testing.T) {
 	sessionRepositoryMock, service, _, _ := setupTest(t)
-	sessionRepositoryMock.On("Query", gormDB).Return(nil, httperrors.ErrForTests)
+	sessionRepositoryMock.On("Find", gormDB).Return(nil, httperrors.ErrForTests)
 	assert.PanicsWithError(t, httperrors.ErrForTests.Error(), func() { service.pullFromDB() })
 }
 

@@ -29,11 +29,11 @@ func (_m *WhereCondition[T]) AffectsDeletedAt() bool {
 }
 
 // ApplyTo provides a mock function with given fields: _a0, _a1
-func (_m *WhereCondition[T]) ApplyTo(_a0 *query.Query, _a1 query.Table) error {
+func (_m *WhereCondition[T]) ApplyTo(_a0 *query.GormQuery, _a1 query.Table) error {
 	ret := _m.Called(_a0, _a1)
 
 	var r0 error
-	if rf, ok := ret.Get(0).(func(*query.Query, query.Table) error); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, query.Table) error); ok {
 		r0 = rf(_a0, _a1)
 	} else {
 		r0 = ret.Error(0)
@@ -43,22 +43,22 @@ func (_m *WhereCondition[T]) ApplyTo(_a0 *query.Query, _a1 query.Table) error {
 }
 
 // GetSQL provides a mock function with given fields: _a0, table
-func (_m *WhereCondition[T]) GetSQL(_a0 *query.Query, table query.Table) (string, []interface{}, error) {
+func (_m *WhereCondition[T]) GetSQL(_a0 *query.GormQuery, table query.Table) (string, []interface{}, error) {
 	ret := _m.Called(_a0, table)
 
 	var r0 string
 	var r1 []interface{}
 	var r2 error
-	if rf, ok := ret.Get(0).(func(*query.Query, query.Table) (string, []interface{}, error)); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, query.Table) (string, []interface{}, error)); ok {
 		return rf(_a0, table)
 	}
-	if rf, ok := ret.Get(0).(func(*query.Query, query.Table) string); ok {
+	if rf, ok := ret.Get(0).(func(*query.GormQuery, query.Table) string); ok {
 		r0 = rf(_a0, table)
 	} else {
 		r0 = ret.Get(0).(string)
 	}
 
-	if rf, ok := ret.Get(1).(func(*query.Query, query.Table) []interface{}); ok {
+	if rf, ok := ret.Get(1).(func(*query.GormQuery, query.Table) []interface{}); ok {
 		r1 = rf(_a0, table)
 	} else {
 		if ret.Get(1) != nil {
@@ -66,7 +66,7 @@ func (_m *WhereCondition[T]) GetSQL(_a0 *query.Query, table query.Table) (string
 		}
 	}
 
-	if rf, ok := ret.Get(2).(func(*query.Query, query.Table) error); ok {
+	if rf, ok := ret.Get(2).(func(*query.GormQuery, query.Table) error); ok {
 		r2 = rf(_a0, table)
 	} else {
 		r2 = ret.Error(2)

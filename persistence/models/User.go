@@ -1,10 +1,7 @@
 package models
 
 import (
-	"github.com/ditrit/badaas/orm/condition"
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/operator"
-	"github.com/ditrit/badaas/orm/query"
 )
 
 // Represents a user
@@ -15,13 +12,4 @@ type User struct {
 
 	// password hash
 	Password []byte `gorm:"not null"`
-}
-
-func UserEmailCondition(operator operator.Operator[string]) condition.WhereCondition[User] {
-	return condition.NewFieldCondition[User, string](
-		query.FieldIdentifier[string]{
-			Field: "Email",
-		},
-		operator,
-	)
 }
