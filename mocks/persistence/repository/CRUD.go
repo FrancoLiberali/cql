@@ -3,7 +3,7 @@
 package mocks
 
 import (
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	gorm "gorm.io/gorm"
 
 	mock "github.com/stretchr/testify/mock"
@@ -45,7 +45,7 @@ func (_m *CRUD[T, ID]) Delete(tx *gorm.DB, entity *T) error {
 }
 
 // Find provides a mock function with given fields: tx, conditions
-func (_m *CRUD[T, ID]) Find(tx *gorm.DB, conditions ...condition.Condition[T]) ([]*T, error) {
+func (_m *CRUD[T, ID]) Find(tx *gorm.DB, conditions ...cql.Condition[T]) ([]*T, error) {
 	_va := make([]interface{}, len(conditions))
 	for _i := range conditions {
 		_va[_i] = conditions[_i]
@@ -57,10 +57,10 @@ func (_m *CRUD[T, ID]) Find(tx *gorm.DB, conditions ...condition.Condition[T]) (
 
 	var r0 []*T
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*gorm.DB, ...condition.Condition[T]) ([]*T, error)); ok {
+	if rf, ok := ret.Get(0).(func(*gorm.DB, ...cql.Condition[T]) ([]*T, error)); ok {
 		return rf(tx, conditions...)
 	}
-	if rf, ok := ret.Get(0).(func(*gorm.DB, ...condition.Condition[T]) []*T); ok {
+	if rf, ok := ret.Get(0).(func(*gorm.DB, ...cql.Condition[T]) []*T); ok {
 		r0 = rf(tx, conditions...)
 	} else {
 		if ret.Get(0) != nil {
@@ -68,7 +68,7 @@ func (_m *CRUD[T, ID]) Find(tx *gorm.DB, conditions ...condition.Condition[T]) (
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*gorm.DB, ...condition.Condition[T]) error); ok {
+	if rf, ok := ret.Get(1).(func(*gorm.DB, ...cql.Condition[T]) error); ok {
 		r1 = rf(tx, conditions...)
 	} else {
 		r1 = ret.Error(1)
@@ -78,7 +78,7 @@ func (_m *CRUD[T, ID]) Find(tx *gorm.DB, conditions ...condition.Condition[T]) (
 }
 
 // FindOne provides a mock function with given fields: tx, conditions
-func (_m *CRUD[T, ID]) FindOne(tx *gorm.DB, conditions ...condition.Condition[T]) (*T, error) {
+func (_m *CRUD[T, ID]) FindOne(tx *gorm.DB, conditions ...cql.Condition[T]) (*T, error) {
 	_va := make([]interface{}, len(conditions))
 	for _i := range conditions {
 		_va[_i] = conditions[_i]
@@ -90,10 +90,10 @@ func (_m *CRUD[T, ID]) FindOne(tx *gorm.DB, conditions ...condition.Condition[T]
 
 	var r0 *T
 	var r1 error
-	if rf, ok := ret.Get(0).(func(*gorm.DB, ...condition.Condition[T]) (*T, error)); ok {
+	if rf, ok := ret.Get(0).(func(*gorm.DB, ...cql.Condition[T]) (*T, error)); ok {
 		return rf(tx, conditions...)
 	}
-	if rf, ok := ret.Get(0).(func(*gorm.DB, ...condition.Condition[T]) *T); ok {
+	if rf, ok := ret.Get(0).(func(*gorm.DB, ...cql.Condition[T]) *T); ok {
 		r0 = rf(tx, conditions...)
 	} else {
 		if ret.Get(0) != nil {
@@ -101,7 +101,7 @@ func (_m *CRUD[T, ID]) FindOne(tx *gorm.DB, conditions ...condition.Condition[T]
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(*gorm.DB, ...condition.Condition[T]) error); ok {
+	if rf, ok := ret.Get(1).(func(*gorm.DB, ...cql.Condition[T]) error); ok {
 		r1 = rf(tx, conditions...)
 	} else {
 		r1 = ret.Error(1)
@@ -145,7 +145,7 @@ func (_m *CRUD[T, ID]) Save(tx *gorm.DB, entity *T) error {
 		r0 = rf(tx, entity)
 	} else {
 		r0 = ret.Error(0)
-	}// Get the list of models that match "conditions" inside transaction "tx"
+	}
 
 	return r0
 }

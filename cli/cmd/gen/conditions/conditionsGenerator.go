@@ -44,14 +44,14 @@ func (cg ConditionsGenerator) Into(file *File) error {
 	fieldIdentifiers := []jen.Code{}
 	relationPreloads := []jen.Code{}
 
-	addReflectTypeDefinition(file, objectName, objectQual)
-
 	conditionsModelType := getConditionsModelType(objectName)
 	conditionsModelAttributesDef := []jen.Code{}
 	conditionsModelAttributesIns := jen.Dict{}
 
 	for _, condition := range conditions {
-		file.Add(condition.ConditionMethod)
+		if condition.ConditionMethod != nil {
+			file.Add(condition.ConditionMethod)
+		}
 
 		// add all field names to the list of fields of the preload condition
 		if condition.FieldDefinition != nil {
@@ -84,7 +84,7 @@ func (cg ConditionsGenerator) Into(file *File) error {
 func addPreloadRelationsMethod(file *File, objectName string, objectQual *jen.Statement, conditionsModelType string, relationPreloads []jen.Code) {
 	if len(relationPreloads) > 0 {
 		condition := jen.Index().Add(jen.Qual(
-			conditionPath, badaasORMCondition,
+			cqlPath, badaasORMCondition,
 		)).Types(
 			objectQual,
 		)
@@ -105,14 +105,14 @@ func addPreloadMethod(file *File, objectName string, objectQual *jen.Statement, 
 		jen.Comment(fmt.Sprintf("Preload allows preloading the %s when doing a query", objectName)),
 		createMethod(conditionsModelType, preloadMethod).Params().Add(
 			jen.Qual(
-				conditionPath, badaasORMCondition,
+				cqlPath, badaasORMCondition,
 			).Types(
 				objectQual,
 			),
 		).Block(
 			jen.Return(
 				jen.Qual(
-					conditionPath, badaasORMNewPreloadCondition,
+					cqlPath, badaasORMNewPreloadCondition,
 				).Types(
 					objectQual,
 				).Call(fieldIdentifiers...),
@@ -143,25 +143,8 @@ func addConditionsModelDefinition(file *File, conditionsModelType string, condit
 	)
 }
 
-func addReflectTypeDefinition(file *File, objectName string, objectQual *jen.Statement) {
-	file.Add(
-		jen.Var().Id(
-			getObjectTypeName(objectName),
-		).Op("=").Add(
-			jen.Qual(
-				"reflect",
-				"TypeOf",
-			).Call(jen.Op("*").New(objectQual)),
-		),
-	)
-}
-
 func getConditionsModelType(objectName string) string {
 	return strcase.ToCamel(objectName) + "Conditions"
-}
-
-func getObjectTypeName(objectType string) string {
-	return strcase.ToCamel(objectType) + "Type"
 }
 
 // Generate the conditions for each of the object's fields

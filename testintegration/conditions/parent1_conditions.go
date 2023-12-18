@@ -2,76 +2,41 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var parent1Type = reflect.TypeOf(*new(models.Parent1))
-
-func (parent1Conditions parent1Conditions) IdIs() orm.FieldIs[models.Parent1, model.UUID] {
-	return orm.FieldIs[models.Parent1, model.UUID]{FieldID: parent1Conditions.ID}
+func (parent1Conditions parent1Conditions) ParentParent(conditions ...cql.Condition[models.ParentParent]) cql.JoinCondition[models.Parent1] {
+	return cql.NewJoinCondition[models.Parent1, models.ParentParent](conditions, "ParentParent", "ParentParentID", parent1Conditions.Preload(), "ID")
 }
-func (parent1Conditions parent1Conditions) CreatedAtIs() orm.FieldIs[models.Parent1, time.Time] {
-	return orm.FieldIs[models.Parent1, time.Time]{FieldID: parent1Conditions.CreatedAt}
-}
-func (parent1Conditions parent1Conditions) UpdatedAtIs() orm.FieldIs[models.Parent1, time.Time] {
-	return orm.FieldIs[models.Parent1, time.Time]{FieldID: parent1Conditions.UpdatedAt}
-}
-func (parent1Conditions parent1Conditions) DeletedAtIs() orm.FieldIs[models.Parent1, time.Time] {
-	return orm.FieldIs[models.Parent1, time.Time]{FieldID: parent1Conditions.DeletedAt}
-}
-func (parent1Conditions parent1Conditions) ParentParent(conditions ...condition.Condition[models.ParentParent]) condition.JoinCondition[models.Parent1] {
-	return condition.NewJoinCondition[models.Parent1, models.ParentParent](conditions, "ParentParent", "ParentParentID", parent1Conditions.Preload(), "ID")
-}
-func (parent1Conditions parent1Conditions) PreloadParentParent() condition.JoinCondition[models.Parent1] {
+func (parent1Conditions parent1Conditions) PreloadParentParent() cql.JoinCondition[models.Parent1] {
 	return parent1Conditions.ParentParent(ParentParent.Preload())
-}
-func (parent1Conditions parent1Conditions) ParentParentIdIs() orm.FieldIs[models.Parent1, model.UUID] {
-	return orm.FieldIs[models.Parent1, model.UUID]{FieldID: parent1Conditions.ParentParentID}
 }
 
 type parent1Conditions struct {
-	ID             query.FieldIdentifier[model.UUID]
-	CreatedAt      query.FieldIdentifier[time.Time]
-	UpdatedAt      query.FieldIdentifier[time.Time]
-	DeletedAt      query.FieldIdentifier[time.Time]
-	ParentParentID query.FieldIdentifier[model.UUID]
+	ID             cql.Field[models.Parent1, model.UUID]
+	CreatedAt      cql.Field[models.Parent1, time.Time]
+	UpdatedAt      cql.Field[models.Parent1, time.Time]
+	DeletedAt      cql.Field[models.Parent1, time.Time]
+	ParentParentID cql.Field[models.Parent1, model.UUID]
 }
 
 var Parent1 = parent1Conditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: parent1Type,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: parent1Type,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: parent1Type,
-	},
-	ParentParentID: query.FieldIdentifier[model.UUID]{
-		Field:     "ParentParentID",
-		ModelType: parent1Type,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: parent1Type,
-	},
+	CreatedAt:      cql.Field[models.Parent1, time.Time]{Name: "CreatedAt"},
+	DeletedAt:      cql.Field[models.Parent1, time.Time]{Name: "DeletedAt"},
+	ID:             cql.Field[models.Parent1, model.UUID]{Name: "ID"},
+	ParentParentID: cql.Field[models.Parent1, model.UUID]{Name: "ParentParentID"},
+	UpdatedAt:      cql.Field[models.Parent1, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Parent1 when doing a query
-func (parent1Conditions parent1Conditions) Preload() condition.Condition[models.Parent1] {
-	return condition.NewPreloadCondition[models.Parent1](parent1Conditions.ID, parent1Conditions.CreatedAt, parent1Conditions.UpdatedAt, parent1Conditions.DeletedAt, parent1Conditions.ParentParentID)
+func (parent1Conditions parent1Conditions) Preload() cql.Condition[models.Parent1] {
+	return cql.NewPreloadCondition[models.Parent1](parent1Conditions.ID, parent1Conditions.CreatedAt, parent1Conditions.UpdatedAt, parent1Conditions.DeletedAt, parent1Conditions.ParentParentID)
 }
 
 // PreloadRelations allows preloading all the Parent1's relation when doing a query
-func (parent1Conditions parent1Conditions) PreloadRelations() []condition.Condition[models.Parent1] {
-	return []condition.Condition[models.Parent1]{parent1Conditions.PreloadParentParent()}
+func (parent1Conditions parent1Conditions) PreloadRelations() []cql.Condition[models.Parent1] {
+	return []cql.Condition[models.Parent1]{parent1Conditions.PreloadParentParent()}
 }

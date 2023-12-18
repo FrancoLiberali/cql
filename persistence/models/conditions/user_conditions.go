@@ -2,80 +2,33 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/persistence/models"
-	"reflect"
 	"time"
 )
 
-var userType = reflect.TypeOf(*new(models.User))
-
-func (userConditions userConditions) IdIs() orm.FieldIs[models.User, model.UUID] {
-	return orm.FieldIs[models.User, model.UUID]{FieldID: userConditions.ID}
-}
-func (userConditions userConditions) CreatedAtIs() orm.FieldIs[models.User, time.Time] {
-	return orm.FieldIs[models.User, time.Time]{FieldID: userConditions.CreatedAt}
-}
-func (userConditions userConditions) UpdatedAtIs() orm.FieldIs[models.User, time.Time] {
-	return orm.FieldIs[models.User, time.Time]{FieldID: userConditions.UpdatedAt}
-}
-func (userConditions userConditions) DeletedAtIs() orm.FieldIs[models.User, time.Time] {
-	return orm.FieldIs[models.User, time.Time]{FieldID: userConditions.DeletedAt}
-}
-func (userConditions userConditions) UsernameIs() orm.StringFieldIs[models.User] {
-	return orm.StringFieldIs[models.User]{FieldIs: orm.FieldIs[models.User, string]{FieldID: userConditions.Username}}
-}
-func (userConditions userConditions) EmailIs() orm.StringFieldIs[models.User] {
-	return orm.StringFieldIs[models.User]{FieldIs: orm.FieldIs[models.User, string]{FieldID: userConditions.Email}}
-}
-func (userConditions userConditions) PasswordIs() orm.FieldIs[models.User, []uint8] {
-	return orm.FieldIs[models.User, []uint8]{FieldID: userConditions.Password}
-}
-
 type userConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Username  query.FieldIdentifier[string]
-	Email     query.FieldIdentifier[string]
-	Password  query.FieldIdentifier[[]uint8]
+	ID        cql.Field[models.User, model.UUID]
+	CreatedAt cql.Field[models.User, time.Time]
+	UpdatedAt cql.Field[models.User, time.Time]
+	DeletedAt cql.Field[models.User, time.Time]
+	Username  cql.StringField[models.User]
+	Email     cql.StringField[models.User]
+	Password  cql.Field[models.User, []uint8]
 }
 
 var User = userConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: userType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: userType,
-	},
-	Email: query.FieldIdentifier[string]{
-		Field:     "Email",
-		ModelType: userType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: userType,
-	},
-	Password: query.FieldIdentifier[[]uint8]{
-		Field:     "Password",
-		ModelType: userType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: userType,
-	},
-	Username: query.FieldIdentifier[string]{
-		Field:     "Username",
-		ModelType: userType,
-	},
+	CreatedAt: cql.Field[models.User, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.User, time.Time]{Name: "DeletedAt"},
+	Email:     cql.StringField[models.User]{Field: cql.Field[models.User, string]{Name: "Email"}},
+	ID:        cql.Field[models.User, model.UUID]{Name: "ID"},
+	Password:  cql.Field[models.User, []uint8]{Name: "Password"},
+	UpdatedAt: cql.Field[models.User, time.Time]{Name: "UpdatedAt"},
+	Username:  cql.StringField[models.User]{Field: cql.Field[models.User, string]{Name: "Username"}},
 }
 
-func (userConditions userConditions) Preload() condition.Condition[models.User] {
-	return condition.NewPreloadCondition[models.User](userConditions.ID, userConditions.CreatedAt, userConditions.UpdatedAt, userConditions.DeletedAt, userConditions.Username, userConditions.Email, userConditions.Password)
+// Preload allows preloading the User when doing a query
+func (userConditions userConditions) Preload() cql.Condition[models.User] {
+	return cql.NewPreloadCondition[models.User](userConditions.ID, userConditions.CreatedAt, userConditions.UpdatedAt, userConditions.DeletedAt, userConditions.Username, userConditions.Email, userConditions.Password)
 }

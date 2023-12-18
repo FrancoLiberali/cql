@@ -22,7 +22,7 @@ require (
 	gorm.io/driver/postgres v1.5.2
 	gorm.io/driver/sqlite v1.5.2
 	gorm.io/driver/sqlserver v1.5.1
-	gorm.io/gorm v1.25.2-0.20230530020048-26663ab9bf55
+	gorm.io/gorm v1.25.2-0.20230610234218-206613868439
 	gotest.tools v2.2.0+incompatible
 )
 
@@ -66,3 +66,13 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
+
+// TODO agregar comentario de que los de los dialectors se pueden sacar cuando se mergeen los prs
+// gorm por el contrario no porque el de los joins no se va a hacer pr porque es muy dificil hacer que ande en todos los casos
+replace gorm.io/driver/postgres v1.5.2 => github.com/ditrit/postgres v0.0.0-20230906140800-b3d5f9d4b6ad
+
+replace gorm.io/driver/sqlite v1.5.2 => github.com/ditrit/sqlite v0.0.0-20230906140046-2f37a3f972de
+
+replace gorm.io/driver/sqlserver v1.5.1 => github.com/ditrit/sqlserver v0.0.0-20230908120642-af1820b994f4
+
+replace gorm.io/gorm => github.com/ditrit/gorm v0.0.0-20230912092052-cfff75e01a3a

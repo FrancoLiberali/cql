@@ -2,65 +2,29 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
-	"reflect"
 	"time"
 )
 
-var personType = reflect.TypeOf(*new(models.Person))
-
-func (personConditions personConditions) IdIs() orm.FieldIs[models.Person, model.UUID] {
-	return orm.FieldIs[models.Person, model.UUID]{FieldID: personConditions.ID}
-}
-func (personConditions personConditions) CreatedAtIs() orm.FieldIs[models.Person, time.Time] {
-	return orm.FieldIs[models.Person, time.Time]{FieldID: personConditions.CreatedAt}
-}
-func (personConditions personConditions) UpdatedAtIs() orm.FieldIs[models.Person, time.Time] {
-	return orm.FieldIs[models.Person, time.Time]{FieldID: personConditions.UpdatedAt}
-}
-func (personConditions personConditions) DeletedAtIs() orm.FieldIs[models.Person, time.Time] {
-	return orm.FieldIs[models.Person, time.Time]{FieldID: personConditions.DeletedAt}
-}
-func (personConditions personConditions) NameIs() orm.StringFieldIs[models.Person] {
-	return orm.StringFieldIs[models.Person]{FieldIs: orm.FieldIs[models.Person, string]{FieldID: personConditions.Name}}
-}
-
 type personConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
+	ID        cql.Field[models.Person, model.UUID]
+	CreatedAt cql.Field[models.Person, time.Time]
+	UpdatedAt cql.Field[models.Person, time.Time]
+	DeletedAt cql.Field[models.Person, time.Time]
+	Name      cql.StringField[models.Person]
 }
 
 var Person = personConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: personType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: personType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: personType,
-	},
-	Name: query.FieldIdentifier[string]{
-		Field:     "Name",
-		ModelType: personType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: personType,
-	},
+	CreatedAt: cql.Field[models.Person, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[models.Person, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[models.Person, model.UUID]{Name: "ID"},
+	Name:      cql.StringField[models.Person]{Field: cql.Field[models.Person, string]{Name: "Name"}},
+	UpdatedAt: cql.Field[models.Person, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Person when doing a query
-func (personConditions personConditions) Preload() condition.Condition[models.Person] {
-	return condition.NewPreloadCondition[models.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt, personConditions.Name)
+func (personConditions personConditions) Preload() cql.Condition[models.Person] {
+	return cql.NewPreloadCondition[models.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt, personConditions.Name)
 }

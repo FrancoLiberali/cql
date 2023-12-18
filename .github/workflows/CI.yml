@@ -167,3 +167,21 @@ jobs:
         with:
           name: docker-compose-e2e-logs
           path: app.log
+
+  sonarcloud:
+    name: SonarCloud
+    needs: [check-style, integration-tests]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Download line coverage reports
+        uses: actions/download-artifact@v3
+        with:
+          name: coverage
+      - name: SonarCloud Scan
+        uses: sonarsource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
