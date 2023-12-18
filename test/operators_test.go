@@ -7,13 +7,13 @@ import (
 
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm"
-	"github.com/ditrit/badaas/orm/cql"
-	"github.com/ditrit/badaas/orm/mysql"
-	"github.com/ditrit/badaas/orm/psql"
-	"github.com/ditrit/badaas/orm/sqlite"
-	"github.com/ditrit/badaas/test/conditions"
-	"github.com/ditrit/badaas/test/models"
+	"github.com/FrancoLiberali/cql/orm"
+	"github.com/FrancoLiberali/cql/orm/cql"
+	"github.com/FrancoLiberali/cql/orm/mysql"
+	"github.com/FrancoLiberali/cql/orm/psql"
+	"github.com/FrancoLiberali/cql/orm/sqlite"
+	"github.com/FrancoLiberali/cql/test/conditions"
+	"github.com/FrancoLiberali/cql/test/models"
 )
 
 type OperatorsIntTestSuite struct {

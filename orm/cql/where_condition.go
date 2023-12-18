@@ -1,7 +1,7 @@
 package cql
 
 import (
-	"github.com/ditrit/badaas/orm/model"
+	"github.com/FrancoLiberali/cql/orm/model"
 )
 
 // Conditions that can be used in a where clause

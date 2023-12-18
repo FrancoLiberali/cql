@@ -23,7 +23,7 @@ Create a package for your :ref:`models <badaas-orm/concepts:model>`, for example
   package models
 
   import (
-    "github.com/ditrit/badaas/orm/model"
+    "github.com/FrancoLiberali/cql/orm/model"
   )
 
   type MyModel struct {

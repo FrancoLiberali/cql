@@ -3,8 +3,8 @@ package conditions
 
 import (
 	uuidmodel "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/uuidmodel"
-	cql "github.com/ditrit/badaas/orm/cql"
-	model "github.com/ditrit/badaas/orm/model"
+	cql "github.com/FrancoLiberali/cql/orm/cql"
+	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 

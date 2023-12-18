@@ -1,6 +1,6 @@
 package uintmodel
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type UintModel struct {
 	model.UIntModel

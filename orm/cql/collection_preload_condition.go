@@ -4,7 +4,7 @@ import (
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm/model"
+	"github.com/FrancoLiberali/cql/orm/model"
 )
 
 // Condition used to the preload a collection of models of a model

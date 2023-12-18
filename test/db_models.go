@@ -6,7 +6,7 @@ import (
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/test/models"
+	"github.com/FrancoLiberali/cql/test/models"
 )
 
 var ListOfTables = []any{

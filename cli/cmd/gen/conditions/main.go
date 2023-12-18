@@ -26,7 +26,7 @@ var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 
 const (
 	DestPackageKey = "dest_package"
-	badaasORMPath  = "github.com/ditrit/badaas/orm"
+	badaasORMPath  = "github.com/FrancoLiberali/cql/orm"
 )
 
 func init() {

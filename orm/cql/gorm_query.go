@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
 
-	"github.com/ditrit/badaas/orm/model"
+	"github.com/FrancoLiberali/cql/orm/model"
 )
 
 type GormQuery struct {

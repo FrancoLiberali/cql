@@ -3,8 +3,8 @@ package unsafe
 import (
 	"fmt"
 
-	"github.com/ditrit/badaas/orm/cql"
-	"github.com/ditrit/badaas/orm/model"
+	"github.com/FrancoLiberali/cql/orm/cql"
+	"github.com/FrancoLiberali/cql/orm/model"
 )
 
 // Condition that can be used to express conditions that are not supported (yet?) by badaas-orm

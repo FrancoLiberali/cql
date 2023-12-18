@@ -13,9 +13,9 @@ import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm"
-	"github.com/ditrit/badaas/orm/cql"
-	"github.com/ditrit/badaas/orm/logger"
+	"github.com/FrancoLiberali/cql/orm"
+	"github.com/FrancoLiberali/cql/orm/cql"
+	"github.com/FrancoLiberali/cql/orm/logger"
 )
 
 const dbTypeEnvKey = "DB"

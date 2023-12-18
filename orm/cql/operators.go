@@ -1,7 +1,7 @@
 package cql
 
 import (
-	"github.com/ditrit/badaas/orm/sql"
+	"github.com/FrancoLiberali/cql/orm/sql"
 )
 
 // Comparison Operators

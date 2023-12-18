@@ -1,6 +1,6 @@
 package overridereferencesinverse
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type Computer struct {
 	model.UUIDModel

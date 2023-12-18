@@ -4,8 +4,8 @@ import (
 	"github.com/stretchr/testify/suite"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/test/models"
+	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/test/models"
 )
 
 type TestSuite struct {

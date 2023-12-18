@@ -5,8 +5,8 @@ import (
 
 	"github.com/elliotchance/pie/v2"
 
-	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/orm/sql"
+	"github.com/FrancoLiberali/cql/orm/model"
+	"github.com/FrancoLiberali/cql/orm/sql"
 )
 
 // Condition that connects multiple conditions.

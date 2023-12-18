@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-	"github.com/ditrit/badaas/orm/logger"
+	"github.com/FrancoLiberali/cql/orm/logger"
 )
 
 func TestTraceError(t *testing.T) {

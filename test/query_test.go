@@ -5,10 +5,10 @@ import (
 	"gorm.io/gorm"
 	"gotest.tools/assert"
 
-	"github.com/ditrit/badaas/orm"
-	"github.com/ditrit/badaas/orm/cql"
-	"github.com/ditrit/badaas/test/conditions"
-	"github.com/ditrit/badaas/test/models"
+	"github.com/FrancoLiberali/cql/orm"
+	"github.com/FrancoLiberali/cql/orm/cql"
+	"github.com/FrancoLiberali/cql/test/conditions"
+	"github.com/FrancoLiberali/cql/test/models"
 )
 
 type QueryIntTestSuite struct {

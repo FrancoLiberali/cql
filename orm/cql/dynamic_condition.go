@@ -1,6 +1,6 @@
 package cql
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type DynamicCondition[T model.Model] interface {
 	WhereCondition[T]

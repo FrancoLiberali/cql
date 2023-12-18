@@ -1,6 +1,6 @@
 package basicslices
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type BasicSlices struct {
 	model.UUIDModel

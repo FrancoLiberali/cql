@@ -2,9 +2,9 @@
 package conditions
 
 import (
-	cql "github.com/ditrit/badaas/orm/cql"
-	model "github.com/ditrit/badaas/orm/model"
-	models "github.com/ditrit/badaas/test/models"
+	cql "github.com/FrancoLiberali/cql/orm/cql"
+	model "github.com/FrancoLiberali/cql/orm/model"
+	models "github.com/FrancoLiberali/cql/test/models"
 	"time"
 )
 

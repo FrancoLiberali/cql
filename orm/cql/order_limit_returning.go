@@ -1,6 +1,6 @@
 package cql
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type OrderLimitReturning[T model.Model] struct {
 	query         *Query[T]

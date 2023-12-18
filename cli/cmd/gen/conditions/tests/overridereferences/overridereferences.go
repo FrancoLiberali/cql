@@ -1,6 +1,6 @@
 package overridereferences
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type Brand struct {
 	model.UUIDModel

@@ -1,7 +1,7 @@
 package cql
 
 import (
-	"github.com/ditrit/badaas/orm/model"
+	"github.com/FrancoLiberali/cql/orm/model"
 )
 
 // Condition used to the preload the attributes of a model

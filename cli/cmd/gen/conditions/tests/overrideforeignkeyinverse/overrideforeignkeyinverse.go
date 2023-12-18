@@ -1,7 +1,7 @@
 package overrideforeignkeyinverse
 
 import (
-	"github.com/ditrit/badaas/orm/model"
+	"github.com/FrancoLiberali/cql/orm/model"
 )
 
 type User struct {

@@ -3,8 +3,8 @@ package orm
 import (
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm/cql"
-	"github.com/ditrit/badaas/orm/model"
+	"github.com/FrancoLiberali/cql/orm/cql"
+	"github.com/FrancoLiberali/cql/orm/model"
 )
 
 // TODO null y zero para update

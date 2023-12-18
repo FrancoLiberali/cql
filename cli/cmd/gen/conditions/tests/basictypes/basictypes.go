@@ -1,6 +1,6 @@
 package basictypes
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type BasicTypes struct {
 	model.UUIDModel

@@ -1,8 +1,8 @@
 package psql
 
 import (
-	"github.com/ditrit/badaas/orm/cql"
-	"github.com/ditrit/badaas/orm/sql"
+	"github.com/FrancoLiberali/cql/orm/cql"
+	"github.com/FrancoLiberali/cql/orm/sql"
 )
 
 // Pattern Matching

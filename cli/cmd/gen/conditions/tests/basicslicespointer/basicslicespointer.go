@@ -1,6 +1,6 @@
 package basicslicespointer
 
-import "github.com/ditrit/badaas/orm/model"
+import "github.com/FrancoLiberali/cql/orm/model"
 
 type BasicSlicesPointer struct {
 	model.UUIDModel

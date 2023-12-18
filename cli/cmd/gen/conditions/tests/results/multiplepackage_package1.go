@@ -4,8 +4,8 @@ package conditions
 import (
 	package1 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package1"
 	package2 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
-	cql "github.com/ditrit/badaas/orm/cql"
-	model "github.com/ditrit/badaas/orm/model"
+	cql "github.com/FrancoLiberali/cql/orm/cql"
+	model "github.com/FrancoLiberali/cql/orm/model"
 	"time"
 )
 

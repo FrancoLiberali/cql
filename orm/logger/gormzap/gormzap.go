@@ -12,7 +12,7 @@ import (
 	"gorm.io/gorm"
 	gormLogger "gorm.io/gorm/logger"
 
-	"github.com/ditrit/badaas/orm/logger"
+	"github.com/FrancoLiberali/cql/orm/logger"
 )
 
 // This type implement the [logger.Interface] interface.

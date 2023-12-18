@@ -4,7 +4,7 @@ import (
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/orm/logger"
+	"github.com/FrancoLiberali/cql/orm/logger"
 )
 
 // Open initialize db session based on dialector

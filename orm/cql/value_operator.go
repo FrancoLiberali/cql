@@ -3,7 +3,7 @@ package cql
 import (
 	"fmt"
 
-	"github.com/ditrit/badaas/orm/sql"
+	"github.com/FrancoLiberali/cql/orm/sql"
 )
 
 // Operator that compares the value of the column against a fixed value

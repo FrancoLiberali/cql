@@ -1,4 +1,4 @@
-module github.com/ditrit/badaas
+module github.com/FrancoLiberali/cql
 
 go 1.18
 

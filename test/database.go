@@ -4,8 +4,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/ditrit/badaas/orm"
-	"github.com/ditrit/badaas/orm/logger"
+	"github.com/FrancoLiberali/cql/orm"
+	"github.com/FrancoLiberali/cql/orm/logger"
 	"gorm.io/gorm"
 )
 

@@ -12,8 +12,8 @@ import (
 	"go.uber.org/zap/zapcore"
 	"go.uber.org/zap/zaptest/observer"
 
-	"github.com/ditrit/badaas/orm/logger"
-	"github.com/ditrit/badaas/orm/logger/gormzap"
+	"github.com/FrancoLiberali/cql/orm/logger"
+	"github.com/FrancoLiberali/cql/orm/logger/gormzap"
 )
 
 func TestTraceError(t *testing.T) {
