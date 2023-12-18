@@ -14,8 +14,19 @@ type UUID uuid.UUID
 
 var NilUUID = UUID(uuid.Nil)
 
-func (id UUID) GormDBDataType(_ *gorm.DB, _ *schema.Field) string {
-	return "uuid"
+func (id UUID) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
+	switch db.Dialector.Name() {
+	case "mysql":
+		return "binary(16)"
+	case "postgres":
+		return "uuid"
+	case "sqlite":
+		return "varchar(36)"
+	case "sqlserver":
+		return "uniqueidentifier"
+	}
+
+	return ""
 }
 
 func (id UUID) String() string {
@@ -58,12 +69,23 @@ func (id UUID) IsNil() bool {
 	return id == NilUUID
 }
 
-func (id UUID) GormValue(_ context.Context, _ *gorm.DB) clause.Expr {
+func (id UUID) GormValue(_ context.Context, db *gorm.DB) clause.Expr {
 	if id == NilUUID {
 		return gorm.Expr("NULL")
 	}
 
-	return gorm.Expr("?", id.String())
+	switch db.Dialector.Name() {
+	case "mysql", "sqlserver":
+		binary, err := id.MarshalBinary()
+		if err != nil {
+			_ = db.AddError(err)
+			return clause.Expr{}
+		}
+
+		return gorm.Expr("?", binary)
+	default:
+		return gorm.Expr("?", id.String())
+	}
 }
 
 func (id UUID) Value() (driver.Value, error) {

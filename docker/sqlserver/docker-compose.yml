@@ -1,0 +1,16 @@
+# DEVELOPMENT ONLY, DO NOT USE FOR PRODUCTION
+version: "3.5"
+
+services:
+  db:
+    container_name: "badaas-test-db"
+    build: .
+    image: badaas/mssqlserver:latest
+    ports:
+      - "5000:1433"
+    environment:
+      MSSQL_SA_PASSWORD: "badaas2023!"
+      ACCEPT_EULA: "Y"
+      MSSQL_DB: badaas_db
+      MSSQL_USER: badaas
+      MSSQL_PASSWORD: badaas_password2023

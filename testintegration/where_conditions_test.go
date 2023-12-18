@@ -1,12 +1,15 @@
 package testintegration
 
 import (
+	"log"
+
 	"gorm.io/gorm"
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/model"
+	"github.com/ditrit/badaas/orm/mysql"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -519,6 +522,29 @@ func (ts *WhereConditionsIntTestSuite) TestNotOr() {
 	ts.Nil(err)
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
+}
+
+func (ts *WhereConditionsIntTestSuite) TestXor() {
+	switch getDBDialector() {
+	case postgreSQL, sqLite, sqlServer:
+		log.Println("Xor not compatible")
+	case mySQL:
+		match1 := ts.createProduct("", 1, 0, false, nil)
+		match2 := ts.createProduct("", 7, 0, false, nil)
+
+		ts.createProduct("", 5, 0, false, nil)
+		ts.createProduct("", 4, 0, false, nil)
+
+		entities, err := ts.crudProductService.Query(
+			mysql.Xor(
+				conditions.ProductInt(orm.Lt(6)),
+				conditions.ProductInt(orm.Gt(3)),
+			),
+		)
+		ts.Nil(err)
+
+		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
+	}
 }
 
 func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsDifferentOperators() {

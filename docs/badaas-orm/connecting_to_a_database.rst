@@ -5,8 +5,8 @@ Connecting to a database
 Connection
 -----------------------------
 
-badaas-orm supports the PostgreSQL databases using gorm's driver. 
-Some databases may be compatible with the postgres dialect, 
+badaas-orm supports the databases MySQL, PostgreSQL, SQLite, SQL Server using gorm's driver. 
+Some databases may be compatible with the mysql or postgres dialect, 
 in which case you could just use the dialect for those databases (from which CockroachDB is tested).
 
 To communicate with the database badaas-orm need a :ref:`GormDB <badaas-orm/concepts:GormDB>` object. 
