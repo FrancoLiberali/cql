@@ -12,6 +12,5 @@ var GenCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 })
 
 func init() {
-	GenCmd.AddSubCommand(genDockerCmd)
 	GenCmd.AddSubCommand(conditions.GenConditionsCmd)
 }
