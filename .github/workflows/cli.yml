@@ -24,6 +24,7 @@ jobs:
         uses: golangci/golangci-lint-action@v3
         with:
           working-directory: cql-cli
+          args: --config=../.golangci.yml
           skip-cache: true
           skip-pkg-cache: true
           skip-build-cache: true
