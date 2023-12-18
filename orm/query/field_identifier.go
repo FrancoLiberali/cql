@@ -6,6 +6,7 @@ import (
 
 type IFieldIdentifier interface {
 	ColumnName(query *GormQuery, table Table) string
+	FieldName() string
 	ColumnSQL(query *GormQuery, table Table) string
 	GetModelType() reflect.Type
 }
@@ -19,6 +20,11 @@ type FieldIdentifier[T any] struct {
 
 func (fieldID FieldIdentifier[T]) GetModelType() reflect.Type {
 	return fieldID.ModelType
+}
+
+// Returns the name of the field identified
+func (fieldID FieldIdentifier[T]) FieldName() string {
+	return fieldID.Field
 }
 
 // Returns the name of the column in which the field is saved in the table

@@ -7,8 +7,6 @@ import (
 	"github.com/ditrit/badaas/orm/sql"
 )
 
-const undefinedJoinNumber = -1
-
 // Operator that compares the value of the column against a fixed value
 // If Operations has multiple entries, operations will be nested
 // Example (single): value = v1
@@ -80,20 +78,12 @@ func (operator ValueOperator[T]) ToSQL(queryV *query.GormQuery, columnName strin
 }
 
 func getModelTable(queryV *query.GormQuery, field query.IFieldIdentifier, joinNumber int, sqlOperator sql.Operator) (query.Table, error) {
-	modelTables := queryV.GetTables(field.GetModelType())
-	if modelTables == nil {
-		return query.Table{}, fieldModelNotConcernedError(field, sqlOperator)
+	table, err := queryV.GetModelTable(field, joinNumber)
+	if err != nil {
+		return query.Table{}, operatorError(err, sqlOperator)
 	}
 
-	if len(modelTables) == 1 {
-		return modelTables[0], nil
-	}
-
-	if joinNumber == undefinedJoinNumber {
-		return query.Table{}, joinMustBeSelectedError(field, sqlOperator)
-	}
-
-	return modelTables[joinNumber], nil
+	return table, nil
 }
 
 func (operator *ValueOperator[T]) AddOperation(sqlOperator sql.Operator, value any) *ValueOperator[T] {
@@ -102,7 +92,7 @@ func (operator *ValueOperator[T]) AddOperation(sqlOperator sql.Operator, value a
 		operation{
 			Value:       value,
 			SQLOperator: sqlOperator,
-			JoinNumber:  undefinedJoinNumber,
+			JoinNumber:  query.UndefinedJoinNumber,
 		},
 	)
 

@@ -82,7 +82,7 @@ We can run this tutorial with `make tutorial_1` and we will obtain the following
 
 As you can see, in this case we will get both cities which we can differentiate by their population and the id of the country.
 
-In this first tutorial we have used the badaas-orm compilable queries system to get these cities, 
+In this tutorial we have used the badaas-orm compilable queries system to get these cities, 
 for more details you can read :ref:`badaas-orm/query:conditions`.
 
 Tutorial 2: operators
@@ -111,19 +111,51 @@ We can run this tutorial with `make tutorial_2` and we will obtain the following
 
 As you can see, in this case we only get one city, Paris in France.
 
-In this second tutorial we have used the operator Gt to obtain this city, 
+In this tutorial we have used the operator Gt to obtain this city, 
 for more details you can read :ref:`badaas-orm/query:Operators`.
 
-Tutorial 3: joins
+Tutorial 3: modifiers
 -------------------------------
 
 Although in the previous tutorial we achieved our goal of differentiating the two Paris, 
-the way to do it is debatable since the population of the cities can evolve and, 
-then, the result of this query can change. 
+the way to do it is debatable since the population of Paris, Texas may increase to over 1000000 someday 
+and then, the result of this query can change. 
+Therefore, we will search only for the city with the largest population.
+
+In the tutorial_3.go file you will find that we can perform this query as follows:
+
+.. code-block:: go
+
+    parisFrance, err := orm.NewQuery[models.City](
+		db,
+		conditions.City.NameIs().Eq("Paris"),
+	).Descending(
+		conditions.City.Population,
+	).Limit(1).FindOne()
+
+We can run this tutorial with `make tutorial_3` and we will obtain the following result:
+
+.. code-block:: bash
+
+    City named 'Paris' with the largest population is: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:<nil> CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
+
+As you can see, again we get only the Paris in France. 
+As you may have noticed, in this case we have used the `FindOne` method instead of `Find`. 
+This is because in this case we are sure that the result is a single model, 
+so instead of getting a list we get a single city.
+
+In this tutorial we have used query modifier methods, 
+for more details you can read :ref:`badaas-orm/query:Query methods`.
+
+Tutorial 4: joins
+-------------------------------
+
+Again, the solution of the previous tutorial is debatable because the evolution 
+of populations could make Paris, Texas have more inhabitants than Paris, France one day. 
 Therefore, we are now going to improve this query by obtaining the city called 
 Paris whose country is called France. 
 
-In the tutorial_3.go file you will find that we can perform this query as follows:
+In the tutorial_4.go file you will find that we can perform this query as follows:
 
 .. code-block:: go
 
@@ -135,7 +167,7 @@ In the tutorial_3.go file you will find that we can perform this query as follow
         ),
     ).FindOne()
 
-We can run this tutorial with `make tutorial_3` and we will obtain the following result:
+We can run this tutorial with `make tutorial_4` and we will obtain the following result:
 
 .. code-block:: bash
 
@@ -143,14 +175,11 @@ We can run this tutorial with `make tutorial_3` and we will obtain the following
         1: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:<nil> CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
 
 As you can see, again we get only the Paris in France. 
-As you may have noticed, in this case we have used the `FindOne` method instead of `Find`. 
-This is because in this case we are sure that the result is a single model, 
-so instead of getting a list we get a single city.
 
-In this third tutorial we have used a condition that performs a join, 
+In this tutorial we have used a condition that performs a join, 
 for more details you can read :ref:`badaas-orm/query:Use of the conditions`.
 
-Tutorial 4: preloading
+Tutorial 5: preloading
 -------------------------------
 
 You may have noticed that in the results of the previous tutorials the Country field of the cities was null (Country:<nil>). 
@@ -158,7 +187,7 @@ This is because, to ensure performance, badaas-orm will retrieve only the attrib
 you are querying (City in this case because the method used is orm.NewQuery[models.City]) 
 but not of its relationships. If we also want to obtain this data, we must perform preloading.
 
-In the tutorial_4.go file you will find that we can perform this query as follows:
+In the tutorial_5.go file you will find that we can perform this query as follows:
 
 .. code-block:: go
 
@@ -168,7 +197,7 @@ In the tutorial_4.go file you will find that we can perform this query as follow
         conditions.City.PreloadCountry(),
     ).Find()
 
-We can run this tutorial with `make tutorial_4` and we will obtain the following result:
+We can run this tutorial with `make tutorial_5` and we will obtain the following result:
 
 .. code-block:: bash
 
@@ -185,17 +214,17 @@ that is generated by badaas-cli together with the conditions.
 These methods allow us to differentiate null objects from objects not loaded from the database, 
 since when trying to browse a relation that was not loaded we will get `errors.ErrRelationNotLoaded`. 
 
-In this fourth tutorial we have used preloading and relation getters, 
+In this tutorial we have used preloading and relation getters, 
 for more details you can read :doc:`/badaas-orm/preloading`.
 
-Tutorial 5: dynamic operators
+Tutorial 6: dynamic operators
 -------------------------------
 
 So far we have performed operations that take as input a static value (equal to "Paris" or greater than 1000000) 
 but what if now we would like to differentiate these two Paris from each other based on whether they 
 are the capital of their country.
 
-In the tutorial_5.go file you will find that we can perform this query as follows:
+In the tutorial_6.go file you will find that we can perform this query as follows:
 
 .. code-block:: go
 
@@ -207,7 +236,7 @@ In the tutorial_5.go file you will find that we can perform this query as follow
         ),
     ).Find()
 
-We can run this tutorial with `make tutorial_5` and we will obtain the following result:
+We can run this tutorial with `make tutorial_6` and we will obtain the following result:
 
 .. code-block:: bash
 
@@ -216,5 +245,5 @@ We can run this tutorial with `make tutorial_5` and we will obtain the following
 
 As you can see, again we only get the Paris in France.
 
-In this fifth tutorial we have used dynamic conditions, 
+In this tutorial we have used dynamic conditions, 
 for more details you can read :ref:`badaas-orm/advanced_query:Dynamic operators`.
