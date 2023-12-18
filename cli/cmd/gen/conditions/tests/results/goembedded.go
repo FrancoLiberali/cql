@@ -3,67 +3,72 @@ package conditions
 
 import (
 	goembedded "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/goembedded"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var goEmbeddedType = reflect.TypeOf(*new(goembedded.GoEmbedded))
-var GoEmbeddedIdField = query.FieldIdentifier[model.UIntID]{
-	Field:     "ID",
-	ModelType: goEmbeddedType,
+
+func (goEmbeddedConditions goEmbeddedConditions) IdIs() orm.FieldIs[goembedded.GoEmbedded, model.UIntID] {
+	return orm.FieldIs[goembedded.GoEmbedded, model.UIntID]{FieldID: goEmbeddedConditions.ID}
+}
+func (goEmbeddedConditions goEmbeddedConditions) CreatedAtIs() orm.FieldIs[goembedded.GoEmbedded, time.Time] {
+	return orm.FieldIs[goembedded.GoEmbedded, time.Time]{FieldID: goEmbeddedConditions.CreatedAt}
+}
+func (goEmbeddedConditions goEmbeddedConditions) UpdatedAtIs() orm.FieldIs[goembedded.GoEmbedded, time.Time] {
+	return orm.FieldIs[goembedded.GoEmbedded, time.Time]{FieldID: goEmbeddedConditions.UpdatedAt}
+}
+func (goEmbeddedConditions goEmbeddedConditions) DeletedAtIs() orm.FieldIs[goembedded.GoEmbedded, time.Time] {
+	return orm.FieldIs[goembedded.GoEmbedded, time.Time]{FieldID: goEmbeddedConditions.DeletedAt}
+}
+func (goEmbeddedConditions goEmbeddedConditions) IntIs() orm.FieldIs[goembedded.GoEmbedded, int] {
+	return orm.FieldIs[goembedded.GoEmbedded, int]{FieldID: goEmbeddedConditions.Int}
+}
+func (goEmbeddedConditions goEmbeddedConditions) ToBeEmbeddedIntIs() orm.FieldIs[goembedded.GoEmbedded, int] {
+	return orm.FieldIs[goembedded.GoEmbedded, int]{FieldID: goEmbeddedConditions.ToBeEmbeddedInt}
 }
 
-func GoEmbeddedId(operator operator.Operator[model.UIntID]) condition.WhereCondition[goembedded.GoEmbedded] {
-	return condition.NewFieldCondition[goembedded.GoEmbedded, model.UIntID](GoEmbeddedIdField, operator)
+type goEmbeddedConditions struct {
+	ID              query.FieldIdentifier[model.UIntID]
+	CreatedAt       query.FieldIdentifier[time.Time]
+	UpdatedAt       query.FieldIdentifier[time.Time]
+	DeletedAt       query.FieldIdentifier[time.Time]
+	Int             query.FieldIdentifier[int]
+	ToBeEmbeddedInt query.FieldIdentifier[int]
 }
 
-var GoEmbeddedCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: goEmbeddedType,
+var GoEmbedded = goEmbeddedConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: goEmbeddedType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: goEmbeddedType,
+	},
+	ID: query.FieldIdentifier[model.UIntID]{
+		Field:     "ID",
+		ModelType: goEmbeddedType,
+	},
+	Int: query.FieldIdentifier[int]{
+		Field:     "Int",
+		ModelType: goEmbeddedType,
+	},
+	ToBeEmbeddedInt: query.FieldIdentifier[int]{
+		Field:     "Int",
+		ModelType: goEmbeddedType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: goEmbeddedType,
+	},
 }
 
-func GoEmbeddedCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[goembedded.GoEmbedded] {
-	return condition.NewFieldCondition[goembedded.GoEmbedded, time.Time](GoEmbeddedCreatedAtField, operator)
+// Preload allows preloading the GoEmbedded when doing a query
+func (goEmbeddedConditions goEmbeddedConditions) Preload() condition.Condition[goembedded.GoEmbedded] {
+	return condition.NewPreloadCondition[goembedded.GoEmbedded](goEmbeddedConditions.ID, goEmbeddedConditions.CreatedAt, goEmbeddedConditions.UpdatedAt, goEmbeddedConditions.DeletedAt, goEmbeddedConditions.Int, goEmbeddedConditions.ToBeEmbeddedInt)
 }
-
-var GoEmbeddedUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: goEmbeddedType,
-}
-
-func GoEmbeddedUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[goembedded.GoEmbedded] {
-	return condition.NewFieldCondition[goembedded.GoEmbedded, time.Time](GoEmbeddedUpdatedAtField, operator)
-}
-
-var GoEmbeddedDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: goEmbeddedType,
-}
-
-func GoEmbeddedDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[goembedded.GoEmbedded] {
-	return condition.NewFieldCondition[goembedded.GoEmbedded, time.Time](GoEmbeddedDeletedAtField, operator)
-}
-
-var GoEmbeddedIntField = query.FieldIdentifier[int]{
-	Field:     "Int",
-	ModelType: goEmbeddedType,
-}
-
-func GoEmbeddedInt(operator operator.Operator[int]) condition.WhereCondition[goembedded.GoEmbedded] {
-	return condition.NewFieldCondition[goembedded.GoEmbedded, int](GoEmbeddedIntField, operator)
-}
-
-var GoEmbeddedToBeEmbeddedIntField = query.FieldIdentifier[int]{
-	Field:     "Int",
-	ModelType: goEmbeddedType,
-}
-
-func GoEmbeddedToBeEmbeddedInt(operator operator.Operator[int]) condition.WhereCondition[goembedded.GoEmbedded] {
-	return condition.NewFieldCondition[goembedded.GoEmbedded, int](GoEmbeddedToBeEmbeddedIntField, operator)
-}
-
-var GoEmbeddedPreloadAttributes = condition.NewPreloadCondition[goembedded.GoEmbedded](GoEmbeddedIdField, GoEmbeddedCreatedAtField, GoEmbeddedUpdatedAtField, GoEmbeddedDeletedAtField, GoEmbeddedIntField, GoEmbeddedToBeEmbeddedIntField)

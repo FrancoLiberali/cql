@@ -3,7 +3,6 @@ package configuration
 import (
 	"time"
 
-	"github.com/ditrit/badaas/utils"
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 

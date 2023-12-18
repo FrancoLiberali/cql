@@ -6,87 +6,53 @@ PreloadConditions
 ---------------------------
 
 During the :ref:`conditions generation <badaas-orm/query:conditions generation>` the following 
-PreloadConditions are also generated which are useful for preloading:
+methods will also be created for the condition models:
 
-- One PreloadCondition for each of your models, that will allow to preload this model when doing a query.
-  The name of these conditions will be <Model>PreloadAttributes where 
-  <Model> is the model type.
-- One PreloadCondition for each of the relations of your model, 
+- Preload() will allow to preload this model when doing a query.
+- Preload<Relation>() for each of the relations of your model, 
+  where <Relation> is the name of the attribute that creates the relation, 
   to preload that the related object when doing a query. 
   This is really just a facility that translates to using the JoinCondition of 
-  that relation and then the PreloadAttributes of the related model.
-  The name of these conditions will be <Model>Preload<Relation> where 
-  <Model> is the model type and <Relation> is the name of the attribute that creates the relation.
-- One PreloadCondition to preload all the related models of your model.
-  The name of these conditions will be <Model>PreloadRelations where 
-  <Model> is the model type.
+  that relation and then the Preload method of the related model.
+- PreloadRelation() to preload all the related models of your model 
+  (only generated if the model has at least one relation).
 
 Examples
 ----------------------------------
 
 **Preload a related model**
 
-In this example we query all YourModels and preload whose related Related.
+In this example we query all MyModels and preload whose related MyOtherModel.
 
 .. code-block:: go
 
-    type Related struct {
+    type MyOtherModel struct {
         model.UUIDModel
     }
 
-    type YourModel struct {
+    type MyModel struct {
         model.UUIDModel
 
-        Related   Related
+        Related   MyOtherModel
         RelatedID model.UUID
     }
 
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelRelated(
-            conditions.RelatedPreloadAttributes,
+    myModels, err := orm.NewQuery[MyModel](
+        gormDB,
+        conditions.MyModel.Related(
+            conditions.Related.Preload(),
         ),
-    )
+    ).Find()
 
-Or using the PreloadCondition to avoid the JoinCondition 
+Or using the PreloadRelation method to avoid the JoinCondition 
 (only useful when you don't want to add other conditions to that Join):
 
 .. code-block:: go
 
-    type Related struct {
-        model.UUIDModel
-    }
-
-    type YourModel struct {
-        model.UUIDModel
-
-        Related   Related
-        RelatedID model.UUID
-    }
-
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelPreloadRelated,
-    )
-
-**Preload a list of models**
-
-.. code-block:: go
-
-    type Related struct {
-        model.UUIDModel
-
-        YourModel *YourModel
-        YourModelID *model.UUID
-    }
-
-    type YourModel struct {
-        model.UUIDModel
-
-        Related *[]Related
-    }
-
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelPreloadRelated,
-    )
+    myModels, err := orm.NewQuery[MyModel](
+        gormDB,
+        conditions.MyModel.PreloadRelated(),
+    ).Find()
 
 **Nested preloads**
 
@@ -96,25 +62,26 @@ Or using the PreloadCondition to avoid the JoinCondition
         model.UUIDModel
     }
 
-    type Related struct {
+    type MyOtherModel struct {
         model.UUIDModel
 
         Parent   Parent
         ParentID model.UUID
     }
 
-    type YourModel struct {
+    type MyModel struct {
         model.UUIDModel
 
-        Related   Related
+        Related   MyOtherModel
         RelatedID model.UUID
     }
 
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelRelated(
-            conditions.RelatedPreloadParent,
+    myModels, err := orm.NewQuery[MyModel](
+        gormDB,
+        conditions.MyModel.Related(
+            conditions.MyOtherModel.PreloadParent(),
         ),
-    )
+    ).Find()
 
 As we can see, it is not necessary to add the preload to all joins, 
 it is enough to do it in the deepest one, 
@@ -139,23 +106,23 @@ Here is an example of its use:
 
 .. code-block:: go
 
-    type Related struct {
+    type MyOtherModel struct {
         model.UUIDModel
     }
 
-    type YourModel struct {
+    type MyModel struct {
         model.UUIDModel
 
-        Related   Related
+        Related   MyOtherModel
         RelatedID model.UUID
     }
 
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelPreloadRelated,
-    )
+    myModel, err := orm.NewQuery[MyModel](
+        conditions.MyModel.PreloadRelated(),
+    ).FindOne()
 
-    if err == nil && len(yourModels) > 1 {
-        firstRelated, err := yourModels[0].GetRelated()
+    if err == nil {
+        firstRelated, err := myModel.GetRelated()
         if err == nil {
             // you can safely apply your business logic
         } else {

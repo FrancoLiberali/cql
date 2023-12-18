@@ -18,7 +18,7 @@ func (t Table) IsInitial() bool {
 }
 
 // Returns the related Table corresponding to the model
-func (t Table) DeliverTable(query *Query, model model.Model, relationName string) (Table, error) {
+func (t Table) DeliverTable(query *GormQuery, model model.Model, relationName string) (Table, error) {
 	// get the name of the table for the model
 	tableName, err := getTableName(query.GormDB, model)
 	if err != nil {

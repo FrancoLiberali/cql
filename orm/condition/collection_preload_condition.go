@@ -19,7 +19,7 @@ func (condition collectionPreloadCondition[T1, T2]) InterfaceVerificationMethod(
 	// that an object is of type Condition[T1]
 }
 
-func (condition collectionPreloadCondition[T1, T2]) ApplyTo(queryV *query.Query, _ query.Table) error {
+func (condition collectionPreloadCondition[T1, T2]) ApplyTo(queryV *query.GormQuery, _ query.Table) error {
 	if len(condition.NestedPreloads) == 0 {
 		queryV.Preload(condition.CollectionField)
 		return nil

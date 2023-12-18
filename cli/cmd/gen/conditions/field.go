@@ -22,6 +22,10 @@ type Field struct {
 	ColumnPrefix string
 }
 
+func (field Field) CompleteName() string {
+	return field.NamePrefix + field.Name
+}
+
 func (field Field) IsModelID() bool {
 	return pie.Contains(modelIDs, field.TypeString())
 }

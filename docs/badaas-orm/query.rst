@@ -2,21 +2,42 @@
 Query
 ==============================
 
+Create, Save and Delete methods are done directly with gormDB object using the corresponding methods. 
+For details visit 
+<https://gorm.io/docs/create.html>, <https://gorm.io/docs/update.html> and <https://gorm.io/docs/delete.html>. 
+On the other hand, read (query) operations are provided by badaas-orm via its compilable query system.
+
+Query creation
+-----------------------
+
+To create a query you must use the orm.NewQuery[models.MyModel] method,
+where models.MyModel is the model you expect this query to answer. 
+This function takes as parameters the :ref:`transaction <badaas-orm/query:transactions>` 
+on which to execute the query and the query :ref:`badaas-orm/query:conditions`.
+
+Transactions
+--------------------
+
+To execute transactions badaas-orm provides the function orm.Transaction. 
+The function passed by parameter will be executed inside a gorm transaction 
+(for more information visit https://gorm.io/docs/transactions.html). 
+Using this method will also allow the transaction execution time to be logged.
+
 Query methods
 ------------------------
 
-In CRUDRepository you will find different methods that will 
-allow you to perform queries on the model to which that repository belongs:
+The `orm.Query` object obtained using `orm.NewQuery` has different methods that 
+will allow you to obtain the results of the query:
 
-- GetByID: will allow you to obtain a model by its id.
-- QueryOne: will allow you to obtain the model that meets the conditions received by parameter.
-- Query: will allow you to obtain the models that meet the conditions received by parameter.
+- FindOne: will allow you to obtain the only one model that meets the conditions received by parameter
+  or an error will be returned if none or more than one model comply with them.
+- Find: will allow you to obtain the list of models that meet the conditions received by parameter.
 
-Compilable query system
+Conditions
 ------------------------
 
-The set of conditions that are received by the read operations of the CRUDService 
-and CRUDRepository form the badaas-orm compilable query system. 
+The set of conditions that are received by the `orm.NewQuery` method 
+form the badaas-orm compilable query system. 
 It is so named because the conditions will verify at compile time that the query to be executed is correct.
 
 These conditions are objects of type Condition that contain the 
@@ -55,128 +76,137 @@ and the conditions for each of your models will be created in the conditions pac
 Use of the conditions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-After generating the conditions you will have the following conditions:
+After performing the conditions generation, 
+your conditions package will have a replica of your models package, 
+i.e. if, for example, the type models.MyModel is part of your models, 
+the variable conditions.MyModel will be in the conditions package. 
+This variable is called the condition model and it has:
 
-- One condition for each attribute of each of your models. 
-  The name of these conditions will be <Model><Attribute> where 
-  <Model> is the model type and <Attribute> is the attribute name. 
-  These conditions are of type WhereCondition.
-- One condition for each relationship with another model that each of your models has. 
-  The name of these conditions will be <Model><Relation> where 
-  <Model> is the model type and <Relation> is the name of the attribute that creates the relation. 
-  These conditions are of type JoinCondition because using them will 
-  mean performing a join within the executed query.
+- An attribute for each attribute of your original model with the same name 
+  (if models.MyModel.Name exists, then conditions.MyModel.Name is generated), 
+  of type FieldIdentifier that allows to use that attribute in queries 
+  (for :ref:`dynamic conditions <badaas-orm/advanced_query:dynamic operators>` for example).
+- A method for each attribute of your original model with the same name + Is 
+  (if models.MyModel.Name exists, then conditions.MyModel.NameIs() is generated), 
+  which will allow you to create operations for that attribute in your queries.
+- A method for each relation of your original model with the same name 
+  (if models.MyModel.MyOtherModel exists, then conditions.MyModel.MyOtherModel() is generated), 
+  which will allow you to perform joins in your queries.
+- Methods for :doc:`/badaas-orm/preloading`.
 
 Then, combining these conditions, the Connection Conditions (orm.And, orm.Or, orm.Not) 
-and the Operators (orm.Eq, orm.Lt, etc.) you will be able to make all 
-the queries you need in a safe way.
+you will be able to make all the queries you need in a safe way.
 
 Examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 **Filter by an attribute**
 
-In this example we query all YourModel that has "a_string" in the Attribute attribute.
+In this example we query all MyModel that has "a_string" in the Name attribute.
 
 .. code-block:: go
 
-    type YourModel struct {
+    type MyModel struct {
         model.UUIDModel
 
-        Attribute string
+        Name string
     }
 
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelAttribute(orm.Eq("a_string")),
-    )
+    myModels, err := orm.NewQuery[MyModel](
+        gormDB,
+        conditions.MyModel.NameIs().Eq("a_string"),
+    ).Find()
 
 **Filter by an attribute of a related model**
 
-In this example we query all YourModels whose related Related has "a_string" in its Attribute attribute.
+In this example we query all MyModels whose related MyOtherModel has "a_string" in its Name attribute.
 
 .. code-block:: go
 
-    type Related struct {
+    type MyOtherModel struct {
         model.UUIDModel
 
-        Attribute string
+        Name string
     }
 
-    type YourModel struct {
+    type MyModel struct {
         model.UUIDModel
 
-        Related   Related
+        Related   MyOtherModel
         RelatedID model.UUID
     }
 
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelRelated(
-            conditions.RelatedAttribute(orm.Eq("a_string")),
+    myModels, err := orm.NewQuery[MyModel](
+        gormDB,
+        conditions.MyModel.Related(
+            conditions.MyOtherModel.NameIs().Eq("a_string"),
         ),
-    )
+    ).Find()
 
 **Multiple conditions**
 
-In this example we query all YourModels that has a 4 in the IntAttribute attribute and 
-whose related Related has "a_string" in its Attribute attribute.
+In this example we query all MyModels that has a 4 in the Code attribute and 
+whose related MyOtherModel has "a_string" in its Name attribute.
 
 .. code-block:: go
 
-    type Related struct {
+    type MyOtherModel struct {
         model.UUIDModel
 
-        Attribute string
+        Name string
     }
 
-    type YourModel struct {
+    type MyModel struct {
         model.UUIDModel
 
-        IntAttribute int
+        Code int
 
-        Related   Related
+        Related   MyOtherModel
         RelatedID model.UUID
     }
 
-    yourModels, err := ts.crudYourModelService.Query(
-        conditions.YourModelIntAttribute(orm.Eq(4)),
-        conditions.YourModelRelated(
-            conditions.RelatedAttribute(orm.Eq("a_string")),
+    myModels, err := orm.NewQuery[MyModel](
+        gormDB,
+        conditions.MyModel.CodeIs().Eq(4),
+        conditions.MyModel.Related(
+            conditions.MyOtherModel.NameIs().Eq("a_string"),
         ),
-    )
+    ).Find()
 
 Operators
 ------------------------
 
+The different operators to use inside your queries are defined by 
+the methods of the FieldIs type, which is returned when using, for example, 
+the conditions.MyModel.CodeIs() method. 
 Below you will find the complete list of available operators:
 
-- orm.Eq(value): EqualTo
-- orm.EqOrIsNull(value): if value is not NULL returns a Eq operator but if value is NULL returns a IsNull operator
-- orm.NotEq(value): NotEqualTo
-- orm.NotEqOrIsNotNull(value): if value is not NULL returns a NotEq operator but if value is NULL returns a IsNotNull operator
-- orm.Lt(value): LessThan
-- orm.LtOrEq(value): LessThanOrEqualTo
-- orm.Gt(value): GreaterThan
-- orm.GtOrEq(value): GreaterThanOrEqualTo
-- orm.IsNull()
-- orm.IsNotNull()
-- orm.Between(v1, v2): Equivalent to v1 < attribute < v2
-- orm.NotBetween(v1, v2): Equivalent to NOT (v1 < attribute < v2)
-- orm.IsTrue() (Not supported by: sqlserver)
-- orm.IsNotTrue() (Not supported by: sqlserver)
-- orm.IsFalse() (Not supported by: sqlserver)
-- orm.IsNotFalse() (Not supported by: sqlserver)
-- orm.IsUnknown() (Not supported by: sqlserver, sqlite)
-- orm.IsNotUnknown() (Not supported by: sqlserver, sqlite)
-- orm.IsDistinct(value) (Not supported by: mysql)
-- orm.IsNotDistinct(value) (Not supported by: mysql)
-- orm.Like(pattern)
-- orm.Like(pattern).Escape(escape)
-- orm.ArrayIn(values)
-- orm.ArrayNotIn(values)
+- Eq(value): EqualTo
+- NotEq(value): NotEqualTo
+- Lt(value): LessThan
+- LtOrEq(value): LessThanOrEqualTo
+- Gt(value): GreaterThan
+- GtOrEq(value): GreaterThanOrEqualTo
+- Null()
+- NotNull()
+- Between(v1, v2): Equivalent to v1 < attribute < v2
+- NotBetween(v1, v2): Equivalent to NOT (v1 < attribute < v2)
+- True() (Not supported by: sqlserver)
+- NotTrue() (Not supported by: sqlserver)
+- False() (Not supported by: sqlserver)
+- NotFalse() (Not supported by: sqlserver)
+- Unknown() (Not supported by: sqlserver, sqlite)
+- NotUnknown() (Not supported by: sqlserver, sqlite)
+- Distinct(value) (Not supported by: mysql)
+- NotDistinct(value) (Not supported by: mysql)
+- Like(pattern)
+- In(values)
+- NotIn(values)
 
 In addition to these, badaas-orm gives the possibility to use operators 
 that are only supported by a certain database (outside the standard). 
 These operators can be found in <https://pkg.go.dev/github.com/ditrit/badaas/orm/mysql>, 
 <https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlserver>, 
 <https://pkg.go.dev/github.com/ditrit/badaas/orm/psql> 
-and <https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlite>.
+and <https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlite>. 
+To use them, use the Custom method of FieldIs type.

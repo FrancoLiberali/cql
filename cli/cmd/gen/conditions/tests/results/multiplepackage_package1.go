@@ -4,54 +4,67 @@ package conditions
 import (
 	package1 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package1"
 	package2 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var package1Type = reflect.TypeOf(*new(package1.Package1))
-var Package1IdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: package1Type,
+
+func (package1Conditions package1Conditions) IdIs() orm.FieldIs[package1.Package1, model.UUID] {
+	return orm.FieldIs[package1.Package1, model.UUID]{FieldID: package1Conditions.ID}
+}
+func (package1Conditions package1Conditions) CreatedAtIs() orm.FieldIs[package1.Package1, time.Time] {
+	return orm.FieldIs[package1.Package1, time.Time]{FieldID: package1Conditions.CreatedAt}
+}
+func (package1Conditions package1Conditions) UpdatedAtIs() orm.FieldIs[package1.Package1, time.Time] {
+	return orm.FieldIs[package1.Package1, time.Time]{FieldID: package1Conditions.UpdatedAt}
+}
+func (package1Conditions package1Conditions) DeletedAtIs() orm.FieldIs[package1.Package1, time.Time] {
+	return orm.FieldIs[package1.Package1, time.Time]{FieldID: package1Conditions.DeletedAt}
+}
+func (package1Conditions package1Conditions) Package2(conditions ...condition.Condition[package2.Package2]) condition.JoinCondition[package1.Package1] {
+	return condition.NewJoinCondition[package1.Package1, package2.Package2](conditions, "Package2", "ID", package1Conditions.Preload(), "Package1ID")
+}
+func (package1Conditions package1Conditions) PreloadPackage2() condition.JoinCondition[package1.Package1] {
+	return package1Conditions.Package2(Package2.Preload())
 }
 
-func Package1Id(operator operator.Operator[model.UUID]) condition.WhereCondition[package1.Package1] {
-	return condition.NewFieldCondition[package1.Package1, model.UUID](Package1IdField, operator)
+type package1Conditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
 }
 
-var Package1CreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: package1Type,
+var Package1 = package1Conditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: package1Type,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: package1Type,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: package1Type,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: package1Type,
+	},
 }
 
-func Package1CreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[package1.Package1] {
-	return condition.NewFieldCondition[package1.Package1, time.Time](Package1CreatedAtField, operator)
+// Preload allows preloading the Package1 when doing a query
+func (package1Conditions package1Conditions) Preload() condition.Condition[package1.Package1] {
+	return condition.NewPreloadCondition[package1.Package1](package1Conditions.ID, package1Conditions.CreatedAt, package1Conditions.UpdatedAt, package1Conditions.DeletedAt)
 }
 
-var Package1UpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: package1Type,
+// PreloadRelations allows preloading all the Package1's relation when doing a query
+func (package1Conditions package1Conditions) PreloadRelations() []condition.Condition[package1.Package1] {
+	return []condition.Condition[package1.Package1]{package1Conditions.PreloadPackage2()}
 }
-
-func Package1UpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[package1.Package1] {
-	return condition.NewFieldCondition[package1.Package1, time.Time](Package1UpdatedAtField, operator)
-}
-
-var Package1DeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: package1Type,
-}
-
-func Package1DeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[package1.Package1] {
-	return condition.NewFieldCondition[package1.Package1, time.Time](Package1DeletedAtField, operator)
-}
-func Package1Package2(conditions ...condition.Condition[package2.Package2]) condition.JoinCondition[package1.Package1] {
-	return condition.NewJoinCondition[package1.Package1, package2.Package2](conditions, "Package2", "ID", Package1PreloadAttributes, "Package1ID")
-}
-
-var Package1PreloadPackage2 = Package1Package2(Package2PreloadAttributes)
-var Package1PreloadAttributes = condition.NewPreloadCondition[package1.Package1](Package1IdField, Package1CreatedAtField, Package1UpdatedAtField, Package1DeletedAtField)
-var Package1PreloadRelations = []condition.Condition[package1.Package1]{Package1PreloadPackage2}

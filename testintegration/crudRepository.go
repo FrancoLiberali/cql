@@ -5,22 +5,20 @@ import (
 	"gorm.io/gorm"
 	"gotest.tools/assert"
 
-	"github.com/ditrit/badaas/orm"
-	"github.com/ditrit/badaas/orm/errors"
 	"github.com/ditrit/badaas/orm/model"
-	"github.com/ditrit/badaas/testintegration/conditions"
+	"github.com/ditrit/badaas/persistence/repository"
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
 type CRUDRepositoryIntTestSuite struct {
 	suite.Suite
 	db                    *gorm.DB
-	crudProductRepository orm.CRUDRepository[models.Product, model.UUID]
+	crudProductRepository repository.CRUD[models.Product, model.UUID]
 }
 
 func NewCRUDRepositoryIntTestSuite(
 	db *gorm.DB,
-	crudProductRepository orm.CRUDRepository[models.Product, model.UUID],
+	crudProductRepository repository.CRUD[models.Product, model.UUID],
 ) *CRUDRepositoryIntTestSuite {
 	return &CRUDRepositoryIntTestSuite{
 		db:                    db,
@@ -51,38 +49,6 @@ func (ts *CRUDRepositoryIntTestSuite) TestGetByIDReturnsEntityIfIDMatch() {
 	ts.Nil(err)
 
 	assert.DeepEqual(ts.T(), product, productReturned)
-}
-
-// ------------------------- QueryOne --------------------------------
-
-func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsErrorIfConditionsDontMatch() {
-	ts.createProduct(0)
-	_, err := ts.crudProductRepository.QueryOne(
-		ts.db,
-		conditions.ProductInt(orm.Eq(1)),
-	)
-	ts.Error(err, gorm.ErrRecordNotFound)
-}
-
-func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsEntityIfConditionsMatch() {
-	product := ts.createProduct(1)
-	productReturned, err := ts.crudProductRepository.QueryOne(
-		ts.db,
-		conditions.ProductInt(orm.Eq(1)),
-	)
-	ts.Nil(err)
-
-	assert.DeepEqual(ts.T(), product, productReturned)
-}
-
-func (ts *CRUDRepositoryIntTestSuite) TestQueryOneReturnsErrorIfMoreThanOneMatchConditions() {
-	ts.createProduct(0)
-	ts.createProduct(0)
-	_, err := ts.crudProductRepository.QueryOne(
-		ts.db,
-		conditions.ProductInt(orm.Eq(0)),
-	)
-	ts.Error(err, errors.ErrMoreThanOneObjectFound)
 }
 
 // ------------------------- utils -------------------------

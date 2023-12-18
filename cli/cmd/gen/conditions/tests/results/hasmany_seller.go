@@ -3,63 +3,75 @@ package conditions
 
 import (
 	hasmany "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmany"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var sellerType = reflect.TypeOf(*new(hasmany.Seller))
-var SellerIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: sellerType,
+
+func (sellerConditions sellerConditions) IdIs() orm.FieldIs[hasmany.Seller, model.UUID] {
+	return orm.FieldIs[hasmany.Seller, model.UUID]{FieldID: sellerConditions.ID}
+}
+func (sellerConditions sellerConditions) CreatedAtIs() orm.FieldIs[hasmany.Seller, time.Time] {
+	return orm.FieldIs[hasmany.Seller, time.Time]{FieldID: sellerConditions.CreatedAt}
+}
+func (sellerConditions sellerConditions) UpdatedAtIs() orm.FieldIs[hasmany.Seller, time.Time] {
+	return orm.FieldIs[hasmany.Seller, time.Time]{FieldID: sellerConditions.UpdatedAt}
+}
+func (sellerConditions sellerConditions) DeletedAtIs() orm.FieldIs[hasmany.Seller, time.Time] {
+	return orm.FieldIs[hasmany.Seller, time.Time]{FieldID: sellerConditions.DeletedAt}
+}
+func (sellerConditions sellerConditions) Company(conditions ...condition.Condition[hasmany.Company]) condition.JoinCondition[hasmany.Seller] {
+	return condition.NewJoinCondition[hasmany.Seller, hasmany.Company](conditions, "Company", "CompanyID", sellerConditions.Preload(), "ID")
+}
+func (sellerConditions sellerConditions) PreloadCompany() condition.JoinCondition[hasmany.Seller] {
+	return sellerConditions.Company(Company.Preload())
+}
+func (sellerConditions sellerConditions) CompanyIdIs() orm.FieldIs[hasmany.Seller, model.UUID] {
+	return orm.FieldIs[hasmany.Seller, model.UUID]{FieldID: sellerConditions.CompanyID}
 }
 
-func SellerId(operator operator.Operator[model.UUID]) condition.WhereCondition[hasmany.Seller] {
-	return condition.NewFieldCondition[hasmany.Seller, model.UUID](SellerIdField, operator)
+type sellerConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
+	CompanyID query.FieldIdentifier[model.UUID]
 }
 
-var SellerCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: sellerType,
+var Seller = sellerConditions{
+	CompanyID: query.FieldIdentifier[model.UUID]{
+		Field:     "CompanyID",
+		ModelType: sellerType,
+	},
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: sellerType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: sellerType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: sellerType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: sellerType,
+	},
 }
 
-func SellerCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmany.Seller] {
-	return condition.NewFieldCondition[hasmany.Seller, time.Time](SellerCreatedAtField, operator)
+// Preload allows preloading the Seller when doing a query
+func (sellerConditions sellerConditions) Preload() condition.Condition[hasmany.Seller] {
+	return condition.NewPreloadCondition[hasmany.Seller](sellerConditions.ID, sellerConditions.CreatedAt, sellerConditions.UpdatedAt, sellerConditions.DeletedAt, sellerConditions.CompanyID)
 }
 
-var SellerUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: sellerType,
+// PreloadRelations allows preloading all the Seller's relation when doing a query
+func (sellerConditions sellerConditions) PreloadRelations() []condition.Condition[hasmany.Seller] {
+	return []condition.Condition[hasmany.Seller]{sellerConditions.PreloadCompany()}
 }
-
-func SellerUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmany.Seller] {
-	return condition.NewFieldCondition[hasmany.Seller, time.Time](SellerUpdatedAtField, operator)
-}
-
-var SellerDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: sellerType,
-}
-
-func SellerDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmany.Seller] {
-	return condition.NewFieldCondition[hasmany.Seller, time.Time](SellerDeletedAtField, operator)
-}
-func SellerCompany(conditions ...condition.Condition[hasmany.Company]) condition.JoinCondition[hasmany.Seller] {
-	return condition.NewJoinCondition[hasmany.Seller, hasmany.Company](conditions, "Company", "CompanyID", SellerPreloadAttributes, "ID")
-}
-
-var SellerPreloadCompany = SellerCompany(CompanyPreloadAttributes)
-var SellerCompanyIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "CompanyID",
-	ModelType: sellerType,
-}
-
-func SellerCompanyId(operator operator.Operator[model.UUID]) condition.WhereCondition[hasmany.Seller] {
-	return condition.NewFieldCondition[hasmany.Seller, model.UUID](SellerCompanyIdField, operator)
-}
-
-var SellerPreloadAttributes = condition.NewPreloadCondition[hasmany.Seller](SellerIdField, SellerCreatedAtField, SellerUpdatedAtField, SellerDeletedAtField, SellerCompanyIdField)
-var SellerPreloadRelations = []condition.Condition[hasmany.Seller]{SellerPreloadCompany}

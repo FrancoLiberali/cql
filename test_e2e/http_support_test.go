@@ -238,10 +238,7 @@ func checkMethod(method string) (string, error) {
 		http.MethodTrace,
 	}
 	sanitizedMethod := strings.TrimSpace(strings.ToUpper(method))
-<<<<<<< HEAD
 
-=======
->>>>>>> main
 	if !pie.Contains(
 		allowedMethods,
 		sanitizedMethod,

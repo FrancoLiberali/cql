@@ -1,0 +1,13 @@
+database:
+  host: localhost
+  port: 5000
+  sslmode: disable
+  username: badaas
+  password: badaas_password2023
+  name: badaas_db
+  init:
+    retry: 10
+    retryTime: 5
+
+logger:
+  mode: dev

@@ -17,17 +17,8 @@ the badaas-orm default logger will be configured instead of the gorm one.
 For details about this logger visit :doc:`/badaas-orm/logger`. 
 For details about gorm configuration visit `gorm documentation <https://gorm.io/docs/connecting_to_the_database.html>`_.
 
-When using badaas-orm with `fx` as :ref:`dependency injector <badaas-orm/concepts:Dependency injection>` you 
-will need to provide (`fx.Provide`) a function that returns a `*gorm.DB`.
-
 Migration
 ----------------------------
 
 Migration is done by gorm using the `gormDB.AutoMigrate` method. 
 For details visit `gorm docs <https://gorm.io/docs/migration.html>`_.
-
-When using badaas-orm with `fx` as :ref:`dependency injector <badaas-orm/concepts:Dependency injection>` 
-this method can't be called directly. In that case, badaas-orm will execute the migration by providing 
-`orm.AutoMigrate` to fx. For this to work, you will need to provide also a method that returns 
-`orm.GetModelsResult` with the models you want to include in the migration. 
-Remember that the order in this list is important for gorm to be able to execute the migration.

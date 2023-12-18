@@ -15,7 +15,7 @@ func (condition preloadCondition[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (condition preloadCondition[T]) ApplyTo(query *query.Query, table query.Table) error {
+func (condition preloadCondition[T]) ApplyTo(query *query.GormQuery, table query.Table) error {
 	for _, fieldID := range condition.Fields {
 		query.AddSelect(table, fieldID)
 	}
