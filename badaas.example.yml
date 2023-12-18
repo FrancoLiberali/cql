@@ -59,6 +59,29 @@ logger:
   # Either `dev` or `prod`
   # default (`prod`)
   mode: prod
+
+  # Disable error stacktrace from logs
+  # default (true)
+  disableStacktrace: true
+
+  # Threshold for the slow query warning in milliseconds
+  # default (200)
+  # use 0 to disable slow query warnings
+  slowQueryThreshold: 200
+
+  # Threshold for the slow transaction warning in milliseconds
+  # default (200)
+  # use 0 to disable slow transaction warnings
+  slowTransactionThreshold: 200
+
+  # If true, ignore gorm.ErrRecordNotFound error for logger
+  # default (false)
+  ignoreRecordNotFoundError: false
+
+  # If true, don't include params in the query execution logs
+  # default (false)
+  parameterizedQueries: false
+
   request:
     # Change the log emitted when badaas receives a request on a valid endpoint.
     template: "Receive {{method}} request on {{url}}"

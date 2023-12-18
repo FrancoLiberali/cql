@@ -4,16 +4,14 @@ import (
 	"testing"
 	"time"
 
-	"github.com/spf13/viper"
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
-	"go.uber.org/zap"
+	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/configuration"
-	"github.com/ditrit/badaas/logger"
 	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/logger"
+	"github.com/ditrit/badaas/persistence/database"
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
@@ -32,21 +30,10 @@ func TestBaDaaSORM(t *testing.T) {
 	tGlobal = t
 
 	fx.New(
-		// logger
-		fx.Provide(NewLoggerConfiguration),
-		logger.LoggerModule,
-
 		// connect to db
-		fx.Provide(NewGormDBConnection),
-
-		// activate badaas-orm
+		fx.Provide(NewDBConnection),
 		fx.Provide(GetModels),
 		orm.AutoMigrate,
-
-		// logger for fx
-		fx.WithLogger(func(logger *zap.Logger) fxevent.Logger {
-			return &fxevent.ZapLogger{Logger: logger}
-		}),
 
 		// create crud services for models
 		orm.GetCRUDServiceModule[models.Seller](),
@@ -90,15 +77,10 @@ func runORMTestSuites(
 	shutdowner.Shutdown()
 }
 
-func NewLoggerConfiguration() configuration.LoggerConfiguration {
-	viper.Set(configuration.LoggerModeKey, "dev")
-	return configuration.NewLoggerConfiguration()
-}
-
-func NewGormDBConnection(logger *zap.Logger) (*gorm.DB, error) {
-	return orm.ConnectToDialector(
-		logger,
-		orm.CreateDialector(host, username, password, sslMode, dbName, port),
+func NewDBConnection() (*gorm.DB, error) {
+	return database.OpenWithRetry(
+		postgres.Open(orm.CreateDSN(host, username, password, sslMode, dbName, port)),
+		logger.Default.ToLogMode(logger.Info),
 		10, time.Duration(5)*time.Second,
 	)
 }
