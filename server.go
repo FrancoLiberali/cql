@@ -50,7 +50,6 @@ func newHTTPServer(
 	)(router)
 
 	srv := createServer(handler, httpServerConfig)
-
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			ln, err := net.Listen("tcp", srv.Addr)
