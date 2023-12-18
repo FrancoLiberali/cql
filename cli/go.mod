@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/dave/jennifer v1.6.1
-	github.com/ditrit/badaas v0.0.0-20230809080330-b57bcd989f3e
+	github.com/ditrit/badaas v0.0.0-20230829122312-83f5e8a9f307
 	github.com/ditrit/verdeter v0.4.0
 	github.com/elliotchance/pie/v2 v2.7.0
 	github.com/ettle/strcase v0.1.1
@@ -44,5 +44,5 @@ require (
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
-	gorm.io/gorm v1.25.1 // indirect
+	gorm.io/gorm v1.25.2-0.20230530020048-26663ab9bf55 // indirect
 )

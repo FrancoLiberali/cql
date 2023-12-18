@@ -3,121 +3,120 @@ package conditions
 
 import (
 	nullabletypes "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/nullabletypes"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var nullableTypesType = reflect.TypeOf(*new(nullabletypes.NullableTypes))
-var NullableTypesIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: nullableTypesType,
+
+func (nullableTypesConditions nullableTypesConditions) IdIs() orm.FieldIs[nullabletypes.NullableTypes, model.UUID] {
+	return orm.FieldIs[nullabletypes.NullableTypes, model.UUID]{FieldID: nullableTypesConditions.ID}
+}
+func (nullableTypesConditions nullableTypesConditions) CreatedAtIs() orm.FieldIs[nullabletypes.NullableTypes, time.Time] {
+	return orm.FieldIs[nullabletypes.NullableTypes, time.Time]{FieldID: nullableTypesConditions.CreatedAt}
+}
+func (nullableTypesConditions nullableTypesConditions) UpdatedAtIs() orm.FieldIs[nullabletypes.NullableTypes, time.Time] {
+	return orm.FieldIs[nullabletypes.NullableTypes, time.Time]{FieldID: nullableTypesConditions.UpdatedAt}
+}
+func (nullableTypesConditions nullableTypesConditions) DeletedAtIs() orm.FieldIs[nullabletypes.NullableTypes, time.Time] {
+	return orm.FieldIs[nullabletypes.NullableTypes, time.Time]{FieldID: nullableTypesConditions.DeletedAt}
+}
+func (nullableTypesConditions nullableTypesConditions) StringIs() orm.StringFieldIs[nullabletypes.NullableTypes] {
+	return orm.StringFieldIs[nullabletypes.NullableTypes]{FieldIs: orm.FieldIs[nullabletypes.NullableTypes, string]{FieldID: nullableTypesConditions.String}}
+}
+func (nullableTypesConditions nullableTypesConditions) Int64Is() orm.FieldIs[nullabletypes.NullableTypes, int64] {
+	return orm.FieldIs[nullabletypes.NullableTypes, int64]{FieldID: nullableTypesConditions.Int64}
+}
+func (nullableTypesConditions nullableTypesConditions) Int32Is() orm.FieldIs[nullabletypes.NullableTypes, int32] {
+	return orm.FieldIs[nullabletypes.NullableTypes, int32]{FieldID: nullableTypesConditions.Int32}
+}
+func (nullableTypesConditions nullableTypesConditions) Int16Is() orm.FieldIs[nullabletypes.NullableTypes, int16] {
+	return orm.FieldIs[nullabletypes.NullableTypes, int16]{FieldID: nullableTypesConditions.Int16}
+}
+func (nullableTypesConditions nullableTypesConditions) ByteIs() orm.FieldIs[nullabletypes.NullableTypes, int8] {
+	return orm.FieldIs[nullabletypes.NullableTypes, int8]{FieldID: nullableTypesConditions.Byte}
+}
+func (nullableTypesConditions nullableTypesConditions) Float64Is() orm.FieldIs[nullabletypes.NullableTypes, float64] {
+	return orm.FieldIs[nullabletypes.NullableTypes, float64]{FieldID: nullableTypesConditions.Float64}
+}
+func (nullableTypesConditions nullableTypesConditions) BoolIs() orm.BoolFieldIs[nullabletypes.NullableTypes] {
+	return orm.BoolFieldIs[nullabletypes.NullableTypes]{FieldIs: orm.FieldIs[nullabletypes.NullableTypes, bool]{FieldID: nullableTypesConditions.Bool}}
+}
+func (nullableTypesConditions nullableTypesConditions) TimeIs() orm.FieldIs[nullabletypes.NullableTypes, time.Time] {
+	return orm.FieldIs[nullabletypes.NullableTypes, time.Time]{FieldID: nullableTypesConditions.Time}
 }
 
-func NullableTypesId(operator operator.Operator[model.UUID]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, model.UUID](NullableTypesIdField, operator)
+type nullableTypesConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
+	String    query.FieldIdentifier[string]
+	Int64     query.FieldIdentifier[int64]
+	Int32     query.FieldIdentifier[int32]
+	Int16     query.FieldIdentifier[int16]
+	Byte      query.FieldIdentifier[int8]
+	Float64   query.FieldIdentifier[float64]
+	Bool      query.FieldIdentifier[bool]
+	Time      query.FieldIdentifier[time.Time]
 }
 
-var NullableTypesCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: nullableTypesType,
+var NullableTypes = nullableTypesConditions{
+	Bool: query.FieldIdentifier[bool]{
+		Field:     "Bool",
+		ModelType: nullableTypesType,
+	},
+	Byte: query.FieldIdentifier[int8]{
+		Field:     "Byte",
+		ModelType: nullableTypesType,
+	},
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: nullableTypesType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: nullableTypesType,
+	},
+	Float64: query.FieldIdentifier[float64]{
+		Field:     "Float64",
+		ModelType: nullableTypesType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: nullableTypesType,
+	},
+	Int16: query.FieldIdentifier[int16]{
+		Field:     "Int16",
+		ModelType: nullableTypesType,
+	},
+	Int32: query.FieldIdentifier[int32]{
+		Field:     "Int32",
+		ModelType: nullableTypesType,
+	},
+	Int64: query.FieldIdentifier[int64]{
+		Field:     "Int64",
+		ModelType: nullableTypesType,
+	},
+	String: query.FieldIdentifier[string]{
+		Field:     "String",
+		ModelType: nullableTypesType,
+	},
+	Time: query.FieldIdentifier[time.Time]{
+		Field:     "Time",
+		ModelType: nullableTypesType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: nullableTypesType,
+	},
 }
 
-func NullableTypesCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, time.Time](NullableTypesCreatedAtField, operator)
+// Preload allows preloading the NullableTypes when doing a query
+func (nullableTypesConditions nullableTypesConditions) Preload() condition.Condition[nullabletypes.NullableTypes] {
+	return condition.NewPreloadCondition[nullabletypes.NullableTypes](nullableTypesConditions.ID, nullableTypesConditions.CreatedAt, nullableTypesConditions.UpdatedAt, nullableTypesConditions.DeletedAt, nullableTypesConditions.String, nullableTypesConditions.Int64, nullableTypesConditions.Int32, nullableTypesConditions.Int16, nullableTypesConditions.Byte, nullableTypesConditions.Float64, nullableTypesConditions.Bool, nullableTypesConditions.Time)
 }
-
-var NullableTypesUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, time.Time](NullableTypesUpdatedAtField, operator)
-}
-
-var NullableTypesDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, time.Time](NullableTypesDeletedAtField, operator)
-}
-
-var NullableTypesStringField = query.FieldIdentifier[string]{
-	Field:     "String",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesString(operator operator.Operator[string]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, string](NullableTypesStringField, operator)
-}
-
-var NullableTypesInt64Field = query.FieldIdentifier[int64]{
-	Field:     "Int64",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesInt64(operator operator.Operator[int64]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, int64](NullableTypesInt64Field, operator)
-}
-
-var NullableTypesInt32Field = query.FieldIdentifier[int32]{
-	Field:     "Int32",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesInt32(operator operator.Operator[int32]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, int32](NullableTypesInt32Field, operator)
-}
-
-var NullableTypesInt16Field = query.FieldIdentifier[int16]{
-	Field:     "Int16",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesInt16(operator operator.Operator[int16]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, int16](NullableTypesInt16Field, operator)
-}
-
-var NullableTypesByteField = query.FieldIdentifier[int8]{
-	Field:     "Byte",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesByte(operator operator.Operator[int8]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, int8](NullableTypesByteField, operator)
-}
-
-var NullableTypesFloat64Field = query.FieldIdentifier[float64]{
-	Field:     "Float64",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesFloat64(operator operator.Operator[float64]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, float64](NullableTypesFloat64Field, operator)
-}
-
-var NullableTypesBoolField = query.FieldIdentifier[bool]{
-	Field:     "Bool",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesBool(operator operator.Operator[bool]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, bool](NullableTypesBoolField, operator)
-}
-
-var NullableTypesTimeField = query.FieldIdentifier[time.Time]{
-	Field:     "Time",
-	ModelType: nullableTypesType,
-}
-
-func NullableTypesTime(operator operator.Operator[time.Time]) condition.WhereCondition[nullabletypes.NullableTypes] {
-	return condition.NewFieldCondition[nullabletypes.NullableTypes, time.Time](NullableTypesTimeField, operator)
-}
-
-var NullableTypesPreloadAttributes = condition.NewPreloadCondition[nullabletypes.NullableTypes](NullableTypesIdField, NullableTypesCreatedAtField, NullableTypesUpdatedAtField, NullableTypesDeletedAtField, NullableTypesStringField, NullableTypesInt64Field, NullableTypesInt32Field, NullableTypesInt16Field, NullableTypesByteField, NullableTypesFloat64Field, NullableTypesBoolField, NullableTypesTimeField)

@@ -3,49 +3,56 @@ package conditions
 
 import (
 	overrideforeignkey "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkey"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var personType = reflect.TypeOf(*new(overrideforeignkey.Person))
-var PersonIdField = query.FieldIdentifier[model.UUID]{
-	Field:     "ID",
-	ModelType: personType,
+
+func (personConditions personConditions) IdIs() orm.FieldIs[overrideforeignkey.Person, model.UUID] {
+	return orm.FieldIs[overrideforeignkey.Person, model.UUID]{FieldID: personConditions.ID}
+}
+func (personConditions personConditions) CreatedAtIs() orm.FieldIs[overrideforeignkey.Person, time.Time] {
+	return orm.FieldIs[overrideforeignkey.Person, time.Time]{FieldID: personConditions.CreatedAt}
+}
+func (personConditions personConditions) UpdatedAtIs() orm.FieldIs[overrideforeignkey.Person, time.Time] {
+	return orm.FieldIs[overrideforeignkey.Person, time.Time]{FieldID: personConditions.UpdatedAt}
+}
+func (personConditions personConditions) DeletedAtIs() orm.FieldIs[overrideforeignkey.Person, time.Time] {
+	return orm.FieldIs[overrideforeignkey.Person, time.Time]{FieldID: personConditions.DeletedAt}
 }
 
-func PersonId(operator operator.Operator[model.UUID]) condition.WhereCondition[overrideforeignkey.Person] {
-	return condition.NewFieldCondition[overrideforeignkey.Person, model.UUID](PersonIdField, operator)
+type personConditions struct {
+	ID        query.FieldIdentifier[model.UUID]
+	CreatedAt query.FieldIdentifier[time.Time]
+	UpdatedAt query.FieldIdentifier[time.Time]
+	DeletedAt query.FieldIdentifier[time.Time]
 }
 
-var PersonCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: personType,
+var Person = personConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: personType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: personType,
+	},
+	ID: query.FieldIdentifier[model.UUID]{
+		Field:     "ID",
+		ModelType: personType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: personType,
+	},
 }
 
-func PersonCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Person] {
-	return condition.NewFieldCondition[overrideforeignkey.Person, time.Time](PersonCreatedAtField, operator)
+// Preload allows preloading the Person when doing a query
+func (personConditions personConditions) Preload() condition.Condition[overrideforeignkey.Person] {
+	return condition.NewPreloadCondition[overrideforeignkey.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt)
 }
-
-var PersonUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: personType,
-}
-
-func PersonUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Person] {
-	return condition.NewFieldCondition[overrideforeignkey.Person, time.Time](PersonUpdatedAtField, operator)
-}
-
-var PersonDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: personType,
-}
-
-func PersonDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[overrideforeignkey.Person] {
-	return condition.NewFieldCondition[overrideforeignkey.Person, time.Time](PersonDeletedAtField, operator)
-}
-
-var PersonPreloadAttributes = condition.NewPreloadCondition[overrideforeignkey.Person](PersonIdField, PersonCreatedAtField, PersonUpdatedAtField, PersonDeletedAtField)

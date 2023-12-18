@@ -3,77 +3,81 @@ package conditions
 
 import (
 	gormembedded "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/gormembedded"
+	orm "github.com/ditrit/badaas/orm"
 	condition "github.com/ditrit/badaas/orm/condition"
 	model "github.com/ditrit/badaas/orm/model"
-	operator "github.com/ditrit/badaas/orm/operator"
 	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var gormEmbeddedType = reflect.TypeOf(*new(gormembedded.GormEmbedded))
-var GormEmbeddedIdField = query.FieldIdentifier[model.UIntID]{
-	Field:     "ID",
-	ModelType: gormEmbeddedType,
+
+func (gormEmbeddedConditions gormEmbeddedConditions) IdIs() orm.FieldIs[gormembedded.GormEmbedded, model.UIntID] {
+	return orm.FieldIs[gormembedded.GormEmbedded, model.UIntID]{FieldID: gormEmbeddedConditions.ID}
+}
+func (gormEmbeddedConditions gormEmbeddedConditions) CreatedAtIs() orm.FieldIs[gormembedded.GormEmbedded, time.Time] {
+	return orm.FieldIs[gormembedded.GormEmbedded, time.Time]{FieldID: gormEmbeddedConditions.CreatedAt}
+}
+func (gormEmbeddedConditions gormEmbeddedConditions) UpdatedAtIs() orm.FieldIs[gormembedded.GormEmbedded, time.Time] {
+	return orm.FieldIs[gormembedded.GormEmbedded, time.Time]{FieldID: gormEmbeddedConditions.UpdatedAt}
+}
+func (gormEmbeddedConditions gormEmbeddedConditions) DeletedAtIs() orm.FieldIs[gormembedded.GormEmbedded, time.Time] {
+	return orm.FieldIs[gormembedded.GormEmbedded, time.Time]{FieldID: gormEmbeddedConditions.DeletedAt}
+}
+func (gormEmbeddedConditions gormEmbeddedConditions) IntIs() orm.FieldIs[gormembedded.GormEmbedded, int] {
+	return orm.FieldIs[gormembedded.GormEmbedded, int]{FieldID: gormEmbeddedConditions.Int}
+}
+func (gormEmbeddedConditions gormEmbeddedConditions) GormEmbeddedIntIs() orm.FieldIs[gormembedded.GormEmbedded, int] {
+	return orm.FieldIs[gormembedded.GormEmbedded, int]{FieldID: gormEmbeddedConditions.GormEmbeddedInt}
+}
+func (gormEmbeddedConditions gormEmbeddedConditions) GormEmbeddedNoPrefixIntIs() orm.FieldIs[gormembedded.GormEmbedded, int] {
+	return orm.FieldIs[gormembedded.GormEmbedded, int]{FieldID: gormEmbeddedConditions.GormEmbeddedNoPrefixInt}
 }
 
-func GormEmbeddedId(operator operator.Operator[model.UIntID]) condition.WhereCondition[gormembedded.GormEmbedded] {
-	return condition.NewFieldCondition[gormembedded.GormEmbedded, model.UIntID](GormEmbeddedIdField, operator)
+type gormEmbeddedConditions struct {
+	ID                      query.FieldIdentifier[model.UIntID]
+	CreatedAt               query.FieldIdentifier[time.Time]
+	UpdatedAt               query.FieldIdentifier[time.Time]
+	DeletedAt               query.FieldIdentifier[time.Time]
+	Int                     query.FieldIdentifier[int]
+	GormEmbeddedInt         query.FieldIdentifier[int]
+	GormEmbeddedNoPrefixInt query.FieldIdentifier[int]
 }
 
-var GormEmbeddedCreatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "CreatedAt",
-	ModelType: gormEmbeddedType,
+var GormEmbedded = gormEmbeddedConditions{
+	CreatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "CreatedAt",
+		ModelType: gormEmbeddedType,
+	},
+	DeletedAt: query.FieldIdentifier[time.Time]{
+		Field:     "DeletedAt",
+		ModelType: gormEmbeddedType,
+	},
+	GormEmbeddedInt: query.FieldIdentifier[int]{
+		ColumnPrefix: "gorm_embedded_",
+		Field:        "Int",
+		ModelType:    gormEmbeddedType,
+	},
+	GormEmbeddedNoPrefixInt: query.FieldIdentifier[int]{
+		Field:     "Int",
+		ModelType: gormEmbeddedType,
+	},
+	ID: query.FieldIdentifier[model.UIntID]{
+		Field:     "ID",
+		ModelType: gormEmbeddedType,
+	},
+	Int: query.FieldIdentifier[int]{
+		Field:     "Int",
+		ModelType: gormEmbeddedType,
+	},
+	UpdatedAt: query.FieldIdentifier[time.Time]{
+		Field:     "UpdatedAt",
+		ModelType: gormEmbeddedType,
+	},
 }
 
-func GormEmbeddedCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[gormembedded.GormEmbedded] {
-	return condition.NewFieldCondition[gormembedded.GormEmbedded, time.Time](GormEmbeddedCreatedAtField, operator)
+// Preload allows preloading the GormEmbedded when doing a query
+func (gormEmbeddedConditions gormEmbeddedConditions) Preload() condition.Condition[gormembedded.GormEmbedded] {
+	return condition.NewPreloadCondition[gormembedded.GormEmbedded](gormEmbeddedConditions.ID, gormEmbeddedConditions.CreatedAt, gormEmbeddedConditions.UpdatedAt, gormEmbeddedConditions.DeletedAt, gormEmbeddedConditions.Int, gormEmbeddedConditions.GormEmbeddedInt, gormEmbeddedConditions.GormEmbeddedNoPrefixInt)
 }
-
-var GormEmbeddedUpdatedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "UpdatedAt",
-	ModelType: gormEmbeddedType,
-}
-
-func GormEmbeddedUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[gormembedded.GormEmbedded] {
-	return condition.NewFieldCondition[gormembedded.GormEmbedded, time.Time](GormEmbeddedUpdatedAtField, operator)
-}
-
-var GormEmbeddedDeletedAtField = query.FieldIdentifier[time.Time]{
-	Field:     "DeletedAt",
-	ModelType: gormEmbeddedType,
-}
-
-func GormEmbeddedDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[gormembedded.GormEmbedded] {
-	return condition.NewFieldCondition[gormembedded.GormEmbedded, time.Time](GormEmbeddedDeletedAtField, operator)
-}
-
-var GormEmbeddedIntField = query.FieldIdentifier[int]{
-	Field:     "Int",
-	ModelType: gormEmbeddedType,
-}
-
-func GormEmbeddedInt(operator operator.Operator[int]) condition.WhereCondition[gormembedded.GormEmbedded] {
-	return condition.NewFieldCondition[gormembedded.GormEmbedded, int](GormEmbeddedIntField, operator)
-}
-
-var GormEmbeddedGormEmbeddedIntField = query.FieldIdentifier[int]{
-	ColumnPrefix: "gorm_embedded_",
-	Field:        "Int",
-	ModelType:    gormEmbeddedType,
-}
-
-func GormEmbeddedGormEmbeddedInt(operator operator.Operator[int]) condition.WhereCondition[gormembedded.GormEmbedded] {
-	return condition.NewFieldCondition[gormembedded.GormEmbedded, int](GormEmbeddedGormEmbeddedIntField, operator)
-}
-
-var GormEmbeddedGormEmbeddedNoPrefixIntField = query.FieldIdentifier[int]{
-	Field:     "Int",
-	ModelType: gormEmbeddedType,
-}
-
-func GormEmbeddedGormEmbeddedNoPrefixInt(operator operator.Operator[int]) condition.WhereCondition[gormembedded.GormEmbedded] {
-	return condition.NewFieldCondition[gormembedded.GormEmbedded, int](GormEmbeddedGormEmbeddedNoPrefixIntField, operator)
-}
-
-var GormEmbeddedPreloadAttributes = condition.NewPreloadCondition[gormembedded.GormEmbedded](GormEmbeddedIdField, GormEmbeddedCreatedAtField, GormEmbeddedUpdatedAtField, GormEmbeddedDeletedAtField, GormEmbeddedIntField, GormEmbeddedGormEmbeddedIntField, GormEmbeddedGormEmbeddedNoPrefixIntField)
