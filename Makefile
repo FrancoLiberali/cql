@@ -23,19 +23,19 @@ sqlserver:
 	docker compose -f "docker/sqlserver/docker-compose.yml" up -d --build
 
 test_postgresql: postgresql
-	DB=postgres gotestsum --format testname ./test
+	DB=postgres gotestsum --format testname ./...
 
 test_cockroachdb: cockroachdb
-	DB=postgres gotestsum --format testname ./test -tags=cockroachdb
+	DB=postgres gotestsum --format testname ./... -tags=cockroachdb
 
 test_mysql: mysql
-	DB=mysql gotestsum --format testname ./test -tags=mysql
+	DB=mysql gotestsum --format testname ./... -tags=mysql
 
 test_sqlite:
-	DB=sqlite gotestsum --format testname ./test
+	DB=sqlite gotestsum --format testname ./...
 
 test_sqlserver: sqlserver
-	DB=sqlserver gotestsum --format testname ./test
+	DB=sqlserver gotestsum --format testname ./...
 
 test: test_postgresql
 
