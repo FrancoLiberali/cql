@@ -184,6 +184,7 @@ func (sessionService *sessionServiceImpl) delete(session *models.Session) httper
 	defer sessionService.mutex.Unlock()
 
 	sessionUUID := session.ID
+
 	err := sessionService.sessionRepository.Delete(sessionService.db, session)
 	if err != nil {
 		return httperrors.NewInternalServerError(
@@ -218,6 +219,7 @@ func (sessionService *sessionServiceImpl) RollSession(sessionUUID model.UUID) ht
 		defer sessionService.mutex.Unlock()
 
 		session.ExpiresAt = session.ExpiresAt.Add(sessionDuration)
+
 		err := sessionService.sessionRepository.Save(sessionService.db, session)
 		if err != nil {
 			return httperrors.NewDBError(err)
@@ -235,10 +237,12 @@ func (sessionService *sessionServiceImpl) RollSession(sessionUUID model.UUID) ht
 func (sessionService *sessionServiceImpl) LogUserIn(user *models.User) (*models.Session, error) {
 	sessionDuration := sessionService.sessionConfiguration.GetSessionDuration()
 	session := models.NewSession(user.ID, sessionDuration)
+
 	err := sessionService.add(session)
 	if err != nil {
 		return nil, err
 	}
+
 	return session, nil
 }
 

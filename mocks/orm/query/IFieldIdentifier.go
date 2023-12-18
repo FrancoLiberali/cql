@@ -42,6 +42,20 @@ func (_m *IFieldIdentifier) ColumnSQL(_a0 *query.GormQuery, table query.Table) s
 	return r0
 }
 
+// FieldName provides a mock function with given fields:
+func (_m *IFieldIdentifier) FieldName() string {
+	ret := _m.Called()
+
+	var r0 string
+	if rf, ok := ret.Get(0).(func() string); ok {
+		r0 = rf()
+	} else {
+		r0 = ret.Get(0).(string)
+	}
+
+	return r0
+}
+
 // GetModelType provides a mock function with given fields:
 func (_m *IFieldIdentifier) GetModelType() reflect.Type {
 	ret := _m.Called()
