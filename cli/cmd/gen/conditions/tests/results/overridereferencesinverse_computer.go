@@ -3,75 +3,40 @@ package conditions
 
 import (
 	overridereferencesinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferencesinverse"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var computerType = reflect.TypeOf(*new(overridereferencesinverse.Computer))
-
-func (computerConditions computerConditions) IdIs() orm.FieldIs[overridereferencesinverse.Computer, model.UUID] {
-	return orm.FieldIs[overridereferencesinverse.Computer, model.UUID]{FieldID: computerConditions.ID}
+func (computerConditions computerConditions) Processor(conditions ...cql.Condition[overridereferencesinverse.Processor]) cql.JoinCondition[overridereferencesinverse.Computer] {
+	return cql.NewJoinCondition[overridereferencesinverse.Computer, overridereferencesinverse.Processor](conditions, "Processor", "Name", computerConditions.Preload(), "ComputerName")
 }
-func (computerConditions computerConditions) CreatedAtIs() orm.FieldIs[overridereferencesinverse.Computer, time.Time] {
-	return orm.FieldIs[overridereferencesinverse.Computer, time.Time]{FieldID: computerConditions.CreatedAt}
-}
-func (computerConditions computerConditions) UpdatedAtIs() orm.FieldIs[overridereferencesinverse.Computer, time.Time] {
-	return orm.FieldIs[overridereferencesinverse.Computer, time.Time]{FieldID: computerConditions.UpdatedAt}
-}
-func (computerConditions computerConditions) DeletedAtIs() orm.FieldIs[overridereferencesinverse.Computer, time.Time] {
-	return orm.FieldIs[overridereferencesinverse.Computer, time.Time]{FieldID: computerConditions.DeletedAt}
-}
-func (computerConditions computerConditions) NameIs() orm.StringFieldIs[overridereferencesinverse.Computer] {
-	return orm.StringFieldIs[overridereferencesinverse.Computer]{FieldIs: orm.FieldIs[overridereferencesinverse.Computer, string]{FieldID: computerConditions.Name}}
-}
-func (computerConditions computerConditions) Processor(conditions ...condition.Condition[overridereferencesinverse.Processor]) condition.JoinCondition[overridereferencesinverse.Computer] {
-	return condition.NewJoinCondition[overridereferencesinverse.Computer, overridereferencesinverse.Processor](conditions, "Processor", "Name", computerConditions.Preload(), "ComputerName")
-}
-func (computerConditions computerConditions) PreloadProcessor() condition.JoinCondition[overridereferencesinverse.Computer] {
+func (computerConditions computerConditions) PreloadProcessor() cql.JoinCondition[overridereferencesinverse.Computer] {
 	return computerConditions.Processor(Processor.Preload())
 }
 
 type computerConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Name      query.FieldIdentifier[string]
+	ID        cql.Field[overridereferencesinverse.Computer, model.UUID]
+	CreatedAt cql.Field[overridereferencesinverse.Computer, time.Time]
+	UpdatedAt cql.Field[overridereferencesinverse.Computer, time.Time]
+	DeletedAt cql.Field[overridereferencesinverse.Computer, time.Time]
+	Name      cql.StringField[overridereferencesinverse.Computer]
 }
 
 var Computer = computerConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: computerType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: computerType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: computerType,
-	},
-	Name: query.FieldIdentifier[string]{
-		Field:     "Name",
-		ModelType: computerType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: computerType,
-	},
+	CreatedAt: cql.Field[overridereferencesinverse.Computer, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[overridereferencesinverse.Computer, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[overridereferencesinverse.Computer, model.UUID]{Name: "ID"},
+	Name:      cql.StringField[overridereferencesinverse.Computer]{Field: cql.Field[overridereferencesinverse.Computer, string]{Name: "Name"}},
+	UpdatedAt: cql.Field[overridereferencesinverse.Computer, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Computer when doing a query
-func (computerConditions computerConditions) Preload() condition.Condition[overridereferencesinverse.Computer] {
-	return condition.NewPreloadCondition[overridereferencesinverse.Computer](computerConditions.ID, computerConditions.CreatedAt, computerConditions.UpdatedAt, computerConditions.DeletedAt, computerConditions.Name)
+func (computerConditions computerConditions) Preload() cql.Condition[overridereferencesinverse.Computer] {
+	return cql.NewPreloadCondition[overridereferencesinverse.Computer](computerConditions.ID, computerConditions.CreatedAt, computerConditions.UpdatedAt, computerConditions.DeletedAt, computerConditions.Name)
 }
 
 // PreloadRelations allows preloading all the Computer's relation when doing a query
-func (computerConditions computerConditions) PreloadRelations() []condition.Condition[overridereferencesinverse.Computer] {
-	return []condition.Condition[overridereferencesinverse.Computer]{computerConditions.PreloadProcessor()}
+func (computerConditions computerConditions) PreloadRelations() []cql.Condition[overridereferencesinverse.Computer] {
+	return []cql.Condition[overridereferencesinverse.Computer]{computerConditions.PreloadProcessor()}
 }

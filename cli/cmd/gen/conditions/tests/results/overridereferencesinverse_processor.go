@@ -3,64 +3,28 @@ package conditions
 
 import (
 	overridereferencesinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferencesinverse"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var processorType = reflect.TypeOf(*new(overridereferencesinverse.Processor))
-
-func (processorConditions processorConditions) IdIs() orm.FieldIs[overridereferencesinverse.Processor, model.UUID] {
-	return orm.FieldIs[overridereferencesinverse.Processor, model.UUID]{FieldID: processorConditions.ID}
-}
-func (processorConditions processorConditions) CreatedAtIs() orm.FieldIs[overridereferencesinverse.Processor, time.Time] {
-	return orm.FieldIs[overridereferencesinverse.Processor, time.Time]{FieldID: processorConditions.CreatedAt}
-}
-func (processorConditions processorConditions) UpdatedAtIs() orm.FieldIs[overridereferencesinverse.Processor, time.Time] {
-	return orm.FieldIs[overridereferencesinverse.Processor, time.Time]{FieldID: processorConditions.UpdatedAt}
-}
-func (processorConditions processorConditions) DeletedAtIs() orm.FieldIs[overridereferencesinverse.Processor, time.Time] {
-	return orm.FieldIs[overridereferencesinverse.Processor, time.Time]{FieldID: processorConditions.DeletedAt}
-}
-func (processorConditions processorConditions) ComputerNameIs() orm.StringFieldIs[overridereferencesinverse.Processor] {
-	return orm.StringFieldIs[overridereferencesinverse.Processor]{FieldIs: orm.FieldIs[overridereferencesinverse.Processor, string]{FieldID: processorConditions.ComputerName}}
-}
-
 type processorConditions struct {
-	ID           query.FieldIdentifier[model.UUID]
-	CreatedAt    query.FieldIdentifier[time.Time]
-	UpdatedAt    query.FieldIdentifier[time.Time]
-	DeletedAt    query.FieldIdentifier[time.Time]
-	ComputerName query.FieldIdentifier[string]
+	ID           cql.Field[overridereferencesinverse.Processor, model.UUID]
+	CreatedAt    cql.Field[overridereferencesinverse.Processor, time.Time]
+	UpdatedAt    cql.Field[overridereferencesinverse.Processor, time.Time]
+	DeletedAt    cql.Field[overridereferencesinverse.Processor, time.Time]
+	ComputerName cql.StringField[overridereferencesinverse.Processor]
 }
 
 var Processor = processorConditions{
-	ComputerName: query.FieldIdentifier[string]{
-		Field:     "ComputerName",
-		ModelType: processorType,
-	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: processorType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: processorType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: processorType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: processorType,
-	},
+	ComputerName: cql.StringField[overridereferencesinverse.Processor]{Field: cql.Field[overridereferencesinverse.Processor, string]{Name: "ComputerName"}},
+	CreatedAt:    cql.Field[overridereferencesinverse.Processor, time.Time]{Name: "CreatedAt"},
+	DeletedAt:    cql.Field[overridereferencesinverse.Processor, time.Time]{Name: "DeletedAt"},
+	ID:           cql.Field[overridereferencesinverse.Processor, model.UUID]{Name: "ID"},
+	UpdatedAt:    cql.Field[overridereferencesinverse.Processor, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Processor when doing a query
-func (processorConditions processorConditions) Preload() condition.Condition[overridereferencesinverse.Processor] {
-	return condition.NewPreloadCondition[overridereferencesinverse.Processor](processorConditions.ID, processorConditions.CreatedAt, processorConditions.UpdatedAt, processorConditions.DeletedAt, processorConditions.ComputerName)
+func (processorConditions processorConditions) Preload() cql.Condition[overridereferencesinverse.Processor] {
+	return cql.NewPreloadCondition[overridereferencesinverse.Processor](processorConditions.ID, processorConditions.CreatedAt, processorConditions.UpdatedAt, processorConditions.DeletedAt, processorConditions.ComputerName)
 }

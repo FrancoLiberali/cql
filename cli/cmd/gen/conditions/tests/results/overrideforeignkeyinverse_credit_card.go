@@ -3,64 +3,28 @@ package conditions
 
 import (
 	overrideforeignkeyinverse "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overrideforeignkeyinverse"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var creditCardType = reflect.TypeOf(*new(overrideforeignkeyinverse.CreditCard))
-
-func (creditCardConditions creditCardConditions) IdIs() orm.FieldIs[overrideforeignkeyinverse.CreditCard, model.UUID] {
-	return orm.FieldIs[overrideforeignkeyinverse.CreditCard, model.UUID]{FieldID: creditCardConditions.ID}
-}
-func (creditCardConditions creditCardConditions) CreatedAtIs() orm.FieldIs[overrideforeignkeyinverse.CreditCard, time.Time] {
-	return orm.FieldIs[overrideforeignkeyinverse.CreditCard, time.Time]{FieldID: creditCardConditions.CreatedAt}
-}
-func (creditCardConditions creditCardConditions) UpdatedAtIs() orm.FieldIs[overrideforeignkeyinverse.CreditCard, time.Time] {
-	return orm.FieldIs[overrideforeignkeyinverse.CreditCard, time.Time]{FieldID: creditCardConditions.UpdatedAt}
-}
-func (creditCardConditions creditCardConditions) DeletedAtIs() orm.FieldIs[overrideforeignkeyinverse.CreditCard, time.Time] {
-	return orm.FieldIs[overrideforeignkeyinverse.CreditCard, time.Time]{FieldID: creditCardConditions.DeletedAt}
-}
-func (creditCardConditions creditCardConditions) UserReferenceIs() orm.FieldIs[overrideforeignkeyinverse.CreditCard, model.UUID] {
-	return orm.FieldIs[overrideforeignkeyinverse.CreditCard, model.UUID]{FieldID: creditCardConditions.UserReference}
-}
-
 type creditCardConditions struct {
-	ID            query.FieldIdentifier[model.UUID]
-	CreatedAt     query.FieldIdentifier[time.Time]
-	UpdatedAt     query.FieldIdentifier[time.Time]
-	DeletedAt     query.FieldIdentifier[time.Time]
-	UserReference query.FieldIdentifier[model.UUID]
+	ID            cql.Field[overrideforeignkeyinverse.CreditCard, model.UUID]
+	CreatedAt     cql.Field[overrideforeignkeyinverse.CreditCard, time.Time]
+	UpdatedAt     cql.Field[overrideforeignkeyinverse.CreditCard, time.Time]
+	DeletedAt     cql.Field[overrideforeignkeyinverse.CreditCard, time.Time]
+	UserReference cql.Field[overrideforeignkeyinverse.CreditCard, model.UUID]
 }
 
 var CreditCard = creditCardConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: creditCardType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: creditCardType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: creditCardType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: creditCardType,
-	},
-	UserReference: query.FieldIdentifier[model.UUID]{
-		Field:     "UserReference",
-		ModelType: creditCardType,
-	},
+	CreatedAt:     cql.Field[overrideforeignkeyinverse.CreditCard, time.Time]{Name: "CreatedAt"},
+	DeletedAt:     cql.Field[overrideforeignkeyinverse.CreditCard, time.Time]{Name: "DeletedAt"},
+	ID:            cql.Field[overrideforeignkeyinverse.CreditCard, model.UUID]{Name: "ID"},
+	UpdatedAt:     cql.Field[overrideforeignkeyinverse.CreditCard, time.Time]{Name: "UpdatedAt"},
+	UserReference: cql.Field[overrideforeignkeyinverse.CreditCard, model.UUID]{Name: "UserReference"},
 }
 
 // Preload allows preloading the CreditCard when doing a query
-func (creditCardConditions creditCardConditions) Preload() condition.Condition[overrideforeignkeyinverse.CreditCard] {
-	return condition.NewPreloadCondition[overrideforeignkeyinverse.CreditCard](creditCardConditions.ID, creditCardConditions.CreatedAt, creditCardConditions.UpdatedAt, creditCardConditions.DeletedAt, creditCardConditions.UserReference)
+func (creditCardConditions creditCardConditions) Preload() cql.Condition[overrideforeignkeyinverse.CreditCard] {
+	return cql.NewPreloadCondition[overrideforeignkeyinverse.CreditCard](creditCardConditions.ID, creditCardConditions.CreatedAt, creditCardConditions.UpdatedAt, creditCardConditions.DeletedAt, creditCardConditions.UserReference)
 }

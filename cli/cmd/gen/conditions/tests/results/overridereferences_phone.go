@@ -3,75 +3,40 @@ package conditions
 
 import (
 	overridereferences "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/overridereferences"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var phoneType = reflect.TypeOf(*new(overridereferences.Phone))
-
-func (phoneConditions phoneConditions) IdIs() orm.FieldIs[overridereferences.Phone, model.UUID] {
-	return orm.FieldIs[overridereferences.Phone, model.UUID]{FieldID: phoneConditions.ID}
+func (phoneConditions phoneConditions) Brand(conditions ...cql.Condition[overridereferences.Brand]) cql.JoinCondition[overridereferences.Phone] {
+	return cql.NewJoinCondition[overridereferences.Phone, overridereferences.Brand](conditions, "Brand", "BrandName", phoneConditions.Preload(), "Name")
 }
-func (phoneConditions phoneConditions) CreatedAtIs() orm.FieldIs[overridereferences.Phone, time.Time] {
-	return orm.FieldIs[overridereferences.Phone, time.Time]{FieldID: phoneConditions.CreatedAt}
-}
-func (phoneConditions phoneConditions) UpdatedAtIs() orm.FieldIs[overridereferences.Phone, time.Time] {
-	return orm.FieldIs[overridereferences.Phone, time.Time]{FieldID: phoneConditions.UpdatedAt}
-}
-func (phoneConditions phoneConditions) DeletedAtIs() orm.FieldIs[overridereferences.Phone, time.Time] {
-	return orm.FieldIs[overridereferences.Phone, time.Time]{FieldID: phoneConditions.DeletedAt}
-}
-func (phoneConditions phoneConditions) Brand(conditions ...condition.Condition[overridereferences.Brand]) condition.JoinCondition[overridereferences.Phone] {
-	return condition.NewJoinCondition[overridereferences.Phone, overridereferences.Brand](conditions, "Brand", "BrandName", phoneConditions.Preload(), "Name")
-}
-func (phoneConditions phoneConditions) PreloadBrand() condition.JoinCondition[overridereferences.Phone] {
+func (phoneConditions phoneConditions) PreloadBrand() cql.JoinCondition[overridereferences.Phone] {
 	return phoneConditions.Brand(Brand.Preload())
-}
-func (phoneConditions phoneConditions) BrandNameIs() orm.StringFieldIs[overridereferences.Phone] {
-	return orm.StringFieldIs[overridereferences.Phone]{FieldIs: orm.FieldIs[overridereferences.Phone, string]{FieldID: phoneConditions.BrandName}}
 }
 
 type phoneConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	BrandName query.FieldIdentifier[string]
+	ID        cql.Field[overridereferences.Phone, model.UUID]
+	CreatedAt cql.Field[overridereferences.Phone, time.Time]
+	UpdatedAt cql.Field[overridereferences.Phone, time.Time]
+	DeletedAt cql.Field[overridereferences.Phone, time.Time]
+	BrandName cql.StringField[overridereferences.Phone]
 }
 
 var Phone = phoneConditions{
-	BrandName: query.FieldIdentifier[string]{
-		Field:     "BrandName",
-		ModelType: phoneType,
-	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: phoneType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: phoneType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: phoneType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: phoneType,
-	},
+	BrandName: cql.StringField[overridereferences.Phone]{Field: cql.Field[overridereferences.Phone, string]{Name: "BrandName"}},
+	CreatedAt: cql.Field[overridereferences.Phone, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[overridereferences.Phone, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[overridereferences.Phone, model.UUID]{Name: "ID"},
+	UpdatedAt: cql.Field[overridereferences.Phone, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Phone when doing a query
-func (phoneConditions phoneConditions) Preload() condition.Condition[overridereferences.Phone] {
-	return condition.NewPreloadCondition[overridereferences.Phone](phoneConditions.ID, phoneConditions.CreatedAt, phoneConditions.UpdatedAt, phoneConditions.DeletedAt, phoneConditions.BrandName)
+func (phoneConditions phoneConditions) Preload() cql.Condition[overridereferences.Phone] {
+	return cql.NewPreloadCondition[overridereferences.Phone](phoneConditions.ID, phoneConditions.CreatedAt, phoneConditions.UpdatedAt, phoneConditions.DeletedAt, phoneConditions.BrandName)
 }
 
 // PreloadRelations allows preloading all the Phone's relation when doing a query
-func (phoneConditions phoneConditions) PreloadRelations() []condition.Condition[overridereferences.Phone] {
-	return []condition.Condition[overridereferences.Phone]{phoneConditions.PreloadBrand()}
+func (phoneConditions phoneConditions) PreloadRelations() []cql.Condition[overridereferences.Phone] {
+	return []cql.Condition[overridereferences.Phone]{phoneConditions.PreloadBrand()}
 }

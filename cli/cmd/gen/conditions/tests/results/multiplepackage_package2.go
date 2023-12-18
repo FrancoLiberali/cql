@@ -3,64 +3,28 @@ package conditions
 
 import (
 	package2 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var package2Type = reflect.TypeOf(*new(package2.Package2))
-
-func (package2Conditions package2Conditions) IdIs() orm.FieldIs[package2.Package2, model.UUID] {
-	return orm.FieldIs[package2.Package2, model.UUID]{FieldID: package2Conditions.ID}
-}
-func (package2Conditions package2Conditions) CreatedAtIs() orm.FieldIs[package2.Package2, time.Time] {
-	return orm.FieldIs[package2.Package2, time.Time]{FieldID: package2Conditions.CreatedAt}
-}
-func (package2Conditions package2Conditions) UpdatedAtIs() orm.FieldIs[package2.Package2, time.Time] {
-	return orm.FieldIs[package2.Package2, time.Time]{FieldID: package2Conditions.UpdatedAt}
-}
-func (package2Conditions package2Conditions) DeletedAtIs() orm.FieldIs[package2.Package2, time.Time] {
-	return orm.FieldIs[package2.Package2, time.Time]{FieldID: package2Conditions.DeletedAt}
-}
-func (package2Conditions package2Conditions) Package1IdIs() orm.FieldIs[package2.Package2, model.UUID] {
-	return orm.FieldIs[package2.Package2, model.UUID]{FieldID: package2Conditions.Package1ID}
-}
-
 type package2Conditions struct {
-	ID         query.FieldIdentifier[model.UUID]
-	CreatedAt  query.FieldIdentifier[time.Time]
-	UpdatedAt  query.FieldIdentifier[time.Time]
-	DeletedAt  query.FieldIdentifier[time.Time]
-	Package1ID query.FieldIdentifier[model.UUID]
+	ID         cql.Field[package2.Package2, model.UUID]
+	CreatedAt  cql.Field[package2.Package2, time.Time]
+	UpdatedAt  cql.Field[package2.Package2, time.Time]
+	DeletedAt  cql.Field[package2.Package2, time.Time]
+	Package1ID cql.Field[package2.Package2, model.UUID]
 }
 
 var Package2 = package2Conditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: package2Type,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: package2Type,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: package2Type,
-	},
-	Package1ID: query.FieldIdentifier[model.UUID]{
-		Field:     "Package1ID",
-		ModelType: package2Type,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: package2Type,
-	},
+	CreatedAt:  cql.Field[package2.Package2, time.Time]{Name: "CreatedAt"},
+	DeletedAt:  cql.Field[package2.Package2, time.Time]{Name: "DeletedAt"},
+	ID:         cql.Field[package2.Package2, model.UUID]{Name: "ID"},
+	Package1ID: cql.Field[package2.Package2, model.UUID]{Name: "Package1ID"},
+	UpdatedAt:  cql.Field[package2.Package2, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Package2 when doing a query
-func (package2Conditions package2Conditions) Preload() condition.Condition[package2.Package2] {
-	return condition.NewPreloadCondition[package2.Package2](package2Conditions.ID, package2Conditions.CreatedAt, package2Conditions.UpdatedAt, package2Conditions.DeletedAt, package2Conditions.Package1ID)
+func (package2Conditions package2Conditions) Preload() cql.Condition[package2.Package2] {
+	return cql.NewPreloadCondition[package2.Package2](package2Conditions.ID, package2Conditions.CreatedAt, package2Conditions.UpdatedAt, package2Conditions.DeletedAt, package2Conditions.Package1ID)
 }

@@ -3,67 +3,38 @@ package conditions
 
 import (
 	hasone "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasone"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var countryType = reflect.TypeOf(*new(hasone.Country))
-
-func (countryConditions countryConditions) IdIs() orm.FieldIs[hasone.Country, model.UUID] {
-	return orm.FieldIs[hasone.Country, model.UUID]{FieldID: countryConditions.ID}
+func (countryConditions countryConditions) Capital(conditions ...cql.Condition[hasone.City]) cql.JoinCondition[hasone.Country] {
+	return cql.NewJoinCondition[hasone.Country, hasone.City](conditions, "Capital", "ID", countryConditions.Preload(), "CountryID")
 }
-func (countryConditions countryConditions) CreatedAtIs() orm.FieldIs[hasone.Country, time.Time] {
-	return orm.FieldIs[hasone.Country, time.Time]{FieldID: countryConditions.CreatedAt}
-}
-func (countryConditions countryConditions) UpdatedAtIs() orm.FieldIs[hasone.Country, time.Time] {
-	return orm.FieldIs[hasone.Country, time.Time]{FieldID: countryConditions.UpdatedAt}
-}
-func (countryConditions countryConditions) DeletedAtIs() orm.FieldIs[hasone.Country, time.Time] {
-	return orm.FieldIs[hasone.Country, time.Time]{FieldID: countryConditions.DeletedAt}
-}
-func (countryConditions countryConditions) Capital(conditions ...condition.Condition[hasone.City]) condition.JoinCondition[hasone.Country] {
-	return condition.NewJoinCondition[hasone.Country, hasone.City](conditions, "Capital", "ID", countryConditions.Preload(), "CountryID")
-}
-func (countryConditions countryConditions) PreloadCapital() condition.JoinCondition[hasone.Country] {
+func (countryConditions countryConditions) PreloadCapital() cql.JoinCondition[hasone.Country] {
 	return countryConditions.Capital(City.Preload())
 }
 
 type countryConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
+	ID        cql.Field[hasone.Country, model.UUID]
+	CreatedAt cql.Field[hasone.Country, time.Time]
+	UpdatedAt cql.Field[hasone.Country, time.Time]
+	DeletedAt cql.Field[hasone.Country, time.Time]
 }
 
 var Country = countryConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: countryType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: countryType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: countryType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: countryType,
-	},
+	CreatedAt: cql.Field[hasone.Country, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[hasone.Country, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[hasone.Country, model.UUID]{Name: "ID"},
+	UpdatedAt: cql.Field[hasone.Country, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Country when doing a query
-func (countryConditions countryConditions) Preload() condition.Condition[hasone.Country] {
-	return condition.NewPreloadCondition[hasone.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt)
+func (countryConditions countryConditions) Preload() cql.Condition[hasone.Country] {
+	return cql.NewPreloadCondition[hasone.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt)
 }
 
 // PreloadRelations allows preloading all the Country's relation when doing a query
-func (countryConditions countryConditions) PreloadRelations() []condition.Condition[hasone.Country] {
-	return []condition.Condition[hasone.Country]{countryConditions.PreloadCapital()}
+func (countryConditions countryConditions) PreloadRelations() []cql.Condition[hasone.Country] {
+	return []cql.Condition[hasone.Country]{countryConditions.PreloadCapital()}
 }

@@ -3,65 +3,31 @@ package conditions
 
 import (
 	columndefinition "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/columndefinition"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var columnDefinitionType = reflect.TypeOf(*new(columndefinition.ColumnDefinition))
-
-func (columnDefinitionConditions columnDefinitionConditions) IdIs() orm.FieldIs[columndefinition.ColumnDefinition, model.UUID] {
-	return orm.FieldIs[columndefinition.ColumnDefinition, model.UUID]{FieldID: columnDefinitionConditions.ID}
-}
-func (columnDefinitionConditions columnDefinitionConditions) CreatedAtIs() orm.FieldIs[columndefinition.ColumnDefinition, time.Time] {
-	return orm.FieldIs[columndefinition.ColumnDefinition, time.Time]{FieldID: columnDefinitionConditions.CreatedAt}
-}
-func (columnDefinitionConditions columnDefinitionConditions) UpdatedAtIs() orm.FieldIs[columndefinition.ColumnDefinition, time.Time] {
-	return orm.FieldIs[columndefinition.ColumnDefinition, time.Time]{FieldID: columnDefinitionConditions.UpdatedAt}
-}
-func (columnDefinitionConditions columnDefinitionConditions) DeletedAtIs() orm.FieldIs[columndefinition.ColumnDefinition, time.Time] {
-	return orm.FieldIs[columndefinition.ColumnDefinition, time.Time]{FieldID: columnDefinitionConditions.DeletedAt}
-}
-func (columnDefinitionConditions columnDefinitionConditions) StringIs() orm.StringFieldIs[columndefinition.ColumnDefinition] {
-	return orm.StringFieldIs[columndefinition.ColumnDefinition]{FieldIs: orm.FieldIs[columndefinition.ColumnDefinition, string]{FieldID: columnDefinitionConditions.String}}
-}
-
 type columnDefinitionConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	String    query.FieldIdentifier[string]
+	ID        cql.Field[columndefinition.ColumnDefinition, model.UUID]
+	CreatedAt cql.Field[columndefinition.ColumnDefinition, time.Time]
+	UpdatedAt cql.Field[columndefinition.ColumnDefinition, time.Time]
+	DeletedAt cql.Field[columndefinition.ColumnDefinition, time.Time]
+	String    cql.StringField[columndefinition.ColumnDefinition]
 }
 
 var ColumnDefinition = columnDefinitionConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: columnDefinitionType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: columnDefinitionType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: columnDefinitionType,
-	},
-	String: query.FieldIdentifier[string]{
-		Column:    "string_something_else",
-		Field:     "String",
-		ModelType: columnDefinitionType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: columnDefinitionType,
-	},
+	CreatedAt: cql.Field[columndefinition.ColumnDefinition, time.Time]{Name: "CreatedAt"},
+	DeletedAt: cql.Field[columndefinition.ColumnDefinition, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[columndefinition.ColumnDefinition, model.UUID]{Name: "ID"},
+	String: cql.StringField[columndefinition.ColumnDefinition]{Field: cql.Field[columndefinition.ColumnDefinition, string]{
+		Column: "string_something_else",
+		Name:   "String",
+	}},
+	UpdatedAt: cql.Field[columndefinition.ColumnDefinition, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the ColumnDefinition when doing a query
-func (columnDefinitionConditions columnDefinitionConditions) Preload() condition.Condition[columndefinition.ColumnDefinition] {
-	return condition.NewPreloadCondition[columndefinition.ColumnDefinition](columnDefinitionConditions.ID, columnDefinitionConditions.CreatedAt, columnDefinitionConditions.UpdatedAt, columnDefinitionConditions.DeletedAt, columnDefinitionConditions.String)
+func (columnDefinitionConditions columnDefinitionConditions) Preload() cql.Condition[columndefinition.ColumnDefinition] {
+	return cql.NewPreloadCondition[columndefinition.ColumnDefinition](columnDefinitionConditions.ID, columnDefinitionConditions.CreatedAt, columnDefinitionConditions.UpdatedAt, columnDefinitionConditions.DeletedAt, columnDefinitionConditions.String)
 }

@@ -3,64 +3,28 @@ package conditions
 
 import (
 	customtype "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/customtype"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var customTypeType = reflect.TypeOf(*new(customtype.CustomType))
-
-func (customTypeConditions customTypeConditions) IdIs() orm.FieldIs[customtype.CustomType, model.UUID] {
-	return orm.FieldIs[customtype.CustomType, model.UUID]{FieldID: customTypeConditions.ID}
-}
-func (customTypeConditions customTypeConditions) CreatedAtIs() orm.FieldIs[customtype.CustomType, time.Time] {
-	return orm.FieldIs[customtype.CustomType, time.Time]{FieldID: customTypeConditions.CreatedAt}
-}
-func (customTypeConditions customTypeConditions) UpdatedAtIs() orm.FieldIs[customtype.CustomType, time.Time] {
-	return orm.FieldIs[customtype.CustomType, time.Time]{FieldID: customTypeConditions.UpdatedAt}
-}
-func (customTypeConditions customTypeConditions) DeletedAtIs() orm.FieldIs[customtype.CustomType, time.Time] {
-	return orm.FieldIs[customtype.CustomType, time.Time]{FieldID: customTypeConditions.DeletedAt}
-}
-func (customTypeConditions customTypeConditions) CustomIs() orm.FieldIs[customtype.CustomType, customtype.MultiString] {
-	return orm.FieldIs[customtype.CustomType, customtype.MultiString]{FieldID: customTypeConditions.Custom}
-}
-
 type customTypeConditions struct {
-	ID        query.FieldIdentifier[model.UUID]
-	CreatedAt query.FieldIdentifier[time.Time]
-	UpdatedAt query.FieldIdentifier[time.Time]
-	DeletedAt query.FieldIdentifier[time.Time]
-	Custom    query.FieldIdentifier[customtype.MultiString]
+	ID        cql.Field[customtype.CustomType, model.UUID]
+	CreatedAt cql.Field[customtype.CustomType, time.Time]
+	UpdatedAt cql.Field[customtype.CustomType, time.Time]
+	DeletedAt cql.Field[customtype.CustomType, time.Time]
+	Custom    cql.Field[customtype.CustomType, customtype.MultiString]
 }
 
 var CustomType = customTypeConditions{
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: customTypeType,
-	},
-	Custom: query.FieldIdentifier[customtype.MultiString]{
-		Field:     "Custom",
-		ModelType: customTypeType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: customTypeType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: customTypeType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: customTypeType,
-	},
+	CreatedAt: cql.Field[customtype.CustomType, time.Time]{Name: "CreatedAt"},
+	Custom:    cql.Field[customtype.CustomType, customtype.MultiString]{Name: "Custom"},
+	DeletedAt: cql.Field[customtype.CustomType, time.Time]{Name: "DeletedAt"},
+	ID:        cql.Field[customtype.CustomType, model.UUID]{Name: "ID"},
+	UpdatedAt: cql.Field[customtype.CustomType, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the CustomType when doing a query
-func (customTypeConditions customTypeConditions) Preload() condition.Condition[customtype.CustomType] {
-	return condition.NewPreloadCondition[customtype.CustomType](customTypeConditions.ID, customTypeConditions.CreatedAt, customTypeConditions.UpdatedAt, customTypeConditions.DeletedAt, customTypeConditions.Custom)
+func (customTypeConditions customTypeConditions) Preload() cql.Condition[customtype.CustomType] {
+	return cql.NewPreloadCondition[customtype.CustomType](customTypeConditions.ID, customTypeConditions.CreatedAt, customTypeConditions.UpdatedAt, customTypeConditions.DeletedAt, customTypeConditions.Custom)
 }

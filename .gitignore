@@ -30,3 +30,6 @@ test/sqlite:*
 
 # Sphinx documentation
 docs/_build/
+
+# cli binary
+cli/badaas-cli

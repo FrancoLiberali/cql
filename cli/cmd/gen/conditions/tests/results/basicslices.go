@@ -3,200 +3,62 @@ package conditions
 
 import (
 	basicslices "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/basicslices"
-	orm "github.com/ditrit/badaas/orm"
-	condition "github.com/ditrit/badaas/orm/condition"
+	cql "github.com/ditrit/badaas/orm/cql"
 	model "github.com/ditrit/badaas/orm/model"
-	query "github.com/ditrit/badaas/orm/query"
-	"reflect"
 	"time"
 )
 
-var basicSlicesType = reflect.TypeOf(*new(basicslices.BasicSlices))
-
-func (basicSlicesConditions basicSlicesConditions) IdIs() orm.FieldIs[basicslices.BasicSlices, model.UUID] {
-	return orm.FieldIs[basicslices.BasicSlices, model.UUID]{FieldID: basicSlicesConditions.ID}
-}
-func (basicSlicesConditions basicSlicesConditions) CreatedAtIs() orm.FieldIs[basicslices.BasicSlices, time.Time] {
-	return orm.FieldIs[basicslices.BasicSlices, time.Time]{FieldID: basicSlicesConditions.CreatedAt}
-}
-func (basicSlicesConditions basicSlicesConditions) UpdatedAtIs() orm.FieldIs[basicslices.BasicSlices, time.Time] {
-	return orm.FieldIs[basicslices.BasicSlices, time.Time]{FieldID: basicSlicesConditions.UpdatedAt}
-}
-func (basicSlicesConditions basicSlicesConditions) DeletedAtIs() orm.FieldIs[basicslices.BasicSlices, time.Time] {
-	return orm.FieldIs[basicslices.BasicSlices, time.Time]{FieldID: basicSlicesConditions.DeletedAt}
-}
-func (basicSlicesConditions basicSlicesConditions) BoolIs() orm.FieldIs[basicslices.BasicSlices, []bool] {
-	return orm.FieldIs[basicslices.BasicSlices, []bool]{FieldID: basicSlicesConditions.Bool}
-}
-func (basicSlicesConditions basicSlicesConditions) IntIs() orm.FieldIs[basicslices.BasicSlices, []int] {
-	return orm.FieldIs[basicslices.BasicSlices, []int]{FieldID: basicSlicesConditions.Int}
-}
-func (basicSlicesConditions basicSlicesConditions) Int8Is() orm.FieldIs[basicslices.BasicSlices, []int8] {
-	return orm.FieldIs[basicslices.BasicSlices, []int8]{FieldID: basicSlicesConditions.Int8}
-}
-func (basicSlicesConditions basicSlicesConditions) Int16Is() orm.FieldIs[basicslices.BasicSlices, []int16] {
-	return orm.FieldIs[basicslices.BasicSlices, []int16]{FieldID: basicSlicesConditions.Int16}
-}
-func (basicSlicesConditions basicSlicesConditions) Int32Is() orm.FieldIs[basicslices.BasicSlices, []int32] {
-	return orm.FieldIs[basicslices.BasicSlices, []int32]{FieldID: basicSlicesConditions.Int32}
-}
-func (basicSlicesConditions basicSlicesConditions) Int64Is() orm.FieldIs[basicslices.BasicSlices, []int64] {
-	return orm.FieldIs[basicslices.BasicSlices, []int64]{FieldID: basicSlicesConditions.Int64}
-}
-func (basicSlicesConditions basicSlicesConditions) UIntIs() orm.FieldIs[basicslices.BasicSlices, []uint] {
-	return orm.FieldIs[basicslices.BasicSlices, []uint]{FieldID: basicSlicesConditions.UInt}
-}
-func (basicSlicesConditions basicSlicesConditions) UInt8Is() orm.FieldIs[basicslices.BasicSlices, []uint8] {
-	return orm.FieldIs[basicslices.BasicSlices, []uint8]{FieldID: basicSlicesConditions.UInt8}
-}
-func (basicSlicesConditions basicSlicesConditions) UInt16Is() orm.FieldIs[basicslices.BasicSlices, []uint16] {
-	return orm.FieldIs[basicslices.BasicSlices, []uint16]{FieldID: basicSlicesConditions.UInt16}
-}
-func (basicSlicesConditions basicSlicesConditions) UInt32Is() orm.FieldIs[basicslices.BasicSlices, []uint32] {
-	return orm.FieldIs[basicslices.BasicSlices, []uint32]{FieldID: basicSlicesConditions.UInt32}
-}
-func (basicSlicesConditions basicSlicesConditions) UInt64Is() orm.FieldIs[basicslices.BasicSlices, []uint64] {
-	return orm.FieldIs[basicslices.BasicSlices, []uint64]{FieldID: basicSlicesConditions.UInt64}
-}
-func (basicSlicesConditions basicSlicesConditions) UIntptrIs() orm.FieldIs[basicslices.BasicSlices, []uintptr] {
-	return orm.FieldIs[basicslices.BasicSlices, []uintptr]{FieldID: basicSlicesConditions.UIntptr}
-}
-func (basicSlicesConditions basicSlicesConditions) Float32Is() orm.FieldIs[basicslices.BasicSlices, []float32] {
-	return orm.FieldIs[basicslices.BasicSlices, []float32]{FieldID: basicSlicesConditions.Float32}
-}
-func (basicSlicesConditions basicSlicesConditions) Float64Is() orm.FieldIs[basicslices.BasicSlices, []float64] {
-	return orm.FieldIs[basicslices.BasicSlices, []float64]{FieldID: basicSlicesConditions.Float64}
-}
-func (basicSlicesConditions basicSlicesConditions) Complex64Is() orm.FieldIs[basicslices.BasicSlices, []complex64] {
-	return orm.FieldIs[basicslices.BasicSlices, []complex64]{FieldID: basicSlicesConditions.Complex64}
-}
-func (basicSlicesConditions basicSlicesConditions) Complex128Is() orm.FieldIs[basicslices.BasicSlices, []complex128] {
-	return orm.FieldIs[basicslices.BasicSlices, []complex128]{FieldID: basicSlicesConditions.Complex128}
-}
-func (basicSlicesConditions basicSlicesConditions) StringIs() orm.FieldIs[basicslices.BasicSlices, []string] {
-	return orm.FieldIs[basicslices.BasicSlices, []string]{FieldID: basicSlicesConditions.String}
-}
-func (basicSlicesConditions basicSlicesConditions) ByteIs() orm.FieldIs[basicslices.BasicSlices, []uint8] {
-	return orm.FieldIs[basicslices.BasicSlices, []uint8]{FieldID: basicSlicesConditions.Byte}
-}
-
 type basicSlicesConditions struct {
-	ID         query.FieldIdentifier[model.UUID]
-	CreatedAt  query.FieldIdentifier[time.Time]
-	UpdatedAt  query.FieldIdentifier[time.Time]
-	DeletedAt  query.FieldIdentifier[time.Time]
-	Bool       query.FieldIdentifier[[]bool]
-	Int        query.FieldIdentifier[[]int]
-	Int8       query.FieldIdentifier[[]int8]
-	Int16      query.FieldIdentifier[[]int16]
-	Int32      query.FieldIdentifier[[]int32]
-	Int64      query.FieldIdentifier[[]int64]
-	UInt       query.FieldIdentifier[[]uint]
-	UInt8      query.FieldIdentifier[[]uint8]
-	UInt16     query.FieldIdentifier[[]uint16]
-	UInt32     query.FieldIdentifier[[]uint32]
-	UInt64     query.FieldIdentifier[[]uint64]
-	UIntptr    query.FieldIdentifier[[]uintptr]
-	Float32    query.FieldIdentifier[[]float32]
-	Float64    query.FieldIdentifier[[]float64]
-	Complex64  query.FieldIdentifier[[]complex64]
-	Complex128 query.FieldIdentifier[[]complex128]
-	String     query.FieldIdentifier[[]string]
-	Byte       query.FieldIdentifier[[]uint8]
+	ID         cql.Field[basicslices.BasicSlices, model.UUID]
+	CreatedAt  cql.Field[basicslices.BasicSlices, time.Time]
+	UpdatedAt  cql.Field[basicslices.BasicSlices, time.Time]
+	DeletedAt  cql.Field[basicslices.BasicSlices, time.Time]
+	Bool       cql.Field[basicslices.BasicSlices, []bool]
+	Int        cql.Field[basicslices.BasicSlices, []int]
+	Int8       cql.Field[basicslices.BasicSlices, []int8]
+	Int16      cql.Field[basicslices.BasicSlices, []int16]
+	Int32      cql.Field[basicslices.BasicSlices, []int32]
+	Int64      cql.Field[basicslices.BasicSlices, []int64]
+	UInt       cql.Field[basicslices.BasicSlices, []uint]
+	UInt8      cql.Field[basicslices.BasicSlices, []uint8]
+	UInt16     cql.Field[basicslices.BasicSlices, []uint16]
+	UInt32     cql.Field[basicslices.BasicSlices, []uint32]
+	UInt64     cql.Field[basicslices.BasicSlices, []uint64]
+	UIntptr    cql.Field[basicslices.BasicSlices, []uintptr]
+	Float32    cql.Field[basicslices.BasicSlices, []float32]
+	Float64    cql.Field[basicslices.BasicSlices, []float64]
+	Complex64  cql.Field[basicslices.BasicSlices, []complex64]
+	Complex128 cql.Field[basicslices.BasicSlices, []complex128]
+	String     cql.Field[basicslices.BasicSlices, []string]
+	Byte       cql.Field[basicslices.BasicSlices, []uint8]
 }
 
 var BasicSlices = basicSlicesConditions{
-	Bool: query.FieldIdentifier[[]bool]{
-		Field:     "Bool",
-		ModelType: basicSlicesType,
-	},
-	Byte: query.FieldIdentifier[[]uint8]{
-		Field:     "Byte",
-		ModelType: basicSlicesType,
-	},
-	Complex128: query.FieldIdentifier[[]complex128]{
-		Field:     "Complex128",
-		ModelType: basicSlicesType,
-	},
-	Complex64: query.FieldIdentifier[[]complex64]{
-		Field:     "Complex64",
-		ModelType: basicSlicesType,
-	},
-	CreatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "CreatedAt",
-		ModelType: basicSlicesType,
-	},
-	DeletedAt: query.FieldIdentifier[time.Time]{
-		Field:     "DeletedAt",
-		ModelType: basicSlicesType,
-	},
-	Float32: query.FieldIdentifier[[]float32]{
-		Field:     "Float32",
-		ModelType: basicSlicesType,
-	},
-	Float64: query.FieldIdentifier[[]float64]{
-		Field:     "Float64",
-		ModelType: basicSlicesType,
-	},
-	ID: query.FieldIdentifier[model.UUID]{
-		Field:     "ID",
-		ModelType: basicSlicesType,
-	},
-	Int: query.FieldIdentifier[[]int]{
-		Field:     "Int",
-		ModelType: basicSlicesType,
-	},
-	Int16: query.FieldIdentifier[[]int16]{
-		Field:     "Int16",
-		ModelType: basicSlicesType,
-	},
-	Int32: query.FieldIdentifier[[]int32]{
-		Field:     "Int32",
-		ModelType: basicSlicesType,
-	},
-	Int64: query.FieldIdentifier[[]int64]{
-		Field:     "Int64",
-		ModelType: basicSlicesType,
-	},
-	Int8: query.FieldIdentifier[[]int8]{
-		Field:     "Int8",
-		ModelType: basicSlicesType,
-	},
-	String: query.FieldIdentifier[[]string]{
-		Field:     "String",
-		ModelType: basicSlicesType,
-	},
-	UInt: query.FieldIdentifier[[]uint]{
-		Field:     "UInt",
-		ModelType: basicSlicesType,
-	},
-	UInt16: query.FieldIdentifier[[]uint16]{
-		Field:     "UInt16",
-		ModelType: basicSlicesType,
-	},
-	UInt32: query.FieldIdentifier[[]uint32]{
-		Field:     "UInt32",
-		ModelType: basicSlicesType,
-	},
-	UInt64: query.FieldIdentifier[[]uint64]{
-		Field:     "UInt64",
-		ModelType: basicSlicesType,
-	},
-	UInt8: query.FieldIdentifier[[]uint8]{
-		Field:     "UInt8",
-		ModelType: basicSlicesType,
-	},
-	UIntptr: query.FieldIdentifier[[]uintptr]{
-		Field:     "UIntptr",
-		ModelType: basicSlicesType,
-	},
-	UpdatedAt: query.FieldIdentifier[time.Time]{
-		Field:     "UpdatedAt",
-		ModelType: basicSlicesType,
-	},
+	Bool:       cql.Field[basicslices.BasicSlices, []bool]{Name: "Bool"},
+	Byte:       cql.Field[basicslices.BasicSlices, []uint8]{Name: "Byte"},
+	Complex128: cql.Field[basicslices.BasicSlices, []complex128]{Name: "Complex128"},
+	Complex64:  cql.Field[basicslices.BasicSlices, []complex64]{Name: "Complex64"},
+	CreatedAt:  cql.Field[basicslices.BasicSlices, time.Time]{Name: "CreatedAt"},
+	DeletedAt:  cql.Field[basicslices.BasicSlices, time.Time]{Name: "DeletedAt"},
+	Float32:    cql.Field[basicslices.BasicSlices, []float32]{Name: "Float32"},
+	Float64:    cql.Field[basicslices.BasicSlices, []float64]{Name: "Float64"},
+	ID:         cql.Field[basicslices.BasicSlices, model.UUID]{Name: "ID"},
+	Int:        cql.Field[basicslices.BasicSlices, []int]{Name: "Int"},
+	Int16:      cql.Field[basicslices.BasicSlices, []int16]{Name: "Int16"},
+	Int32:      cql.Field[basicslices.BasicSlices, []int32]{Name: "Int32"},
+	Int64:      cql.Field[basicslices.BasicSlices, []int64]{Name: "Int64"},
+	Int8:       cql.Field[basicslices.BasicSlices, []int8]{Name: "Int8"},
+	String:     cql.Field[basicslices.BasicSlices, []string]{Name: "String"},
+	UInt:       cql.Field[basicslices.BasicSlices, []uint]{Name: "UInt"},
+	UInt16:     cql.Field[basicslices.BasicSlices, []uint16]{Name: "UInt16"},
+	UInt32:     cql.Field[basicslices.BasicSlices, []uint32]{Name: "UInt32"},
+	UInt64:     cql.Field[basicslices.BasicSlices, []uint64]{Name: "UInt64"},
+	UInt8:      cql.Field[basicslices.BasicSlices, []uint8]{Name: "UInt8"},
+	UIntptr:    cql.Field[basicslices.BasicSlices, []uintptr]{Name: "UIntptr"},
+	UpdatedAt:  cql.Field[basicslices.BasicSlices, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the BasicSlices when doing a query
-func (basicSlicesConditions basicSlicesConditions) Preload() condition.Condition[basicslices.BasicSlices] {
-	return condition.NewPreloadCondition[basicslices.BasicSlices](basicSlicesConditions.ID, basicSlicesConditions.CreatedAt, basicSlicesConditions.UpdatedAt, basicSlicesConditions.DeletedAt, basicSlicesConditions.Bool, basicSlicesConditions.Int, basicSlicesConditions.Int8, basicSlicesConditions.Int16, basicSlicesConditions.Int32, basicSlicesConditions.Int64, basicSlicesConditions.UInt, basicSlicesConditions.UInt8, basicSlicesConditions.UInt16, basicSlicesConditions.UInt32, basicSlicesConditions.UInt64, basicSlicesConditions.UIntptr, basicSlicesConditions.Float32, basicSlicesConditions.Float64, basicSlicesConditions.Complex64, basicSlicesConditions.Complex128, basicSlicesConditions.String, basicSlicesConditions.Byte)
+func (basicSlicesConditions basicSlicesConditions) Preload() cql.Condition[basicslices.BasicSlices] {
+	return cql.NewPreloadCondition[basicslices.BasicSlices](basicSlicesConditions.ID, basicSlicesConditions.CreatedAt, basicSlicesConditions.UpdatedAt, basicSlicesConditions.DeletedAt, basicSlicesConditions.Bool, basicSlicesConditions.Int, basicSlicesConditions.Int8, basicSlicesConditions.Int16, basicSlicesConditions.Int32, basicSlicesConditions.Int64, basicSlicesConditions.UInt, basicSlicesConditions.UInt8, basicSlicesConditions.UInt16, basicSlicesConditions.UInt32, basicSlicesConditions.UInt64, basicSlicesConditions.UIntptr, basicSlicesConditions.Float32, basicSlicesConditions.Float64, basicSlicesConditions.Complex64, basicSlicesConditions.Complex128, basicSlicesConditions.String, basicSlicesConditions.Byte)
 }
