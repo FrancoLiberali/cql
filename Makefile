@@ -13,13 +13,40 @@ lint:
 test_unit:
 	gotestsum --format pkgname $(PATHS)
 
-test_integration:
-	docker compose -f "docker/test_db/docker-compose.yml" up -d
-	./docker/wait_for_db.sh
-	gotestsum --format testname ./testintegration
+rmdb:
+	docker stop badaas-test-db && docker rm badaas-test-db
+
+postgresql:
+	docker compose -f "docker/postgresql/docker-compose.yml" up -d
+
+cockroachdb:
+	docker compose -f "docker/cockroachdb/docker-compose.yml" up -d
+
+mysql:
+	docker compose -f "docker/mysql/docker-compose.yml" up -d
+
+sqlserver:
+	docker compose -f "docker/sqlserver/docker-compose.yml" up -d --build
+
+test_integration_postgresql: postgresql
+	DB=postgresql gotestsum --format testname ./testintegration
+
+test_integration_cockroachdb: cockroachdb
+	DB=postgresql gotestsum --format testname ./testintegration
+
+test_integration_mysql: mysql
+	DB=mysql gotestsum --format testname ./testintegration -tags=mysql
+
+test_integration_sqlite:
+	DB=sqlite gotestsum --format testname ./testintegration
+
+test_integration_sqlserver: sqlserver
+	DB=sqlserver gotestsum --format testname ./testintegration
+
+test_integration: test_integration_postgresql
 
 test_e2e:
-	docker compose -f "docker/test_db/docker-compose.yml" -f "docker/test_api/docker-compose.yml" up -d
+	docker compose -f "docker/cockroachdb/docker-compose.yml" -f "docker/test_api/docker-compose.yml" up -d
 	./docker/wait_for_api.sh 8000/info
 	go test ./test_e2e -v
 

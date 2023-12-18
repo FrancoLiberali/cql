@@ -46,11 +46,11 @@ func TestMain(_ *testing.M) {
 		panic(err)
 	}
 
-	viper.Set(configuration.DatabasePortKey, 26257)
+	viper.Set(configuration.DatabasePortKey, 5000)
 	viper.Set(configuration.DatabaseHostKey, "localhost")
 	viper.Set(configuration.DatabaseNameKey, "badaas_db")
-	viper.Set(configuration.DatabaseUsernameKey, "root")
-	viper.Set(configuration.DatabasePasswordKey, "postgres")
+	viper.Set(configuration.DatabaseUsernameKey, "badaas")
+	viper.Set(configuration.DatabasePasswordKey, "badaas_password2023")
 	viper.Set(configuration.DatabaseSslmodeKey, "disable")
 	viper.Set(configuration.DatabaseRetryKey, 10)
 	viper.Set(configuration.DatabaseRetryDurationKey, 5)

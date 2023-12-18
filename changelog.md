@@ -35,5 +35,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add operators support
 - Add preloading
 - Add dynamic and unsafe operators
+- Add badaas-orm support for MySQL, SQLServer and SQLite
 
 [unreleased]: https://github.com/ditrit/badaas/blob/main/changelog.md#unreleased

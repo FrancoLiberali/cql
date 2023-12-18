@@ -1,12 +1,17 @@
 package testintegration
 
 import (
+	"fmt"
+	"os"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/suite"
 	"go.uber.org/fx"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
+	"gorm.io/driver/sqlite"
+	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 
 	"github.com/ditrit/badaas/orm"
@@ -17,13 +22,24 @@ import (
 
 var tGlobal *testing.T
 
+const dbTypeEnvKey = "DB"
+
 const (
-	username = "root"
-	password = "postgres"
+	username = "badaas"
+	password = "badaas_password2023"
 	host     = "localhost"
-	port     = 26257
+	port     = 5000
 	sslMode  = "disable"
 	dbName   = "badaas_db"
+)
+
+type dbDialector string
+
+const (
+	postgreSQL dbDialector = "postgresql"
+	mySQL      dbDialector = "mysql"
+	sqLite     dbDialector = "sqlite"
+	sqlServer  dbDialector = "sqlserver"
 )
 
 func TestBaDaaSORM(t *testing.T) {
@@ -78,9 +94,28 @@ func runORMTestSuites(
 }
 
 func NewDBConnection() (*gorm.DB, error) {
+	var dialector gorm.Dialector
+
+	switch getDBDialector() {
+	case postgreSQL:
+		dialector = postgres.Open(orm.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
+	case mySQL:
+		dialector = mysql.Open(orm.CreateMySQLDSN(host, username, password, dbName, port))
+	case sqLite:
+		dialector = sqlite.Open(orm.CreateSQLiteDSN(host))
+	case sqlServer:
+		dialector = sqlserver.Open(orm.CreateSQLServerDSN(host, username, password, dbName, port))
+	default:
+		return nil, fmt.Errorf("unknown db %s", getDBDialector())
+	}
+
 	return database.OpenWithRetry(
-		postgres.Open(orm.CreateDSN(host, username, password, sslMode, dbName, port)),
+		dialector,
 		logger.Default.ToLogMode(logger.Info),
 		10, time.Duration(5)*time.Second,
 	)
+}
+
+func getDBDialector() dbDialector {
+	return dbDialector(os.Getenv(dbTypeEnvKey))
 }

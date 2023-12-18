@@ -1,0 +1,19 @@
+# DEVELOPMENT ONLY, DO NOT USE FOR PRODUCTION
+version: '3.5'
+
+services:
+  db:
+    container_name: "badaas-test-db"
+    image: mysql:latest
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+      MYSQL_DATABASE: 'badaas_db'
+      MYSQL_USER: 'badaas'
+      MYSQL_PASSWORD: 'badaas_password2023'
+    ports:
+      - '5000:3306'
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
