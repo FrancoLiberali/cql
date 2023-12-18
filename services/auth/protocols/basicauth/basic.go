@@ -14,6 +14,7 @@ func SaltAndHashPassword(password string) []byte {
 		[]byte(password),
 		cost,
 	)
+
 	return bytes
 }
 

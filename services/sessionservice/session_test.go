@@ -177,9 +177,11 @@ func TestLogOutUser_SessionNotFound(t *testing.T) {
 func TestRollSession(t *testing.T) {
 	sessionRepositoryMock, service, _, sessionConfigurationMock := setupTest(t)
 	sessionRepositoryMock.On("Save", gormDB, mock.Anything).Return(nil)
+
 	sessionDuration := time.Minute
 	sessionConfigurationMock.On("GetSessionDuration").Return(sessionDuration)
 	sessionConfigurationMock.On("GetRollDuration").Return(sessionDuration / 4)
+
 	uuidSample := orm.NewUUID()
 	originalExpirationTime := time.Now().Add(sessionDuration / 5)
 	session := &models.Session{
@@ -276,8 +278,8 @@ func Test_pullFromDB(t *testing.T) {
 
 func Test_pullFromDB_repoError(t *testing.T) {
 	sessionRepositoryMock, service, _, _ := setupTest(t)
-	sessionRepositoryMock.On("Query", gormDB).Return(nil, httperrors.AnError)
-	assert.PanicsWithError(t, httperrors.AnError.Error(), func() { service.pullFromDB() })
+	sessionRepositoryMock.On("Query", gormDB).Return(nil, httperrors.ErrForTests)
+	assert.PanicsWithError(t, httperrors.ErrForTests.Error(), func() { service.pullFromDB() })
 }
 
 func Test_removeExpired(t *testing.T) {
@@ -293,6 +295,7 @@ func Test_removeExpired(t *testing.T) {
 	sessionRepositoryMock.
 		On("Delete", gormDB, session).
 		Return(nil)
+
 	service.cache[uuidSample] = session
 
 	service.removeExpired()
@@ -317,7 +320,8 @@ func Test_removeExpired_RepositoryError(t *testing.T) {
 	}
 	sessionRepositoryMock.
 		On("Delete", gormDB, session).
-		Return(httperrors.AnError)
+		Return(httperrors.ErrForTests)
+
 	service.cache[uuidSample] = session
 
 	assert.Panics(t, func() { service.removeExpired() })

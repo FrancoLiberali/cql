@@ -10,7 +10,7 @@ import (
 	"github.com/ditrit/badaas/configuration"
 )
 
-func TestInvokeFunctionsWithProvidedValues(t *testing.T) {
+func TestInvokeFunctionsWithProvidedValues(_ *testing.T) {
 	mockObject := mockObject{}
 
 	mockObject.On("Function", 1).Return(1)
@@ -22,7 +22,7 @@ func TestInvokeFunctionsWithProvidedValues(t *testing.T) {
 	viper.Set(configuration.DatabaseSslmodeKey, "disable")
 	viper.Set(configuration.DatabaseRetryKey, 0)
 
-	badaas := BaDaaSInitializer{}
+	badaas := Initializer{}
 	badaas.Provide(
 		newIntValue,
 	).Invoke(
@@ -31,17 +31,17 @@ func TestInvokeFunctionsWithProvidedValues(t *testing.T) {
 	).Start()
 }
 
-func TestAddModulesAreExecuted(t *testing.T) {
-	mockObject := mockObject{}
+func TestAddModulesAreExecuted(_ *testing.T) {
+	mockObjectI := mockObject{}
 
-	mockObject.On("Function", 1).Return(1)
+	mockObjectI.On("Function", 1).Return(1)
 
-	badaas := BaDaaSInitializer{}
+	badaas := Initializer{}
 	badaas.AddModules(
 		fx.Module(
 			"test module",
 			fx.Provide(newIntValue),
-			fx.Invoke(mockObject.Function),
+			fx.Invoke(mockObjectI.Function),
 		),
 	).Invoke(
 		shutdown,

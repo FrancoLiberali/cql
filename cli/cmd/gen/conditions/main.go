@@ -101,6 +101,7 @@ func generateConditionsForObject(destPkg string, object types.Object) {
 // Load package information from paths
 func loadPackages(paths []string) []*packages.Package {
 	cfg := &packages.Config{Mode: packages.NeedTypes}
+
 	pkgs, err := packages.Load(cfg, paths...)
 	if err != nil {
 		panic(fmt.Errorf("loading packages for inspection: %w", err))

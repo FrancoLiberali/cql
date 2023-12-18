@@ -3,9 +3,10 @@ package logger
 import (
 	"testing"
 
-	configurationmocks "github.com/ditrit/badaas/mocks/configuration"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/zap/zapcore"
+
+	configurationmocks "github.com/ditrit/badaas/mocks/configuration"
 )
 
 func TestInitializeDevelopmentLogger(t *testing.T) {

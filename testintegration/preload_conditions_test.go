@@ -766,7 +766,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
 	err := ts.db.Save(seller1).Error
 	ts.Nil(err)
 
-	university2 := ts.createUniversity("uni1")
+	university2 := ts.createUniversity("uni2")
 	seller2 := ts.createSeller("2", company)
 	seller2.University = university2
 	err = ts.db.Save(seller2).Error
@@ -804,7 +804,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 	err := ts.db.Save(seller1).Error
 	ts.Nil(err)
 
-	university2 := ts.createUniversity("uni1")
+	university2 := ts.createUniversity("uni2")
 	seller2 := ts.createSeller("2", company1)
 	seller2.University = university2
 	err = ts.db.Save(seller2).Error

@@ -11,6 +11,8 @@ import (
 	"github.com/ditrit/verdeter"
 )
 
+const filePermissions = 0o0600
+
 // File system embed in the executable that will have the following files:
 //
 //go:embed docker/*
@@ -29,7 +31,7 @@ var genDockerCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 const destBadaasDir = "badaas"
 
 // copies all docker and configurations related files from the embed file system to the destination folder
-func generateDockerFiles(cmd *cobra.Command, args []string) {
+func generateDockerFiles(_ *cobra.Command, _ []string) {
 	sourceDockerDir := "docker"
 
 	copyDir(
@@ -65,7 +67,7 @@ func copyFile(sourcePath, destPath string) {
 		panic(fmt.Errorf("error reading source file %s: %w", sourcePath, err))
 	}
 
-	if err := os.WriteFile(destPath, fileContent, 0o0600); err != nil {
+	if err := os.WriteFile(destPath, fileContent, filePermissions); err != nil {
 		panic(fmt.Errorf("error writing on destination file %s: %w", destPath, err))
 	}
 }

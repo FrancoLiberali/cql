@@ -180,6 +180,7 @@ type Comparison struct {
 func doTest(t *testing.T, sourcePkg string, comparisons []Comparison) {
 	viper.Set(DestPackageKey, "conditions")
 	generateConditions(nil, []string{sourcePkg})
+
 	for _, comparison := range comparisons {
 		checkFilesEqual(t, comparison.Have, comparison.Expected)
 	}

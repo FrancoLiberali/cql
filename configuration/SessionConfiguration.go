@@ -17,7 +17,7 @@ const (
 
 // Hold the configuration values to handle the sessions
 type SessionConfiguration interface {
-	ConfigurationHolder
+	Holder
 	GetSessionDuration() time.Duration
 	GetPullInterval() time.Duration
 	GetRollDuration() time.Duration
@@ -34,6 +34,7 @@ type sessionConfigurationImpl struct {
 func NewSessionConfiguration() SessionConfiguration {
 	sessionConfiguration := new(sessionConfigurationImpl)
 	sessionConfiguration.Reload()
+
 	return sessionConfiguration
 }
 

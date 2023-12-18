@@ -6,11 +6,12 @@ import (
 	"net/url"
 	"testing"
 
-	configurationmocks "github.com/ditrit/badaas/mocks/configuration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zaptest/observer"
+
+	configurationmocks "github.com/ditrit/badaas/mocks/configuration"
 )
 
 func TestMiddlewareLogger(t *testing.T) {
@@ -18,7 +19,7 @@ func TestMiddlewareLogger(t *testing.T) {
 	observedLogger := zap.New(observedZapCore)
 
 	req := &http.Request{
-		Method: "GET",
+		Method: http.MethodGet,
 		URL: &url.URL{
 			Scheme: "http",
 			Host:   "localhost",
@@ -26,7 +27,8 @@ func TestMiddlewareLogger(t *testing.T) {
 		},
 	}
 	res := httptest.NewRecorder()
-	var actuallyRunned bool = false
+
+	actuallyRunned := false
 	// create a handler to use as "next" which will verify the request
 	nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		actuallyRunned = true

@@ -31,5 +31,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+
 	rootCmd.SetDefault(log.VerboseKey, false)
 }

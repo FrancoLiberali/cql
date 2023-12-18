@@ -81,9 +81,10 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	if err != nil {
 		panic(err)
 	}
+
 	t.httpClient = &http.Client{
 		Transport: http.DefaultTransport,
-		Timeout:   time.Duration(5 * time.Second),
+		Timeout:   5 * time.Second,
 		Jar:       jar,
 	}
 
@@ -107,5 +108,5 @@ func InitializeScenario(ctx *godog.ScenarioContext) {
 	ctx.Step(`^I request "(.+)"$`, t.requestGet)
 	ctx.Step(`^status code is "(\d+)"$`, t.assertStatusCode)
 	ctx.Step(`^response field "(.+)" is "(.+)"$`, t.assertResponseFieldIsEquals)
-	ctx.Step(`^I request "(.+)" with method "(.+)" with json$`, t.requestWithJson)
+	ctx.Step(`^I request "(.+)" with method "(.+)" with json$`, t.requestWithJSON)
 }

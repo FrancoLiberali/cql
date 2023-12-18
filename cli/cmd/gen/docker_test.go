@@ -107,6 +107,7 @@ func TestCopyFileWorksWhenDestPathAndFileAlready(t *testing.T) {
 	destDir := filepath.Join("badaas", "docker", "db")
 	err := os.MkdirAll(destDir, os.ModePerm)
 	assert.Nil(t, err)
+
 	destFile := filepath.Join(destDir, "docker-compose.yml")
 	err = os.WriteFile(destFile, []byte("hello"), 0o0600)
 	assert.Nil(t, err)
@@ -114,6 +115,7 @@ func TestCopyFileWorksWhenDestPathAndFileAlready(t *testing.T) {
 	copyFile(filepath.Join("docker", "db", "docker-compose.yml"), destFile)
 
 	checkDockerDBFilesExist(t)
+
 	fileContent, err := os.ReadFile(destFile)
 	assert.Nil(t, err)
 	assert.NotEqual(t, string(fileContent), "hello")

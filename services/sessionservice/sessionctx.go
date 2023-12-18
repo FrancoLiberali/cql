@@ -41,5 +41,6 @@ func GetSessionClaimsFromContext(ctx context.Context) *SessionClaims {
 	if !ok {
 		panic("could not extract claims from context")
 	}
+
 	return claims
 }

@@ -31,7 +31,9 @@ func ConnectToDialector(
 	retryTime time.Duration,
 ) (*gorm.DB, error) {
 	var err error
+
 	var database *gorm.DB
+
 	for numberRetry := uint(0); numberRetry < retryAmount; numberRetry++ {
 		database, err = gorm.Open(dialector, &gorm.Config{
 			Logger: gormzap.New(logger),

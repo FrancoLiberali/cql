@@ -7,7 +7,7 @@ import (
 
 // Hold the configuration values for the pagination
 type PaginationConfiguration interface {
-	ConfigurationHolder
+	Holder
 	GetMaxElemPerPage() uint
 }
 
@@ -20,6 +20,7 @@ type paginationConfigurationImpl struct {
 func NewPaginationConfiguration() PaginationConfiguration {
 	paginationConfiguration := new(paginationConfigurationImpl)
 	paginationConfiguration.Reload()
+
 	return paginationConfiguration
 }
 

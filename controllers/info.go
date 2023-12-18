@@ -29,7 +29,7 @@ func NewInfoController(version *semver.Version) InformationController {
 }
 
 // Return the badaas server information
-func (c *infoControllerImpl) Info(response http.ResponseWriter, r *http.Request) (any, httperrors.HTTPError) {
+func (c *infoControllerImpl) Info(_ http.ResponseWriter, _ *http.Request) (any, httperrors.HTTPError) {
 	return &BadaasServerInfo{
 		Status:  "OK",
 		Version: c.Version.String(),
