@@ -6,7 +6,6 @@ import (
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
-	"github.com/ditrit/badaas/persistence/gormfx"
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
@@ -26,12 +25,6 @@ var ListOfTables = []any{
 	models.Parent1{},
 	models.Parent2{},
 	models.Child{},
-}
-
-func GetModels() gormfx.GetModelsResult {
-	return gormfx.GetModelsResult{
-		Models: ListOfTables,
-	}
 }
 
 func CleanDB(db *gorm.DB) {

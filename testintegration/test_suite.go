@@ -8,20 +8,20 @@ import (
 	"github.com/ditrit/badaas/testintegration/models"
 )
 
-type ORMIntTestSuite struct {
+type TestSuite struct {
 	suite.Suite
 	db *gorm.DB
 }
 
-func (ts *ORMIntTestSuite) SetupTest() {
+func (ts *TestSuite) SetupTest() {
 	CleanDB(ts.db)
 }
 
-func (ts *ORMIntTestSuite) TearDownSuite() {
+func (ts *TestSuite) TearDownSuite() {
 	CleanDB(ts.db)
 }
 
-func (ts *ORMIntTestSuite) createProduct(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.Product {
+func (ts *TestSuite) createProduct(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.Product {
 	entity := &models.Product{
 		String:     stringV,
 		Int:        intV,
@@ -35,7 +35,7 @@ func (ts *ORMIntTestSuite) createProduct(stringV string, intV int, floatV float6
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createSale(code int, product *models.Product, seller *models.Seller) *models.Sale {
+func (ts *TestSuite) createSale(code int, product *models.Product, seller *models.Seller) *models.Sale {
 	entity := &models.Sale{
 		Code:    code,
 		Product: *product,
@@ -47,7 +47,7 @@ func (ts *ORMIntTestSuite) createSale(code int, product *models.Product, seller 
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createSeller(name string, company *models.Company) *models.Seller {
+func (ts *TestSuite) createSeller(name string, company *models.Company) *models.Seller {
 	var companyID *model.UUID
 	if company != nil {
 		companyID = &company.ID
@@ -63,7 +63,7 @@ func (ts *ORMIntTestSuite) createSeller(name string, company *models.Company) *m
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createCompany(name string) *models.Company {
+func (ts *TestSuite) createCompany(name string) *models.Company {
 	entity := &models.Company{
 		Name: name,
 	}
@@ -73,7 +73,7 @@ func (ts *ORMIntTestSuite) createCompany(name string) *models.Company {
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createCountry(name string, capital models.City) *models.Country {
+func (ts *TestSuite) createCountry(name string, capital models.City) *models.Country {
 	entity := &models.Country{
 		Name:    name,
 		Capital: capital,
@@ -84,7 +84,7 @@ func (ts *ORMIntTestSuite) createCountry(name string, capital models.City) *mode
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createEmployee(name string, boss *models.Employee) *models.Employee {
+func (ts *TestSuite) createEmployee(name string, boss *models.Employee) *models.Employee {
 	entity := &models.Employee{
 		Name: name,
 		Boss: boss,
@@ -95,7 +95,7 @@ func (ts *ORMIntTestSuite) createEmployee(name string, boss *models.Employee) *m
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createBicycle(name string, owner models.Person) *models.Bicycle {
+func (ts *TestSuite) createBicycle(name string, owner models.Person) *models.Bicycle {
 	entity := &models.Bicycle{
 		Name:  name,
 		Owner: owner,
@@ -106,7 +106,7 @@ func (ts *ORMIntTestSuite) createBicycle(name string, owner models.Person) *mode
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createBrand(name string) *models.Brand {
+func (ts *TestSuite) createBrand(name string) *models.Brand {
 	entity := &models.Brand{
 		Name: name,
 	}
@@ -116,7 +116,7 @@ func (ts *ORMIntTestSuite) createBrand(name string) *models.Brand {
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createPhone(name string, brand models.Brand) *models.Phone {
+func (ts *TestSuite) createPhone(name string, brand models.Brand) *models.Phone {
 	entity := &models.Phone{
 		Name:  name,
 		Brand: brand,
@@ -127,7 +127,7 @@ func (ts *ORMIntTestSuite) createPhone(name string, brand models.Brand) *models.
 	return entity
 }
 
-func (ts *ORMIntTestSuite) createUniversity(name string) *models.University {
+func (ts *TestSuite) createUniversity(name string) *models.University {
 	entity := &models.University{
 		Name: name,
 	}

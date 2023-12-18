@@ -11,14 +11,14 @@ import (
 )
 
 type JoinConditionsIntTestSuite struct {
-	ORMIntTestSuite
+	TestSuite
 }
 
 func NewJoinConditionsIntTestSuite(
 	db *gorm.DB,
 ) *JoinConditionsIntTestSuite {
 	return &JoinConditionsIntTestSuite{
-		ORMIntTestSuite: ORMIntTestSuite{
+		TestSuite: TestSuite{
 			db: db,
 		},
 	}

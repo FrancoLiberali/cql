@@ -2,12 +2,12 @@ package testintegration
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
 
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/fx"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
@@ -17,10 +17,7 @@ import (
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/cql"
 	"github.com/ditrit/badaas/orm/logger"
-	"github.com/ditrit/badaas/persistence/gormfx"
 )
-
-var tGlobal *testing.T
 
 const dbTypeEnvKey = "DB"
 
@@ -34,47 +31,23 @@ const (
 )
 
 func TestBaDaaSORM(t *testing.T) {
-	tGlobal = t
+	db, err := NewDBConnection()
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-	fx.New(
-		// connect to db
-		fx.Provide(NewDBConnection),
-		fx.Provide(GetModels),
-		gormfx.AutoMigrate,
+	err = db.AutoMigrate(ListOfTables...)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-		// create test suites
-		fx.Provide(NewQueryIntTestSuite),
-		fx.Provide(NewWhereConditionsIntTestSuite),
-		fx.Provide(NewJoinConditionsIntTestSuite),
-		fx.Provide(NewPreloadConditionsIntTestSuite),
-		fx.Provide(NewOperatorsIntTestSuite),
-		fx.Provide(NewUpdateIntTestSuite),
-		fx.Provide(NewDeleteIntTestSuite),
-
-		// run tests
-		fx.Invoke(runORMTestSuites),
-	).Run()
-}
-
-func runORMTestSuites(
-	tsQuery *QueryIntTestSuite,
-	tsWhereConditions *WhereConditionsIntTestSuite,
-	tsJoinConditions *JoinConditionsIntTestSuite,
-	tsPreloadConditions *PreloadConditionsIntTestSuite,
-	tsOperators *OperatorsIntTestSuite,
-	tsUpdate *UpdateIntTestSuite,
-	tsDelete *DeleteIntTestSuite,
-	shutdowner fx.Shutdowner,
-) {
-	suite.Run(tGlobal, tsQuery)
-	suite.Run(tGlobal, tsWhereConditions)
-	suite.Run(tGlobal, tsJoinConditions)
-	suite.Run(tGlobal, tsPreloadConditions)
-	suite.Run(tGlobal, tsOperators)
-	suite.Run(tGlobal, tsUpdate)
-	suite.Run(tGlobal, tsDelete)
-
-	shutdowner.Shutdown()
+	suite.Run(t, NewQueryIntTestSuite(db))
+	suite.Run(t, NewWhereConditionsIntTestSuite(db))
+	suite.Run(t, NewJoinConditionsIntTestSuite(db))
+	suite.Run(t, NewPreloadConditionsIntTestSuite(db))
+	suite.Run(t, NewOperatorsIntTestSuite(db))
+	suite.Run(t, NewUpdateIntTestSuite(db))
+	suite.Run(t, NewDeleteIntTestSuite(db))
 }
 
 func NewDBConnection() (*gorm.DB, error) {

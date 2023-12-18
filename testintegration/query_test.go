@@ -12,14 +12,14 @@ import (
 )
 
 type QueryIntTestSuite struct {
-	ORMIntTestSuite
+	TestSuite
 }
 
 func NewQueryIntTestSuite(
 	db *gorm.DB,
 ) *QueryIntTestSuite {
 	return &QueryIntTestSuite{
-		ORMIntTestSuite: ORMIntTestSuite{
+		TestSuite: TestSuite{
 			db: db,
 		},
 	}

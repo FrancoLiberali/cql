@@ -11,14 +11,14 @@ import (
 )
 
 type UpdateIntTestSuite struct {
-	ORMIntTestSuite
+	TestSuite
 }
 
 func NewUpdateIntTestSuite(
 	db *gorm.DB,
 ) *UpdateIntTestSuite {
 	return &UpdateIntTestSuite{
-		ORMIntTestSuite: ORMIntTestSuite{
+		TestSuite: TestSuite{
 			db: db,
 		},
 	}

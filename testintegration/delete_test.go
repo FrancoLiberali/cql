@@ -11,14 +11,14 @@ import (
 )
 
 type DeleteIntTestSuite struct {
-	ORMIntTestSuite
+	TestSuite
 }
 
 func NewDeleteIntTestSuite(
 	db *gorm.DB,
 ) *DeleteIntTestSuite {
 	return &DeleteIntTestSuite{
-		ORMIntTestSuite: ORMIntTestSuite{
+		TestSuite: TestSuite{
 			db: db,
 		},
 	}

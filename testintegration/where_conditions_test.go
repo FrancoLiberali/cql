@@ -14,14 +14,14 @@ import (
 )
 
 type WhereConditionsIntTestSuite struct {
-	ORMIntTestSuite
+	TestSuite
 }
 
 func NewWhereConditionsIntTestSuite(
 	db *gorm.DB,
 ) *WhereConditionsIntTestSuite {
 	return &WhereConditionsIntTestSuite{
-		ORMIntTestSuite: ORMIntTestSuite{
+		TestSuite: TestSuite{
 			db: db,
 		},
 	}

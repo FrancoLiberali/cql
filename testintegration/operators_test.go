@@ -17,14 +17,14 @@ import (
 )
 
 type OperatorsIntTestSuite struct {
-	ORMIntTestSuite
+	TestSuite
 }
 
 func NewOperatorsIntTestSuite(
 	db *gorm.DB,
 ) *OperatorsIntTestSuite {
 	return &OperatorsIntTestSuite{
-		ORMIntTestSuite: ORMIntTestSuite{
+		TestSuite: TestSuite{
 			db: db,
 		},
 	}

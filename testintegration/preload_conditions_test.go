@@ -17,14 +17,14 @@ import (
 )
 
 type PreloadConditionsIntTestSuite struct {
-	ORMIntTestSuite
+	TestSuite
 }
 
 func NewPreloadConditionsIntTestSuite(
 	db *gorm.DB,
 ) *PreloadConditionsIntTestSuite {
 	return &PreloadConditionsIntTestSuite{
-		ORMIntTestSuite: ORMIntTestSuite{
+		TestSuite: TestSuite{
 			db: db,
 		},
 	}
