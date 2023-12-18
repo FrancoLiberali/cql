@@ -23,7 +23,7 @@ vendor/
 
 # database files
 node*
-testintegration/sqlite:*
+test/sqlite:*
 
 # vscode conf
 .vscode

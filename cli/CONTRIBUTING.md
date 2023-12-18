@@ -1,12 +1,12 @@
 # Contribute to the development of badaas
 
-- [Local compilation](#local-compilation)
-- [Tests](#tests)
-  - [Unit tests](#unit-tests)
-- [Git](#git)
-  - [Branch naming policy](#branch-naming-policy)
-  - [Default branch](#default-branch)
-  - [How to release](#how-to-release)
+- [Contribute to the development of badaas](#contribute-to-the-development-of-badaas)
+  - [Local compilation](#local-compilation)
+  - [Tests](#tests)
+  - [Git](#git)
+    - [Branch naming policy](#branch-naming-policy)
+    - [Default branch](#default-branch)
+    - [How to release](#how-to-release)
 
 ## Local compilation
 
@@ -24,14 +24,12 @@ ln -sf badaas-cli $GOPATH/bin/badaas-cli
 
 ## Tests
 
-### Unit tests
-
 We use the standard test suite in combination with [github.com/stretchr/testify](https://github.com/stretchr/testify) to do our unit testing.
 
 To run them, please run:
 
 ```sh
-make test_unit
+make test
 ```
 
 ## Git

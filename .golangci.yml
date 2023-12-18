@@ -212,7 +212,7 @@ issues:
     - composite literal uses unkeyed fields
   exclude-rules:
     # Exclude some linters from running on test files.
-    - path: _test\.go$|^testintegration/|^test_e2e/
+    - path: _test\.go$|^test/
       linters:
         - errcheck
         - forcetypeassert
