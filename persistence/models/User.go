@@ -1,10 +1,15 @@
 package models
 
-import "github.com/ditrit/badaas/orm"
+import (
+	"github.com/ditrit/badaas/orm/condition"
+	"github.com/ditrit/badaas/orm/model"
+	"github.com/ditrit/badaas/orm/operator"
+	"github.com/ditrit/badaas/orm/query"
+)
 
 // Represents a user
 type User struct {
-	orm.UUIDModel
+	model.UUIDModel
 	Username string `gorm:"not null"`
 	Email    string `gorm:"unique;not null"`
 
@@ -12,11 +17,11 @@ type User struct {
 	Password []byte `gorm:"not null"`
 }
 
-func UserEmailCondition(operator orm.Operator[string]) orm.WhereCondition[User] {
-	return orm.FieldCondition[User, string]{
-		FieldIdentifier: orm.FieldIdentifier[string]{
+func UserEmailCondition(operator operator.Operator[string]) condition.WhereCondition[User] {
+	return condition.NewFieldCondition[User, string](
+		query.FieldIdentifier[string]{
 			Field: "Email",
 		},
-		Operator: operator,
-	}
+		operator,
+	)
 }

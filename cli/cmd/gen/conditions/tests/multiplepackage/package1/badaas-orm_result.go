@@ -3,9 +3,9 @@ package package1
 
 import (
 	package2 "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/multiplepackage/package2"
-	orm "github.com/ditrit/badaas/orm"
+	preload "github.com/ditrit/badaas/orm/preload"
 )
 
 func (m Package1) GetPackage2() (*package2.Package2, error) {
-	return orm.VerifyStructLoaded[package2.Package2](&m.Package2)
+	return preload.VerifyStructLoaded[package2.Package2](&m.Package2)
 }

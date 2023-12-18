@@ -1,13 +1,14 @@
 package dynamic
 
 import (
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/operator"
+	"github.com/ditrit/badaas/orm/query"
 	"github.com/ditrit/badaas/orm/sql"
 )
 
-func NewValueOperator[T any](
+func newValueOperator[T any](
 	sqlOperator sql.Operator,
-	field orm.FieldIdentifier[T],
-) *orm.ValueOperator[T] {
-	return orm.NewValueOperator[T](sqlOperator, field)
+	field query.FieldIdentifier[T],
+) *operator.ValueOperator[T] {
+	return operator.NewValueOperator[T](sqlOperator, field)
 }

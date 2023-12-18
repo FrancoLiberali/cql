@@ -1,14 +1,14 @@
 package overridereferencesinverse
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type Computer struct {
-	orm.UUIDModel
+	model.UUIDModel
 	Name      string
 	Processor Processor `gorm:"foreignKey:ComputerName;references:Name"`
 }
 
 type Processor struct {
-	orm.UUIDModel
+	model.UUIDModel
 	ComputerName string
 }

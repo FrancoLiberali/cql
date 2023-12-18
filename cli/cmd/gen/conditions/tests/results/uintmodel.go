@@ -3,58 +3,49 @@ package conditions
 
 import (
 	uintmodel "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/uintmodel"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var uintModelType = reflect.TypeOf(*new(uintmodel.UintModel))
-var UintModelIdField = orm.FieldIdentifier[orm.UIntID]{
+var UintModelIdField = query.FieldIdentifier[model.UIntID]{
 	Field:     "ID",
 	ModelType: uintModelType,
 }
 
-func UintModelId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.FieldCondition[uintmodel.UintModel, orm.UIntID]{
-		FieldIdentifier: UintModelIdField,
-		Operator:        operator,
-	}
+func UintModelId(operator operator.Operator[model.UIntID]) condition.WhereCondition[uintmodel.UintModel] {
+	return condition.NewFieldCondition[uintmodel.UintModel, model.UIntID](UintModelIdField, operator)
 }
 
-var UintModelCreatedAtField = orm.FieldIdentifier[time.Time]{
+var UintModelCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: uintModelType,
 }
 
-func UintModelCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
-		FieldIdentifier: UintModelCreatedAtField,
-		Operator:        operator,
-	}
+func UintModelCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[uintmodel.UintModel] {
+	return condition.NewFieldCondition[uintmodel.UintModel, time.Time](UintModelCreatedAtField, operator)
 }
 
-var UintModelUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var UintModelUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: uintModelType,
 }
 
-func UintModelUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
-		FieldIdentifier: UintModelUpdatedAtField,
-		Operator:        operator,
-	}
+func UintModelUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[uintmodel.UintModel] {
+	return condition.NewFieldCondition[uintmodel.UintModel, time.Time](UintModelUpdatedAtField, operator)
 }
 
-var UintModelDeletedAtField = orm.FieldIdentifier[time.Time]{
+var UintModelDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: uintModelType,
 }
 
-func UintModelDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[uintmodel.UintModel] {
-	return orm.FieldCondition[uintmodel.UintModel, time.Time]{
-		FieldIdentifier: UintModelDeletedAtField,
-		Operator:        operator,
-	}
+func UintModelDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[uintmodel.UintModel] {
+	return condition.NewFieldCondition[uintmodel.UintModel, time.Time](UintModelDeletedAtField, operator)
 }
 
-var UintModelPreloadAttributes = orm.NewPreloadCondition[uintmodel.UintModel](UintModelIdField, UintModelCreatedAtField, UintModelUpdatedAtField, UintModelDeletedAtField)
+var UintModelPreloadAttributes = condition.NewPreloadCondition[uintmodel.UintModel](UintModelIdField, UintModelCreatedAtField, UintModelUpdatedAtField, UintModelDeletedAtField)

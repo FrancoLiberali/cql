@@ -2,71 +2,59 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
 	"time"
 )
 
 var brandType = reflect.TypeOf(*new(models.Brand))
-var BrandIdField = orm.FieldIdentifier[orm.UIntID]{
+var BrandIdField = query.FieldIdentifier[model.UIntID]{
 	Field:     "ID",
 	ModelType: brandType,
 }
 
-func BrandId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[models.Brand] {
-	return orm.FieldCondition[models.Brand, orm.UIntID]{
-		FieldIdentifier: BrandIdField,
-		Operator:        operator,
-	}
+func BrandId(operator operator.Operator[model.UIntID]) condition.WhereCondition[models.Brand] {
+	return condition.NewFieldCondition[models.Brand, model.UIntID](BrandIdField, operator)
 }
 
-var BrandCreatedAtField = orm.FieldIdentifier[time.Time]{
+var BrandCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: brandType,
 }
 
-func BrandCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Brand] {
-	return orm.FieldCondition[models.Brand, time.Time]{
-		FieldIdentifier: BrandCreatedAtField,
-		Operator:        operator,
-	}
+func BrandCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Brand] {
+	return condition.NewFieldCondition[models.Brand, time.Time](BrandCreatedAtField, operator)
 }
 
-var BrandUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var BrandUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: brandType,
 }
 
-func BrandUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Brand] {
-	return orm.FieldCondition[models.Brand, time.Time]{
-		FieldIdentifier: BrandUpdatedAtField,
-		Operator:        operator,
-	}
+func BrandUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Brand] {
+	return condition.NewFieldCondition[models.Brand, time.Time](BrandUpdatedAtField, operator)
 }
 
-var BrandDeletedAtField = orm.FieldIdentifier[time.Time]{
+var BrandDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: brandType,
 }
 
-func BrandDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Brand] {
-	return orm.FieldCondition[models.Brand, time.Time]{
-		FieldIdentifier: BrandDeletedAtField,
-		Operator:        operator,
-	}
+func BrandDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Brand] {
+	return condition.NewFieldCondition[models.Brand, time.Time](BrandDeletedAtField, operator)
 }
 
-var BrandNameField = orm.FieldIdentifier[string]{
+var BrandNameField = query.FieldIdentifier[string]{
 	Field:     "Name",
 	ModelType: brandType,
 }
 
-func BrandName(operator orm.Operator[string]) orm.WhereCondition[models.Brand] {
-	return orm.FieldCondition[models.Brand, string]{
-		FieldIdentifier: BrandNameField,
-		Operator:        operator,
-	}
+func BrandName(operator operator.Operator[string]) condition.WhereCondition[models.Brand] {
+	return condition.NewFieldCondition[models.Brand, string](BrandNameField, operator)
 }
 
-var BrandPreloadAttributes = orm.NewPreloadCondition[models.Brand](BrandIdField, BrandCreatedAtField, BrandUpdatedAtField, BrandDeletedAtField, BrandNameField)
+var BrandPreloadAttributes = condition.NewPreloadCondition[models.Brand](BrandIdField, BrandCreatedAtField, BrandUpdatedAtField, BrandDeletedAtField, BrandNameField)

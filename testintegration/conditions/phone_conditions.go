@@ -2,94 +2,73 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
 	"time"
 )
 
 var phoneType = reflect.TypeOf(*new(models.Phone))
-var PhoneIdField = orm.FieldIdentifier[orm.UIntID]{
+var PhoneIdField = query.FieldIdentifier[model.UIntID]{
 	Field:     "ID",
 	ModelType: phoneType,
 }
 
-func PhoneId(operator orm.Operator[orm.UIntID]) orm.WhereCondition[models.Phone] {
-	return orm.FieldCondition[models.Phone, orm.UIntID]{
-		FieldIdentifier: PhoneIdField,
-		Operator:        operator,
-	}
+func PhoneId(operator operator.Operator[model.UIntID]) condition.WhereCondition[models.Phone] {
+	return condition.NewFieldCondition[models.Phone, model.UIntID](PhoneIdField, operator)
 }
 
-var PhoneCreatedAtField = orm.FieldIdentifier[time.Time]{
+var PhoneCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: phoneType,
 }
 
-func PhoneCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Phone] {
-	return orm.FieldCondition[models.Phone, time.Time]{
-		FieldIdentifier: PhoneCreatedAtField,
-		Operator:        operator,
-	}
+func PhoneCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Phone] {
+	return condition.NewFieldCondition[models.Phone, time.Time](PhoneCreatedAtField, operator)
 }
 
-var PhoneUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var PhoneUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: phoneType,
 }
 
-func PhoneUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Phone] {
-	return orm.FieldCondition[models.Phone, time.Time]{
-		FieldIdentifier: PhoneUpdatedAtField,
-		Operator:        operator,
-	}
+func PhoneUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Phone] {
+	return condition.NewFieldCondition[models.Phone, time.Time](PhoneUpdatedAtField, operator)
 }
 
-var PhoneDeletedAtField = orm.FieldIdentifier[time.Time]{
+var PhoneDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: phoneType,
 }
 
-func PhoneDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Phone] {
-	return orm.FieldCondition[models.Phone, time.Time]{
-		FieldIdentifier: PhoneDeletedAtField,
-		Operator:        operator,
-	}
+func PhoneDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Phone] {
+	return condition.NewFieldCondition[models.Phone, time.Time](PhoneDeletedAtField, operator)
 }
 
-var PhoneNameField = orm.FieldIdentifier[string]{
+var PhoneNameField = query.FieldIdentifier[string]{
 	Field:     "Name",
 	ModelType: phoneType,
 }
 
-func PhoneName(operator orm.Operator[string]) orm.WhereCondition[models.Phone] {
-	return orm.FieldCondition[models.Phone, string]{
-		FieldIdentifier: PhoneNameField,
-		Operator:        operator,
-	}
+func PhoneName(operator operator.Operator[string]) condition.WhereCondition[models.Phone] {
+	return condition.NewFieldCondition[models.Phone, string](PhoneNameField, operator)
 }
-func PhoneBrand(conditions ...orm.Condition[models.Brand]) orm.IJoinCondition[models.Phone] {
-	return orm.JoinCondition[models.Phone, models.Brand]{
-		Conditions:         conditions,
-		RelationField:      "Brand",
-		T1Field:            "BrandID",
-		T1PreloadCondition: PhonePreloadAttributes,
-		T2Field:            "ID",
-	}
+func PhoneBrand(conditions ...condition.Condition[models.Brand]) condition.JoinCondition[models.Phone] {
+	return condition.NewJoinCondition[models.Phone, models.Brand](conditions, "Brand", "BrandID", PhonePreloadAttributes, "ID")
 }
 
 var PhonePreloadBrand = PhoneBrand(BrandPreloadAttributes)
-var PhoneBrandIdField = orm.FieldIdentifier[uint]{
+var PhoneBrandIdField = query.FieldIdentifier[uint]{
 	Field:     "BrandID",
 	ModelType: phoneType,
 }
 
-func PhoneBrandId(operator orm.Operator[uint]) orm.WhereCondition[models.Phone] {
-	return orm.FieldCondition[models.Phone, uint]{
-		FieldIdentifier: PhoneBrandIdField,
-		Operator:        operator,
-	}
+func PhoneBrandId(operator operator.Operator[uint]) condition.WhereCondition[models.Phone] {
+	return condition.NewFieldCondition[models.Phone, uint](PhoneBrandIdField, operator)
 }
 
-var PhonePreloadAttributes = orm.NewPreloadCondition[models.Phone](PhoneIdField, PhoneCreatedAtField, PhoneUpdatedAtField, PhoneDeletedAtField, PhoneNameField, PhoneBrandIdField)
-var PhonePreloadRelations = []orm.Condition[models.Phone]{PhonePreloadBrand}
+var PhonePreloadAttributes = condition.NewPreloadCondition[models.Phone](PhoneIdField, PhoneCreatedAtField, PhoneUpdatedAtField, PhoneDeletedAtField, PhoneNameField, PhoneBrandIdField)
+var PhonePreloadRelations = []condition.Condition[models.Phone]{PhonePreloadBrand}

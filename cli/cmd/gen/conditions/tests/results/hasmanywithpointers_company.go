@@ -3,62 +3,53 @@ package conditions
 
 import (
 	hasmanywithpointers "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasmanywithpointers"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var companyWithPointersType = reflect.TypeOf(*new(hasmanywithpointers.CompanyWithPointers))
-var CompanyWithPointersIdField = orm.FieldIdentifier[orm.UUID]{
+var CompanyWithPointersIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: companyWithPointersType,
 }
 
-func CompanyWithPointersId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
-	return orm.FieldCondition[hasmanywithpointers.CompanyWithPointers, orm.UUID]{
-		FieldIdentifier: CompanyWithPointersIdField,
-		Operator:        operator,
-	}
+func CompanyWithPointersId(operator operator.Operator[model.UUID]) condition.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
+	return condition.NewFieldCondition[hasmanywithpointers.CompanyWithPointers, model.UUID](CompanyWithPointersIdField, operator)
 }
 
-var CompanyWithPointersCreatedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyWithPointersCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: companyWithPointersType,
 }
 
-func CompanyWithPointersCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
-	return orm.FieldCondition[hasmanywithpointers.CompanyWithPointers, time.Time]{
-		FieldIdentifier: CompanyWithPointersCreatedAtField,
-		Operator:        operator,
-	}
+func CompanyWithPointersCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
+	return condition.NewFieldCondition[hasmanywithpointers.CompanyWithPointers, time.Time](CompanyWithPointersCreatedAtField, operator)
 }
 
-var CompanyWithPointersUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyWithPointersUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: companyWithPointersType,
 }
 
-func CompanyWithPointersUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
-	return orm.FieldCondition[hasmanywithpointers.CompanyWithPointers, time.Time]{
-		FieldIdentifier: CompanyWithPointersUpdatedAtField,
-		Operator:        operator,
-	}
+func CompanyWithPointersUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
+	return condition.NewFieldCondition[hasmanywithpointers.CompanyWithPointers, time.Time](CompanyWithPointersUpdatedAtField, operator)
 }
 
-var CompanyWithPointersDeletedAtField = orm.FieldIdentifier[time.Time]{
+var CompanyWithPointersDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: companyWithPointersType,
 }
 
-func CompanyWithPointersDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
-	return orm.FieldCondition[hasmanywithpointers.CompanyWithPointers, time.Time]{
-		FieldIdentifier: CompanyWithPointersDeletedAtField,
-		Operator:        operator,
-	}
+func CompanyWithPointersDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasmanywithpointers.CompanyWithPointers] {
+	return condition.NewFieldCondition[hasmanywithpointers.CompanyWithPointers, time.Time](CompanyWithPointersDeletedAtField, operator)
 }
-func CompanyWithPointersPreloadSellers(nestedPreloads ...orm.IJoinCondition[hasmanywithpointers.SellerInPointers]) orm.Condition[hasmanywithpointers.CompanyWithPointers] {
-	return orm.NewCollectionPreloadCondition[hasmanywithpointers.CompanyWithPointers, hasmanywithpointers.SellerInPointers]("Sellers", nestedPreloads)
+func CompanyWithPointersPreloadSellers(nestedPreloads ...condition.JoinCondition[hasmanywithpointers.SellerInPointers]) condition.Condition[hasmanywithpointers.CompanyWithPointers] {
+	return condition.NewCollectionPreloadCondition[hasmanywithpointers.CompanyWithPointers, hasmanywithpointers.SellerInPointers]("Sellers", nestedPreloads)
 }
 
-var CompanyWithPointersPreloadAttributes = orm.NewPreloadCondition[hasmanywithpointers.CompanyWithPointers](CompanyWithPointersIdField, CompanyWithPointersCreatedAtField, CompanyWithPointersUpdatedAtField, CompanyWithPointersDeletedAtField)
-var CompanyWithPointersPreloadRelations = []orm.Condition[hasmanywithpointers.CompanyWithPointers]{CompanyWithPointersPreloadSellers()}
+var CompanyWithPointersPreloadAttributes = condition.NewPreloadCondition[hasmanywithpointers.CompanyWithPointers](CompanyWithPointersIdField, CompanyWithPointersCreatedAtField, CompanyWithPointersUpdatedAtField, CompanyWithPointersDeletedAtField)
+var CompanyWithPointersPreloadRelations = []condition.Condition[hasmanywithpointers.CompanyWithPointers]{CompanyWithPointersPreloadSellers()}

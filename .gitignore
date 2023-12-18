@@ -29,3 +29,7 @@ node*
 
 # binary output
 badaas
+!docs/badaas
+
+# Sphinx documentation
+docs/_build/

@@ -1,13 +1,13 @@
 package overrideforeignkey
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type Person struct {
-	orm.UUIDModel
+	model.UUIDModel
 }
 
 type Bicycle struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	// Bicycle BelongsTo Person (Bicycle 0..* -> 1 Person)
 	Owner            Person `gorm:"foreignKey:OwnerSomethingID"`

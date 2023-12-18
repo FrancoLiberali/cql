@@ -1,13 +1,15 @@
 package overrideforeignkeyinverse
 
-import "github.com/ditrit/badaas/orm"
+import (
+	"github.com/ditrit/badaas/orm/model"
+)
 
 type User struct {
-	orm.UUIDModel
+	model.UUIDModel
 	CreditCard CreditCard `gorm:"foreignKey:UserReference"`
 }
 
 type CreditCard struct {
-	orm.UUIDModel
-	UserReference orm.UUID
+	model.UUIDModel
+	UserReference model.UUID
 }

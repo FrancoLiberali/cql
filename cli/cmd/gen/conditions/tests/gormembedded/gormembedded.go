@@ -1,13 +1,13 @@
 package gormembedded
 
-import "github.com/ditrit/badaas/orm"
+import "github.com/ditrit/badaas/orm/model"
 
 type ToBeGormEmbedded struct {
 	Int int
 }
 
 type GormEmbedded struct {
-	orm.UIntModel
+	model.UIntModel
 
 	Int                  int
 	GormEmbedded         ToBeGormEmbedded `gorm:"embedded;embeddedPrefix:gorm_embedded_"`

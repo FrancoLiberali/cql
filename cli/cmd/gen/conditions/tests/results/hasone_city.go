@@ -3,81 +3,63 @@ package conditions
 
 import (
 	hasone "github.com/ditrit/badaas-cli/cmd/gen/conditions/tests/hasone"
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	"reflect"
 	"time"
 )
 
 var cityType = reflect.TypeOf(*new(hasone.City))
-var CityIdField = orm.FieldIdentifier[orm.UUID]{
+var CityIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: cityType,
 }
 
-func CityId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasone.City] {
-	return orm.FieldCondition[hasone.City, orm.UUID]{
-		FieldIdentifier: CityIdField,
-		Operator:        operator,
-	}
+func CityId(operator operator.Operator[model.UUID]) condition.WhereCondition[hasone.City] {
+	return condition.NewFieldCondition[hasone.City, model.UUID](CityIdField, operator)
 }
 
-var CityCreatedAtField = orm.FieldIdentifier[time.Time]{
+var CityCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: cityType,
 }
 
-func CityCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.City] {
-	return orm.FieldCondition[hasone.City, time.Time]{
-		FieldIdentifier: CityCreatedAtField,
-		Operator:        operator,
-	}
+func CityCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasone.City] {
+	return condition.NewFieldCondition[hasone.City, time.Time](CityCreatedAtField, operator)
 }
 
-var CityUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var CityUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: cityType,
 }
 
-func CityUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.City] {
-	return orm.FieldCondition[hasone.City, time.Time]{
-		FieldIdentifier: CityUpdatedAtField,
-		Operator:        operator,
-	}
+func CityUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasone.City] {
+	return condition.NewFieldCondition[hasone.City, time.Time](CityUpdatedAtField, operator)
 }
 
-var CityDeletedAtField = orm.FieldIdentifier[time.Time]{
+var CityDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: cityType,
 }
 
-func CityDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[hasone.City] {
-	return orm.FieldCondition[hasone.City, time.Time]{
-		FieldIdentifier: CityDeletedAtField,
-		Operator:        operator,
-	}
+func CityDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[hasone.City] {
+	return condition.NewFieldCondition[hasone.City, time.Time](CityDeletedAtField, operator)
 }
-func CityCountry(conditions ...orm.Condition[hasone.Country]) orm.IJoinCondition[hasone.City] {
-	return orm.JoinCondition[hasone.City, hasone.Country]{
-		Conditions:         conditions,
-		RelationField:      "Country",
-		T1Field:            "CountryID",
-		T1PreloadCondition: CityPreloadAttributes,
-		T2Field:            "ID",
-	}
+func CityCountry(conditions ...condition.Condition[hasone.Country]) condition.JoinCondition[hasone.City] {
+	return condition.NewJoinCondition[hasone.City, hasone.Country](conditions, "Country", "CountryID", CityPreloadAttributes, "ID")
 }
 
 var CityPreloadCountry = CityCountry(CountryPreloadAttributes)
-var CityCountryIdField = orm.FieldIdentifier[orm.UUID]{
+var CityCountryIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "CountryID",
 	ModelType: cityType,
 }
 
-func CityCountryId(operator orm.Operator[orm.UUID]) orm.WhereCondition[hasone.City] {
-	return orm.FieldCondition[hasone.City, orm.UUID]{
-		FieldIdentifier: CityCountryIdField,
-		Operator:        operator,
-	}
+func CityCountryId(operator operator.Operator[model.UUID]) condition.WhereCondition[hasone.City] {
+	return condition.NewFieldCondition[hasone.City, model.UUID](CityCountryIdField, operator)
 }
 
-var CityPreloadAttributes = orm.NewPreloadCondition[hasone.City](CityIdField, CityCreatedAtField, CityUpdatedAtField, CityDeletedAtField, CityCountryIdField)
-var CityPreloadRelations = []orm.Condition[hasone.City]{CityPreloadCountry}
+var CityPreloadAttributes = condition.NewPreloadCondition[hasone.City](CityIdField, CityCreatedAtField, CityUpdatedAtField, CityDeletedAtField, CityCountryIdField)
+var CityPreloadRelations = []condition.Condition[hasone.City]{CityPreloadCountry}

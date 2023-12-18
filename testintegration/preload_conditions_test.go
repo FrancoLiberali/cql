@@ -8,6 +8,8 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/ditrit/badaas/orm"
+	badaasORMErrors "github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
 	"github.com/ditrit/badaas/utils"
@@ -15,26 +17,26 @@ import (
 
 type PreloadConditionsIntTestSuite struct {
 	CRUDServiceCommonIntTestSuite
-	crudSaleService     orm.CRUDService[models.Sale, orm.UUID]
-	crudCompanyService  orm.CRUDService[models.Company, orm.UUID]
-	crudSellerService   orm.CRUDService[models.Seller, orm.UUID]
-	crudCountryService  orm.CRUDService[models.Country, orm.UUID]
-	crudCityService     orm.CRUDService[models.City, orm.UUID]
-	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID]
-	crudPhoneService    orm.CRUDService[models.Phone, orm.UIntID]
-	crudChildService    orm.CRUDService[models.Child, orm.UUID]
+	crudSaleService     orm.CRUDService[models.Sale, model.UUID]
+	crudCompanyService  orm.CRUDService[models.Company, model.UUID]
+	crudSellerService   orm.CRUDService[models.Seller, model.UUID]
+	crudCountryService  orm.CRUDService[models.Country, model.UUID]
+	crudCityService     orm.CRUDService[models.City, model.UUID]
+	crudEmployeeService orm.CRUDService[models.Employee, model.UUID]
+	crudPhoneService    orm.CRUDService[models.Phone, model.UIntID]
+	crudChildService    orm.CRUDService[models.Child, model.UUID]
 }
 
 func NewPreloadConditionsIntTestSuite(
 	db *gorm.DB,
-	crudSaleService orm.CRUDService[models.Sale, orm.UUID],
-	crudCompanyService orm.CRUDService[models.Company, orm.UUID],
-	crudSellerService orm.CRUDService[models.Seller, orm.UUID],
-	crudCountryService orm.CRUDService[models.Country, orm.UUID],
-	crudCityService orm.CRUDService[models.City, orm.UUID],
-	crudEmployeeService orm.CRUDService[models.Employee, orm.UUID],
-	crudPhoneService orm.CRUDService[models.Phone, orm.UIntID],
-	crudChildService orm.CRUDService[models.Child, orm.UUID],
+	crudSaleService orm.CRUDService[models.Sale, model.UUID],
+	crudCompanyService orm.CRUDService[models.Company, model.UUID],
+	crudSellerService orm.CRUDService[models.Seller, model.UUID],
+	crudCountryService orm.CRUDService[models.Country, model.UUID],
+	crudCityService orm.CRUDService[models.City, model.UUID],
+	crudEmployeeService orm.CRUDService[models.Employee, model.UUID],
+	crudPhoneService orm.CRUDService[models.Phone, model.UIntID],
+	crudChildService orm.CRUDService[models.Child, model.UUID],
 ) *PreloadConditionsIntTestSuite {
 	return &PreloadConditionsIntTestSuite{
 		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{
@@ -65,11 +67,11 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadReturnsErrorOnGetRelation(
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)       // is nil but we cant determine why directly (not loaded or really null)
 	_, err = saleLoaded.GetSeller() // GetSeller give us that information
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyNull() {
@@ -85,7 +87,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyN
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)                 // is nil but we cant determine why directly (not loaded or really null)
 	saleSeller, err := saleLoaded.GetSeller() // GetSeller give us that information
@@ -224,7 +226,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 		// the not null one is not loaded
 		sellerCompany, err := saleSeller.GetCompany()
-		return errors.Is(err, orm.ErrRelationNotLoaded) && sellerCompany == nil
+		return errors.Is(err, badaasORMErrors.ErrRelationNotLoaded) && sellerCompany == nil
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
 		saleSeller, err := sale.GetSeller()
@@ -372,7 +374,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadOneToOne() {
 
 	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
 	_, err = entities[0].GetCountry()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
@@ -754,7 +756,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadCollection() {
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
 	_, err = entities[0].GetSellers()
-	ts.ErrorIs(err, orm.ErrRelationNotLoaded)
+	ts.ErrorIs(err, badaasORMErrors.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
@@ -870,11 +872,11 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 		conditions.CompanyPreloadSellers(
 			conditions.SellerUniversity(
 				conditions.UniversityPreloadAttributes,
-				conditions.UniversityId(orm.Eq(orm.NilUUID)),
+				conditions.UniversityId(orm.Eq(model.NilUUID)),
 			),
 		),
 	)
-	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, badaasORMErrors.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }
 
@@ -884,6 +886,6 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWitho
 			conditions.SellerUniversity(),
 		),
 	)
-	ts.ErrorIs(err, orm.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, badaasORMErrors.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }

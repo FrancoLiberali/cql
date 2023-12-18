@@ -3,18 +3,18 @@ package models
 import (
 	"time"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 )
 
 // Represent a user session
 type Session struct {
-	orm.UUIDModel
-	UserID    orm.UUID  `gorm:"not null"`
-	ExpiresAt time.Time `gorm:"not null"`
+	model.UUIDModel
+	UserID    model.UUID `gorm:"not null"`
+	ExpiresAt time.Time  `gorm:"not null"`
 }
 
 // Create a new session
-func NewSession(userID orm.UUID, sessionDuration time.Duration) *Session {
+func NewSession(userID model.UUID, sessionDuration time.Duration) *Session {
 	return &Session{
 		UserID:    userID,
 		ExpiresAt: time.Now().Add(sessionDuration),

@@ -1,16 +1,16 @@
 package orm
 
 import (
-	"errors"
-	"sync"
-
 	"gorm.io/gorm"
-	"gorm.io/gorm/schema"
+
+	"github.com/ditrit/badaas/orm/condition"
+	"github.com/ditrit/badaas/orm/errors"
+	"github.com/ditrit/badaas/orm/model"
 )
 
 // Generic CRUD Repository
 // T can be any model whose identifier attribute is of type ID
-type CRUDRepository[T Model, ID ModelID] interface {
+type CRUDRepository[T model.Model, ID model.ID] interface {
 	// Create model "model" inside transaction "tx"
 	Create(tx *gorm.DB, entity *T) error
 
@@ -20,10 +20,10 @@ type CRUDRepository[T Model, ID ModelID] interface {
 
 	// Get only one model that match "conditions" inside transaction "tx"
 	// or returns error if 0 or more than 1 are found.
-	QueryOne(tx *gorm.DB, conditions ...Condition[T]) (*T, error)
+	QueryOne(tx *gorm.DB, conditions ...condition.Condition[T]) (*T, error)
 
 	// Get the list of models that match "conditions" inside transaction "tx"
-	Query(tx *gorm.DB, conditions ...Condition[T]) ([]*T, error)
+	Query(tx *gorm.DB, conditions ...condition.Condition[T]) ([]*T, error)
 
 	// Save model "model" inside transaction "tx"
 	Save(tx *gorm.DB, entity *T) error
@@ -32,38 +32,33 @@ type CRUDRepository[T Model, ID ModelID] interface {
 	Delete(tx *gorm.DB, entity *T) error
 }
 
-var (
-	ErrMoreThanOneObjectFound = errors.New("found more that one object that meet the requested conditions")
-	ErrObjectNotFound         = errors.New("no object exists that meets the requested conditions")
-)
-
 // Implementation of the Generic CRUD Repository
-type CRUDRepositoryImpl[T Model, ID ModelID] struct {
+type crudRepositoryImpl[T model.Model, ID model.ID] struct {
 	CRUDRepository[T, ID]
 }
 
 // Constructor of the Generic CRUD Repository
-func NewCRUDRepository[T Model, ID ModelID]() CRUDRepository[T, ID] {
-	return &CRUDRepositoryImpl[T, ID]{}
+func NewCRUDRepository[T model.Model, ID model.ID]() CRUDRepository[T, ID] {
+	return &crudRepositoryImpl[T, ID]{}
 }
 
-// Create object "entity" inside transaction "tx"
-func (repository *CRUDRepositoryImpl[T, ID]) Create(tx *gorm.DB, entity *T) error {
-	return tx.Create(entity).Error
+// Create model "model" inside transaction "tx"
+func (repository *crudRepositoryImpl[T, ID]) Create(tx *gorm.DB, model *T) error {
+	return tx.Create(model).Error
 }
 
-// Delete object "entity" inside transaction "tx"
-func (repository *CRUDRepositoryImpl[T, ID]) Delete(tx *gorm.DB, entity *T) error {
-	return tx.Delete(entity).Error
+// Delete model "model" inside transaction "tx"
+func (repository *crudRepositoryImpl[T, ID]) Delete(tx *gorm.DB, model *T) error {
+	return tx.Delete(model).Error
 }
 
-// Save object "entity" inside transaction "tx"
-func (repository *CRUDRepositoryImpl[T, ID]) Save(tx *gorm.DB, entity *T) error {
-	return tx.Save(entity).Error
+// Save model "model" inside transaction "tx"
+func (repository *crudRepositoryImpl[T, ID]) Save(tx *gorm.DB, model *T) error {
+	return tx.Save(model).Error
 }
 
 // Get a model by its ID
-func (repository *CRUDRepositoryImpl[T, ID]) GetByID(tx *gorm.DB, id ID) (*T, error) {
+func (repository *crudRepositoryImpl[T, ID]) GetByID(tx *gorm.DB, id ID) (*T, error) {
 	var model T
 
 	err := tx.First(&model, "id = ?", id).Error
@@ -76,7 +71,7 @@ func (repository *CRUDRepositoryImpl[T, ID]) GetByID(tx *gorm.DB, id ID) (*T, er
 
 // Get only one model that match "conditions" inside transaction "tx"
 // or returns error if 0 or more than 1 are found.
-func (repository *CRUDRepositoryImpl[T, ID]) QueryOne(tx *gorm.DB, conditions ...Condition[T]) (*T, error) {
+func (repository *crudRepositoryImpl[T, ID]) QueryOne(tx *gorm.DB, conditions ...condition.Condition[T]) (*T, error) {
 	entities, err := repository.Query(tx, conditions...)
 	if err != nil {
 		return nil, err
@@ -86,15 +81,15 @@ func (repository *CRUDRepositoryImpl[T, ID]) QueryOne(tx *gorm.DB, conditions ..
 	case len(entities) == 1:
 		return entities[0], nil
 	case len(entities) == 0:
-		return nil, ErrObjectNotFound
+		return nil, errors.ErrObjectNotFound
 	default:
-		return nil, ErrMoreThanOneObjectFound
+		return nil, errors.ErrMoreThanOneObjectFound
 	}
 }
 
 // Get the list of models that match "conditions" inside transaction "tx"
-func (repository *CRUDRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...Condition[T]) ([]*T, error) {
-	query, err := NewQuery(tx, conditions)
+func (repository *crudRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...condition.Condition[T]) ([]*T, error) {
+	query, err := condition.ApplyConditions(tx, conditions)
 	if err != nil {
 		return nil, err
 	}
@@ -104,16 +99,4 @@ func (repository *CRUDRepositoryImpl[T, ID]) Query(tx *gorm.DB, conditions ...Co
 	err = query.Find(&entities)
 
 	return entities, err
-}
-
-// Get the name of the table in "db" in which the data for "entity" is saved
-// returns error is table name can not be found by gorm,
-// probably because the type of "entity" is not registered using AddModel
-func getTableName(db *gorm.DB, entity any) (string, error) {
-	schemaName, err := schema.Parse(entity, &sync.Map{}, db.NamingStrategy)
-	if err != nil {
-		return "", err
-	}
-
-	return schemaName.Table, nil
 }

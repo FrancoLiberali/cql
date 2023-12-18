@@ -10,6 +10,8 @@ import (
 )
 
 const (
+	// badaas/orm/preload
+	preloadPath                        = badaasORMPath + "/preload"
 	badaasORMVerifyStructLoaded        = "VerifyStructLoaded"
 	badaasORMVerifyPointerLoaded       = "VerifyPointerLoaded"
 	badaasORMVerifyPointerWithIDLoaded = "VerifyPointerWithIDLoaded"
@@ -212,7 +214,7 @@ func (generator RelationGettersGenerator) verifyCommon(
 	).Block(
 		jen.Return(
 			jen.Qual(
-				badaasORMPath,
+				preloadPath,
 				verifyFunc,
 			).Types(
 				fieldType,

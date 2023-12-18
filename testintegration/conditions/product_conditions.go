@@ -2,193 +2,151 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
 	"time"
 )
 
 var productType = reflect.TypeOf(*new(models.Product))
-var ProductIdField = orm.FieldIdentifier[orm.UUID]{
+var ProductIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: productType,
 }
 
-func ProductId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, orm.UUID]{
-		FieldIdentifier: ProductIdField,
-		Operator:        operator,
-	}
+func ProductId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, model.UUID](ProductIdField, operator)
 }
 
-var ProductCreatedAtField = orm.FieldIdentifier[time.Time]{
+var ProductCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: productType,
 }
 
-func ProductCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, time.Time]{
-		FieldIdentifier: ProductCreatedAtField,
-		Operator:        operator,
-	}
+func ProductCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, time.Time](ProductCreatedAtField, operator)
 }
 
-var ProductUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var ProductUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: productType,
 }
 
-func ProductUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, time.Time]{
-		FieldIdentifier: ProductUpdatedAtField,
-		Operator:        operator,
-	}
+func ProductUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, time.Time](ProductUpdatedAtField, operator)
 }
 
-var ProductDeletedAtField = orm.FieldIdentifier[time.Time]{
+var ProductDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: productType,
 }
 
-func ProductDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, time.Time]{
-		FieldIdentifier: ProductDeletedAtField,
-		Operator:        operator,
-	}
+func ProductDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, time.Time](ProductDeletedAtField, operator)
 }
 
-var ProductStringField = orm.FieldIdentifier[string]{
+var ProductStringField = query.FieldIdentifier[string]{
 	Column:    "string_something_else",
 	Field:     "String",
 	ModelType: productType,
 }
 
-func ProductString(operator orm.Operator[string]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, string]{
-		FieldIdentifier: ProductStringField,
-		Operator:        operator,
-	}
+func ProductString(operator operator.Operator[string]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, string](ProductStringField, operator)
 }
 
-var ProductIntField = orm.FieldIdentifier[int]{
+var ProductIntField = query.FieldIdentifier[int]{
 	Field:     "Int",
 	ModelType: productType,
 }
 
-func ProductInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: ProductIntField,
-		Operator:        operator,
-	}
+func ProductInt(operator operator.Operator[int]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, int](ProductIntField, operator)
 }
 
-var ProductIntPointerField = orm.FieldIdentifier[int]{
+var ProductIntPointerField = query.FieldIdentifier[int]{
 	Field:     "IntPointer",
 	ModelType: productType,
 }
 
-func ProductIntPointer(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: ProductIntPointerField,
-		Operator:        operator,
-	}
+func ProductIntPointer(operator operator.Operator[int]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, int](ProductIntPointerField, operator)
 }
 
-var ProductFloatField = orm.FieldIdentifier[float64]{
+var ProductFloatField = query.FieldIdentifier[float64]{
 	Field:     "Float",
 	ModelType: productType,
 }
 
-func ProductFloat(operator orm.Operator[float64]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, float64]{
-		FieldIdentifier: ProductFloatField,
-		Operator:        operator,
-	}
+func ProductFloat(operator operator.Operator[float64]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, float64](ProductFloatField, operator)
 }
 
-var ProductNullFloatField = orm.FieldIdentifier[float64]{
+var ProductNullFloatField = query.FieldIdentifier[float64]{
 	Field:     "NullFloat",
 	ModelType: productType,
 }
 
-func ProductNullFloat(operator orm.Operator[float64]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, float64]{
-		FieldIdentifier: ProductNullFloatField,
-		Operator:        operator,
-	}
+func ProductNullFloat(operator operator.Operator[float64]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, float64](ProductNullFloatField, operator)
 }
 
-var ProductBoolField = orm.FieldIdentifier[bool]{
+var ProductBoolField = query.FieldIdentifier[bool]{
 	Field:     "Bool",
 	ModelType: productType,
 }
 
-func ProductBool(operator orm.Operator[bool]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, bool]{
-		FieldIdentifier: ProductBoolField,
-		Operator:        operator,
-	}
+func ProductBool(operator operator.Operator[bool]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, bool](ProductBoolField, operator)
 }
 
-var ProductNullBoolField = orm.FieldIdentifier[bool]{
+var ProductNullBoolField = query.FieldIdentifier[bool]{
 	Field:     "NullBool",
 	ModelType: productType,
 }
 
-func ProductNullBool(operator orm.Operator[bool]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, bool]{
-		FieldIdentifier: ProductNullBoolField,
-		Operator:        operator,
-	}
+func ProductNullBool(operator operator.Operator[bool]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, bool](ProductNullBoolField, operator)
 }
 
-var ProductByteArrayField = orm.FieldIdentifier[[]uint8]{
+var ProductByteArrayField = query.FieldIdentifier[[]uint8]{
 	Field:     "ByteArray",
 	ModelType: productType,
 }
 
-func ProductByteArray(operator orm.Operator[[]uint8]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, []uint8]{
-		FieldIdentifier: ProductByteArrayField,
-		Operator:        operator,
-	}
+func ProductByteArray(operator operator.Operator[[]uint8]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, []uint8](ProductByteArrayField, operator)
 }
 
-var ProductMultiStringField = orm.FieldIdentifier[models.MultiString]{
+var ProductMultiStringField = query.FieldIdentifier[models.MultiString]{
 	Field:     "MultiString",
 	ModelType: productType,
 }
 
-func ProductMultiString(operator orm.Operator[models.MultiString]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, models.MultiString]{
-		FieldIdentifier: ProductMultiStringField,
-		Operator:        operator,
-	}
+func ProductMultiString(operator operator.Operator[models.MultiString]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, models.MultiString](ProductMultiStringField, operator)
 }
 
-var ProductToBeEmbeddedEmbeddedIntField = orm.FieldIdentifier[int]{
+var ProductToBeEmbeddedEmbeddedIntField = query.FieldIdentifier[int]{
 	Field:     "EmbeddedInt",
 	ModelType: productType,
 }
 
-func ProductToBeEmbeddedEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: ProductToBeEmbeddedEmbeddedIntField,
-		Operator:        operator,
-	}
+func ProductToBeEmbeddedEmbeddedInt(operator operator.Operator[int]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, int](ProductToBeEmbeddedEmbeddedIntField, operator)
 }
 
-var ProductGormEmbeddedIntField = orm.FieldIdentifier[int]{
+var ProductGormEmbeddedIntField = query.FieldIdentifier[int]{
 	ColumnPrefix: "gorm_embedded_",
 	Field:        "Int",
 	ModelType:    productType,
 }
 
-func ProductGormEmbeddedInt(operator orm.Operator[int]) orm.WhereCondition[models.Product] {
-	return orm.FieldCondition[models.Product, int]{
-		FieldIdentifier: ProductGormEmbeddedIntField,
-		Operator:        operator,
-	}
+func ProductGormEmbeddedInt(operator operator.Operator[int]) condition.WhereCondition[models.Product] {
+	return condition.NewFieldCondition[models.Product, int](ProductGormEmbeddedIntField, operator)
 }
 
-var ProductPreloadAttributes = orm.NewPreloadCondition[models.Product](ProductIdField, ProductCreatedAtField, ProductUpdatedAtField, ProductDeletedAtField, ProductStringField, ProductIntField, ProductIntPointerField, ProductFloatField, ProductNullFloatField, ProductBoolField, ProductNullBoolField, ProductByteArrayField, ProductMultiStringField, ProductToBeEmbeddedEmbeddedIntField, ProductGormEmbeddedIntField)
+var ProductPreloadAttributes = condition.NewPreloadCondition[models.Product](ProductIdField, ProductCreatedAtField, ProductUpdatedAtField, ProductDeletedAtField, ProductStringField, ProductIntField, ProductIntPointerField, ProductFloatField, ProductNullFloatField, ProductBoolField, ProductNullBoolField, ProductByteArrayField, ProductMultiStringField, ProductToBeEmbeddedEmbeddedIntField, ProductGormEmbeddedIntField)

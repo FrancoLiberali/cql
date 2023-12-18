@@ -3,11 +3,11 @@ package nullabletypes
 import (
 	"database/sql"
 
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 )
 
 type NullableTypes struct {
-	orm.UUIDModel
+	model.UUIDModel
 
 	String  sql.NullString
 	Int64   sql.NullInt64

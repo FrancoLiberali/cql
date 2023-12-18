@@ -2,94 +2,73 @@
 package conditions
 
 import (
-	orm "github.com/ditrit/badaas/orm"
+	condition "github.com/ditrit/badaas/orm/condition"
+	model "github.com/ditrit/badaas/orm/model"
+	operator "github.com/ditrit/badaas/orm/operator"
+	query "github.com/ditrit/badaas/orm/query"
 	models "github.com/ditrit/badaas/testintegration/models"
 	"reflect"
 	"time"
 )
 
 var bicycleType = reflect.TypeOf(*new(models.Bicycle))
-var BicycleIdField = orm.FieldIdentifier[orm.UUID]{
+var BicycleIdField = query.FieldIdentifier[model.UUID]{
 	Field:     "ID",
 	ModelType: bicycleType,
 }
 
-func BicycleId(operator orm.Operator[orm.UUID]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, orm.UUID]{
-		FieldIdentifier: BicycleIdField,
-		Operator:        operator,
-	}
+func BicycleId(operator operator.Operator[model.UUID]) condition.WhereCondition[models.Bicycle] {
+	return condition.NewFieldCondition[models.Bicycle, model.UUID](BicycleIdField, operator)
 }
 
-var BicycleCreatedAtField = orm.FieldIdentifier[time.Time]{
+var BicycleCreatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "CreatedAt",
 	ModelType: bicycleType,
 }
 
-func BicycleCreatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, time.Time]{
-		FieldIdentifier: BicycleCreatedAtField,
-		Operator:        operator,
-	}
+func BicycleCreatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Bicycle] {
+	return condition.NewFieldCondition[models.Bicycle, time.Time](BicycleCreatedAtField, operator)
 }
 
-var BicycleUpdatedAtField = orm.FieldIdentifier[time.Time]{
+var BicycleUpdatedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "UpdatedAt",
 	ModelType: bicycleType,
 }
 
-func BicycleUpdatedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, time.Time]{
-		FieldIdentifier: BicycleUpdatedAtField,
-		Operator:        operator,
-	}
+func BicycleUpdatedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Bicycle] {
+	return condition.NewFieldCondition[models.Bicycle, time.Time](BicycleUpdatedAtField, operator)
 }
 
-var BicycleDeletedAtField = orm.FieldIdentifier[time.Time]{
+var BicycleDeletedAtField = query.FieldIdentifier[time.Time]{
 	Field:     "DeletedAt",
 	ModelType: bicycleType,
 }
 
-func BicycleDeletedAt(operator orm.Operator[time.Time]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, time.Time]{
-		FieldIdentifier: BicycleDeletedAtField,
-		Operator:        operator,
-	}
+func BicycleDeletedAt(operator operator.Operator[time.Time]) condition.WhereCondition[models.Bicycle] {
+	return condition.NewFieldCondition[models.Bicycle, time.Time](BicycleDeletedAtField, operator)
 }
 
-var BicycleNameField = orm.FieldIdentifier[string]{
+var BicycleNameField = query.FieldIdentifier[string]{
 	Field:     "Name",
 	ModelType: bicycleType,
 }
 
-func BicycleName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, string]{
-		FieldIdentifier: BicycleNameField,
-		Operator:        operator,
-	}
+func BicycleName(operator operator.Operator[string]) condition.WhereCondition[models.Bicycle] {
+	return condition.NewFieldCondition[models.Bicycle, string](BicycleNameField, operator)
 }
-func BicycleOwner(conditions ...orm.Condition[models.Person]) orm.IJoinCondition[models.Bicycle] {
-	return orm.JoinCondition[models.Bicycle, models.Person]{
-		Conditions:         conditions,
-		RelationField:      "Owner",
-		T1Field:            "OwnerName",
-		T1PreloadCondition: BicyclePreloadAttributes,
-		T2Field:            "Name",
-	}
+func BicycleOwner(conditions ...condition.Condition[models.Person]) condition.JoinCondition[models.Bicycle] {
+	return condition.NewJoinCondition[models.Bicycle, models.Person](conditions, "Owner", "OwnerName", BicyclePreloadAttributes, "Name")
 }
 
 var BicyclePreloadOwner = BicycleOwner(PersonPreloadAttributes)
-var BicycleOwnerNameField = orm.FieldIdentifier[string]{
+var BicycleOwnerNameField = query.FieldIdentifier[string]{
 	Field:     "OwnerName",
 	ModelType: bicycleType,
 }
 
-func BicycleOwnerName(operator orm.Operator[string]) orm.WhereCondition[models.Bicycle] {
-	return orm.FieldCondition[models.Bicycle, string]{
-		FieldIdentifier: BicycleOwnerNameField,
-		Operator:        operator,
-	}
+func BicycleOwnerName(operator operator.Operator[string]) condition.WhereCondition[models.Bicycle] {
+	return condition.NewFieldCondition[models.Bicycle, string](BicycleOwnerNameField, operator)
 }
 
-var BicyclePreloadAttributes = orm.NewPreloadCondition[models.Bicycle](BicycleIdField, BicycleCreatedAtField, BicycleUpdatedAtField, BicycleDeletedAtField, BicycleNameField, BicycleOwnerNameField)
-var BicyclePreloadRelations = []orm.Condition[models.Bicycle]{BicyclePreloadOwner}
+var BicyclePreloadAttributes = condition.NewPreloadCondition[models.Bicycle](BicycleIdField, BicycleCreatedAtField, BicycleUpdatedAtField, BicycleDeletedAtField, BicycleNameField, BicycleOwnerNameField)
+var BicyclePreloadRelations = []condition.Condition[models.Bicycle]{BicyclePreloadOwner}

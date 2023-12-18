@@ -8,6 +8,7 @@ import (
 
 	"github.com/ditrit/badaas/orm"
 	"github.com/ditrit/badaas/orm/dynamic"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/orm/unsafe"
 	"github.com/ditrit/badaas/testintegration/conditions"
 	"github.com/ditrit/badaas/testintegration/models"
@@ -15,12 +16,12 @@ import (
 
 type OperatorsIntTestSuite struct {
 	CRUDServiceCommonIntTestSuite
-	crudProductService orm.CRUDService[models.Product, orm.UUID]
+	crudProductService orm.CRUDService[models.Product, model.UUID]
 }
 
 func NewOperatorsIntTestSuite(
 	db *gorm.DB,
-	crudProductService orm.CRUDService[models.Product, orm.UUID],
+	crudProductService orm.CRUDService[models.Product, model.UUID],
 ) *OperatorsIntTestSuite {
 	return &OperatorsIntTestSuite{
 		CRUDServiceCommonIntTestSuite: CRUDServiceCommonIntTestSuite{

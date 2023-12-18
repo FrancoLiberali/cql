@@ -6,7 +6,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/ditrit/badaas/httperrors"
-	"github.com/ditrit/badaas/orm"
+	"github.com/ditrit/badaas/orm/model"
 	"github.com/ditrit/badaas/services/sessionservice"
 )
 
@@ -43,7 +43,7 @@ func (authenticationMiddleware *authenticationMiddleware) Handle(next http.Handl
 			return
 		}
 
-		extractedUUID, err := orm.ParseUUID(accessTokenCookie.Value)
+		extractedUUID, err := model.ParseUUID(accessTokenCookie.Value)
 		if err != nil {
 			NotAuthenticated.Write(response, authenticationMiddleware.logger)
 			return

@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest an idea for this project
 title: ''
-labels: User Story, To be verify
+labels: enhancement
 ---
 
 ## Description
