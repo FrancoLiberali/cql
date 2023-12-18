@@ -13,7 +13,7 @@ import (
 type Interface interface {
 	gormLogger.Interface
 	// change log mode
-	ToLogMode(gormLogger.LogLevel) Interface
+	ToLogMode(level gormLogger.LogLevel) Interface
 	// Trace a committed transaction
 	TraceTransaction(ctx context.Context, begin time.Time)
 }

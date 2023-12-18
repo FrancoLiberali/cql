@@ -33,8 +33,8 @@ func TestTraceError(t *testing.T) {
 
 	require.Equal(t, 1, logs.Len())
 	log := logs.All()[0]
-	assert.Equal(t, log.Level, zapcore.ErrorLevel)
-	assert.Equal(t, log.Message, "query_error")
+	assert.Equal(t, zapcore.ErrorLevel, log.Level)
+	assert.Equal(t, "query_error", log.Message)
 	require.Len(t, log.Context, 4)
 	assert.Contains(t, log.Context, zap.Field{Key: "error", Type: zapcore.ErrorType, Interface: err})
 	assert.Contains(t, log.Context, zap.Field{Key: "rows_affected", Type: zapcore.StringType, String: "-"})
@@ -57,8 +57,8 @@ func TestTraceSlowQuery(t *testing.T) {
 
 	require.Equal(t, 1, logs.Len())
 	log := logs.All()[0]
-	assert.Equal(t, log.Level, zapcore.WarnLevel)
-	assert.Equal(t, log.Message, "query_slow (>= 200ms)")
+	assert.Equal(t, zapcore.WarnLevel, log.Level)
+	assert.Equal(t, "query_slow (>= 200ms)", log.Message)
 	require.Len(t, log.Context, 3)
 	assert.Contains(t, log.Context, zap.Field{Key: "rows_affected", Type: zapcore.StringType, String: "1"})
 	assert.Contains(t, log.Context, zap.Field{Key: "sql", Type: zapcore.StringType, String: "slow sql"})
@@ -80,8 +80,8 @@ func TestTraceQueryExec(t *testing.T) {
 
 	require.Equal(t, 1, logs.Len())
 	log := logs.All()[0]
-	assert.Equal(t, log.Level, zapcore.DebugLevel)
-	assert.Equal(t, log.Message, "query_exec")
+	assert.Equal(t, zapcore.DebugLevel, log.Level)
+	assert.Equal(t, "query_exec", log.Message)
 	require.Len(t, log.Context, 3)
 	assert.Contains(t, log.Context, zap.Field{Key: "rows_affected", Type: zapcore.StringType, String: "1"})
 	assert.Contains(t, log.Context, zap.Field{Key: "sql", Type: zapcore.StringType, String: "normal sql"})
@@ -99,8 +99,8 @@ func TestTraceSlowTransaction(t *testing.T) {
 
 	require.Equal(t, 1, logs.Len())
 	log := logs.All()[0]
-	assert.Equal(t, log.Level, zapcore.WarnLevel)
-	assert.Equal(t, log.Message, "transaction_slow (>= 200ms)")
+	assert.Equal(t, zapcore.WarnLevel, log.Level)
+	assert.Equal(t, "transaction_slow (>= 200ms)", log.Message)
 	require.Len(t, log.Context, 1)
 }
 
@@ -116,7 +116,7 @@ func TestTraceTransactionExec(t *testing.T) {
 
 	require.Equal(t, 1, logs.Len())
 	log := logs.All()[0]
-	assert.Equal(t, log.Level, zapcore.DebugLevel)
-	assert.Equal(t, log.Message, "transaction_exec")
+	assert.Equal(t, zapcore.DebugLevel, log.Level)
+	assert.Equal(t, "transaction_exec", log.Message)
 	require.Len(t, log.Context, 1)
 }

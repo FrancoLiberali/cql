@@ -11,14 +11,14 @@ import (
 )
 
 type JoinConditionsIntTestSuite struct {
-	TestSuite
+	testSuite
 }
 
 func NewJoinConditionsIntTestSuite(
 	db *gorm.DB,
 ) *JoinConditionsIntTestSuite {
 	return &JoinConditionsIntTestSuite{
-		TestSuite: TestSuite{
+		testSuite: testSuite{
 			db: db,
 		},
 	}
@@ -37,7 +37,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsUintBelongsTo() {
 			conditions.Brand.Name.Is().Eq("google"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Phone{match}, entities)
 }
@@ -55,7 +55,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsBelongsTo() {
 			conditions.Product.Int.Is().Eq(1),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -78,7 +78,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersTheMainEnt
 			conditions.Product.Int.Is().Eq(1),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -99,7 +99,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneOptional() {
 			conditions.Seller.Name.Is().Eq("franco"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -121,7 +121,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneSelfReferentia
 			conditions.Employee.Name.Is().Eq("Xavier"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Employee{match}, entities)
 }
@@ -143,7 +143,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOne() {
 			conditions.Country.Name.Is().Eq("Argentina"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
 }
@@ -165,7 +165,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOneReversed() {
 			conditions.City.Name.Is().Eq("Buenos Aires"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Country{country1}, entities)
 }
@@ -187,7 +187,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsWithEntityThatDefine
 			conditions.Person.Name.Is().Eq("franco"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Bicycle{match}, entities)
 }
@@ -205,7 +205,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnHasMany() {
 			conditions.Company.Name.Is().Eq("ditrit"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Seller{match}, entities)
 }
@@ -227,7 +227,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDifferentAttribute
 			conditions.Product.String.Is().Eq("match"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -250,7 +250,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAddsDeletedAtAutomat
 			conditions.Product.String.Is().Eq("match"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -273,7 +273,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDeletedAt() {
 			conditions.Product.DeletedAt.Is().Eq(product1.DeletedAt.Time),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -292,7 +292,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersByNil() {
 			conditions.Product.IntPointer.Is().Null(),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -318,7 +318,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsDifferentEntities() 
 			conditions.Seller.Name.Is().Eq("franco"),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -345,7 +345,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsMultipleTimes() {
 			),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -371,7 +371,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithUnsafeCondition() {
 			),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -389,7 +389,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyConnectionConditionMakesN
 			cql.And[models.Product](),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match1, match2}, entities)
 }
@@ -418,7 +418,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
 			conditions.Company.Name.Is().Dynamic().Eq(conditions.Seller.Name),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Seller{seller1}, entities)
 }
@@ -444,7 +444,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 			),
 		),
 	).Find()
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
@@ -479,7 +479,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 	parent2 := &models.Parent2{ParentParent: *parentParent}
 	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "franco"}
 	err := ts.db.Create(child).Error
-	ts.Nil(err)
+	ts.Require().NoError(err)
 
 	entities, err := cql.Query[models.Child](
 		ts.db,

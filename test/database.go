@@ -4,9 +4,10 @@ import (
 	"context"
 	"time"
 
+	"gorm.io/gorm"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/logger"
-	"gorm.io/gorm"
 )
 
 func OpenWithRetry(

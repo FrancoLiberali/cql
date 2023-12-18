@@ -9,7 +9,7 @@ type Operator[T any] interface {
 	// that an object is of type Operator[T],
 	// since if no method receives by parameter a type T,
 	// any other Operator[T2] would also be considered a Operator[T].
-	InterfaceVerificationMethod(T)
+	InterfaceVerificationMethod(t T)
 }
 
 type DynamicOperator[T any] interface {

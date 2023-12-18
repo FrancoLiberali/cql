@@ -5,6 +5,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 
 	"github.com/FrancoLiberali/cql/model"
 )
@@ -12,12 +13,12 @@ import (
 func TestParseCorrectUUID(t *testing.T) {
 	uuidString := uuid.New().String()
 	uuid, err := model.ParseUUID(uuidString)
-	assert.Nil(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, uuidString, uuid.String())
 }
 
 func TestParseIncorrectUUID(t *testing.T) {
 	uid, err := model.ParseUUID("not uuid")
-	assert.Error(t, err)
+	require.Error(t, err)
 	assert.Equal(t, model.NilUUID, uid)
 }

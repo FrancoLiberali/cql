@@ -83,7 +83,7 @@ func IsDistinct[T any](value any) Operator[T] {
 		},
 		value,
 	)
-	isNotDistinct.Modifier = map[Dialector]string{
+	isNotDistinct.Modifier = map[Dialector]string{ //nolint:exhaustive // not present is expected for the other ones
 		MySQL: "NOT",
 	}
 
