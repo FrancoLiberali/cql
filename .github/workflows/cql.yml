@@ -6,6 +6,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+permissions:
+  id-token: write
+  contents: read
+  checks: write
+
 jobs:
   branch-naming-rules:
     name: Check branch name
