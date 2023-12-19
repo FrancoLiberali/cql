@@ -12,7 +12,7 @@ It's built on top of `gorm <https://gorm.io/>`_, a library that actually provide
 
 ## Documentation
 
-<!-- TODO add link to docs -->
+<https://compilablequerylanguage.readthedocs.io/en/latest/>
 
 ## Contributing
 
