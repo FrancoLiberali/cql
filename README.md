@@ -1,6 +1,13 @@
 # CQL: Compiled Query Language <!-- omit in toc -->
 
-CQL allows easy and safe persistence and querying of objects.
+[![Build Status](https://github.com/FrancoLiberali/cql/actions/workflows/cql.yml/badge.svg?branch=main)](https://github.com/FrancoLiberali/cql/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/FrancoLiberali/cql)](https://goreportcard.com/report/github.com/FrancoLiberali/cql)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_cql&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_cql)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_cql&metric=coverage)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_cql)
+
+[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/FrancoLiberali/cql)
+
+Originally part of `BaDaaS <https://github.com/ditrit/badaas`_, CQL allows easy and safe persistence and querying of objects.
 
 It's built on top of `gorm <https://gorm.io/>`_, a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. While gorm does this job well with its automatic migration then performing queries on these objects is somewhat limited, forcing us to write SQL queries directly when they are complex. CQL seeks to address these limitations with a query system that:
 
