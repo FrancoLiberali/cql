@@ -82,7 +82,7 @@ We can run this tutorial with `make tutorial_1` and we will obtain the following
 
 As you can see, in this case we will get both cities which we can differentiate by their population and the id of the country.
 
-In this tutorial we have used the cql compilable queries system to get these cities, 
+In this tutorial we have used the cql compiled queries system to get these cities, 
 for more details you can read :ref:`cql/query:conditions`.
 
 Tutorial 2: operators

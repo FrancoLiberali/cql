@@ -5,7 +5,7 @@ Query
 Create, Save and Delete methods are done directly with gormDB object using the corresponding methods. 
 For details visit 
 <https://gorm.io/docs/create.html>, <https://gorm.io/docs/update.html> and <https://gorm.io/docs/delete.html>. 
-On the other hand, read (query) operations are provided by cql via its compilable query system.
+On the other hand, read (query) operations are provided by cql via its compiled query system.
 
 Query creation
 -----------------------
@@ -53,7 +53,7 @@ Conditions
 ------------------------
 
 The set of conditions that are received by the `orm.NewQuery` method 
-form the cql compilable query system. 
+form the cql compiled query system. 
 It is so named because the conditions will verify at compile time that the query to be executed is correct.
 
 These conditions are objects of type Condition that contain the 
