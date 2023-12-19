@@ -115,6 +115,13 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage
+      - name: Download cli line coverage report
+        id: download-artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: cli.yml
+          workflow_conclusion: success
+          name: coverage_cli
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
