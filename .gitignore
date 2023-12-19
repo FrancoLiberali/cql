@@ -23,14 +23,15 @@ vendor/
 
 # database files
 node*
-testintegration/sqlite:*
+test/sqlite:*
 
 # vscode conf
 .vscode
 
-# binary output
-badaas
-!docs/badaas
-
 # Sphinx documentation
 docs/_build/
+
+# cli
+cql-cli/cql-cli
+cql-cli/tests/*_conditions.go
+cql-cli/tests/**/cql.go

@@ -1,6 +1,6 @@
 # Contributing
 
-Thank you for your interest in BaDaaS! This document provides the guidelines for how to contribute to the project through issues and pull-requests. Contributions can also come in additional ways such as joining the [DitRit discord server](https://discord.gg/zkKfj9gj2C), commenting on issues or pull requests and more.
+Thank you for your interest in CQL! This document provides the guidelines for how to contribute to the project through issues and pull-requests. Contributions can also come in additional ways such as commenting on issues or pull requests and more.
 
 ## Issues
 
@@ -12,14 +12,12 @@ There are 3 types of issues:
 - Discussion: You have something on your mind, which requires input form others in a discussion, before it eventually manifests as a proposal.
 - Feature request: Used for items that propose a new idea or functionality. This allows feedback from others before code is written.
 
-To ask questions and troubleshoot, please join the [DitRit discord server](https://discord.gg/zkKfj9gj2C) (use the BADAAS channel).
-
 ### Before submitting
 
 Before you submit an issue, make sure you’ve checked the following:
 
 1. Check for existing issues
-   - Before you create a new issue, please do a search in [open issues](https://github.com/ditrit/badaas/issues) to see if the issue or feature request has already been filed.
+   - Before you create a new issue, please do a search in [open issues](https://github.com/FrancoLiberali/cql/issues) to see if the issue or feature request has already been filed.
    - If you find your issue already exists, make relevant comments and add your reaction.
 2. For bugs
    - It’s not an environment issue.
@@ -32,11 +30,11 @@ All contributions come through pull requests. To submit a proposed change, follo
 
 1. Make sure there's an issue (bug report or feature request) opened, which sets the expectations for the contribution you are about to make
 2. Assign yourself to the issue and add the `wip` tag
-3. Fork the [repo](https://github.com/ditrit/badaas) and create a new [branch](#branch-naming-policy) from the issue
+3. Fork the [repo](https://github.com/FrancoLiberali/cql) and create a new [branch](#branch-naming-policy) from the issue
 4. Install the necessary [development environment](developing.md#environment)
 5. Create your change and the corresponding [tests](developing.md#tests)
 6. Update relevant documentation for the change in `docs/`
-7. If changes are necessary in [BaDaaS example](https://github.com/ditrit/badaas-example), [badaas-orm quickstart](https://github.com/ditrit/badaas-orm-quickstart) and [badaas-orm tutorial](https://github.com/ditrit/badaas-orm-tutorial), follow the same workflow there
+7. If changes are necessary in [cql quickstart](https://github.com/FrancoLiberali/cql-quickstart) and [cql tutorial](https://github.com/FrancoLiberali/cql-tutorial), follow the same workflow there
 8. Open a PR (and add links to the example repos' PR if they exist)
 9. Wait for the CI process to finish and make sure all checks are green
 10. A maintainer of the project will be assigned
@@ -63,4 +61,4 @@ A good way to communicate before investing too much time is to create a "Work-in
 
 ## Code of Conduct
 
-This project has adopted the [Contributor Covenant Code of Conduct](https://github.com/ditrit/badaas/blob/main/CODE_OF_CONDUCT.md)
+This project has adopted the [Contributor Covenant Code of Conduct](https://github.com/FrancoLiberali/cql/blob/main/CODE_OF_CONDUCT.md)
