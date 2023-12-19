@@ -43,7 +43,7 @@ GormDB
 GormDB is a gorm.DB object that allows communication with the database. 
 This object allows us to perform CUD (create, update and delete)
 operations. While read operations are also possible, 
-cql provides us the :ref:`cql/concepts:compilable query system` 
+cql provides us the :ref:`cql/concepts:compiled query system` 
 that is more complete and secure that gorm's query system.
 
 For details visit :ref:`cql/connecting_to_a_database:connection`.
@@ -136,11 +136,11 @@ sql.NullBool, sql.NullFloat64, etc..
 
 For details visit <https://pkg.go.dev/database/sql>.
 
-Compilable query system
+Compiled query system
 -----------------------------
 
 The set of conditions that are received by the read operations of the 
-`cql.NewQuery` method form the cql compilable query system. 
+`cql.NewQuery` method form the cql compiled query system. 
 It is so named because the conditions will verify at compile time that the query to be executed is correct.
 
 For details visit :ref:`cql/query:conditions`.
@@ -148,7 +148,7 @@ For details visit :ref:`cql/query:conditions`.
 Conditions generation
 ----------------------------
 
-Conditions are the basis of the compilable query system. 
+Conditions are the basis of the compiled query system. 
 They are generated for each model and attribute and can then be used. 
 Their generation is done with cql-cli.
 
