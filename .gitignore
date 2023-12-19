@@ -33,5 +33,5 @@ docs/_build/
 
 # cli
 cql-cli/cql-cli
-cql-cli/cmd/gen/conditions/*_conditions.go
-cql-cli/cmd/gen/conditions/tests/**/cql.go
+cql-cli/tests/*_conditions.go
+cql-cli/tests/**/cql.go

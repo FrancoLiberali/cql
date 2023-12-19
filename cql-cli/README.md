@@ -59,7 +59,7 @@ cql-cli help [command]
 
 gen conditions is the command you can use to generate conditions to query your objects using cql. For each cql.Model found in the input packages a file containing all possible Conditions on that object will be generated, allowing you to use cql.
 
-Its use is recommended through `go generate`. To see an example of how to do it click [here](https://github.com/ditrit/badaa-orm-example/blob/main/standalone/conditions/orm.go).
+Its use is recommended through `go generate`. To see an example of how to do it visit the [quickstart](https://github.com/FrancoLiberali/cql-quickstart/blob/main/conditions/cql.go).
 
 ## Contributing
 

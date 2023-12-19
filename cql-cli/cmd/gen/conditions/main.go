@@ -20,7 +20,7 @@ var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 	Use:   "conditions",
 	Short: "Generate conditions to query your objects using cql",
 	Long:  `gen is the command you can use to generate conditions to query your objects using cql.`,
-	Run:   generateConditions,
+	Run:   GenerateConditions,
 	Args:  cobra.MinimumNArgs(1),
 })
 
@@ -40,7 +40,7 @@ func init() {
 }
 
 // GenConditionsCmd Run func
-func generateConditions(_ *cobra.Command, args []string) {
+func GenerateConditions(_ *cobra.Command, args []string) {
 	log.SetLevel()
 	// Inspect package and use type checker to infer imported types
 	pkgs := loadPackages(args)
