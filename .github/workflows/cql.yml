@@ -101,7 +101,7 @@ jobs:
           path: coverage_${{ matrix.db }}.out
       - name: Stop containers
         if: ${{ matrix.db != 'sqlite' }}
-        run: docker stop badaas-test-db
+        run: docker stop cql-test-db
 
   sonarcloud:
     name: SonarCloud

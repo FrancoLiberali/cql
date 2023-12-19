@@ -11,15 +11,15 @@ import (
 
 const (
 	// cql/condition
-	conditionPath                 = cqlPath + "/condition"
-	badaasORMCondition            = "Condition"
-	badaasORMJoinCondition        = "JoinCondition"
-	badaasORMNewJoinCondition     = "NewJoinCondition"
-	badaasORMNewCollectionPreload = "NewCollectionPreloadCondition"
-	badaasORMNewPreloadCondition  = "NewPreloadCondition"
-	badaasORMField                = "Field"
-	badaasORMBoolField            = "BoolField"
-	badaasORMStringField          = "StringField"
+	conditionPath           = cqlPath + "/condition"
+	cqlCondition            = "Condition"
+	cqlJoinCondition        = "JoinCondition"
+	cqlNewJoinCondition     = "NewJoinCondition"
+	cqlNewCollectionPreload = "NewCollectionPreloadCondition"
+	cqlNewPreloadCondition  = "NewPreloadCondition"
+	cqlField                = "Field"
+	cqlBoolField            = "BoolField"
+	cqlStringField          = "StringField"
 	// cql/model
 	modelPath = cqlPath + "/model"
 	uIntID    = "UIntID"
@@ -104,9 +104,9 @@ func (condition *Condition) generateForSlice(objectType Type, field Field) {
 		)
 	case *types.Named:
 		// slice of named types (user defined types)
-		_, err := field.Type.BadaasModelStruct()
+		_, err := field.Type.CQLModelStruct()
 		if err == nil {
-			// field is a Badaas Model
+			// field is a CQL Model
 			condition.generateCollectionPreload(objectType, field)
 		}
 	case *types.Pointer:
@@ -122,12 +122,12 @@ func (condition *Condition) generateForSlice(objectType Type, field Field) {
 
 // Generate condition between object and field when the field is a named type (user defined struct)
 func (condition *Condition) generateForNamedType(objectType Type, field Field) {
-	_, err := field.Type.BadaasModelStruct()
+	_, err := field.Type.CQLModelStruct()
 
 	switch {
 	case err == nil:
-		// field is a badaas model
-		condition.generateForBadaasModel(objectType, field)
+		// field is a cql model
+		condition.generateForCQLModel(objectType, field)
 	case field.Type.IsSQLNullableType():
 		// field is a sql nullable type (sql.NullBool, sql.NullInt, etc.)
 		condition.param.SQLToBasicType(field.Type)
@@ -138,7 +138,7 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 	case field.Type.IsGormCustomType() || field.TypeString() == "time.Time" || field.IsModelID():
 		// field is a Gorm Custom type (implements Scanner and Valuer interfaces)
 		// or a named type supported by gorm (time.Time)
-		// or a badaas-orm id (uuid or uintid)
+		// or a cql id (uuid or uintid)
 		condition.param.ToCustomType(condition.destPkg, field.Type)
 		condition.createField(
 			objectType,
@@ -149,8 +149,8 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 	}
 }
 
-// Generate condition between object and field when the field is a Badaas Model
-func (condition *Condition) generateForBadaasModel(objectType Type, field Field) {
+// Generate condition between object and field when the field is a CQL Model
+func (condition *Condition) generateForCQLModel(objectType Type, field Field) {
 	_, err := objectType.GetFK(field)
 	if err == nil {
 		// has the fk -> belongsTo relation
@@ -197,7 +197,7 @@ func (condition *Condition) createField(objectType Type, field Field) {
 	)
 
 	fieldQual := jen.Qual(
-		conditionPath, badaasORMField,
+		conditionPath, cqlField,
 	).Types(
 		objectTypeQual,
 		condition.param.GenericType(),
@@ -207,14 +207,14 @@ func (condition *Condition) createField(objectType Type, field Field) {
 			jen.Id("Field"): fieldQual.Clone().Values(fieldValues),
 		}
 		fieldQual = jen.Qual(
-			conditionPath, badaasORMStringField,
+			conditionPath, cqlStringField,
 		).Types(objectTypeQual)
 	} else if condition.param.isBool {
 		fieldValues = jen.Dict{
 			jen.Id("Field"): fieldQual.Clone().Values(fieldValues),
 		}
 		fieldQual = jen.Qual(
-			conditionPath, badaasORMBoolField,
+			conditionPath, cqlBoolField,
 		).Types(objectTypeQual)
 	}
 
@@ -264,13 +264,13 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 	log.Logger.Debugf("Generated %q", conditionName)
 
 	ormT1IJoinCondition := jen.Qual(
-		conditionPath, badaasORMJoinCondition,
+		conditionPath, cqlJoinCondition,
 	).Types(t1)
 	ormT2Condition := jen.Qual(
-		conditionPath, badaasORMCondition,
+		conditionPath, cqlCondition,
 	).Types(t2)
 	ormJoinCondition := jen.Qual(
-		conditionPath, badaasORMNewJoinCondition,
+		conditionPath, cqlNewJoinCondition,
 	).Types(
 		t1, t2,
 	)
@@ -319,13 +319,13 @@ func (condition *Condition) generateCollectionPreload(objectType Type, field Fie
 	)
 
 	ormT1Condition := jen.Qual(
-		conditionPath, badaasORMCondition,
+		conditionPath, cqlCondition,
 	).Types(t1)
 	ormT2IJoinCondition := jen.Qual(
-		conditionPath, badaasORMJoinCondition,
+		conditionPath, cqlJoinCondition,
 	).Types(t2)
 	ormNewCollectionPreload := jen.Qual(
-		conditionPath, badaasORMNewCollectionPreload,
+		conditionPath, cqlNewCollectionPreload,
 	).Types(
 		t1, t2,
 	)

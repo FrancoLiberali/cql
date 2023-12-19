@@ -1,10 +1,10 @@
 :orphan:
 
 ======================================
-BaDaaS documentation quick start guide
+CQL documentation quick start guide
 ======================================
 
-This file provides a quick guide on how to compile the BaDaaS documentation.
+This file provides a quick guide on how to compile the CQL documentation.
 
 
 Setup the environment

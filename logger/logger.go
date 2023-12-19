@@ -48,7 +48,7 @@ func (c Config) toGormConfig() gormLogger.Config {
 	}
 }
 
-// search in the stacktrace the last file outside gormzap, badaas-orm and gorm
+// search in the stacktrace the last file outside gormzap, cql and gorm
 func FindLastCaller(skip int) (string, int, int) {
 	// +1 because at least one will be inside gorm
 	// +1 because of this function
@@ -58,8 +58,8 @@ func FindLastCaller(skip int) (string, int, int) {
 		if !ok {
 			// we checked in all the stacktrace and none meet the conditions,
 			return "", 0, 0
-		} else if !strings.Contains(file, gormSourceDir) && !strings.Contains(file, badaasORMSourceDir) {
-			// file outside badaas-orm and gorm
+		} else if !strings.Contains(file, gormSourceDir) && !strings.Contains(file, cqlSourceDir) {
+			// file outside cql and gorm
 			return file, line, i - 1 // -1 to remove this function from the stacktrace
 		}
 	}
@@ -68,19 +68,19 @@ func FindLastCaller(skip int) (string, int, int) {
 }
 
 var (
-	badaasORMSourceDir string
-	gormSourceDir      = filepath.Join("gorm.io", "gorm")
+	cqlSourceDir  string
+	gormSourceDir = filepath.Join("gorm.io", "gorm")
 )
 
 func init() {
 	_, file, _, _ := runtime.Caller(0)
-	// compatible solution to get badaas-orm source directory with various operating systems
-	badaasORMSourceDir = sourceDir(file)
+	// compatible solution to get cql source directory with various operating systems
+	cqlSourceDir = sourceDir(file)
 }
 
 func sourceDir(file string) string {
 	loggerDir := filepath.Dir(file)
-	badaasORMDir := filepath.Dir(loggerDir)
+	cqlDir := filepath.Dir(loggerDir)
 
-	return filepath.ToSlash(badaasORMDir) + "/"
+	return filepath.ToSlash(cqlDir) + "/"
 }

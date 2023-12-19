@@ -13,8 +13,8 @@ import (
 )
 
 var (
-	// badaas/orm/baseModels.go
-	badaasORMBaseModels = []string{
+	// cql/model/models.go
+	cqlBaseModels = []string{
 		modelPath + "." + uuidModel,
 		modelPath + "." + uIntModel,
 	}
@@ -61,19 +61,19 @@ func (t Type) Pkg() *types.Package {
 	}
 }
 
-// Get the struct under type if it is a Badaas model
-// Returns error if the type is not a Badaas model
-func (t Type) BadaasModelStruct() (*types.Struct, error) {
+// Get the struct under type if it is a cql model
+// Returns error if the type is not a cql model
+func (t Type) CQLModelStruct() (*types.Struct, error) {
 	structType, ok := t.Underlying().(*types.Struct)
-	if !ok || !isBadaasModel(structType) {
-		return nil, fmt.Errorf("type %s is not a Badaas Model", t.String())
+	if !ok || !isCQLModel(structType) {
+		return nil, fmt.Errorf("type %s is not a cql Model", t.String())
 	}
 
 	return structType, nil
 }
 
-// Returns true if the type is a Badaas model
-func isBadaasModel(structType *types.Struct) bool {
+// Returns true if the type is a cql model
+func isCQLModel(structType *types.Struct) bool {
 	for i := 0; i < structType.NumFields(); i++ {
 		field := structType.Field(i)
 
@@ -86,7 +86,7 @@ func isBadaasModel(structType *types.Struct) bool {
 }
 
 func isBaseModel(fieldName string) bool {
-	return pie.Contains(badaasORMBaseModels, fieldName)
+	return pie.Contains(cqlBaseModels, fieldName)
 }
 
 // Returns the fk field of the type to the "field"'s object

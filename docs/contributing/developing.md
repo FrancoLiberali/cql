@@ -14,7 +14,6 @@ This is the directory structure we use for the project:
 
 - `docker/` : Contains the docker, docker-compose and configuration files for different environments.
 - `docs/`: Contains the documentation showed for readthedocs.io.
-- `orm/` *(Go code)*: Contains the code of the orm used by badaas.
 - `test/`: Contains all the tests.
 
 At the root of the project, you will find:
@@ -35,7 +34,7 @@ We use `golangci-lint` for linting our code. You can test it with `make lint`. T
 
 ### Tests
 
-We use the standard test suite in combination with [github.com/stretchr/testify](https://github.com/stretchr/testify) to do our testing. Tests have a database. Badaas-orm is tested on multiple databases. By default, the database used will be postgresql:
+We use the standard test suite in combination with [github.com/stretchr/testify](https://github.com/stretchr/testify) to do our testing. Tests have a database. CQL is tested on multiple databases. By default, the database used will be postgresql:
 
 ```sh
 make test
@@ -49,7 +48,7 @@ To be acceptable, contributions must:
 
 - Have a good quality of code, based on <https://go.dev/doc/effective_go>.
 - Have at least 80 percent new code coverage (although a higher percentage may be required depending on the importance of the feature). The tests that contribute to coverage are unit tests and integration tests.
-- The features defined in the PR base issue must be explicitly tested by an e2e test or by integration tests in case it is not possible (for badaas-orm features for example).
+- The features defined in the PR base issue must be explicitly tested by tests.
 
 ## Use of Third-party code
 

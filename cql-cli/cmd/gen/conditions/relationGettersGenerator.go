@@ -10,12 +10,12 @@ import (
 )
 
 const (
-	// badaas/orm/preload
-	preloadPath                        = cqlPath + "/preload"
-	badaasORMVerifyStructLoaded        = "VerifyStructLoaded"
-	badaasORMVerifyPointerLoaded       = "VerifyPointerLoaded"
-	badaasORMVerifyPointerWithIDLoaded = "VerifyPointerWithIDLoaded"
-	badaasORMVerifyCollectionLoaded    = "VerifyCollectionLoaded"
+	// cql/preload
+	preloadPath                  = cqlPath + "/preload"
+	cqlVerifyStructLoaded        = "VerifyStructLoaded"
+	cqlVerifyPointerLoaded       = "VerifyPointerLoaded"
+	cqlVerifyPointerWithIDLoaded = "VerifyPointerWithIDLoaded"
+	cqlVerifyCollectionLoaded    = "VerifyCollectionLoaded"
 )
 
 type RelationGettersGenerator struct {
@@ -72,10 +72,10 @@ func (generator RelationGettersGenerator) generateForField(field Field) jen.Code
 	switch fieldType := field.GetType().(type) {
 	case *types.Named:
 		// the field is a named type (user defined structs)
-		_, err := field.Type.BadaasModelStruct()
+		_, err := field.Type.CQLModelStruct()
 		if err == nil {
 			log.Logger.Debugf("Generating relation getter for type %q and field %s", generator.object.Name(), field.Name)
-			// field is a badaas Model
+			// field is a cql Model
 			return generator.verifyStruct(field)
 		}
 	case *types.Pointer:
@@ -91,9 +91,9 @@ func (generator RelationGettersGenerator) generateForField(field Field) jen.Code
 func (generator RelationGettersGenerator) generateForPointer(field Field) jen.Code {
 	switch fieldType := field.GetType().(type) {
 	case *types.Named:
-		_, err := field.Type.BadaasModelStruct()
+		_, err := field.Type.CQLModelStruct()
 		if err == nil {
-			// field is a pointer to Badaas Model
+			// field is a pointer to cql Model
 			fk, err := generator.objectType.GetFK(field)
 			if err != nil {
 				log.Logger.Debugf("unhandled: field is a pointer and object not has the fk: %s", field.Type)
@@ -125,9 +125,9 @@ func (generator RelationGettersGenerator) generateForPointer(field Field) jen.Co
 func (generator RelationGettersGenerator) generateForSlicePointer(field Field, fieldTypePrefix *jen.Statement) jen.Code {
 	switch fieldType := field.GetType().(type) {
 	case *types.Named:
-		_, err := field.Type.BadaasModelStruct()
+		_, err := field.Type.CQLModelStruct()
 		if err == nil {
-			// field is a pointer to a slice of badaas Model
+			// field is a pointer to a slice of cql Model
 			return generator.verifyCollection(field, fieldTypePrefix)
 		}
 	case *types.Pointer:
@@ -147,7 +147,7 @@ func getGetterName(field Field) string {
 func (generator RelationGettersGenerator) verifyStruct(field Field) *jen.Statement {
 	return generator.verifyCommon(
 		field,
-		badaasORMVerifyStructLoaded,
+		cqlVerifyStructLoaded,
 		jen.Op("*"),
 		nil,
 		jen.Op("&").Id("m").Op(".").Id(field.Name),
@@ -155,17 +155,17 @@ func (generator RelationGettersGenerator) verifyStruct(field Field) *jen.Stateme
 }
 
 func (generator RelationGettersGenerator) verifyPointer(field Field) *jen.Statement {
-	return generator.verifyPointerCommon(field, badaasORMVerifyPointerLoaded)
+	return generator.verifyPointerCommon(field, cqlVerifyPointerLoaded)
 }
 
 func (generator RelationGettersGenerator) verifyPointerWithID(field Field) *jen.Statement {
-	return generator.verifyPointerCommon(field, badaasORMVerifyPointerWithIDLoaded)
+	return generator.verifyPointerCommon(field, cqlVerifyPointerWithIDLoaded)
 }
 
 func (generator RelationGettersGenerator) verifyCollection(field Field, fieldTypePrefix *jen.Statement) jen.Code {
 	return generator.verifyCommon(
 		field,
-		badaasORMVerifyCollectionLoaded,
+		cqlVerifyCollectionLoaded,
 		jen.Index(),
 		fieldTypePrefix,
 		jen.Id("m").Op(".").Id(field.Name),

@@ -5,7 +5,7 @@ Preloading
 PreloadConditions
 ---------------------------
 
-During the :ref:`conditions generation <badaas-orm/query:conditions generation>` the following 
+During the :ref:`conditions generation <cql/query:conditions generation>` the following 
 methods will also be created for the condition models:
 
 - Preload() will allow to preload this model when doing a query.
@@ -95,12 +95,12 @@ The problem is that once we get the result of the query, we cannot determine if 
 corresponds to the fact that the relation is really null or that the preload was not performed, 
 which means a big risk of making decisions in our business logic on incomplete information.
 
-For this reason, badaas-orm provides the Relation getters. 
+For this reason, cql provides the Relation getters. 
 These are methods that will be added to your models to safely navigate a relation, 
 responding `errors.ErrRelationNotLoaded` in case you try to navigate a relation 
 that was not loaded from the database. 
-They are created in a file called badaas-orm.go in your model package when 
-:ref:`generating conditions <badaas-orm/concepts:conditions generation>`.
+They are created in a file called cql.go in your model package when 
+:ref:`generating conditions <cql/concepts:conditions generation>`.
 
 Here is an example of its use:
 
@@ -133,6 +133,6 @@ Here is an example of its use:
 Unfortunately, these relation getters cannot be created in all cases but only in those in which:
 
 - The relation is made with an object directly instead of a pointer 
-  (which is not recommended as described :ref:`here <badaas-orm/declaring_models:references>`).
+  (which is not recommended as described :ref:`here <cql/declaring_models:references>`).
 - The relation is made with pointers and the foreign key (typically the ID) is in the same model.
 - The relation is made with a pointer to a list.

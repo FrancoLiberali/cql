@@ -18,8 +18,8 @@ import (
 
 var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 	Use:   "conditions",
-	Short: "Generate conditions to query your objects using badaas-orm",
-	Long:  `gen is the command you can use to generate the files and configurations necessary for your project to use BadAss in a simple way.`,
+	Short: "Generate conditions to query your objects using cql",
+	Long:  `gen is the command you can use to generate conditions to query your objects using cql.`,
 	Run:   generateConditions,
 	Args:  cobra.MinimumNArgs(1),
 })
@@ -60,11 +60,11 @@ func generateConditions(_ *cobra.Command, args []string) {
 	}
 }
 
-// Generates a file with conditions for each Badaas model in the package
+// Generates a file with conditions for each cql model in the package
 func generateConditionsForPkg(destPkg string, pkgPath string, pkg *packages.Package) {
 	log.Logger.Infof("Generating conditions for types in package %q", pkg.Types.Name())
 
-	relationGettersFile := NewFile(pkg.Types.Name(), filepath.Join(pkgPath, "badaas-orm.go"))
+	relationGettersFile := NewFile(pkg.Types.Name(), filepath.Join(pkgPath, "cql.go"))
 
 	for _, name := range pkg.Types.Scope().Names() {
 		object := getObject(pkg, name)
@@ -88,7 +88,7 @@ func generateConditionsForObject(destPkg string, object types.Object) {
 
 	err := NewConditionsGenerator(object).Into(file)
 	if err != nil {
-		// object is not a Badaas model, do not generate conditions
+		// object is not a cql model, do not generate conditions
 		return
 	}
 

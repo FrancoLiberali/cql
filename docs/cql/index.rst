@@ -2,15 +2,14 @@
 Introduction
 ==============================
 
-Badaas-orm is the BaDaaS' component that allows for easy and safe persistence and querying of objects but 
-it can be used both within a BaDaaS application and independently.
+CQL allows easy and safe persistence and querying of objects.
 
 It's built on top of `gorm <https://gorm.io/>`_, 
 a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. 
 While gorm does this job well with its automatic migration 
 then performing queries on these objects is somewhat limited, 
 forcing us to write SQL queries directly when they are complex. 
-Badaas-orm seeks to address these limitations with a query system that:
+CQL seeks to address these limitations with a query system that:
 
 - Is compile-time safe: 
   its query system is validated at compile time to avoid errors such as 
@@ -32,5 +31,5 @@ Badaas-orm seeks to address these limitations with a query system that:
   the query system avoids as much as possible the use of reflection and aims 
   that all the necessary model data can be retrieved in a single query to the database.
 
-To see how to start using badaas-orm in your project you can read the :doc:`quickstart`. 
-If you are interested in learning how to use the features provided by badaas-orm you can read the :doc:`tutorial`.
+To see how to start using cql in your project you can read the :doc:`quickstart`. 
+If you are interested in learning how to use the features provided by cql you can read the :doc:`tutorial`.

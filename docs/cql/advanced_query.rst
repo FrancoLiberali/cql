@@ -5,7 +5,7 @@ Advanced query
 Dynamic operators
 --------------------------------
 
-In :doc:`/badaas-orm/query` we have seen how to use the operators 
+In :doc:`/cql/query` we have seen how to use the operators 
 to make comparisons between the attributes of a model and static values such as a string, 
 a number, etc. But if we want to make comparisons between two or more attributes of 
 the same type we need to use the dynamic operators. 
@@ -71,7 +71,7 @@ For example:
 
 will respond orm.ErrFieldModelNotConcerned in err.
 
-All operators supported by badaas-orm that receive any value are available in their dynamic version 
+All operators supported by cql that receive any value are available in their dynamic version 
 after using the Dynamic() method of the FieldIs object.
 
 Select join
@@ -138,14 +138,14 @@ types map at the same time in the database (see <https://gorm.io/docs/data_types
 If it is neither of these two cases, the use of an unsafe operator will result in 
 an error in the execution of the query that depends on the database used.
 
-All operators supported by badaas-orm that receive any value are available 
+All operators supported by cql that receive any value are available 
 in their unsafe version after using the Unsafe() method of the FieldIs object.
 
 
 Unsafe conditions (raw SQL)
 --------------------------------
 
-In case you need to use operators that are not supported by badaas-orm 
+In case you need to use operators that are not supported by cql
 (please create an issue in our repository if you think we have forgotten any), 
 you can always run raw SQL with unsafe.NewCondition, as in the following example:
 

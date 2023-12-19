@@ -7,7 +7,7 @@ import (
 	"github.com/elliotchance/pie/v2"
 )
 
-// badaas/orm/baseModels.go
+// cql/model/models.go
 var modelIDs = []string{
 	modelPath + "." + uIntID,
 	modelPath + "." + uuid,
@@ -100,12 +100,12 @@ func (field Field) ChangeType(newType types.Type) Field {
 	}
 }
 
-// Get fields of a Badaas model
-// Returns error is objectType is not a Badaas model
+// Get fields of a cql model
+// Returns error is objectType is not a cql model
 func getFields(objectType Type) ([]Field, error) {
-	// The underlying type has to be a struct and a Badaas Model
+	// The underlying type has to be a struct and a cql Model
 	// (ignore const, var, func, etc.)
-	structType, err := objectType.BadaasModelStruct()
+	structType, err := objectType.CQLModelStruct()
 	if err != nil {
 		return nil, err
 	}

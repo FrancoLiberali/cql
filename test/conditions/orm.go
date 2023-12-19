@@ -1,3 +1,3 @@
 package conditions
 
-//go:generate badaas-cli gen conditions ../models
+//go:generate cql-cli gen conditions ../models

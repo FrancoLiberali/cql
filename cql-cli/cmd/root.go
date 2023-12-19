@@ -10,9 +10,9 @@ import (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
-	Use:     "badaas-cli",
-	Short:   "the badaas command line client",
-	Long:    `badaas-cli is the command line tool that makes it possible to configure and run your badaas applications easily.`,
+	Use:     "cql-cli",
+	Short:   "the cql command line client",
+	Long:    `cql-cli is the command line tool that makes it possible to use cql in your project.`,
 	Version: version.Version,
 })
 

@@ -5,16 +5,16 @@ Declaring models
 Model declaration
 -----------------------
 
-The badaas-orm :ref:`model <badaas-orm/concepts:model>` declaration is based on the GORM model declaration, 
-so its definition, conventions, tags and associations are compatible with badaas-orm. 
+The cql :ref:`model <cql/concepts:model>` declaration is based on the GORM model declaration, 
+so its definition, conventions, tags and associations are compatible with cql. 
 For details see `gorm documentation <https://gorm.io/docs/models.html>`_. 
-On the contrary, badaas-orm presents some differences/extras that are explained in this section.
+On the contrary, cql presents some differences/extras that are explained in this section.
 
 Base models
 -----------------------
 
 To be considered a model, your structures must have embedded one of the 
-:ref:`base models <badaas-orm/concepts:base model>` provided by badaas-orm:
+:ref:`base models <cql/concepts:base model>` provided by cql:
 
 - `model.UUIDModel`: Model identified by a model.UUID (Random (Version 4) UUID).
 - `model.UIntModel`: Model identified by a model.UIntID (auto-incremental uint).
@@ -42,7 +42,7 @@ Type of attributes
 
 As we can see in the example in the previous section, 
 the attributes of your models can be of multiple types, 
-such as basic go types, pointers, and :ref:`nullable types <badaas-orm/concepts:nullable types>`.
+such as basic go types, pointers, and :ref:`nullable types <cql/concepts:nullable types>`.
 
 This difference can generate differences in the information that is stored in the database, 
 since saving a model created as follows:
@@ -53,7 +53,7 @@ since saving a model created as follows:
 
 will save a empty string for Name but a null for the Email and the MemberNumber.
 
-The use of nullable types is strongly recommended and badaas-orm takes into account 
+The use of nullable types is strongly recommended and cql takes into account 
 their use in each of its functionalities.
 
 Associations
@@ -63,13 +63,13 @@ All associations provided by GORM are supported.
 For more information see <https://gorm.io/docs/belongs_to.html>, 
 <https://gorm.io/docs/has_one.html>, <https://gorm.io/docs/has_many.html> and 
 <https://gorm.io/docs/many_to_many.html>. 
-However, in this section we will give some differences in badaas-orm and 
+However, in this section we will give some differences in cql and 
 details that are not clear in this documentation.
 
 IDs
 ^^^^^^^^^^^^^^^^^^^^^
 
-Since badaas-orm base models use model.UUID or model.UIntID to identify the models, 
+Since cql base models use model.UUID or model.UIntID to identify the models, 
 the type of id used in a reference to another model is the corresponding one of these two, 
 for example:
 
@@ -128,7 +128,7 @@ this can make a difference when persisting, since one created as follows:
   ModelWithoutPointer{}
 
 will also create and save an empty ReferencedModel{}, what may be undesired behavior. 
-For this reason, although both options are still compatible with badaas-orm, 
+For this reason, although both options are still compatible with cql, 
 we recommend the use of pointers for references. 
 In case the relation is not nullable, use the `not null` tag in the id of the reference, for example:
 

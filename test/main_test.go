@@ -21,15 +21,15 @@ import (
 const dbTypeEnvKey = "DB"
 
 const (
-	username = "badaas"
-	password = "badaas_password2023"
+	username = "cql"
+	password = "cql_password2023"
 	host     = "localhost"
 	port     = 5000
 	sslMode  = "disable"
-	dbName   = "badaas_db"
+	dbName   = "cql_db"
 )
 
-func TestBaDaaSORM(t *testing.T) {
+func TestCQL(t *testing.T) {
 	db, err := NewDBConnection()
 	if err != nil {
 		log.Fatalln(err)

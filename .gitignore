@@ -34,4 +34,4 @@ docs/_build/
 # cli
 cql-cli/cql-cli
 cql-cli/cmd/gen/conditions/*_conditions.go
-cql-cli/cmd/gen/conditions/tests/**/badaas-orm.go
+cql-cli/cmd/gen/conditions/tests/**/cql.go

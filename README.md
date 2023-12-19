@@ -1,8 +1,8 @@
-# BaDaaS ORM: Backend and Distribution ORM (Object Relational Mapping) <!-- omit in toc -->
+# CQL: Compiled Query Language <!-- omit in toc -->
 
-Badaas-orm is the BaDaaS' component that allows for easy and safe persistence and querying of objects but it can be used both within a BaDaaS application and independently.
+CQL allows easy and safe persistence and querying of objects.
 
-It's built on top of `gorm <https://gorm.io/>`_, a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. While gorm does this job well with its automatic migration then performing queries on these objects is somewhat limited, forcing us to write SQL queries directly when they are complex. Badaas-orm seeks to address these limitations with a query system that:
+It's built on top of `gorm <https://gorm.io/>`_, a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. While gorm does this job well with its automatic migration then performing queries on these objects is somewhat limited, forcing us to write SQL queries directly when they are complex. CQL seeks to address these limitations with a query system that:
 
 - Is compile-time safe: its query system is validated at compile time to avoid errors such as comparing attributes that are of different types, trying to use attributes or navigate relationships that do not exist, using information from tables that are not included in the query, etc.
 - Is easy to use: the use of this system does not require knowledge of databases, SQL languages or complex concepts. Writing queries only requires programming in go and the result is easy to read.
@@ -16,8 +16,8 @@ It's built on top of `gorm <https://gorm.io/>`_, a library that actually provide
 
 ## Contributing
 
-See [this section](../docs/contributing/contributing.md) to view the badaas contribution guidelines.
+See [this section](../docs/contributing/contributing.md) to view the cql contribution guidelines.
 
 ## License
 
-Badaas is Licensed under the [Mozilla Public License Version 2.0](../LICENSE).
+CQL is Licensed under the [Mozilla Public License Version 2.0](../LICENSE).

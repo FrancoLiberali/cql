@@ -86,7 +86,7 @@ const defaultStacktraceLen = 2
 
 func (w writerWrapper) Printf(msg string, args ...interface{}) {
 	if len(args) > 0 {
-		// change the file path to avoid showing badaas-orm internal files
+		// change the file path to avoid showing cql internal files
 		firstArg := args[0]
 
 		_, isString := firstArg.(string)

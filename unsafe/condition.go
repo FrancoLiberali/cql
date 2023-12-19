@@ -7,7 +7,7 @@ import (
 	"github.com/FrancoLiberali/cql/model"
 )
 
-// Condition that can be used to express conditions that are not supported (yet?) by badaas-orm
+// Condition that can be used to express conditions that are not supported (yet?) by cql
 // Example: table1.columnX = table2.columnY
 type unsafeCondition[T model.Model] struct {
 	SQLCondition string
@@ -34,7 +34,7 @@ func (unsafeCondition unsafeCondition[T]) AffectsDeletedAt() bool {
 	return false
 }
 
-// Condition that can be used to express conditions that are not supported (yet?) by badaas-orm
+// Condition that can be used to express conditions that are not supported (yet?) by cql
 // Example: table1.columnX = table2.columnY
 func NewCondition[T model.Model](sqlCondition string, values ...any) condition.Condition[T] {
 	return unsafeCondition[T]{

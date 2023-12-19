@@ -4,6 +4,7 @@ go 1.18
 
 require (
 	github.com/dave/jennifer v1.6.1
+	// TODO change by FrancoLiberali/cql
 	github.com/ditrit/badaas v0.0.0-20230829122312-83f5e8a9f307
 	github.com/ditrit/verdeter v0.4.0
 	github.com/elliotchance/pie/v2 v2.7.0

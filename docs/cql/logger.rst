@@ -4,7 +4,7 @@ Logger
 
 When connecting to the database, i.e. when creating the `gorm.DB` object, 
 it is possible to configure the type of logger to use, the logging level, among others. 
-As explained in the :ref:`connection section <badaas-orm/connecting_to_a_database:Connection>`, 
+As explained in the :ref:`connection section <cql/connecting_to_a_database:Connection>`, 
 this can be done by using the `orm.Open` method:
 
 .. code-block:: go
@@ -21,7 +21,7 @@ Any logger that complies with `logger.Interface` can be configured.
 Log levels
 ------------------------------
 
-The log levels provided by badaas-orm are the same as those of gorm:
+The log levels provided by cql are the same as those of gorm:
 
 - `logger.Error`: To only view error messages in case they occur during the execution of a sql query.
 - `logger.Warn`: The previous level plus warnings for execution of queries and transactions that take 
@@ -39,10 +39,10 @@ to be performed, it is necessary to use the orm.Transaction method.
 Default logger
 -------------------------------
 
-badaas-orm provides a default logger that will print Slow SQL and happening errors. 
+cql provides a default logger that will print Slow SQL and happening errors. 
 
 You can create one with the default configuration using 
-(take into account that logger is github.com/ditrit/badaas/orm/logger 
+(take into account that logger is github.com/FrancoLiberali/cql/logger 
 and gormLogger is gorm.io/gorm/logger):
 
 .. code-block:: go
@@ -73,7 +73,7 @@ The LogLevel is also configurable via the `ToLogMode` method.
 Zap logger
 ------------------------------
 
-badaas-orm provides the possibility to use `zap <https://github.com/uber-go/zap>`_ as logger. 
+cql provides the possibility to use `zap <https://github.com/uber-go/zap>`_ as logger. 
 For this, there is a package called `gormzap`. 
 The information displayed by the zap logger will be the same as if we were using the default logger 
 but in a structured form, with the following information:

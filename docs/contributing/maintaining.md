@@ -1,6 +1,6 @@
 # Maintaining
 
-This document is intended for BaDaaS maintainers only.
+This document is intended for CQL maintainers only.
 
 ## How to release
 

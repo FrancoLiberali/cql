@@ -2,21 +2,21 @@
 Quickstart
 ==============================
 
-To integrate badaas-orm into your project, you can head to the 
-`quickstart <https://github.com/ditrit/badaas-orm-quickstart>`_.
+To integrate cql into your project, you can head to the 
+`quickstart <https://github.com/FrancoLiberali/cql-quickstart>`_.
 
 Refer to its README.md for running it.
 
 Understand it
 ----------------------------------
 
-Once you have started your project with `go init`, you must add the dependency to BaDaaS:
+Once you have started your project with `go init`, you must add the dependency to cql:
 
 .. code-block:: bash
 
-    go get -u github.com/ditrit/badaas
+    go get -u github.com/FrancoLiberali/cql
 
-Create a package for your :ref:`models <badaas-orm/concepts:model>`, for example:
+Create a package for your :ref:`models <cql/concepts:model>`, for example:
 
 .. code-block:: go
 
@@ -32,7 +32,7 @@ Create a package for your :ref:`models <badaas-orm/concepts:model>`, for example
     Name string
   }
 
-Once done, you can :ref:`generate the conditions <badaas-orm/concepts:conditions generation>` 
+Once done, you can :ref:`generate the conditions <cql/concepts:conditions generation>` 
 to perform queries on them. 
 Create a new package named conditions and add a file with the following content:
 
@@ -40,12 +40,12 @@ Create a new package named conditions and add a file with the following content:
 
   package conditions
 
-  //go:generate badaas-cli gen conditions ../models
+  //go:generate cql-cli gen conditions ../models
 
-Then, you can generate the conditions using `badaas-cli` as described in the README.md.
+Then, you can generate the conditions using `cql-cli` as described in the README.md.
 
-In main.go create a main function that creates a :ref:`gorm.DB <badaas-orm/concepts:GormDB>`
-that allows connection with the database and call the :ref:`AutoMigrate <badaas-orm/concepts:auto migration>` 
+In main.go create a main function that creates a :ref:`gorm.DB <cql/concepts:GormDB>`
+that allows connection with the database and call the :ref:`AutoMigrate <cql/concepts:auto migration>` 
 method with the models you want to be persisted:
 
 .. code-block:: go
@@ -68,7 +68,7 @@ method with the models you want to be persisted:
 
   func NewDBConnection() (*gorm.DB, error) {
     return orm.Open(
-      postgres.Open(orm.CreatePostgreSQLDSN("localhost", "root", "postgres", "disable", "badaas_db", 26257)),
+      postgres.Open(orm.CreatePostgreSQLDSN("localhost", "root", "postgres", "disable", "cql_db", 26257)),
       &gorm.Config{
         Logger: logger.Default.ToLogMode(logger.Info),
       },
@@ -78,5 +78,5 @@ method with the models you want to be persisted:
 Use it
 ----------------------
 
-Now that you know how to integrate badaas-orm into your project, 
+Now that you know how to integrate cql into your project, 
 you can learn how to use it by following the :doc:`tutorial`.

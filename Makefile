@@ -8,7 +8,7 @@ lint:
 	cd cql-cli && golangci-lint run --config ../.golangci.yml
 
 rmdb:
-	docker stop badaas-test-db && docker rm badaas-test-db
+	docker stop cql-test-db && docker rm cql-test-db
 
 postgresql:
 	docker compose -f "docker/postgresql/docker-compose.yml" up -d

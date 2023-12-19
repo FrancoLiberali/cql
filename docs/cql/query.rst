@@ -5,20 +5,20 @@ Query
 Create, Save and Delete methods are done directly with gormDB object using the corresponding methods. 
 For details visit 
 <https://gorm.io/docs/create.html>, <https://gorm.io/docs/update.html> and <https://gorm.io/docs/delete.html>. 
-On the other hand, read (query) operations are provided by badaas-orm via its compilable query system.
+On the other hand, read (query) operations are provided by cql via its compilable query system.
 
 Query creation
 -----------------------
 
 To create a query you must use the orm.NewQuery[models.MyModel] method,
 where models.MyModel is the model you expect this query to answer. 
-This function takes as parameters the :ref:`transaction <badaas-orm/query:transactions>` 
-on which to execute the query and the query :ref:`badaas-orm/query:conditions`.
+This function takes as parameters the :ref:`transaction <cql/query:transactions>` 
+on which to execute the query and the query :ref:`cql/query:conditions`.
 
 Transactions
 --------------------
 
-To execute transactions badaas-orm provides the function orm.Transaction. 
+To execute transactions cql provides the function orm.Transaction. 
 The function passed by parameter will be executed inside a gorm transaction 
 (for more information visit https://gorm.io/docs/transactions.html). 
 Using this method will also allow the transaction execution time to be logged.
@@ -53,21 +53,21 @@ Conditions
 ------------------------
 
 The set of conditions that are received by the `orm.NewQuery` method 
-form the badaas-orm compilable query system. 
+form the cql compilable query system. 
 It is so named because the conditions will verify at compile time that the query to be executed is correct.
 
 These conditions are objects of type Condition that contain the 
 necessary information to perform the queries in a safe way. 
-They are generated from the definition of your models using badaas-cli.
+They are generated from the definition of your models using cql-cli.
 
 Conditions generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The generation of conditions is done with badaas-cli. For this, we need to install badaas-cli:
+The generation of conditions is done with cql-cli. For this, we need to install cql-cli:
 
 .. code-block:: bash
 
-    go install github.com/ditrit/badaas-cli
+    go install github.com/FrancoLiberali/cql/cql-cli
 
 Then, inside our project we will have to create a package called conditions 
 (or another name if you wish) and inside it a file with the following content:
@@ -76,7 +76,7 @@ Then, inside our project we will have to create a package called conditions
 
     package conditions
 
-    //go:generate badaas-cli gen conditions ../models_path_1 ../models_path_2
+    //go:generate cql-cli gen conditions ../models_path_1 ../models_path_2
 
 where ../models_path_1 ../models_path_2 are the relative paths between the package conditions 
 and the packages containing the definition of your models (can be only one).
@@ -101,14 +101,14 @@ This variable is called the condition model and it has:
 - An attribute for each attribute of your original model with the same name 
   (if models.MyModel.Name exists, then conditions.MyModel.Name is generated), 
   of type FieldIdentifier that allows to use that attribute in queries 
-  (for :ref:`dynamic conditions <badaas-orm/advanced_query:dynamic operators>` for example).
+  (for :ref:`dynamic conditions <cql/advanced_query:dynamic operators>` for example).
 - A method for each attribute of your original model with the same name + Is 
   (if models.MyModel.Name exists, then conditions.MyModel.NameIs() is generated), 
   which will allow you to create operations for that attribute in your queries.
 - A method for each relation of your original model with the same name 
   (if models.MyModel.MyOtherModel exists, then conditions.MyModel.MyOtherModel() is generated), 
   which will allow you to perform joins in your queries.
-- Methods for :doc:`/badaas-orm/preloading`.
+- Methods for :doc:`/cql/preloading`.
 
 Then, combining these conditions, the Connection Conditions (cql.And, cql.Or, cql.Not) 
 you will be able to make all the queries you need in a safe way.
@@ -219,10 +219,10 @@ Below you will find the complete list of available operators:
 - In(values)
 - NotIn(values)
 
-In addition to these, badaas-orm gives the possibility to use operators 
+In addition to these, cql gives the possibility to use operators 
 that are only supported by a certain database (outside the standard). 
-These operators can be found in <https://pkg.go.dev/github.com/ditrit/badaas/orm/mysql>, 
-<https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlserver>, 
-<https://pkg.go.dev/github.com/ditrit/badaas/orm/psql> 
-and <https://pkg.go.dev/github.com/ditrit/badaas/orm/sqlite>. 
+These operators can be found in <https://pkg.go.dev/github.com/FrancoLiberali/cql/mysql>, 
+<https://pkg.go.dev/github.com/FrancoLiberali/cql/sqlserver>, 
+<https://pkg.go.dev/github.com/FrancoLiberali/cql/psql> 
+and <https://pkg.go.dev/github.com/FrancoLiberali/cql/sqlite>. 
 To use them, use the Custom method of FieldIs type.

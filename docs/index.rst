@@ -3,18 +3,18 @@ Introduction
 ==============================
 
 .. toctree::
-   :caption: Badaas-orm
+   :caption: CQL
 
-   badaas-orm/index
-   badaas-orm/quickstart
-   badaas-orm/tutorial
-   badaas-orm/concepts
-   badaas-orm/declaring_models
-   badaas-orm/connecting_to_a_database
-   badaas-orm/query
-   badaas-orm/advanced_query
-   badaas-orm/preloading
-   badaas-orm/logger
+   cql/index
+   cql/quickstart
+   cql/tutorial
+   cql/concepts
+   cql/declaring_models
+   cql/connecting_to_a_database
+   cql/query
+   cql/advanced_query
+   cql/preloading
+   cql/logger
 
 .. toctree::
    :caption: Contributing
@@ -22,4 +22,4 @@ Introduction
    contributing/contributing
    contributing/developing
    contributing/maintaining
-   Github <https://www.github.com/ditrit/badaas>
+   Github <https://www.github.com/FrancoLiberali/cql>
