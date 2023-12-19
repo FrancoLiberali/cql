@@ -3,7 +3,7 @@ version: '3.5'
 
 services:
   db:
-    container_name: "badaas-test-db"
+    container_name: "cql-test-db"
     image: cockroachdb/cockroach:latest
     volumes:
       - .:/cockroach/files
@@ -13,8 +13,8 @@ services:
       - "5000:26257"
       - "8080:8080" # Web based dashboard
     environment:
-      - COCKROACH_USER=badaas
-      - COCKROACH_DATABASE=badaas_db
+      - COCKROACH_USER=cql
+      - COCKROACH_DATABASE=cql_db
     healthcheck:
       test: curl --fail http://localhost:8080 || exit 1
       interval: 10s

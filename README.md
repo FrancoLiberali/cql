@@ -1,44 +1,30 @@
-# BADAAS: Backend And Distribution As A Service
+# CQL: Compiled Query Language <!-- omit in toc -->
 
-[![Build Status](https://github.com/ditrit/badaas/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/ditrit/badaas/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/ditrit/badaas)](https://goreportcard.com/report/github.com/ditrit/badaas)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ditrit_badaas&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=ditrit_badaas)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ditrit_badaas&metric=coverage)](https://sonarcloud.io/summary/new_code?id=ditrit_badaas)
-[![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/7624/badge)](https://bestpractices.coreinfrastructure.org/projects/7624)
+[![Build Status](https://github.com/FrancoLiberali/cql/actions/workflows/cql.yml/badge.svg?branch=main)](https://github.com/FrancoLiberali/cql/actions)
+[![Go Report Card](https://goreportcard.com/badge/github.com/FrancoLiberali/cql)](https://goreportcard.com/report/github.com/FrancoLiberali/cql)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_cql&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_cql)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_cql&metric=coverage)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_cql)
 
-[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/ditrit/badaas)
+[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/FrancoLiberali/cql)
 
-[![Discord DitRit](https://dcbadge.vercel.app/api/server/zkKfj9gj2C?style=flat&theme=default-inverted)](https://discord.gg/zkKfj9gj2C)
+Originally part of `BaDaaS <https://github.com/ditrit/badaas`_, CQL allows easy and safe persistence and querying of objects.
 
-BaDaaS enables the effortless construction of ***distributed, resilient, highly available and secure applications by design***, while ensuring very simple deployment and management (NoOps).
+It's built on top of `gorm <https://gorm.io/>`_, a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. While gorm does this job well with its automatic migration then performing queries on these objects is somewhat limited, forcing us to write SQL queries directly when they are complex. CQL seeks to address these limitations with a query system that:
 
-> **Warning**
-> BaDaaS is still under development and each of its components can have a different state of evolution
-
-## Features and components
-
-Badaas provides several key features, each provided by a component that can be used independently and has a different state of evolution:
-
-- **Authentication**(unstable): Badaas can authenticate users using its internal authentication scheme or externally by using protocols such as OIDC, SAML, Oauth2...
-- **Authorization**(wip_unstable): On resource access, Badaas will check if the user is authorized using a RBAC model.
-- **Distribution**(todo): Badaas is built to run in clusters by default. Communications between nodes are TLS encrypted using [shoset](https://github.com/ditrit/shoset).
-- **Persistence**(wip_unstable): Applicative objects are persisted as well as user files. Those resources are shared across the clusters to increase resiliency. To achieve this, BaDaaS uses the [badaas-orm](https://github.com/ditrit/badaas/orm) component.
-- **Querying Resources**(unstable): Resources are accessible via a REST API.
-- **Posix compliant**(stable): Badaas strives towards being a good unix citizen and respecting commonly accepted norms.
-- **Advanced logs management**(todo): Badaas provides an interface to interact with the logs produced by the clusters. Logs are formatted in json by default.
+- Is compile-time safe: its query system is validated at compile time to avoid errors such as comparing attributes that are of different types, trying to use attributes or navigate relationships that do not exist, using information from tables that are not included in the query, etc.
+- Is easy to use: the use of this system does not require knowledge of databases, SQL languages or complex concepts. Writing queries only requires programming in go and the result is easy to read.
+- Is designed for real applications: the query system is designed to work well in real-world cases where queries are complex, require navigating multiple relationships, performing multiple comparisons, etc.
+- Is designed so that developers can focus on the business model: its queries allow easy retrieval of model relationships to apply business logic to the model and it provides mechanisms to avoid errors in the business logic due to mistakes in loading information from the database.
+- It is designed for high performance: the query system avoids as much as possible the use of reflection and aims that all the necessary model data can be retrieved in a single query to the database.
 
 ## Documentation
 
-<!-- TODO add link to docs -->
+<https://compilablequerylanguage.readthedocs.io/en/latest/>
 
 ## Contributing
 
-See [this section](./docs/contributing/contributing.md).
-
-## Code of Conduct
-
-This project has adopted the [Contributor Covenant Code of Conduct](CODE_OF_CONDUCT.md)
+See [this section](../docs/contributing/contributing.md) to view the cql contribution guidelines.
 
 ## License
 
-Badaas is Licensed under the [Mozilla Public License Version 2.0](./LICENSE).
+CQL is Licensed under the [Mozilla Public License Version 2.0](../LICENSE).

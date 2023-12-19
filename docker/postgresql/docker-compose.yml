@@ -3,12 +3,12 @@ version: '3.5'
 
 services:
   db:
-    container_name: "badaas-test-db"
+    container_name: "cql-test-db"
     image: postgres:latest
     environment:
-      POSTGRES_USER: badaas
-      POSTGRES_PASSWORD: badaas_password2023
-      POSTGRES_DB: badaas_db
+      POSTGRES_USER: cql
+      POSTGRES_PASSWORD: cql_password2023
+      POSTGRES_DB: cql_db
       PGDATA: /data/postgres
     ports:
       - "5000:5432"

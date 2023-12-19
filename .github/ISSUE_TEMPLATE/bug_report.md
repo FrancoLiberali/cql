@@ -30,9 +30,9 @@ If applicable, add screenshots to help explain your problem.
 
 Please complete the following information:
 
-- badaas version [X.X.X] or commit hash
+- cql version [X.X.X] or commit hash
 - go version
-- database vendor and version (in case of bugs related with badaas-orm)
+- database vendor and version
 
 ## Additional context
 
