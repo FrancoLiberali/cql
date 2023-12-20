@@ -80,7 +80,6 @@ func (update *Update[T]) Limit(limit int) *Update[T] {
 //
 // warning: in sqlite preloads are not allowed
 func (update *Update[T]) Returning(dest *[]T) *Update[T] {
-	// TODO hacer el update del logger para que no muestre internals de ditrit/gorm
 	update.OrderLimitReturning.Returning(dest)
 
 	return update

@@ -58,7 +58,7 @@ func FindLastCaller(skip int) (string, int, int) {
 		if !ok {
 			// we checked in all the stacktrace and none meet the conditions,
 			return "", 0, 0
-		} else if !strings.Contains(file, gormSourceDir) && !strings.Contains(file, cqlSourceDir) {
+		} else if !strings.Contains(file, gormSourceDir) && !strings.Contains(file, gormForkSourceDir) && !strings.Contains(file, cqlSourceDir) {
 			// file outside cql and gorm
 			return file, line, i - 1 // -1 to remove this function from the stacktrace
 		}
@@ -68,8 +68,9 @@ func FindLastCaller(skip int) (string, int, int) {
 }
 
 var (
-	cqlSourceDir  string
-	gormSourceDir = filepath.Join("gorm.io", "gorm")
+	cqlSourceDir      string
+	gormSourceDir     = filepath.Join("gorm.io", "gorm")
+	gormForkSourceDir = filepath.Join("FrancoLiberali", "gorm")
 )
 
 func init() {
