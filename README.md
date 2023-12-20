@@ -30,10 +30,11 @@ table th:nth-of-type(3) {
 }
 </style>
 
-
-| SQL | GORM | CQL |
-|---|---|---|
-| SELECT cities.* FROM cities INNER JOIN countries Country ON Country.id = cities.country_id AND Country.name = "France" WHERE cities.name = "Paris" | db.Where(     "cities.name = ?",     "Paris", ).Joins(     "Country",     db.Where(         "Country.name = ?",         "France",     ), ).Find(&cities) | cql.Query[models.City](     db,     conditions.City.Name.Is().Eq("Paris"),     conditions.City.Country(         conditions.Country.Name.Is().Eq("France"),     ), ).FindOne() |
+| Language | Query |
+|---|---|
+| SQL | SELECT cities.* FROM cities <br> INNER JOIN countries ON <br>&emsp;&emsp; countries.id = cities.country_id AND <br>&emsp;&emsp; countries.name = "France" <br> WHERE cities.name = "Paris" |
+| GORM | db.Where(<br>&emsp;"cities.name = ?",<br>&emsp;"Paris",<br>).Joins(<br>&emsp;"Country",<br>&emsp;db.Where( <br>&emsp;&emsp; "Country.name = ?", <br>&emsp;&emsp; "France", <br>&emsp; ), <br> ).Find(&cities) |
+| CQL | cql.Query[models.City]( <br>&emsp; db, <br>&emsp; conditions.City.Name.Is().Eq("Paris"), <br>&emsp; conditions.City.Country( <br>&emsp;&emsp; conditions.Country.Name.Is().Eq("France"), <br>&emsp; ), <br> ).FindOne() |
 
 ## Documentation
 
