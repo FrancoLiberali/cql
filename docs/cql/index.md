@@ -1,6 +1,4 @@
-==============================
-Introduction
-==============================
+# Introduction
 
 Originally part of [BaDaaS](https://github.com/ditrit/badaas), CQL allows easy and safe persistence and querying of objects.
 
