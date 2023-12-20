@@ -9,7 +9,7 @@ type FieldIs[TObject model.Model, TAttribute any] struct {
 }
 
 type BoolFieldIs[TObject model.Model] struct {
-	Field Field[TObject, bool]
+	Field[TObject, bool]
 }
 
 type StringFieldIs[TObject model.Model] struct {

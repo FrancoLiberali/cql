@@ -7,7 +7,6 @@ import (
 )
 
 type IField interface {
-	// TODO ver si de todos estos podria sacar alguno
 	ColumnName(query *GormQuery, table Table) string
 	FieldName() string
 	ColumnSQL(query *GormQuery, table Table) string
@@ -33,12 +32,7 @@ func (field Field[TModel, TAttribute]) Is() FieldIs[TModel, TAttribute] {
 	return FieldIs[TModel, TAttribute]{Field: field}
 }
 
-func (field Field[TModel, TAttribute]) Set() FieldSet[TModel, TAttribute] {
-	return FieldSet[TModel, TAttribute]{Field: field}
-}
-
 func (field Field[TModel, TAttribute]) GetModelType() reflect.Type {
-	// TODO ver si esto sigue siendo necesario
 	return reflect.TypeOf(*new(TModel))
 }
 
@@ -63,8 +57,16 @@ func (field Field[TModel, TAttribute]) ColumnSQL(query *GormQuery, table Table) 
 	return table.Alias + "." + field.ColumnName(query, table)
 }
 
+type UpdatableField[TModel model.Model, TAttribute any] struct {
+	Field[TModel, TAttribute]
+}
+
+func (field UpdatableField[TModel, TAttribute]) Set() FieldSet[TModel, TAttribute] {
+	return FieldSet[TModel, TAttribute]{Field: field}
+}
+
 type BoolField[TModel model.Model] struct {
-	Field[TModel, bool]
+	UpdatableField[TModel, bool]
 }
 
 func (boolField BoolField[TModel]) Is() BoolFieldIs[TModel] {
@@ -74,7 +76,7 @@ func (boolField BoolField[TModel]) Is() BoolFieldIs[TModel] {
 }
 
 type StringField[TModel model.Model] struct {
-	Field[TModel, string]
+	UpdatableField[TModel, string]
 }
 
 func (stringField StringField[TModel]) Is() StringFieldIs[TModel] {

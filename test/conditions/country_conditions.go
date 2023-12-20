@@ -27,7 +27,7 @@ var Country = countryConditions{
 	CreatedAt: condition.Field[models.Country, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.Country, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.Country, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.Country]{Field: condition.Field[models.Country, string]{Name: "Name"}},
+	Name:      condition.StringField[models.Country]{UpdatableField: condition.UpdatableField[models.Country, string]{Field: condition.Field[models.Country, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[models.Country, time.Time]{Name: "UpdatedAt"},
 }
 

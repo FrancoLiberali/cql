@@ -13,12 +13,12 @@ type customTypeConditions struct {
 	CreatedAt condition.Field[customtype.CustomType, time.Time]
 	UpdatedAt condition.Field[customtype.CustomType, time.Time]
 	DeletedAt condition.Field[customtype.CustomType, time.Time]
-	Custom    condition.Field[customtype.CustomType, customtype.MultiString]
+	Custom    condition.UpdatableField[customtype.CustomType, customtype.MultiString]
 }
 
 var CustomType = customTypeConditions{
 	CreatedAt: condition.Field[customtype.CustomType, time.Time]{Name: "CreatedAt"},
-	Custom:    condition.Field[customtype.CustomType, customtype.MultiString]{Name: "Custom"},
+	Custom:    condition.UpdatableField[customtype.CustomType, customtype.MultiString]{Field: condition.Field[customtype.CustomType, customtype.MultiString]{Name: "Custom"}},
 	DeletedAt: condition.Field[customtype.CustomType, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[customtype.CustomType, model.UUID]{Name: "ID"},
 	UpdatedAt: condition.Field[customtype.CustomType, time.Time]{Name: "UpdatedAt"},

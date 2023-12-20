@@ -13,21 +13,21 @@ type gormEmbeddedConditions struct {
 	CreatedAt               condition.Field[gormembedded.GormEmbedded, time.Time]
 	UpdatedAt               condition.Field[gormembedded.GormEmbedded, time.Time]
 	DeletedAt               condition.Field[gormembedded.GormEmbedded, time.Time]
-	Int                     condition.Field[gormembedded.GormEmbedded, int]
-	GormEmbeddedInt         condition.Field[gormembedded.GormEmbedded, int]
-	GormEmbeddedNoPrefixInt condition.Field[gormembedded.GormEmbedded, int]
+	Int                     condition.UpdatableField[gormembedded.GormEmbedded, int]
+	GormEmbeddedInt         condition.UpdatableField[gormembedded.GormEmbedded, int]
+	GormEmbeddedNoPrefixInt condition.UpdatableField[gormembedded.GormEmbedded, int]
 }
 
 var GormEmbedded = gormEmbeddedConditions{
 	CreatedAt: condition.Field[gormembedded.GormEmbedded, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[gormembedded.GormEmbedded, time.Time]{Name: "DeletedAt"},
-	GormEmbeddedInt: condition.Field[gormembedded.GormEmbedded, int]{
+	GormEmbeddedInt: condition.UpdatableField[gormembedded.GormEmbedded, int]{Field: condition.Field[gormembedded.GormEmbedded, int]{
 		ColumnPrefix: "gorm_embedded_",
 		Name:         "Int",
-	},
-	GormEmbeddedNoPrefixInt: condition.Field[gormembedded.GormEmbedded, int]{Name: "Int"},
+	}},
+	GormEmbeddedNoPrefixInt: condition.UpdatableField[gormembedded.GormEmbedded, int]{Field: condition.Field[gormembedded.GormEmbedded, int]{Name: "Int"}},
 	ID:                      condition.Field[gormembedded.GormEmbedded, model.UIntID]{Name: "ID"},
-	Int:                     condition.Field[gormembedded.GormEmbedded, int]{Name: "Int"},
+	Int:                     condition.UpdatableField[gormembedded.GormEmbedded, int]{Field: condition.Field[gormembedded.GormEmbedded, int]{Name: "Int"}},
 	UpdatedAt:               condition.Field[gormembedded.GormEmbedded, time.Time]{Name: "UpdatedAt"},
 }
 

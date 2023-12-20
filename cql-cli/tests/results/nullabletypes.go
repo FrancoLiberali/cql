@@ -14,27 +14,27 @@ type nullableTypesConditions struct {
 	UpdatedAt condition.Field[nullabletypes.NullableTypes, time.Time]
 	DeletedAt condition.Field[nullabletypes.NullableTypes, time.Time]
 	String    condition.StringField[nullabletypes.NullableTypes]
-	Int64     condition.Field[nullabletypes.NullableTypes, int64]
-	Int32     condition.Field[nullabletypes.NullableTypes, int32]
-	Int16     condition.Field[nullabletypes.NullableTypes, int16]
-	Byte      condition.Field[nullabletypes.NullableTypes, int8]
-	Float64   condition.Field[nullabletypes.NullableTypes, float64]
+	Int64     condition.UpdatableField[nullabletypes.NullableTypes, int64]
+	Int32     condition.UpdatableField[nullabletypes.NullableTypes, int32]
+	Int16     condition.UpdatableField[nullabletypes.NullableTypes, int16]
+	Byte      condition.UpdatableField[nullabletypes.NullableTypes, int8]
+	Float64   condition.UpdatableField[nullabletypes.NullableTypes, float64]
 	Bool      condition.BoolField[nullabletypes.NullableTypes]
-	Time      condition.Field[nullabletypes.NullableTypes, time.Time]
+	Time      condition.UpdatableField[nullabletypes.NullableTypes, time.Time]
 }
 
 var NullableTypes = nullableTypesConditions{
-	Bool:      condition.BoolField[nullabletypes.NullableTypes]{Field: condition.Field[nullabletypes.NullableTypes, bool]{Name: "Bool"}},
-	Byte:      condition.Field[nullabletypes.NullableTypes, int8]{Name: "Byte"},
+	Bool:      condition.BoolField[nullabletypes.NullableTypes]{UpdatableField: condition.UpdatableField[nullabletypes.NullableTypes, bool]{Field: condition.Field[nullabletypes.NullableTypes, bool]{Name: "Bool"}}},
+	Byte:      condition.UpdatableField[nullabletypes.NullableTypes, int8]{Field: condition.Field[nullabletypes.NullableTypes, int8]{Name: "Byte"}},
 	CreatedAt: condition.Field[nullabletypes.NullableTypes, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[nullabletypes.NullableTypes, time.Time]{Name: "DeletedAt"},
-	Float64:   condition.Field[nullabletypes.NullableTypes, float64]{Name: "Float64"},
+	Float64:   condition.UpdatableField[nullabletypes.NullableTypes, float64]{Field: condition.Field[nullabletypes.NullableTypes, float64]{Name: "Float64"}},
 	ID:        condition.Field[nullabletypes.NullableTypes, model.UUID]{Name: "ID"},
-	Int16:     condition.Field[nullabletypes.NullableTypes, int16]{Name: "Int16"},
-	Int32:     condition.Field[nullabletypes.NullableTypes, int32]{Name: "Int32"},
-	Int64:     condition.Field[nullabletypes.NullableTypes, int64]{Name: "Int64"},
-	String:    condition.StringField[nullabletypes.NullableTypes]{Field: condition.Field[nullabletypes.NullableTypes, string]{Name: "String"}},
-	Time:      condition.Field[nullabletypes.NullableTypes, time.Time]{Name: "Time"},
+	Int16:     condition.UpdatableField[nullabletypes.NullableTypes, int16]{Field: condition.Field[nullabletypes.NullableTypes, int16]{Name: "Int16"}},
+	Int32:     condition.UpdatableField[nullabletypes.NullableTypes, int32]{Field: condition.Field[nullabletypes.NullableTypes, int32]{Name: "Int32"}},
+	Int64:     condition.UpdatableField[nullabletypes.NullableTypes, int64]{Field: condition.Field[nullabletypes.NullableTypes, int64]{Name: "Int64"}},
+	String:    condition.StringField[nullabletypes.NullableTypes]{UpdatableField: condition.UpdatableField[nullabletypes.NullableTypes, string]{Field: condition.Field[nullabletypes.NullableTypes, string]{Name: "String"}}},
+	Time:      condition.UpdatableField[nullabletypes.NullableTypes, time.Time]{Field: condition.Field[nullabletypes.NullableTypes, time.Time]{Name: "Time"}},
 	UpdatedAt: condition.Field[nullabletypes.NullableTypes, time.Time]{Name: "UpdatedAt"},
 }
 

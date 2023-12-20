@@ -29,7 +29,7 @@ var City = cityConditions{
 	CreatedAt: condition.Field[models.City, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.City, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.City, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.City]{Field: condition.Field[models.City, string]{Name: "Name"}},
+	Name:      condition.StringField[models.City]{UpdatableField: condition.UpdatableField[models.City, string]{Field: condition.Field[models.City, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[models.City, time.Time]{Name: "UpdatedAt"},
 }
 

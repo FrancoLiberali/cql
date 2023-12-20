@@ -13,16 +13,16 @@ type goEmbeddedConditions struct {
 	CreatedAt       condition.Field[goembedded.GoEmbedded, time.Time]
 	UpdatedAt       condition.Field[goembedded.GoEmbedded, time.Time]
 	DeletedAt       condition.Field[goembedded.GoEmbedded, time.Time]
-	Int             condition.Field[goembedded.GoEmbedded, int]
-	ToBeEmbeddedInt condition.Field[goembedded.GoEmbedded, int]
+	Int             condition.UpdatableField[goembedded.GoEmbedded, int]
+	ToBeEmbeddedInt condition.UpdatableField[goembedded.GoEmbedded, int]
 }
 
 var GoEmbedded = goEmbeddedConditions{
 	CreatedAt:       condition.Field[goembedded.GoEmbedded, time.Time]{Name: "CreatedAt"},
 	DeletedAt:       condition.Field[goembedded.GoEmbedded, time.Time]{Name: "DeletedAt"},
 	ID:              condition.Field[goembedded.GoEmbedded, model.UIntID]{Name: "ID"},
-	Int:             condition.Field[goembedded.GoEmbedded, int]{Name: "Int"},
-	ToBeEmbeddedInt: condition.Field[goembedded.GoEmbedded, int]{Name: "Int"},
+	Int:             condition.UpdatableField[goembedded.GoEmbedded, int]{Field: condition.Field[goembedded.GoEmbedded, int]{Name: "Int"}},
+	ToBeEmbeddedInt: condition.UpdatableField[goembedded.GoEmbedded, int]{Field: condition.Field[goembedded.GoEmbedded, int]{Name: "Int"}},
 	UpdatedAt:       condition.Field[goembedded.GoEmbedded, time.Time]{Name: "UpdatedAt"},
 }
 

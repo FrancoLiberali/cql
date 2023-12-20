@@ -291,7 +291,6 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 			updatedTables = append(updatedTables, tableAndValue.table)
 		}
 
-		// TODO que no existan los set de field de los models (id, created, updated, etc)
 		now := time.Now()
 		for _, table := range pie.Unique(updatedTables) {
 			sets = append(sets, clause.Assignment{

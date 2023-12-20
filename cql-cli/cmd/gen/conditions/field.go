@@ -8,10 +8,15 @@ import (
 )
 
 // cql/model/models.go
-var modelIDs = []string{
-	modelPath + "." + uIntID,
-	modelPath + "." + uuid,
-}
+var (
+	modelIDs = []string{
+		modelPath + "." + uIntID,
+		modelPath + "." + uuid,
+	}
+	baseModelFields = []string{
+		"CreatedAt", "UpdatedAt", "DeletedAt",
+	}
+)
 
 type Field struct {
 	Name         string
@@ -28,6 +33,10 @@ func (field Field) CompleteName() string {
 
 func (field Field) IsModelID() bool {
 	return pie.Contains(modelIDs, field.TypeString())
+}
+
+func (field Field) IsUpdatable() bool {
+	return !field.IsModelID() && !pie.Contains(baseModelFields, field.Name)
 }
 
 // Get the name of the column where the data for a field will be saved

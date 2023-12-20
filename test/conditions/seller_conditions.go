@@ -36,7 +36,7 @@ var Seller = sellerConditions{
 	CreatedAt:    condition.Field[models.Seller, time.Time]{Name: "CreatedAt"},
 	DeletedAt:    condition.Field[models.Seller, time.Time]{Name: "DeletedAt"},
 	ID:           condition.Field[models.Seller, model.UUID]{Name: "ID"},
-	Name:         condition.StringField[models.Seller]{Field: condition.Field[models.Seller, string]{Name: "Name"}},
+	Name:         condition.StringField[models.Seller]{UpdatableField: condition.UpdatableField[models.Seller, string]{Field: condition.Field[models.Seller, string]{Name: "Name"}}},
 	UniversityID: condition.Field[models.Seller, model.UUID]{Name: "UniversityID"},
 	UpdatedAt:    condition.Field[models.Seller, time.Time]{Name: "UpdatedAt"},
 }

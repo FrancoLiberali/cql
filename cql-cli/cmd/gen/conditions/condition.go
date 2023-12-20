@@ -18,6 +18,7 @@ const (
 	cqlNewCollectionPreload = "NewCollectionPreloadCondition"
 	cqlNewPreloadCondition  = "NewPreloadCondition"
 	cqlField                = "Field"
+	cqlUpdatableField       = "UpdatableField"
 	cqlBoolField            = "BoolField"
 	cqlStringField          = "StringField"
 	// cql/model
@@ -202,16 +203,29 @@ func (condition *Condition) createField(objectType Type, field Field) {
 		objectTypeQual,
 		condition.param.GenericType(),
 	)
+
+	if field.IsUpdatable() {
+		fieldValues = jen.Dict{
+			jen.Id(cqlField): fieldQual.Clone().Values(fieldValues),
+		}
+		fieldQual = jen.Qual(
+			conditionPath, cqlUpdatableField,
+		).Types(
+			objectTypeQual,
+			condition.param.GenericType(),
+		)
+	}
+
 	if condition.param.isString {
 		fieldValues = jen.Dict{
-			jen.Id("Field"): fieldQual.Clone().Values(fieldValues),
+			jen.Id(cqlUpdatableField): fieldQual.Clone().Values(fieldValues),
 		}
 		fieldQual = jen.Qual(
 			conditionPath, cqlStringField,
 		).Types(objectTypeQual)
 	} else if condition.param.isBool {
 		fieldValues = jen.Dict{
-			jen.Id("Field"): fieldQual.Clone().Values(fieldValues),
+			jen.Id(cqlUpdatableField): fieldQual.Clone().Values(fieldValues),
 		}
 		fieldQual = jen.Qual(
 			conditionPath, cqlBoolField,

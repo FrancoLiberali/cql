@@ -20,7 +20,7 @@ var University = universityConditions{
 	CreatedAt: condition.Field[models.University, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.University, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.University, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.University]{Field: condition.Field[models.University, string]{Name: "Name"}},
+	Name:      condition.StringField[models.University]{UpdatableField: condition.UpdatableField[models.University, string]{Field: condition.Field[models.University, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[models.University, time.Time]{Name: "UpdatedAt"},
 }
 

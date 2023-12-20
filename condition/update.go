@@ -95,14 +95,12 @@ func NewUpdate[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Update[T
 	}
 }
 
-// TODO mover todo esto
 type ISet interface {
 	Field() IField
 	Value() any
 	JoinNumber() int
 }
 
-// TODO ver donde pongo esto
 type Set[T model.Model] struct {
 	field      IField
 	value      any
@@ -121,10 +119,8 @@ func (set Set[T]) JoinNumber() int {
 	return set.joinNumber
 }
 
-// TODO ver donde pongo esto
-// TODO nombre muy parecido
 type FieldSet[TModel model.Model, TAttribute any] struct {
-	Field Field[TModel, TAttribute]
+	Field UpdatableField[TModel, TAttribute]
 }
 
 func (set FieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
