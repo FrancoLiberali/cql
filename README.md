@@ -18,18 +18,6 @@ It's built on top of [gorm](https://gorm.io/), a library that actually provides 
 - Is designed so that developers can focus on the business model: its queries allow easy retrieval of model relationships to apply business logic to the model and it provides mechanisms to avoid errors in the business logic due to mistakes in loading information from the database.
 - It is designed for high performance: the query system avoids as much as possible the use of reflection and aims that all the necessary model data can be retrieved in a single query to the database.
 
-<style>
-table th:first-of-type {
-    width: 33%;
-}
-table th:nth-of-type(2) {
-    width: 33%;
-}
-table th:nth-of-type(3) {
-    width: 33%;
-}
-</style>
-
 | Language | Query |
 |---|---|
 | SQL | SELECT cities.* FROM cities <br> INNER JOIN countries ON <br>&emsp;&emsp; countries.id = cities.country_id AND <br>&emsp;&emsp; countries.name = "France" <br> WHERE cities.name = "Paris" |
