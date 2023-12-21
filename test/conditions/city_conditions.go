@@ -21,11 +21,11 @@ type cityConditions struct {
 	UpdatedAt condition.Field[models.City, time.Time]
 	DeletedAt condition.Field[models.City, time.Time]
 	Name      condition.StringField[models.City]
-	CountryID condition.Field[models.City, model.UUID]
+	CountryID condition.UpdatableField[models.City, model.UUID]
 }
 
 var City = cityConditions{
-	CountryID: condition.Field[models.City, model.UUID]{Name: "CountryID"},
+	CountryID: condition.UpdatableField[models.City, model.UUID]{Field: condition.Field[models.City, model.UUID]{Name: "CountryID"}},
 	CreatedAt: condition.Field[models.City, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.City, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.City, model.UUID]{Name: "ID"},

@@ -28,8 +28,8 @@ type saleConditions struct {
 	DeletedAt   condition.Field[models.Sale, time.Time]
 	Code        condition.UpdatableField[models.Sale, int]
 	Description condition.StringField[models.Sale]
-	ProductID   condition.Field[models.Sale, model.UUID]
-	SellerID    condition.Field[models.Sale, model.UUID]
+	ProductID   condition.UpdatableField[models.Sale, model.UUID]
+	SellerID    condition.NullableField[models.Sale, model.UUID]
 }
 
 var Sale = saleConditions{
@@ -38,8 +38,8 @@ var Sale = saleConditions{
 	DeletedAt:   condition.Field[models.Sale, time.Time]{Name: "DeletedAt"},
 	Description: condition.StringField[models.Sale]{UpdatableField: condition.UpdatableField[models.Sale, string]{Field: condition.Field[models.Sale, string]{Name: "Description"}}},
 	ID:          condition.Field[models.Sale, model.UUID]{Name: "ID"},
-	ProductID:   condition.Field[models.Sale, model.UUID]{Name: "ProductID"},
-	SellerID:    condition.Field[models.Sale, model.UUID]{Name: "SellerID"},
+	ProductID:   condition.UpdatableField[models.Sale, model.UUID]{Field: condition.Field[models.Sale, model.UUID]{Name: "ProductID"}},
+	SellerID:    condition.NullableField[models.Sale, model.UUID]{UpdatableField: condition.UpdatableField[models.Sale, model.UUID]{Field: condition.Field[models.Sale, model.UUID]{Name: "SellerID"}}},
 	UpdatedAt:   condition.Field[models.Sale, time.Time]{Name: "UpdatedAt"},
 }
 

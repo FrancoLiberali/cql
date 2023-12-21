@@ -20,11 +20,11 @@ type sellerConditions struct {
 	CreatedAt condition.Field[hasmany.Seller, time.Time]
 	UpdatedAt condition.Field[hasmany.Seller, time.Time]
 	DeletedAt condition.Field[hasmany.Seller, time.Time]
-	CompanyID condition.Field[hasmany.Seller, model.UUID]
+	CompanyID condition.NullableField[hasmany.Seller, model.UUID]
 }
 
 var Seller = sellerConditions{
-	CompanyID: condition.Field[hasmany.Seller, model.UUID]{Name: "CompanyID"},
+	CompanyID: condition.NullableField[hasmany.Seller, model.UUID]{UpdatableField: condition.UpdatableField[hasmany.Seller, model.UUID]{Field: condition.Field[hasmany.Seller, model.UUID]{Name: "CompanyID"}}},
 	CreatedAt: condition.Field[hasmany.Seller, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[hasmany.Seller, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[hasmany.Seller, model.UUID]{Name: "ID"},

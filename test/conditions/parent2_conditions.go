@@ -20,14 +20,14 @@ type parent2Conditions struct {
 	CreatedAt      condition.Field[models.Parent2, time.Time]
 	UpdatedAt      condition.Field[models.Parent2, time.Time]
 	DeletedAt      condition.Field[models.Parent2, time.Time]
-	ParentParentID condition.Field[models.Parent2, model.UUID]
+	ParentParentID condition.UpdatableField[models.Parent2, model.UUID]
 }
 
 var Parent2 = parent2Conditions{
 	CreatedAt:      condition.Field[models.Parent2, time.Time]{Name: "CreatedAt"},
 	DeletedAt:      condition.Field[models.Parent2, time.Time]{Name: "DeletedAt"},
 	ID:             condition.Field[models.Parent2, model.UUID]{Name: "ID"},
-	ParentParentID: condition.Field[models.Parent2, model.UUID]{Name: "ParentParentID"},
+	ParentParentID: condition.UpdatableField[models.Parent2, model.UUID]{Field: condition.Field[models.Parent2, model.UUID]{Name: "ParentParentID"}},
 	UpdatedAt:      condition.Field[models.Parent2, time.Time]{Name: "UpdatedAt"},
 }
 

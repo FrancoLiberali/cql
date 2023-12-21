@@ -268,6 +268,55 @@ func (ts *UpdateIntTestSuite) TestUpdateSetNullForBool() {
 	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
 
+func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNewValue() {
+	company := ts.createCompany("mcdonald's")
+	company2 := ts.createCompany("burger king")
+	seller := ts.createSeller("franco", company)
+
+	updated, err := cql.Update[models.Seller](
+		ts.db,
+		conditions.Seller.Name.Is().Eq("franco"),
+	).Set(
+		conditions.Seller.CompanyID.Set().Eq(company2.ID),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	sellerReturned, err := cql.Query[models.Seller](
+		ts.db,
+		conditions.Seller.Company(
+			conditions.Company.Name.Is().Eq("burger king"),
+		),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(seller.ID, sellerReturned.ID)
+	ts.NotEqual(seller.UpdatedAt.UnixMicro(), sellerReturned.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNull() {
+	company := ts.createCompany("mcdonald's")
+	seller := ts.createSeller("franco", company)
+
+	updated, err := cql.Update[models.Seller](
+		ts.db,
+		conditions.Seller.Name.Is().Eq("franco"),
+	).Set(
+		conditions.Seller.CompanyID.Set().Null(),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	sellerReturned, err := cql.Query[models.Seller](
+		ts.db,
+		conditions.Seller.CompanyID.Is().Null(),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(seller.ID, sellerReturned.ID)
+	ts.NotEqual(seller.UpdatedAt.UnixMicro(), sellerReturned.UpdatedAt.UnixMicro())
+}
+
 func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	google := ts.createBrand("google")
 	apple := ts.createBrand("apple")

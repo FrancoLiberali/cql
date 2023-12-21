@@ -14,7 +14,7 @@ var (
 		modelPath + "." + uuid,
 	}
 	baseModelFields = []string{
-		"CreatedAt", "UpdatedAt", "DeletedAt",
+		"ID", "CreatedAt", "UpdatedAt", "DeletedAt",
 	}
 )
 
@@ -36,7 +36,7 @@ func (field Field) IsModelID() bool {
 }
 
 func (field Field) IsUpdatable() bool {
-	return !field.IsModelID() && !pie.Contains(baseModelFields, field.Name)
+	return !pie.Contains(baseModelFields, field.Name)
 }
 
 func (field Field) IsNullable() bool {

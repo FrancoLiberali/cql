@@ -28,8 +28,8 @@ type childConditions struct {
 	DeletedAt condition.Field[models.Child, time.Time]
 	Name      condition.StringField[models.Child]
 	Number    condition.UpdatableField[models.Child, int]
-	Parent1ID condition.Field[models.Child, model.UUID]
-	Parent2ID condition.Field[models.Child, model.UUID]
+	Parent1ID condition.UpdatableField[models.Child, model.UUID]
+	Parent2ID condition.UpdatableField[models.Child, model.UUID]
 }
 
 var Child = childConditions{
@@ -38,8 +38,8 @@ var Child = childConditions{
 	ID:        condition.Field[models.Child, model.UUID]{Name: "ID"},
 	Name:      condition.StringField[models.Child]{UpdatableField: condition.UpdatableField[models.Child, string]{Field: condition.Field[models.Child, string]{Name: "Name"}}},
 	Number:    condition.UpdatableField[models.Child, int]{Field: condition.Field[models.Child, int]{Name: "Number"}},
-	Parent1ID: condition.Field[models.Child, model.UUID]{Name: "Parent1ID"},
-	Parent2ID: condition.Field[models.Child, model.UUID]{Name: "Parent2ID"},
+	Parent1ID: condition.UpdatableField[models.Child, model.UUID]{Field: condition.Field[models.Child, model.UUID]{Name: "Parent1ID"}},
+	Parent2ID: condition.UpdatableField[models.Child, model.UUID]{Field: condition.Field[models.Child, model.UUID]{Name: "Parent2ID"}},
 	UpdatedAt: condition.Field[models.Child, time.Time]{Name: "UpdatedAt"},
 }
 
