@@ -107,7 +107,7 @@ func (op Operator) Supports(dialector Dialector) bool {
 	return supportedDialector == dialector
 }
 
-var operatorDialector = map[Operator]Dialector{
+var operatorDialector = map[Operator]Dialector{ //nolint:exhaustive // missing key is supported
 	MySQLXor:              MySQL,
 	MySQLRegexp:           MySQL,
 	MySQLNullSafeEqual:    MySQL,
