@@ -11,6 +11,7 @@ type Update[T model.Model] struct {
 	OrderLimitReturning[T]
 }
 
+// Set allows updating multiple attributes of the same table.
 func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
 	setsAsInterface := []ISet{}
 	for _, set := range sets {
@@ -20,13 +21,14 @@ func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
 	return update.unsafeSet(setsAsInterface)
 }
 
+// SetMultiple allows updating multiple tables in the same query.
+//
 // available for: mysql
 func (update *Update[T]) SetMultiple(sets ...ISet) (int64, error) {
 	if update.query.gormQuery.Dialector() != sql.MySQL {
 		update.query.addError(methodError(ErrUnsupportedByDatabase, "SetMultiple"))
 	}
 
-	// TODO que pasa si esta vacio?
 	return update.unsafeSet(sets)
 }
 

@@ -55,8 +55,13 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case sql.SQLite:
-		dialector = sqlite.Open(fmt.Sprintf("sqlite:%s", host))
+	case sql.Postgres:
+		dialector = postgres.Open(
+			fmt.Sprintf(
+				"user=%s password=%s host=%s port=%d sslmode=%s dbname=%s",
+				username, password, host, port, sslMode, dbName,
+			),
+		)
 	case sql.MySQL:
 		dialector = mysql.Open(
 			fmt.Sprintf(
@@ -75,12 +80,7 @@ func NewDBConnection() (*gorm.DB, error) {
 			),
 		)
 	default:
-		dialector = postgres.Open(
-			fmt.Sprintf(
-				"user=%s password=%s host=%s port=%d sslmode=%s dbname=%s",
-				username, password, host, port, sslMode, dbName,
-			),
-		)
+		dialector = sqlite.Open(fmt.Sprintf("sqlite:%s", host))
 	}
 
 	return OpenWithRetry(
