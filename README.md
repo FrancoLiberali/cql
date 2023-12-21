@@ -30,7 +30,7 @@ It's built on top of [gorm](https://gorm.io/), a library that actually provides 
 
 ## Contributing
 
-See [this section](../docs/contributing/contributing.md) to view the cql contribution guidelines.
+See [this section](./docs/contributing/contributing.md) to view the cql contribution guidelines.
 
 ## License
 
