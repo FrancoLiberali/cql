@@ -6,6 +6,7 @@ import (
 
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
+	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -164,13 +165,13 @@ func (ts *DeleteIntTestSuite) TestDeleteWithMultilevelJoinInConditions() {
 func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case condition.MySQL:
+	case sql.MySQL:
 		_, err := cql.Delete[models.Phone](
 			ts.db,
 		).Returning(nil).Exec()
 		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
-	case condition.Postgres, condition.SQLite, condition.SQLServer:
+	case sql.Postgres, sql.SQLite, sql.SQLServer:
 		product := ts.createProduct("", 0, 0, false, nil)
 
 		productsReturned := []models.Product{}
@@ -197,7 +198,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 	switch getDBDialector() {
 	// update returning with preload only supported for postgres
-	case condition.SQLite, condition.SQLServer:
+	case sql.SQLite, sql.SQLServer:
 		salesReturned := []models.Sale{}
 		_, err := cql.Delete[models.Sale](
 			ts.db,
@@ -207,7 +208,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database")
 		ts.ErrorContains(err, "method: Returning")
-	case condition.Postgres:
+	case sql.Postgres:
 		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
 		product2 := ts.createProduct("", 2, 0.0, false, nil)
 
@@ -234,7 +235,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 
 func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadAtSecondLevel() {
 	// update returning with preloads only supported for postgres
-	if getDBDialector() != condition.Postgres {
+	if getDBDialector() != sql.Postgres {
 		return
 	}
 
@@ -274,7 +275,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadAtSecondLevel() {
 func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case condition.Postgres, condition.SQLite, condition.SQLServer:
+	case sql.Postgres, sql.SQLite, sql.SQLServer:
 		company := ts.createCompany("ditrit")
 		seller1 := ts.createSeller("1", company)
 		seller2 := ts.createSeller("2", company)
@@ -299,7 +300,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
 
 func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != sql.MySQL {
 		_, err := cql.Delete[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
@@ -333,7 +334,7 @@ func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
 
 func (ts *DeleteIntTestSuite) TestDeleteLimitWithoutOrderByReturnsError() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != sql.MySQL {
 		_, err := cql.Delete[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),

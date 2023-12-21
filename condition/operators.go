@@ -75,16 +75,16 @@ func IsNotNull[T any]() Operator[T] {
 
 func IsDistinct[T any](value any) Operator[T] {
 	isNotDistinct := new(ValueOperator[T]).AddOperation(
-		map[Dialector]sql.Operator{
-			Postgres:  sql.IsDistinct,
-			SQLServer: sql.IsDistinct,
-			SQLite:    sql.IsDistinct,
-			MySQL:     sql.MySQLNullSafeEqual,
+		map[sql.Dialector]sql.Operator{
+			sql.Postgres:  sql.IsDistinct,
+			sql.SQLServer: sql.IsDistinct,
+			sql.SQLite:    sql.IsDistinct,
+			sql.MySQL:     sql.MySQLNullSafeEqual,
 		},
 		value,
 	)
-	isNotDistinct.Modifier = map[Dialector]string{ //nolint:exhaustive // not present is expected for the other ones
-		MySQL: "NOT",
+	isNotDistinct.Modifier = map[sql.Dialector]string{ //nolint:exhaustive // not present is expected for the other ones
+		sql.MySQL: "NOT",
 	}
 
 	return isNotDistinct
@@ -92,11 +92,11 @@ func IsDistinct[T any](value any) Operator[T] {
 
 func IsNotDistinct[T any](value any) Operator[T] {
 	return new(ValueOperator[T]).AddOperation(
-		map[Dialector]sql.Operator{
-			Postgres:  sql.IsNotDistinct,
-			SQLServer: sql.IsNotDistinct,
-			SQLite:    sql.IsNotDistinct,
-			MySQL:     sql.MySQLNullSafeEqual,
+		map[sql.Dialector]sql.Operator{
+			sql.Postgres:  sql.IsNotDistinct,
+			sql.SQLServer: sql.IsNotDistinct,
+			sql.SQLite:    sql.IsNotDistinct,
+			sql.MySQL:     sql.MySQLNullSafeEqual,
 		},
 		value,
 	)

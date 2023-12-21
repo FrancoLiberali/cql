@@ -43,7 +43,7 @@ func joinMustBeSelectedError(field IField) error {
 	)
 }
 
-func preloadsInReturningNotAllowed(dialector string) error {
+func preloadsInReturningNotAllowed(dialector sql.Dialector) error {
 	return fmt.Errorf("%w; preloads in returning are not allowed for database: %s",
 		ErrUnsupportedByDatabase,
 		dialector,

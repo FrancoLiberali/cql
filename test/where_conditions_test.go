@@ -8,6 +8,7 @@ import (
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/mysql"
+	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 	"github.com/FrancoLiberali/cql/unsafe"
@@ -500,9 +501,9 @@ func (ts *WhereConditionsIntTestSuite) TestNotOr() {
 
 func (ts *WhereConditionsIntTestSuite) TestXor() {
 	switch getDBDialector() {
-	case condition.Postgres, condition.SQLite, condition.SQLServer:
+	case sql.Postgres, sql.SQLite, sql.SQLServer:
 		log.Println("Xor not compatible")
-	case condition.MySQL:
+	case sql.MySQL:
 		match1 := ts.createProduct("", 1, 0, false, nil)
 		match2 := ts.createProduct("", 7, 0, false, nil)
 

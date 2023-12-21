@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/FrancoLiberali/cql/sql"
 )
 
 type Update[T model.Model] struct {
@@ -21,8 +22,7 @@ func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
 
 // available for: mysql
 func (update *Update[T]) SetMultiple(sets ...ISet) (int64, error) {
-	// TODO hacer lo mismo con todos los operadores
-	if update.query.gormQuery.Dialector() != MySQL {
+	if update.query.gormQuery.Dialector() != sql.MySQL {
 		update.query.addError(methodError(ErrUnsupportedByDatabase, "SetMultiple"))
 	}
 

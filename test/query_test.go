@@ -7,6 +7,7 @@ import (
 
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
+	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -264,7 +265,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 	product2 := ts.createProduct("", 1, 2, false, nil)
 
 	switch getDBDialector() {
-	case condition.Postgres, condition.SQLServer, condition.SQLite:
+	case sql.Postgres, sql.SQLServer, sql.SQLite:
 		products, err := cql.Query[models.Product](
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
@@ -272,7 +273,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{product2}, products)
-	case condition.MySQL:
+	case sql.MySQL:
 		products, err := cql.Query[models.Product](
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
@@ -288,7 +289,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 	ts.createProduct("", 1, 0, false, nil)
 
 	switch getDBDialector() {
-	case condition.Postgres, condition.SQLServer, condition.SQLite:
+	case sql.Postgres, sql.SQLServer, sql.SQLite:
 		products, err := cql.Query[models.Product](
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),
@@ -296,7 +297,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{}, products)
-	case condition.MySQL:
+	case sql.MySQL:
 		products, err := cql.Query[models.Product](
 			ts.db,
 			conditions.Product.Int.Is().Eq(1),

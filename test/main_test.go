@@ -16,8 +16,8 @@ import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/logger"
+	"github.com/FrancoLiberali/cql/sql"
 )
 
 const dbTypeEnvKey = "DB"
@@ -55,16 +55,16 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case condition.SQLite:
+	case sql.SQLite:
 		dialector = sqlite.Open(fmt.Sprintf("sqlite:%s", host))
-	case condition.MySQL:
+	case sql.MySQL:
 		dialector = mysql.Open(
 			fmt.Sprintf(
 				"%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 				username, password, net.JoinHostPort(host, strconv.Itoa(port)), dbName,
 			),
 		)
-	case condition.SQLServer:
+	case sql.SQLServer:
 		dialector = sqlserver.Open(
 			fmt.Sprintf(
 				"sqlserver://%s:%s@%s?database=%s",
@@ -90,6 +90,6 @@ func NewDBConnection() (*gorm.DB, error) {
 	)
 }
 
-func getDBDialector() condition.Dialector {
-	return condition.Dialector(os.Getenv(dbTypeEnvKey))
+func getDBDialector() sql.Dialector {
+	return sql.Dialector(os.Getenv(dbTypeEnvKey))
 }

@@ -17,6 +17,6 @@ func Like[T string |
 }
 
 // ref: https://dev.mysql.com/doc/refman/8.0/en/regexp.html#operator_regexp
-func RegexP(pattern string) condition.Operator[string] {
+func Regexp(pattern string) condition.Operator[string] {
 	return condition.NewValueOperator[string](sql.MySQLRegexp, pattern)
 }

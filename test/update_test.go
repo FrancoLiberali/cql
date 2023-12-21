@@ -8,6 +8,7 @@ import (
 
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
+	cqlSQL "github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -423,13 +424,13 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case condition.MySQL:
+	case cqlSQL.MySQL:
 		_, err := cql.Update[models.Phone](
 			ts.db,
 		).Returning(nil).Set()
 		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
-	case condition.Postgres, condition.SQLite, condition.SQLServer:
+	case cqlSQL.Postgres, cqlSQL.SQLite, cqlSQL.SQLServer:
 		product := ts.createProduct("", 0, 0, false, nil)
 
 		productsReturned := []models.Product{}
@@ -453,7 +454,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 	switch getDBDialector() {
 	// update returning with preload only supported for postgres
-	case condition.SQLite, condition.SQLServer:
+	case cqlSQL.SQLite, cqlSQL.SQLServer:
 		salesReturned := []models.Sale{}
 		_, err := cql.Update[models.Sale](
 			ts.db,
@@ -465,7 +466,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database")
 		ts.ErrorContains(err, "method: Returning")
-	case condition.Postgres:
+	case cqlSQL.Postgres:
 		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
 		product2 := ts.createProduct("", 2, 0.0, false, nil)
 
@@ -496,7 +497,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 	// update returning with preloads only supported for postgres
-	if getDBDialector() != condition.Postgres {
+	if getDBDialector() != cqlSQL.Postgres {
 		return
 	}
 
@@ -540,7 +541,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case condition.Postgres, condition.SQLite, condition.SQLServer:
+	case cqlSQL.Postgres, cqlSQL.SQLite, cqlSQL.SQLServer:
 		company := ts.createCompany("ditrit")
 		seller1 := ts.createSeller("1", company)
 		seller2 := ts.createSeller("2", company)
@@ -569,7 +570,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	// update join only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Phone](
 			ts.db,
 		).SetMultiple()
@@ -618,7 +619,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoined() {
 	// update join only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		return
 	}
 
@@ -634,7 +635,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoin
 
 func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
@@ -674,7 +675,7 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 
 func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
