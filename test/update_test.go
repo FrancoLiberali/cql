@@ -1,6 +1,8 @@
 package test
 
 import (
+	"database/sql"
+
 	"gorm.io/gorm"
 	"gotest.tools/assert"
 
@@ -214,6 +216,56 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	ts.Equal(match.ID, sale.ID)
 	ts.Equal(1, sale.Code)
 	ts.NotEqual(match.UpdatedAt.UnixMicro(), sale.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateSetNull() {
+	product := ts.createProduct("", 0, 0, false, nil)
+	product.NullFloat = sql.NullFloat64{Valid: true, Float64: 1.3}
+	err := ts.db.Save(product).Error
+	ts.Require().NoError(err)
+
+	updated, err := cql.Update[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(0),
+	).Set(
+		conditions.Product.NullFloat.Set().Null(),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.NullFloat.Is().Null(),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(product.ID, productReturned.ID)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateSetNullForBool() {
+	product := ts.createProduct("", 0, 0, false, nil)
+	product.NullBool = sql.NullBool{Valid: true, Bool: true}
+	err := ts.db.Save(product).Error
+	ts.Require().NoError(err)
+
+	updated, err := cql.Update[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(0),
+	).Set(
+		conditions.Product.NullBool.Set().Null(),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.NullBool.Is().Unknown(),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(product.ID, productReturned.ID)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateDynamic() {

@@ -39,6 +39,10 @@ func (field Field) IsUpdatable() bool {
 	return !field.IsModelID() && !pie.Contains(baseModelFields, field.Name)
 }
 
+func (field Field) IsNullable() bool {
+	return field.Type.IsSQLNullableType() || field.Type.WasPointer()
+}
+
 // Get the name of the column where the data for a field will be saved
 func (field Field) getColumnName() string {
 	columnTag, isPresent := field.Tags[columnTagName]
@@ -101,10 +105,10 @@ func (field Field) TypeName() string {
 }
 
 // Create a new field with the same name and tags but a different type
-func (field Field) ChangeType(newType types.Type) Field {
+func (field Field) ChangeType(newType types.Type, fromPointer bool) Field {
 	return Field{
 		Name: field.Name,
-		Type: Type{newType},
+		Type: Type{Type: newType, wasPointer: fromPointer},
 		Tags: field.Tags,
 	}
 }
@@ -138,7 +142,7 @@ func getStructFields(structType *types.Struct) ([]Field, error) {
 		gormTags := getGormTags(structType.Tag(i))
 		fields = append(fields, Field{
 			Name:     fieldObject.Name(),
-			Type:     Type{fieldObject.Type()},
+			Type:     Type{Type: fieldObject.Type()},
 			Embedded: fieldObject.Embedded() || gormTags.hasEmbedded(),
 			Tags:     gormTags,
 		})

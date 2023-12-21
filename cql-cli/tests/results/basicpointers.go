@@ -13,48 +13,48 @@ type basicPointersConditions struct {
 	CreatedAt  condition.Field[basicpointers.BasicPointers, time.Time]
 	UpdatedAt  condition.Field[basicpointers.BasicPointers, time.Time]
 	DeletedAt  condition.Field[basicpointers.BasicPointers, time.Time]
-	Bool       condition.BoolField[basicpointers.BasicPointers]
-	Int        condition.UpdatableField[basicpointers.BasicPointers, int]
-	Int8       condition.UpdatableField[basicpointers.BasicPointers, int8]
-	Int16      condition.UpdatableField[basicpointers.BasicPointers, int16]
-	Int32      condition.UpdatableField[basicpointers.BasicPointers, int32]
-	Int64      condition.UpdatableField[basicpointers.BasicPointers, int64]
-	UInt       condition.UpdatableField[basicpointers.BasicPointers, uint]
-	UInt8      condition.UpdatableField[basicpointers.BasicPointers, uint8]
-	UInt16     condition.UpdatableField[basicpointers.BasicPointers, uint16]
-	UInt32     condition.UpdatableField[basicpointers.BasicPointers, uint32]
-	UInt64     condition.UpdatableField[basicpointers.BasicPointers, uint64]
-	UIntptr    condition.UpdatableField[basicpointers.BasicPointers, uintptr]
-	Float32    condition.UpdatableField[basicpointers.BasicPointers, float32]
-	Float64    condition.UpdatableField[basicpointers.BasicPointers, float64]
-	Complex64  condition.UpdatableField[basicpointers.BasicPointers, complex64]
-	Complex128 condition.UpdatableField[basicpointers.BasicPointers, complex128]
-	String     condition.StringField[basicpointers.BasicPointers]
-	Byte       condition.UpdatableField[basicpointers.BasicPointers, uint8]
+	Bool       condition.NullableBoolField[basicpointers.BasicPointers]
+	Int        condition.NullableField[basicpointers.BasicPointers, int]
+	Int8       condition.NullableField[basicpointers.BasicPointers, int8]
+	Int16      condition.NullableField[basicpointers.BasicPointers, int16]
+	Int32      condition.NullableField[basicpointers.BasicPointers, int32]
+	Int64      condition.NullableField[basicpointers.BasicPointers, int64]
+	UInt       condition.NullableField[basicpointers.BasicPointers, uint]
+	UInt8      condition.NullableField[basicpointers.BasicPointers, uint8]
+	UInt16     condition.NullableField[basicpointers.BasicPointers, uint16]
+	UInt32     condition.NullableField[basicpointers.BasicPointers, uint32]
+	UInt64     condition.NullableField[basicpointers.BasicPointers, uint64]
+	UIntptr    condition.NullableField[basicpointers.BasicPointers, uintptr]
+	Float32    condition.NullableField[basicpointers.BasicPointers, float32]
+	Float64    condition.NullableField[basicpointers.BasicPointers, float64]
+	Complex64  condition.NullableField[basicpointers.BasicPointers, complex64]
+	Complex128 condition.NullableField[basicpointers.BasicPointers, complex128]
+	String     condition.NullableStringField[basicpointers.BasicPointers]
+	Byte       condition.NullableField[basicpointers.BasicPointers, uint8]
 }
 
 var BasicPointers = basicPointersConditions{
-	Bool:       condition.BoolField[basicpointers.BasicPointers]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, bool]{Field: condition.Field[basicpointers.BasicPointers, bool]{Name: "Bool"}}},
-	Byte:       condition.UpdatableField[basicpointers.BasicPointers, uint8]{Field: condition.Field[basicpointers.BasicPointers, uint8]{Name: "Byte"}},
-	Complex128: condition.UpdatableField[basicpointers.BasicPointers, complex128]{Field: condition.Field[basicpointers.BasicPointers, complex128]{Name: "Complex128"}},
-	Complex64:  condition.UpdatableField[basicpointers.BasicPointers, complex64]{Field: condition.Field[basicpointers.BasicPointers, complex64]{Name: "Complex64"}},
+	Bool:       condition.NullableBoolField[basicpointers.BasicPointers]{NullableField: condition.NullableField[basicpointers.BasicPointers, bool]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, bool]{Field: condition.Field[basicpointers.BasicPointers, bool]{Name: "Bool"}}}},
+	Byte:       condition.NullableField[basicpointers.BasicPointers, uint8]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, uint8]{Field: condition.Field[basicpointers.BasicPointers, uint8]{Name: "Byte"}}},
+	Complex128: condition.NullableField[basicpointers.BasicPointers, complex128]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, complex128]{Field: condition.Field[basicpointers.BasicPointers, complex128]{Name: "Complex128"}}},
+	Complex64:  condition.NullableField[basicpointers.BasicPointers, complex64]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, complex64]{Field: condition.Field[basicpointers.BasicPointers, complex64]{Name: "Complex64"}}},
 	CreatedAt:  condition.Field[basicpointers.BasicPointers, time.Time]{Name: "CreatedAt"},
 	DeletedAt:  condition.Field[basicpointers.BasicPointers, time.Time]{Name: "DeletedAt"},
-	Float32:    condition.UpdatableField[basicpointers.BasicPointers, float32]{Field: condition.Field[basicpointers.BasicPointers, float32]{Name: "Float32"}},
-	Float64:    condition.UpdatableField[basicpointers.BasicPointers, float64]{Field: condition.Field[basicpointers.BasicPointers, float64]{Name: "Float64"}},
+	Float32:    condition.NullableField[basicpointers.BasicPointers, float32]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, float32]{Field: condition.Field[basicpointers.BasicPointers, float32]{Name: "Float32"}}},
+	Float64:    condition.NullableField[basicpointers.BasicPointers, float64]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, float64]{Field: condition.Field[basicpointers.BasicPointers, float64]{Name: "Float64"}}},
 	ID:         condition.Field[basicpointers.BasicPointers, model.UUID]{Name: "ID"},
-	Int:        condition.UpdatableField[basicpointers.BasicPointers, int]{Field: condition.Field[basicpointers.BasicPointers, int]{Name: "Int"}},
-	Int16:      condition.UpdatableField[basicpointers.BasicPointers, int16]{Field: condition.Field[basicpointers.BasicPointers, int16]{Name: "Int16"}},
-	Int32:      condition.UpdatableField[basicpointers.BasicPointers, int32]{Field: condition.Field[basicpointers.BasicPointers, int32]{Name: "Int32"}},
-	Int64:      condition.UpdatableField[basicpointers.BasicPointers, int64]{Field: condition.Field[basicpointers.BasicPointers, int64]{Name: "Int64"}},
-	Int8:       condition.UpdatableField[basicpointers.BasicPointers, int8]{Field: condition.Field[basicpointers.BasicPointers, int8]{Name: "Int8"}},
-	String:     condition.StringField[basicpointers.BasicPointers]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, string]{Field: condition.Field[basicpointers.BasicPointers, string]{Name: "String"}}},
-	UInt:       condition.UpdatableField[basicpointers.BasicPointers, uint]{Field: condition.Field[basicpointers.BasicPointers, uint]{Name: "UInt"}},
-	UInt16:     condition.UpdatableField[basicpointers.BasicPointers, uint16]{Field: condition.Field[basicpointers.BasicPointers, uint16]{Name: "UInt16"}},
-	UInt32:     condition.UpdatableField[basicpointers.BasicPointers, uint32]{Field: condition.Field[basicpointers.BasicPointers, uint32]{Name: "UInt32"}},
-	UInt64:     condition.UpdatableField[basicpointers.BasicPointers, uint64]{Field: condition.Field[basicpointers.BasicPointers, uint64]{Name: "UInt64"}},
-	UInt8:      condition.UpdatableField[basicpointers.BasicPointers, uint8]{Field: condition.Field[basicpointers.BasicPointers, uint8]{Name: "UInt8"}},
-	UIntptr:    condition.UpdatableField[basicpointers.BasicPointers, uintptr]{Field: condition.Field[basicpointers.BasicPointers, uintptr]{Name: "UIntptr"}},
+	Int:        condition.NullableField[basicpointers.BasicPointers, int]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, int]{Field: condition.Field[basicpointers.BasicPointers, int]{Name: "Int"}}},
+	Int16:      condition.NullableField[basicpointers.BasicPointers, int16]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, int16]{Field: condition.Field[basicpointers.BasicPointers, int16]{Name: "Int16"}}},
+	Int32:      condition.NullableField[basicpointers.BasicPointers, int32]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, int32]{Field: condition.Field[basicpointers.BasicPointers, int32]{Name: "Int32"}}},
+	Int64:      condition.NullableField[basicpointers.BasicPointers, int64]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, int64]{Field: condition.Field[basicpointers.BasicPointers, int64]{Name: "Int64"}}},
+	Int8:       condition.NullableField[basicpointers.BasicPointers, int8]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, int8]{Field: condition.Field[basicpointers.BasicPointers, int8]{Name: "Int8"}}},
+	String:     condition.NullableStringField[basicpointers.BasicPointers]{NullableField: condition.NullableField[basicpointers.BasicPointers, string]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, string]{Field: condition.Field[basicpointers.BasicPointers, string]{Name: "String"}}}},
+	UInt:       condition.NullableField[basicpointers.BasicPointers, uint]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, uint]{Field: condition.Field[basicpointers.BasicPointers, uint]{Name: "UInt"}}},
+	UInt16:     condition.NullableField[basicpointers.BasicPointers, uint16]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, uint16]{Field: condition.Field[basicpointers.BasicPointers, uint16]{Name: "UInt16"}}},
+	UInt32:     condition.NullableField[basicpointers.BasicPointers, uint32]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, uint32]{Field: condition.Field[basicpointers.BasicPointers, uint32]{Name: "UInt32"}}},
+	UInt64:     condition.NullableField[basicpointers.BasicPointers, uint64]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, uint64]{Field: condition.Field[basicpointers.BasicPointers, uint64]{Name: "UInt64"}}},
+	UInt8:      condition.NullableField[basicpointers.BasicPointers, uint8]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, uint8]{Field: condition.Field[basicpointers.BasicPointers, uint8]{Name: "UInt8"}}},
+	UIntptr:    condition.NullableField[basicpointers.BasicPointers, uintptr]{UpdatableField: condition.UpdatableField[basicpointers.BasicPointers, uintptr]{Field: condition.Field[basicpointers.BasicPointers, uintptr]{Name: "UIntptr"}}},
 	UpdatedAt:  condition.Field[basicpointers.BasicPointers, time.Time]{Name: "UpdatedAt"},
 }
 

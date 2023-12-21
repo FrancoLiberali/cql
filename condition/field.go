@@ -65,6 +65,14 @@ func (field UpdatableField[TModel, TAttribute]) Set() FieldSet[TModel, TAttribut
 	return FieldSet[TModel, TAttribute]{Field: field}
 }
 
+type NullableField[TModel model.Model, TAttribute any] struct {
+	UpdatableField[TModel, TAttribute]
+}
+
+func (field NullableField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
+	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{Field: field.UpdatableField}}
+}
+
 type BoolField[TModel model.Model] struct {
 	UpdatableField[TModel, bool]
 }
@@ -75,11 +83,33 @@ func (boolField BoolField[TModel]) Is() BoolFieldIs[TModel] {
 	}
 }
 
+type NullableBoolField[TModel model.Model] struct {
+	NullableField[TModel, bool]
+}
+
+func (boolField NullableBoolField[TModel]) Is() BoolFieldIs[TModel] {
+	return BoolFieldIs[TModel]{
+		Field: boolField.Field,
+	}
+}
+
 type StringField[TModel model.Model] struct {
 	UpdatableField[TModel, string]
 }
 
 func (stringField StringField[TModel]) Is() StringFieldIs[TModel] {
+	return StringFieldIs[TModel]{
+		FieldIs: FieldIs[TModel, string]{
+			Field: stringField.Field,
+		},
+	}
+}
+
+type NullableStringField[TModel model.Model] struct {
+	NullableField[TModel, string]
+}
+
+func (stringField NullableStringField[TModel]) Is() StringFieldIs[TModel] {
 	return StringFieldIs[TModel]{
 		FieldIs: FieldIs[TModel, string]{
 			Field: stringField.Field,

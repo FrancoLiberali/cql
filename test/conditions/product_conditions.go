@@ -15,11 +15,11 @@ type productConditions struct {
 	DeletedAt               condition.Field[models.Product, time.Time]
 	String                  condition.StringField[models.Product]
 	Int                     condition.UpdatableField[models.Product, int]
-	IntPointer              condition.UpdatableField[models.Product, int]
+	IntPointer              condition.NullableField[models.Product, int]
 	Float                   condition.UpdatableField[models.Product, float64]
-	NullFloat               condition.UpdatableField[models.Product, float64]
+	NullFloat               condition.NullableField[models.Product, float64]
 	Bool                    condition.BoolField[models.Product]
-	NullBool                condition.BoolField[models.Product]
+	NullBool                condition.NullableBoolField[models.Product]
 	ByteArray               condition.UpdatableField[models.Product, []uint8]
 	MultiString             condition.UpdatableField[models.Product, models.MultiString]
 	ToBeEmbeddedEmbeddedInt condition.UpdatableField[models.Product, int]
@@ -38,10 +38,10 @@ var Product = productConditions{
 	}},
 	ID:          condition.Field[models.Product, model.UUID]{Name: "ID"},
 	Int:         condition.UpdatableField[models.Product, int]{Field: condition.Field[models.Product, int]{Name: "Int"}},
-	IntPointer:  condition.UpdatableField[models.Product, int]{Field: condition.Field[models.Product, int]{Name: "IntPointer"}},
+	IntPointer:  condition.NullableField[models.Product, int]{UpdatableField: condition.UpdatableField[models.Product, int]{Field: condition.Field[models.Product, int]{Name: "IntPointer"}}},
 	MultiString: condition.UpdatableField[models.Product, models.MultiString]{Field: condition.Field[models.Product, models.MultiString]{Name: "MultiString"}},
-	NullBool:    condition.BoolField[models.Product]{UpdatableField: condition.UpdatableField[models.Product, bool]{Field: condition.Field[models.Product, bool]{Name: "NullBool"}}},
-	NullFloat:   condition.UpdatableField[models.Product, float64]{Field: condition.Field[models.Product, float64]{Name: "NullFloat"}},
+	NullBool:    condition.NullableBoolField[models.Product]{NullableField: condition.NullableField[models.Product, bool]{UpdatableField: condition.UpdatableField[models.Product, bool]{Field: condition.Field[models.Product, bool]{Name: "NullBool"}}}},
+	NullFloat:   condition.NullableField[models.Product, float64]{UpdatableField: condition.UpdatableField[models.Product, float64]{Field: condition.Field[models.Product, float64]{Name: "NullFloat"}}},
 	String: condition.StringField[models.Product]{UpdatableField: condition.UpdatableField[models.Product, string]{Field: condition.Field[models.Product, string]{
 		Column: "string_something_else",
 		Name:   "String",

@@ -145,3 +145,14 @@ func (set FieldSet[TModel, TAttribute]) Unsafe(value any) *Set[TModel] {
 		value: value,
 	}
 }
+
+type NullableFieldSet[TModel model.Model, TAttribute any] struct {
+	FieldSet[TModel, TAttribute]
+}
+
+func (set NullableFieldSet[TModel, TAttribute]) Null() *Set[TModel] {
+	return &Set[TModel]{
+		field: set.Field,
+		value: nil,
+	}
+}
