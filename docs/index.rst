@@ -14,6 +14,9 @@ Introduction
    cql/query
    cql/advanced_query
    cql/preloading
+   cql/create
+   cql/update
+   cql/delete
    cql/logger
 
 .. toctree::

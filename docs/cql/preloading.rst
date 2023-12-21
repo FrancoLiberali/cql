@@ -14,7 +14,7 @@ methods will also be created for the condition models:
   to preload that the related object when doing a query. 
   This is really just a facility that translates to using the JoinCondition of 
   that relation and then the Preload method of the related model.
-- PreloadRelation() to preload all the related models of your model 
+- PreloadRelations() to preload all the related models of your model 
   (only generated if the model has at least one relation).
 
 Examples
@@ -37,7 +37,7 @@ In this example we query all MyModels and preload whose related MyOtherModel.
         RelatedID model.UUID
     }
 
-    myModels, err := orm.NewQuery[MyModel](
+    myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.Related(
             conditions.Related.Preload(),
@@ -49,7 +49,7 @@ Or using the PreloadRelation method to avoid the JoinCondition
 
 .. code-block:: go
 
-    myModels, err := orm.NewQuery[MyModel](
+    myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.PreloadRelated(),
     ).Find()
@@ -76,7 +76,7 @@ Or using the PreloadRelation method to avoid the JoinCondition
         RelatedID model.UUID
     }
 
-    myModels, err := orm.NewQuery[MyModel](
+    myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.Related(
             conditions.MyOtherModel.PreloadParent(),
@@ -97,7 +97,7 @@ which means a big risk of making decisions in our business logic on incomplete i
 
 For this reason, cql provides the Relation getters. 
 These are methods that will be added to your models to safely navigate a relation, 
-responding `errors.ErrRelationNotLoaded` in case you try to navigate a relation 
+responding `condition.ErrRelationNotLoaded` in case you try to navigate a relation 
 that was not loaded from the database. 
 They are created in a file called cql.go in your model package when 
 :ref:`generating conditions <cql/concepts:conditions generation>`.
@@ -117,7 +117,7 @@ Here is an example of its use:
         RelatedID model.UUID
     }
 
-    myModel, err := orm.NewQuery[MyModel](
+    myModel, err := cql.Query[MyModel](
         conditions.MyModel.PreloadRelated(),
     ).FindOne()
 
@@ -126,7 +126,7 @@ Here is an example of its use:
         if err == nil {
             // you can safely apply your business logic
         } else {
-            // err is errors.ErrRelationNotLoaded
+            // err is condition.ErrRelationNotLoaded
         }
     }
 
