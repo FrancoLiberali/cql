@@ -2,6 +2,6 @@ go 1.18
 
 use (
 	.
-	./cql-cli
-	./cql-cli/tests
+	./cql-gen
+	./cql-gen/tests
 )

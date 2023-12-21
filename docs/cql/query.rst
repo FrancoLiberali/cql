@@ -55,16 +55,16 @@ It is so named because the conditions will verify at compile time that the query
 
 These conditions are objects of type Condition that contain the 
 necessary information to perform the queries in a safe way. 
-They are generated from the definition of your models using cql-cli.
+They are generated from the definition of your models using cql-gen.
 
 Conditions generation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The generation of conditions is done with cql-cli. For this, we need to install cql-cli:
+The generation of conditions is done with cql-gen. For this, we need to install cql-gen:
 
 .. code-block:: bash
 
-    go install github.com/FrancoLiberali/cql/cql-cli
+    go install github.com/FrancoLiberali/cql/cql-gen
 
 Then, inside our project we will have to create a package called conditions 
 (or another name if you wish) and inside it a file with the following content:
@@ -73,7 +73,7 @@ Then, inside our project we will have to create a package called conditions
 
     package conditions
 
-    //go:generate cql-cli gen conditions ../models_path_1 ../models_path_2
+    //go:generate cql-gen ../models_path_1 ../models_path_2
 
 where ../models_path_1 ../models_path_2 are the relative paths between the package conditions 
 and the packages containing the definition of your models (can be only one).

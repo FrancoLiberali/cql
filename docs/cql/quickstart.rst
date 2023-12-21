@@ -40,9 +40,9 @@ Create a new package named conditions and add a file with the following content:
 
   package conditions
 
-  //go:generate cql-cli gen conditions ../models
+  //go:generate cql-gen ../models
 
-Then, you can generate the conditions using `cql-cli` as described in the README.md.
+Then, you can generate the conditions using `cql-gen` as described in the `README.md <https://github.com/FrancoLiberali/cql-quickstart/blob/main/README.md>`_.
 
 In main.go create a main function that creates a :ref:`gorm.DB <cql/concepts:GormDB>`
 that allows connection with the database and call the :ref:`AutoMigrate <cql/concepts:auto migration>` 
