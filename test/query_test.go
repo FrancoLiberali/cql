@@ -6,7 +6,6 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -55,7 +54,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfMoreThanOneMatchConditions
 		ts.db,
 		conditions.Product.Int.Is().Eq(0),
 	).FindOne()
-	ts.Error(err, condition.ErrMoreThanOneObjectFound)
+	ts.Error(err, cql.ErrMoreThanOneObjectFound)
 }
 
 // ------------------------- First --------------------------------
@@ -182,7 +181,7 @@ func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsNotConcerned() {
 		ts.db,
 		conditions.Product.Int.Is().Eq(1),
 	).Descending(conditions.Seller.ID).Find()
-	ts.ErrorIs(err, condition.ErrFieldModelNotConcerned)
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.Seller; method: Descending")
 }
 
@@ -196,7 +195,7 @@ func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAnd
 			conditions.Parent2.ParentParent(),
 		),
 	).Descending(conditions.ParentParent.ID).Find()
-	ts.ErrorIs(err, condition.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; method: Descending")
 }
 

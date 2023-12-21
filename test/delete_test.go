@@ -5,7 +5,6 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -169,7 +168,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 		_, err := cql.Delete[models.Phone](
 			ts.db,
 		).Returning(nil).Exec()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
 	case sql.Postgres, sql.SQLite, sql.SQLServer:
 		product := ts.createProduct("", 0, 0, false, nil)
@@ -205,7 +204,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 			conditions.Sale.Code.Is().Eq(0),
 			conditions.Sale.PreloadProduct(),
 		).Returning(&salesReturned).Exec()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database")
 		ts.ErrorContains(err, "method: Returning")
 	case sql.Postgres:
@@ -307,7 +306,7 @@ func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
 		).Ascending(
 			conditions.Product.String,
 		).Limit(1).Exec()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Ascending")
 	} else {
 		product1 := ts.createProduct("1", 0, 0, false, nil)
@@ -339,14 +338,14 @@ func (ts *DeleteIntTestSuite) TestDeleteLimitWithoutOrderByReturnsError() {
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Exec()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Limit")
 	} else {
 		_, err := cql.Delete[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Exec()
-		ts.ErrorIs(err, condition.ErrOrderByMustBeCalled)
+		ts.ErrorIs(err, cql.ErrOrderByMustBeCalled)
 		ts.ErrorContains(err, "method: Limit")
 	}
 }

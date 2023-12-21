@@ -485,7 +485,7 @@ func (ts *OperatorsIntTestSuite) TestILike() {
 				psql.ILike("_a%"),
 			),
 		).Find()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "operator: psql.ILike")
 	case cqlSQL.Postgres:
 		match1 := ts.createProduct("basd", 0, 0, false, nil)
@@ -516,7 +516,7 @@ func (ts *OperatorsIntTestSuite) TestSimilarTo() {
 				psql.SimilarTo("%(b|d)%"),
 			),
 		).Find()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "operator: psql.SimilarTo")
 	case cqlSQL.Postgres:
 		match1 := ts.createProduct("abc", 0, 0, false, nil)
@@ -556,7 +556,7 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseSensitive() {
 			),
 		).Find()
 
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "operator: psql.POSIXMatch")
 
 		_, err = cql.Query[models.Product](
@@ -566,7 +566,7 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseSensitive() {
 			),
 		).Find()
 
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "operator: sqlite.Glob")
 	case cqlSQL.Postgres:
 		posixRegexOperator = psql.POSIXMatch("^a(b|x)")
@@ -606,7 +606,7 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseInsensitive() {
 			),
 		).Find()
 
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "operator: mysql.Regexp")
 
 		_, err = cql.Query[models.Product](
@@ -616,7 +616,7 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseInsensitive() {
 			),
 		).Find()
 
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "operator: psql.POSIXIMatch")
 	case cqlSQL.MySQL:
 		posixRegexOperator = mysql.Regexp("^a(b|x)")

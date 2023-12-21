@@ -69,7 +69,7 @@ For example:
         conditions.MyModel.Name.Is().Dynamic().Eq(conditions.MyOtherModel.Name),
     ).Find()
 
-will respond condition.ErrFieldModelNotConcerned in err.
+will respond cql.ErrFieldModelNotConcerned in err.
 
 All operators supported by cql that receive any value are available in their dynamic version 
 after using the Dynamic() method of the FieldIs object.
@@ -79,7 +79,7 @@ Select join
 
 In case the attribute to be used by the dynamic operator is present more 
 than once in the query, it will be necessary to select the join to be used, 
-to avoid getting the error condition.ErrJoinMustBeSelected. 
+to avoid getting the error cql.ErrJoinMustBeSelected. 
 To do this, you must use the SelectJoin method, as in the following example:
 
 .. code-block:: go
