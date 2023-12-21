@@ -8,7 +8,6 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
 	"github.com/FrancoLiberali/cql/preload"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -875,7 +874,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 			),
 		),
 	).Find()
-	ts.ErrorIs(err, condition.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, cql.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }
 
@@ -886,6 +885,6 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWitho
 			conditions.Seller.University(),
 		),
 	).Find()
-	ts.ErrorIs(err, condition.ErrOnlyPreloadsAllowed)
+	ts.ErrorIs(err, cql.ErrOnlyPreloadsAllowed)
 	ts.ErrorContains(err, "model: models.Company, field: Sellers")
 }

@@ -6,7 +6,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/mysql"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -574,5 +573,5 @@ func (ts *WhereConditionsIntTestSuite) TestEmptyContainerConditionReturnsError()
 		ts.db,
 		cql.Not[models.Product](),
 	).Find()
-	ts.ErrorIs(err, condition.ErrEmptyConditions)
+	ts.ErrorIs(err, cql.ErrEmptyConditions)
 }

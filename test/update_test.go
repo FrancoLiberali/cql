@@ -7,7 +7,6 @@ import (
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/condition"
 	cqlSQL "github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -361,7 +360,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJo
 		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name),
 	)
 
-	ts.ErrorIs(err, condition.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; method: Set")
 }
 
@@ -428,7 +427,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 		_, err := cql.Update[models.Phone](
 			ts.db,
 		).Returning(nil).Set()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
 	case cqlSQL.Postgres, cqlSQL.SQLite, cqlSQL.SQLServer:
 		product := ts.createProduct("", 0, 0, false, nil)
@@ -463,7 +462,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		).Returning(&salesReturned).Set(
 			conditions.Sale.Code.Set().Eq(2),
 		)
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database")
 		ts.ErrorContains(err, "method: Returning")
 	case cqlSQL.Postgres:
@@ -574,7 +573,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 		_, err := cql.Update[models.Phone](
 			ts.db,
 		).SetMultiple()
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: SetMultiple")
 	} else {
 		brand1 := ts.createBrand("google")
@@ -629,7 +628,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoin
 		conditions.Phone.Name.Set().Eq("7"),
 		conditions.Brand.Name.Set().Eq("google pixel"),
 	)
-	ts.ErrorIs(err, condition.ErrFieldModelNotConcerned)
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.Brand; method: Set")
 }
 
@@ -644,7 +643,7 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Ascending")
 	} else {
 		product1 := ts.createProduct("1", 0, 0, false, nil)
@@ -682,7 +681,7 @@ func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Limit")
 	} else {
 		_, err := cql.Update[models.Product](
@@ -691,7 +690,7 @@ func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 		).Limit(1).Set(
 			conditions.Product.Int.Set().Eq(1),
 		)
-		ts.ErrorIs(err, condition.ErrOrderByMustBeCalled)
+		ts.ErrorIs(err, cql.ErrOrderByMustBeCalled)
 		ts.ErrorContains(err, "method: Limit")
 	}
 }
