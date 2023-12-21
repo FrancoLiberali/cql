@@ -1,11 +1,11 @@
 install_dependencies:
 	go install gotest.tools/gotestsum@latest
-	go install github.com/FrancoLiberali/cql/cql-cli@latest
+	go install github.com/FrancoLiberali/cql/cql-gen@latest
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 lint:
 	golangci-lint run
-	cd cql-cli && golangci-lint run --config ../.golangci.yml
+	cd cql-gen && golangci-lint run --config ../.golangci.yml
 
 rmdb:
 	docker stop cql-test-db && docker rm cql-test-db

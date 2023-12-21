@@ -32,6 +32,6 @@ test/sqlite:*
 docs/_build/
 
 # cli
-cql-cli/cql-cli
-cql-cli/tests/*_conditions.go
-cql-cli/tests/**/cql.go
+cql-gen/cql-gen
+cql-gen/tests/*_conditions.go
+cql-gen/tests/**/cql.go
