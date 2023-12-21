@@ -21,15 +21,15 @@ type phoneConditions struct {
 	UpdatedAt condition.Field[models.Phone, time.Time]
 	DeletedAt condition.Field[models.Phone, time.Time]
 	Name      condition.StringField[models.Phone]
-	BrandID   condition.Field[models.Phone, uint]
+	BrandID   condition.UpdatableField[models.Phone, uint]
 }
 
 var Phone = phoneConditions{
-	BrandID:   condition.Field[models.Phone, uint]{Name: "BrandID"},
+	BrandID:   condition.UpdatableField[models.Phone, uint]{Field: condition.Field[models.Phone, uint]{Name: "BrandID"}},
 	CreatedAt: condition.Field[models.Phone, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.Phone, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.Phone, model.UIntID]{Name: "ID"},
-	Name:      condition.StringField[models.Phone]{Field: condition.Field[models.Phone, string]{Name: "Name"}},
+	Name:      condition.StringField[models.Phone]{UpdatableField: condition.UpdatableField[models.Phone, string]{Field: condition.Field[models.Phone, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[models.Phone, time.Time]{Name: "UpdatedAt"},
 }
 

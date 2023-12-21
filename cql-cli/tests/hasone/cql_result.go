@@ -4,7 +4,7 @@ package hasone
 import preload "github.com/FrancoLiberali/cql/preload"
 
 func (m City) GetCountry() (*Country, error) {
-	return preload.VerifyPointerWithIDLoaded[Country](m.CountryID, m.Country)
+	return preload.VerifyPointerLoaded[Country](m.CountryID, m.Country)
 }
 func (m Country) GetCapital() (*City, error) {
 	return preload.VerifyStructLoaded[City](&m.Capital)

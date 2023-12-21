@@ -13,48 +13,48 @@ type basicSlicesPointerConditions struct {
 	CreatedAt  condition.Field[basicslicespointer.BasicSlicesPointer, time.Time]
 	UpdatedAt  condition.Field[basicslicespointer.BasicSlicesPointer, time.Time]
 	DeletedAt  condition.Field[basicslicespointer.BasicSlicesPointer, time.Time]
-	Bool       condition.Field[basicslicespointer.BasicSlicesPointer, []bool]
-	Int        condition.Field[basicslicespointer.BasicSlicesPointer, []int]
-	Int8       condition.Field[basicslicespointer.BasicSlicesPointer, []int8]
-	Int16      condition.Field[basicslicespointer.BasicSlicesPointer, []int16]
-	Int32      condition.Field[basicslicespointer.BasicSlicesPointer, []int32]
-	Int64      condition.Field[basicslicespointer.BasicSlicesPointer, []int64]
-	UInt       condition.Field[basicslicespointer.BasicSlicesPointer, []uint]
-	UInt8      condition.Field[basicslicespointer.BasicSlicesPointer, []uint8]
-	UInt16     condition.Field[basicslicespointer.BasicSlicesPointer, []uint16]
-	UInt32     condition.Field[basicslicespointer.BasicSlicesPointer, []uint32]
-	UInt64     condition.Field[basicslicespointer.BasicSlicesPointer, []uint64]
-	UIntptr    condition.Field[basicslicespointer.BasicSlicesPointer, []uintptr]
-	Float32    condition.Field[basicslicespointer.BasicSlicesPointer, []float32]
-	Float64    condition.Field[basicslicespointer.BasicSlicesPointer, []float64]
-	Complex64  condition.Field[basicslicespointer.BasicSlicesPointer, []complex64]
-	Complex128 condition.Field[basicslicespointer.BasicSlicesPointer, []complex128]
-	String     condition.Field[basicslicespointer.BasicSlicesPointer, []string]
-	Byte       condition.Field[basicslicespointer.BasicSlicesPointer, []uint8]
+	Bool       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []bool]
+	Int        condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int]
+	Int8       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int8]
+	Int16      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int16]
+	Int32      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int32]
+	Int64      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int64]
+	UInt       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint]
+	UInt8      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint8]
+	UInt16     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint16]
+	UInt32     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint32]
+	UInt64     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint64]
+	UIntptr    condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uintptr]
+	Float32    condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []float32]
+	Float64    condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []float64]
+	Complex64  condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []complex64]
+	Complex128 condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []complex128]
+	String     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []string]
+	Byte       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint8]
 }
 
 var BasicSlicesPointer = basicSlicesPointerConditions{
-	Bool:       condition.Field[basicslicespointer.BasicSlicesPointer, []bool]{Name: "Bool"},
-	Byte:       condition.Field[basicslicespointer.BasicSlicesPointer, []uint8]{Name: "Byte"},
-	Complex128: condition.Field[basicslicespointer.BasicSlicesPointer, []complex128]{Name: "Complex128"},
-	Complex64:  condition.Field[basicslicespointer.BasicSlicesPointer, []complex64]{Name: "Complex64"},
+	Bool:       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []bool]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []bool]{Name: "Bool"}},
+	Byte:       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint8]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []uint8]{Name: "Byte"}},
+	Complex128: condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []complex128]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []complex128]{Name: "Complex128"}},
+	Complex64:  condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []complex64]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []complex64]{Name: "Complex64"}},
 	CreatedAt:  condition.Field[basicslicespointer.BasicSlicesPointer, time.Time]{Name: "CreatedAt"},
 	DeletedAt:  condition.Field[basicslicespointer.BasicSlicesPointer, time.Time]{Name: "DeletedAt"},
-	Float32:    condition.Field[basicslicespointer.BasicSlicesPointer, []float32]{Name: "Float32"},
-	Float64:    condition.Field[basicslicespointer.BasicSlicesPointer, []float64]{Name: "Float64"},
+	Float32:    condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []float32]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []float32]{Name: "Float32"}},
+	Float64:    condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []float64]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []float64]{Name: "Float64"}},
 	ID:         condition.Field[basicslicespointer.BasicSlicesPointer, model.UUID]{Name: "ID"},
-	Int:        condition.Field[basicslicespointer.BasicSlicesPointer, []int]{Name: "Int"},
-	Int16:      condition.Field[basicslicespointer.BasicSlicesPointer, []int16]{Name: "Int16"},
-	Int32:      condition.Field[basicslicespointer.BasicSlicesPointer, []int32]{Name: "Int32"},
-	Int64:      condition.Field[basicslicespointer.BasicSlicesPointer, []int64]{Name: "Int64"},
-	Int8:       condition.Field[basicslicespointer.BasicSlicesPointer, []int8]{Name: "Int8"},
-	String:     condition.Field[basicslicespointer.BasicSlicesPointer, []string]{Name: "String"},
-	UInt:       condition.Field[basicslicespointer.BasicSlicesPointer, []uint]{Name: "UInt"},
-	UInt16:     condition.Field[basicslicespointer.BasicSlicesPointer, []uint16]{Name: "UInt16"},
-	UInt32:     condition.Field[basicslicespointer.BasicSlicesPointer, []uint32]{Name: "UInt32"},
-	UInt64:     condition.Field[basicslicespointer.BasicSlicesPointer, []uint64]{Name: "UInt64"},
-	UInt8:      condition.Field[basicslicespointer.BasicSlicesPointer, []uint8]{Name: "UInt8"},
-	UIntptr:    condition.Field[basicslicespointer.BasicSlicesPointer, []uintptr]{Name: "UIntptr"},
+	Int:        condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []int]{Name: "Int"}},
+	Int16:      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int16]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []int16]{Name: "Int16"}},
+	Int32:      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int32]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []int32]{Name: "Int32"}},
+	Int64:      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int64]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []int64]{Name: "Int64"}},
+	Int8:       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []int8]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []int8]{Name: "Int8"}},
+	String:     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []string]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []string]{Name: "String"}},
+	UInt:       condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []uint]{Name: "UInt"}},
+	UInt16:     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint16]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []uint16]{Name: "UInt16"}},
+	UInt32:     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint32]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []uint32]{Name: "UInt32"}},
+	UInt64:     condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint64]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []uint64]{Name: "UInt64"}},
+	UInt8:      condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uint8]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []uint8]{Name: "UInt8"}},
+	UIntptr:    condition.UpdatableField[basicslicespointer.BasicSlicesPointer, []uintptr]{Field: condition.Field[basicslicespointer.BasicSlicesPointer, []uintptr]{Name: "UIntptr"}},
 	UpdatedAt:  condition.Field[basicslicespointer.BasicSlicesPointer, time.Time]{Name: "UpdatedAt"},
 }
 

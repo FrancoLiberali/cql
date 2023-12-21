@@ -20,10 +20,10 @@ var ColumnDefinition = columnDefinitionConditions{
 	CreatedAt: condition.Field[columndefinition.ColumnDefinition, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[columndefinition.ColumnDefinition, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[columndefinition.ColumnDefinition, model.UUID]{Name: "ID"},
-	String: condition.StringField[columndefinition.ColumnDefinition]{Field: condition.Field[columndefinition.ColumnDefinition, string]{
+	String: condition.StringField[columndefinition.ColumnDefinition]{UpdatableField: condition.UpdatableField[columndefinition.ColumnDefinition, string]{Field: condition.Field[columndefinition.ColumnDefinition, string]{
 		Column: "string_something_else",
 		Name:   "String",
-	}},
+	}}},
 	UpdatedAt: condition.Field[columndefinition.ColumnDefinition, time.Time]{Name: "UpdatedAt"},
 }
 

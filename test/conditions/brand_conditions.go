@@ -20,7 +20,7 @@ var Brand = brandConditions{
 	CreatedAt: condition.Field[models.Brand, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.Brand, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.Brand, model.UIntID]{Name: "ID"},
-	Name:      condition.StringField[models.Brand]{Field: condition.Field[models.Brand, string]{Name: "Name"}},
+	Name:      condition.StringField[models.Brand]{UpdatableField: condition.UpdatableField[models.Brand, string]{Field: condition.Field[models.Brand, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[models.Brand, time.Time]{Name: "UpdatedAt"},
 }
 

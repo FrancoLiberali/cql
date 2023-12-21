@@ -26,7 +26,7 @@ type RelationGettersGenerator struct {
 func NewRelationGettersGenerator(object types.Object) *RelationGettersGenerator {
 	return &RelationGettersGenerator{
 		object:     object,
-		objectType: Type{object.Type()},
+		objectType: Type{Type: object.Type()},
 	}
 }
 
@@ -80,7 +80,7 @@ func (generator RelationGettersGenerator) generateForField(field Field) jen.Code
 		}
 	case *types.Pointer:
 		// the field is a pointer
-		return generator.generateForPointer(field.ChangeType(fieldType.Elem()))
+		return generator.generateForPointer(field.ChangeType(fieldType.Elem(), true))
 	default:
 		log.Logger.Debugf("struct field type not handled: %T", fieldType)
 	}
@@ -114,7 +114,7 @@ func (generator RelationGettersGenerator) generateForPointer(field Field) jen.Co
 		}
 	case *types.Slice:
 		return generator.generateForSlicePointer(
-			field.ChangeType(fieldType.Elem()),
+			field.ChangeType(fieldType.Elem(), false),
 			nil,
 		)
 	}
@@ -132,7 +132,7 @@ func (generator RelationGettersGenerator) generateForSlicePointer(field Field, f
 		}
 	case *types.Pointer:
 		return generator.generateForSlicePointer(
-			field.ChangeType(fieldType.Elem()),
+			field.ChangeType(fieldType.Elem(), false),
 			jen.Op("*"),
 		)
 	}

@@ -15,7 +15,7 @@ Base model
 -----------------------------
 
 It is a struct that when embedded allows your structures to become cql models, 
-adding attributes ID, CreatedAt, UpdatedAt and DeletedAt attributes and the possibility to persist, 
+adding ID, CreatedAt, UpdatedAt and DeletedAt attributes and the possibility to persist, 
 create conditions and perform queries on these structures.
 
 For details visit :ref:`cql/declaring_models:base models`.
@@ -41,17 +41,14 @@ GormDB
 -----------------------------
 
 GormDB is a gorm.DB object that allows communication with the database. 
-This object allows us to perform CUD (create, update and delete)
-operations. While read operations are also possible, 
-cql provides us the :ref:`cql/concepts:compiled query system` 
-that is more complete and secure that gorm's query system.
+This object will be needed as a parameter for the main cql functions (Query, Update and Delete).
 
 For details visit :ref:`cql/connecting_to_a_database:connection`.
 
 Condition
 -----------------------------
 
-Conditions are the basis of the cqñ query system, every query is composed of a set of conditions. 
+Conditions are the basis of the cql query system, every query is composed of a set of conditions. 
 Conditions belong to a particular model and there are 4 different types: 
 WhereConditions, ConnectionConditions, JoinConditions and PreloadConditions.
 
@@ -139,8 +136,8 @@ For details visit <https://pkg.go.dev/database/sql>.
 Compiled query system
 -----------------------------
 
-The set of conditions that are received by the read operations of the 
-`cql.NewQuery` method form the cql compiled query system. 
+The set of conditions that are received by the 
+`cql.Query`, `cql.Update` and `cql.Delete` methods form the cql compiled query system. 
 It is so named because the conditions will verify at compile time that the query to be executed is correct.
 
 For details visit :ref:`cql/query:conditions`.

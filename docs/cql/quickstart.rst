@@ -14,7 +14,7 @@ Once you have started your project with `go init`, you must add the dependency t
 
 .. code-block:: bash
 
-    go get -u github.com/FrancoLiberali/cql
+    go get -u github.com/FrancoLiberali/cql gorm.io/gorm
 
 Create a package for your :ref:`models <cql/concepts:model>`, for example:
 
@@ -63,12 +63,17 @@ method with the models you want to be persisted:
       panic(err)
     }
 
-    // You are ready to do queries with orm.NewQuery[models.MyModel]
+    // You are ready to do queries with cql.Query[models.MyModel]
   }
 
   func NewDBConnection() (*gorm.DB, error) {
-    return orm.Open(
-      postgres.Open(orm.CreatePostgreSQLDSN("localhost", "root", "postgres", "disable", "cql_db", 26257)),
+    return cql.Open(
+      postgres.Open(
+        fmt.Sprintf(
+          "user=%s password=%s host=%s port=%d sslmode=%s dbname=%s",
+          "root", "postgres", "localhost", 26257, "disable", "cql_db",
+        ),
+      ),
       &gorm.Config{
         Logger: logger.Default.ToLogMode(logger.Info),
       },

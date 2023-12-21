@@ -27,7 +27,7 @@ var Computer = computerConditions{
 	CreatedAt: condition.Field[overridereferencesinverse.Computer, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[overridereferencesinverse.Computer, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[overridereferencesinverse.Computer, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[overridereferencesinverse.Computer]{Field: condition.Field[overridereferencesinverse.Computer, string]{Name: "Name"}},
+	Name:      condition.StringField[overridereferencesinverse.Computer]{UpdatableField: condition.UpdatableField[overridereferencesinverse.Computer, string]{Field: condition.Field[overridereferencesinverse.Computer, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[overridereferencesinverse.Computer, time.Time]{Name: "UpdatedAt"},
 }
 

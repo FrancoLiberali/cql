@@ -27,7 +27,7 @@ var Bicycle = bicycleConditions{
 	CreatedAt:        condition.Field[overrideforeignkey.Bicycle, time.Time]{Name: "CreatedAt"},
 	DeletedAt:        condition.Field[overrideforeignkey.Bicycle, time.Time]{Name: "DeletedAt"},
 	ID:               condition.Field[overrideforeignkey.Bicycle, model.UUID]{Name: "ID"},
-	OwnerSomethingID: condition.StringField[overrideforeignkey.Bicycle]{Field: condition.Field[overrideforeignkey.Bicycle, string]{Name: "OwnerSomethingID"}},
+	OwnerSomethingID: condition.StringField[overrideforeignkey.Bicycle]{UpdatableField: condition.UpdatableField[overrideforeignkey.Bicycle, string]{Field: condition.Field[overrideforeignkey.Bicycle, string]{Name: "OwnerSomethingID"}}},
 	UpdatedAt:        condition.Field[overrideforeignkey.Bicycle, time.Time]{Name: "UpdatedAt"},
 }
 

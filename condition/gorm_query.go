@@ -13,6 +13,7 @@ import (
 	"gorm.io/gorm/schema"
 
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/FrancoLiberali/cql/sql"
 )
 
 type GormQuery struct {
@@ -33,7 +34,7 @@ func (query *GormQuery) Order(field IField, descending bool, joinNumber int) err
 	}
 
 	switch query.Dialector() {
-	case Postgres:
+	case sql.Postgres:
 		// postgres supports only order by selected fields
 		query.AddSelect(table, field)
 		query.GormDB = query.GormDB.Order(
@@ -46,7 +47,7 @@ func (query *GormQuery) Order(field IField, descending bool, joinNumber int) err
 		)
 
 		return nil
-	case SQLServer, SQLite, MySQL:
+	case sql.SQLServer, sql.SQLite, sql.MySQL:
 		query.GormDB = query.GormDB.Order(
 			clause.OrderByColumn{
 				Column: clause.Column{
@@ -181,17 +182,8 @@ func (query GormQuery) ColumnName(table Table, fieldName string) string {
 	return query.GormDB.NamingStrategy.ColumnName(table.Name, fieldName)
 }
 
-type Dialector string
-
-const (
-	Postgres  Dialector = "postgres"
-	MySQL     Dialector = "mysql"
-	SQLite    Dialector = "sqlite"
-	SQLServer Dialector = "sqlserver"
-)
-
-func (query GormQuery) Dialector() Dialector {
-	return Dialector(query.GormDB.Dialector.Name())
+func (query GormQuery) Dialector() sql.Dialector {
+	return sql.Dialector(query.GormDB.Dialector.Name())
 }
 
 func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *GormQuery {
@@ -225,7 +217,7 @@ func (query *GormQuery) Returning(dest any) error {
 	query.GormDB.Model(dest)
 
 	switch query.Dialector() {
-	case Postgres: // support RETURNING from any table
+	case sql.Postgres: // support RETURNING from any table
 		columns := []clause.Column{}
 
 		for _, selectClause := range query.GormDB.Statement.Selects {
@@ -238,13 +230,13 @@ func (query *GormQuery) Returning(dest any) error {
 		}
 
 		query.GormDB.Clauses(clause.Returning{Columns: columns})
-	case SQLite, SQLServer: // supports RETURNING only from main table
+	case sql.SQLite, sql.SQLServer: // supports RETURNING only from main table
 		if len(query.GormDB.Statement.Selects) > 1 {
-			return preloadsInReturningNotAllowed(string(SQLite))
+			return preloadsInReturningNotAllowed(query.Dialector())
 		}
 
 		query.GormDB.Clauses(clause.Returning{})
-	case MySQL: // RETURNING not supported
+	case sql.MySQL: // RETURNING not supported
 		return ErrUnsupportedByDatabase
 	}
 
@@ -263,13 +255,13 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 	query.GormDB.Statement.Selects = []string{}
 
 	switch query.Dialector() {
-	case Postgres, SQLServer, SQLite: // support UPDATE SET FROM
+	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
 		for field, tableAndValue := range tablesAndValues {
 			updateMap[field.ColumnName(query, tableAndValue.table)] = tableAndValue.value
 		}
 
 		query.joinsToFrom()
-	case MySQL: // support UPDATE JOIN SET
+	case sql.MySQL: // support UPDATE JOIN SET
 		// if at least one join is done,
 		// allow UPDATE without WHERE as the condition can be the join
 		if len(query.GormDB.Statement.Joins) > 0 {
@@ -291,7 +283,6 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 			updatedTables = append(updatedTables, tableAndValue.table)
 		}
 
-		// TODO que no existan los set de field de los models (id, created, updated, etc)
 		now := time.Now()
 		for _, table := range pie.Unique(updatedTables) {
 			sets = append(sets, clause.Assignment{
@@ -401,9 +392,9 @@ func splitJoin(joinStatement string) (string, string, string) {
 
 func (query *GormQuery) Delete() (int64, error) {
 	switch query.Dialector() {
-	case Postgres, SQLServer, SQLite: // support UPDATE SET FROM
+	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
 		query.joinsToFrom()
-	case MySQL:
+	case sql.MySQL:
 		// if at least one join is done,
 		// allow UPDATE without WHERE as the condition can be the join
 		if len(query.GormDB.Statement.Joins) > 0 {

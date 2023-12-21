@@ -1,12 +1,4 @@
-# CQL: Compiled Query Language <!-- omit in toc -->
-
-[![Build Status](https://github.com/FrancoLiberali/cql/actions/workflows/cql.yml/badge.svg?branch=main)](https://github.com/FrancoLiberali/cql/actions)
-[![Go Report Card](https://goreportcard.com/badge/github.com/FrancoLiberali/cql)](https://goreportcard.com/report/github.com/FrancoLiberali/cql)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_cql&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_cql)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=FrancoLiberali_cql&metric=coverage)](https://sonarcloud.io/summary/new_code?id=FrancoLiberali_cql)
-
-[![Go.Dev reference](https://img.shields.io/badge/go.dev-reference-blue?logo=go&logoColor=white)](https://pkg.go.dev/github.com/FrancoLiberali/cql)
-[![Documentation Status](https://readthedocs.org/projects/compiledquerylenguage/badge/?version=latest)](https://compiledquerylenguage.readthedocs.io/en/latest/?badge=latest)
+# Introduction
 
 Originally part of [BaDaaS](https://github.com/ditrit/badaas), CQL allows easy and safe persistence and querying of objects.
 
@@ -23,15 +15,3 @@ It's built on top of [gorm](https://gorm.io/), a library that actually provides 
 | SQL | SELECT cities.* FROM cities <br> INNER JOIN countries ON <br>&emsp;&emsp; countries.id = cities.country_id AND <br>&emsp;&emsp; countries.name = "France" <br> WHERE cities.name = "Paris" |
 | GORM | db.Where(<br>&emsp;"cities.name = ?",<br>&emsp;"Paris",<br>).Joins(<br>&emsp;"Country",<br>&emsp;db.Where( <br>&emsp;&emsp; "Country.name = ?", <br>&emsp;&emsp; "France", <br>&emsp; ), <br> ).Find(&cities) |
 | CQL | cql.Query[models.City]( <br>&emsp; db, <br>&emsp; conditions.City.Name.Is().Eq("Paris"), <br>&emsp; conditions.City.Country( <br>&emsp;&emsp; conditions.Country.Name.Is().Eq("France"), <br>&emsp; ), <br> ).FindOne() |
-
-## Documentation
-
-<https://compiledquerylenguage.readthedocs.io/en/latest/>
-
-## Contributing
-
-See [this section](../docs/contributing/contributing.md) to view the cql contribution guidelines.
-
-## License
-
-CQL is Licensed under the [Mozilla Public License Version 2.0](../LICENSE).

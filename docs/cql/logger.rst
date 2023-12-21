@@ -5,11 +5,11 @@ Logger
 When connecting to the database, i.e. when creating the `gorm.DB` object, 
 it is possible to configure the type of logger to use, the logging level, among others. 
 As explained in the :ref:`connection section <cql/connecting_to_a_database:Connection>`, 
-this can be done by using the `orm.Open` method:
+this can be done by using the `cql.Open` method:
 
 .. code-block:: go
 
-  gormDB, err = orm.Open(
+  gormDB, err = cql.Open(
     dialector,
     &gorm.Config{
       Logger: logger.Default,
@@ -34,7 +34,7 @@ Transactions
 
 For the logs corresponding to transactions 
 (slow transactions and transaction execution) 
-to be performed, it is necessary to use the orm.Transaction method.
+to be performed, it is necessary to use the cql.Transaction method.
 
 Default logger
 -------------------------------
@@ -53,10 +53,10 @@ or use `logger.New` to customize it:
 
 .. code-block:: go
 
-  logger.New(gormLogger.Config {
+  logger.New(logger.Config{
+    LogLevel:                  gormLogger.Warn,
     SlowQueryThreshold:        200 * time.Millisecond,
     SlowTransactionThreshold:  200 * time.Millisecond,
-    LogLevel:                  gormLogger.Warn,
     IgnoreRecordNotFoundError: false,
     ParameterizedQueries:      false,
     Colorful:                  true,
@@ -68,7 +68,7 @@ The LogLevel is also configurable via the `ToLogMode` method.
 
 .. code-block:: bash
 
-  standalone/example.go:30 [10.392ms] [rows:1] INSERT INTO "products" ("id","created_at","updated_at","deleted_at","string","int","float","bool") VALUES ('4e6d837b-5641-45c9-a028-e5251e1a18b1','2023-07-21 17:19:59.563','2023-07-21 17:19:59.563',NULL,'',1,0.000000,false)
+  example.go:30 [10.392ms] [rows:1] INSERT INTO "products" ("id","created_at","updated_at","deleted_at","string","int","float","bool") VALUES ('4e6d837b-5641-45c9-a028-e5251e1a18b1','2023-07-21 17:19:59.563','2023-07-21 17:19:59.563',NULL,'',1,0.000000,false)
 
 Zap logger
 ------------------------------
@@ -101,7 +101,7 @@ where `zapLogger` is a zap logger, or use `gormzap.New` to customize it:
 
 .. code-block:: go
 
-  gormzap.New(zapLogger, logger.Config {
+  gormzap.New(zapLogger, logger.Config{
     LogLevel:                  logger.Warn,
     SlowQueryThreshold:        200 * time.Millisecond,
     SlowTransactionThreshold:  200 * time.Millisecond,
@@ -119,4 +119,4 @@ will be the one finally used.
 
 .. code-block:: bash
 
-  DEBUG	fx/example.go:107	query_exec	{"elapsed_time": "3.291981ms", "rows_affected": "1", "sql": "SELECT products.* FROM \"products\" WHERE products.int = 1 AND \"products\".\"deleted_at\" IS NULL"}
+  DEBUG	example.go:107	query_exec	{"elapsed_time": "3.291981ms", "rows_affected": "1", "sql": "SELECT products.* FROM \"products\" WHERE products.int = 1 AND \"products\".\"deleted_at\" IS NULL"}

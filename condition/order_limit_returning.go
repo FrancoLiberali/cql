@@ -1,6 +1,9 @@
 package condition
 
-import "github.com/FrancoLiberali/cql/model"
+import (
+	"github.com/FrancoLiberali/cql/model"
+	"github.com/FrancoLiberali/cql/sql"
+)
 
 type OrderLimitReturning[T model.Model] struct {
 	query         *Query[T]
@@ -13,7 +16,7 @@ type OrderLimitReturning[T model.Model] struct {
 //
 // available for: mysql
 func (olr *OrderLimitReturning[T]) Ascending(field IField, joinNumber ...uint) {
-	if olr.query.gormQuery.Dialector() != MySQL {
+	if olr.query.gormQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Ascending"))
 	}
 
@@ -27,7 +30,7 @@ func (olr *OrderLimitReturning[T]) Ascending(field IField, joinNumber ...uint) {
 //
 // available for: mysql
 func (olr *OrderLimitReturning[T]) Descending(field IField, joinNumber ...uint) {
-	if olr.query.gormQuery.Dialector() != MySQL {
+	if olr.query.gormQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Descending"))
 	}
 
@@ -41,7 +44,7 @@ func (olr *OrderLimitReturning[T]) Descending(field IField, joinNumber ...uint) 
 //
 // available for: mysql
 func (olr *OrderLimitReturning[T]) Limit(limit int) {
-	if olr.query.gormQuery.Dialector() != MySQL {
+	if olr.query.gormQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Limit"))
 	}
 

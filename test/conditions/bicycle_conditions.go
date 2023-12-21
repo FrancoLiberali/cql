@@ -28,8 +28,8 @@ var Bicycle = bicycleConditions{
 	CreatedAt: condition.Field[models.Bicycle, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.Bicycle, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.Bicycle, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.Bicycle]{Field: condition.Field[models.Bicycle, string]{Name: "Name"}},
-	OwnerName: condition.StringField[models.Bicycle]{Field: condition.Field[models.Bicycle, string]{Name: "OwnerName"}},
+	Name:      condition.StringField[models.Bicycle]{UpdatableField: condition.UpdatableField[models.Bicycle, string]{Field: condition.Field[models.Bicycle, string]{Name: "Name"}}},
+	OwnerName: condition.StringField[models.Bicycle]{UpdatableField: condition.UpdatableField[models.Bicycle, string]{Field: condition.Field[models.Bicycle, string]{Name: "OwnerName"}}},
 	UpdatedAt: condition.Field[models.Bicycle, time.Time]{Name: "UpdatedAt"},
 }
 

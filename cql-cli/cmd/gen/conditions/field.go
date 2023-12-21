@@ -8,10 +8,15 @@ import (
 )
 
 // cql/model/models.go
-var modelIDs = []string{
-	modelPath + "." + uIntID,
-	modelPath + "." + uuid,
-}
+var (
+	modelIDs = []string{
+		modelPath + "." + uIntID,
+		modelPath + "." + uuid,
+	}
+	baseModelFields = []string{
+		"ID", "CreatedAt", "UpdatedAt", "DeletedAt",
+	}
+)
 
 type Field struct {
 	Name         string
@@ -28,6 +33,14 @@ func (field Field) CompleteName() string {
 
 func (field Field) IsModelID() bool {
 	return pie.Contains(modelIDs, field.TypeString())
+}
+
+func (field Field) IsUpdatable() bool {
+	return !pie.Contains(baseModelFields, field.Name)
+}
+
+func (field Field) IsNullable() bool {
+	return (field.Type.IsSQLNullableType() || field.Type.WasPointer()) && !field.Tags.hasNotNull()
 }
 
 // Get the name of the column where the data for a field will be saved
@@ -92,10 +105,10 @@ func (field Field) TypeName() string {
 }
 
 // Create a new field with the same name and tags but a different type
-func (field Field) ChangeType(newType types.Type) Field {
+func (field Field) ChangeType(newType types.Type, fromPointer bool) Field {
 	return Field{
 		Name: field.Name,
-		Type: Type{newType},
+		Type: Type{Type: newType, wasPointer: fromPointer},
 		Tags: field.Tags,
 	}
 }
@@ -129,7 +142,7 @@ func getStructFields(structType *types.Struct) ([]Field, error) {
 		gormTags := getGormTags(structType.Tag(i))
 		fields = append(fields, Field{
 			Name:     fieldObject.Name(),
-			Type:     Type{fieldObject.Type()},
+			Type:     Type{Type: fieldObject.Type()},
 			Embedded: fieldObject.Embedded() || gormTags.hasEmbedded(),
 			Tags:     gormTags,
 		})

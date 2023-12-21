@@ -12,12 +12,12 @@ import (
 // Example (multi): value LIKE v1 ESCAPE v2
 type ValueOperator[T any] struct {
 	Operations []operation
-	Modifier   map[Dialector]string
+	Modifier   map[sql.Dialector]string
 }
 
 type operation struct {
 	SQLOperator            sql.Operator
-	SQLOperatorByDialector map[Dialector]sql.Operator
+	SQLOperatorByDialector map[sql.Dialector]sql.Operator
 	Value                  any
 	JoinNumber             int
 }
@@ -63,6 +63,10 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 			sqlOperator = operation.SQLOperatorByDialector[query.Dialector()]
 		}
 
+		if !sqlOperator.Supports(query.Dialector()) {
+			return "", nil, operatorError(ErrUnsupportedByDatabase, sqlOperator)
+		}
+
 		field, isField := operation.Value.(IField)
 		if isField {
 			// if the value of the operation is a field,
@@ -106,7 +110,7 @@ func (operator *ValueOperator[T]) AddOperation(sqlOperator any, value any) *Valu
 			SQLOperator: sqlOperatorTyped,
 			JoinNumber:  UndefinedJoinNumber,
 		}
-	case map[Dialector]sql.Operator:
+	case map[sql.Dialector]sql.Operator:
 		newOperation = operation{
 			Value:                  value,
 			SQLOperatorByDialector: sqlOperatorTyped,

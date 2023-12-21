@@ -9,7 +9,7 @@ In :doc:`/cql/query` we have seen how to use the operators
 to make comparisons between the attributes of a model and static values such as a string, 
 a number, etc. But if we want to make comparisons between two or more attributes of 
 the same type we need to use the dynamic operators. 
-These, instead of a dynamic value, receive a FieldIdentifier, that is, 
+These, instead of a dynamic value, receive a Field, that is, 
 an object that identifies the attribute with which the operation is to be performed.
 
 These identifiers are also generated during the generation of conditions 
@@ -36,14 +36,14 @@ its related MyOtherModel's Name attribute.
         RelatedID model.UUID
     }
 
-    myModels, err := orm.NewQuery[MyModel](
+    myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.NameIs().Dynamic().Eq(conditions.MyModel.Name),
+            conditions.MyOtherModel.Name.Is().Dynamic().Eq(conditions.MyModel.Name),
         ),
     ).Find()
 
-**Attention**, when using dynamic operators the verification that the FieldIdentifier 
+**Attention**, when using dynamic operators the verification that the Field 
 is concerned by the query is performed at run time, returning an error otherwise. 
 For example:
 
@@ -64,12 +64,12 @@ For example:
         RelatedID model.UUID
     }
 
-    myModels, err := orm.NewQuery[MyModel](
+    myModels, err := cql.Query[MyModel](
         gormDB,
-        conditions.MyModel.NameIs().Dynamic().Eq(conditions.MyOtherModel.Name),
+        conditions.MyModel.Name.Is().Dynamic().Eq(conditions.MyOtherModel.Name),
     ).Find()
 
-will respond orm.ErrFieldModelNotConcerned in err.
+will respond condition.ErrFieldModelNotConcerned in err.
 
 All operators supported by cql that receive any value are available in their dynamic version 
 after using the Dynamic() method of the FieldIs object.
@@ -79,7 +79,7 @@ Select join
 
 In case the attribute to be used by the dynamic operator is present more 
 than once in the query, it will be necessary to select the join to be used, 
-to avoid getting the error orm.ErrJoinMustBeSelected. 
+to avoid getting the error condition.ErrJoinMustBeSelected. 
 To do this, you must use the SelectJoin method, as in the following example:
 
 .. code-block:: go
@@ -112,7 +112,7 @@ To do this, you must use the SelectJoin method, as in the following example:
         Parent2ID model.UUID
     }
 
-    models, err := orm.NewQuery[Child](
+    models, err := cql.Query[Child](
         gormDB,
         conditions.Child.Parent1(
             conditions.Parent1.ParentParent(),
@@ -120,8 +120,8 @@ To do this, you must use the SelectJoin method, as in the following example:
         conditions.Child.Parent2(
             conditions.Parent2.ParentParent(),
         ),
-        conditions.Child.NameIs().Dynamic().Eq(conditions.ParentParent.Name).SelectJoin(
-            0, // for the value 0 (conditions.ParentParent.Name),
+        conditions.Child.Name.Is().Dynamic().Eq(conditions.ParentParent.Name).SelectJoin(
+            0, // for the parameter in position 0 of the operator (conditions.ParentParent.Name),
             0, // choose the first (0) join (made by conditions.Child.Parent1())
         ),
     ).Find()
@@ -151,7 +151,7 @@ you can always run raw SQL with unsafe.NewCondition, as in the following example
 
 .. code-block:: go
 
-    myModels, err := orm.NewQuery[MyModel](
+    myModels, err := cql.Query[MyModel](
         gormDB,
         unsafe.NewCondition[MyModel]("%s.name = NULL"),
     ).Find()

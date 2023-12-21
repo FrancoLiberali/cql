@@ -44,14 +44,14 @@ As we can see in the example in the previous section,
 the attributes of your models can be of multiple types, 
 such as basic go types, pointers, and :ref:`nullable types <cql/concepts:nullable types>`.
 
-This difference can generate differences in the information that is stored in the database, 
+This difference can generate differences in the data that is stored in the database, 
 since saving a model created as follows:
 
 .. code-block:: go
 
   MyModel{}
 
-will save a empty string for Name but a null for the Email and the MemberNumber.
+will save a empty string for Name but a NULL for the Email and the MemberNumber.
 
 The use of nullable types is strongly recommended and cql takes into account 
 their use in each of its functionalities.

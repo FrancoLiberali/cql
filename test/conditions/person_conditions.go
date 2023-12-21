@@ -20,7 +20,7 @@ var Person = personConditions{
 	CreatedAt: condition.Field[models.Person, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.Person, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.Person, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.Person]{Field: condition.Field[models.Person, string]{Name: "Name"}},
+	Name:      condition.StringField[models.Person]{UpdatableField: condition.UpdatableField[models.Person, string]{Field: condition.Field[models.Person, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[models.Person, time.Time]{Name: "UpdatedAt"},
 }
 

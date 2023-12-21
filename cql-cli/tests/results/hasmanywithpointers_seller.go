@@ -20,11 +20,11 @@ type sellerInPointersConditions struct {
 	CreatedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
 	UpdatedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
 	DeletedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
-	CompanyID condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]
+	CompanyID condition.NullableField[hasmanywithpointers.SellerInPointers, model.UUID]
 }
 
 var SellerInPointers = sellerInPointersConditions{
-	CompanyID: condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]{Name: "CompanyID"},
+	CompanyID: condition.NullableField[hasmanywithpointers.SellerInPointers, model.UUID]{UpdatableField: condition.UpdatableField[hasmanywithpointers.SellerInPointers, model.UUID]{Field: condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]{Name: "CompanyID"}}},
 	CreatedAt: condition.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[hasmanywithpointers.SellerInPointers, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]{Name: "ID"},

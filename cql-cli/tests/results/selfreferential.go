@@ -20,11 +20,11 @@ type employeeConditions struct {
 	CreatedAt condition.Field[selfreferential.Employee, time.Time]
 	UpdatedAt condition.Field[selfreferential.Employee, time.Time]
 	DeletedAt condition.Field[selfreferential.Employee, time.Time]
-	BossID    condition.Field[selfreferential.Employee, model.UUID]
+	BossID    condition.NullableField[selfreferential.Employee, model.UUID]
 }
 
 var Employee = employeeConditions{
-	BossID:    condition.Field[selfreferential.Employee, model.UUID]{Name: "BossID"},
+	BossID:    condition.NullableField[selfreferential.Employee, model.UUID]{UpdatableField: condition.UpdatableField[selfreferential.Employee, model.UUID]{Field: condition.Field[selfreferential.Employee, model.UUID]{Name: "BossID"}}},
 	CreatedAt: condition.Field[selfreferential.Employee, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[selfreferential.Employee, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[selfreferential.Employee, model.UUID]{Name: "ID"},

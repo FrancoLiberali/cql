@@ -13,7 +13,7 @@ type creditCardConditions struct {
 	CreatedAt     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]
 	UpdatedAt     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]
 	DeletedAt     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]
-	UserReference condition.Field[overrideforeignkeyinverse.CreditCard, model.UUID]
+	UserReference condition.UpdatableField[overrideforeignkeyinverse.CreditCard, model.UUID]
 }
 
 var CreditCard = creditCardConditions{
@@ -21,7 +21,7 @@ var CreditCard = creditCardConditions{
 	DeletedAt:     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]{Name: "DeletedAt"},
 	ID:            condition.Field[overrideforeignkeyinverse.CreditCard, model.UUID]{Name: "ID"},
 	UpdatedAt:     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]{Name: "UpdatedAt"},
-	UserReference: condition.Field[overrideforeignkeyinverse.CreditCard, model.UUID]{Name: "UserReference"},
+	UserReference: condition.UpdatableField[overrideforeignkeyinverse.CreditCard, model.UUID]{Field: condition.Field[overrideforeignkeyinverse.CreditCard, model.UUID]{Name: "UserReference"}},
 }
 
 // Preload allows preloading the CreditCard when doing a query
