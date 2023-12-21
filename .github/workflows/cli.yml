@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-    - cql-cli/**
+    - cql-gen/**
 
 jobs:
   check-style:
@@ -23,7 +23,7 @@ jobs:
       - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
-          working-directory: cql-cli
+          working-directory: cql-gen
           args: --config=../.golangci.yml
           skip-cache: true
           skip-pkg-cache: true
@@ -42,7 +42,7 @@ jobs:
           go-version: '^1.18'
           cache: true
       - name: Run tests
-        run: go test ./cql-cli/tests -coverpkg=./cql-cli/... -coverprofile=coverage_cli.out -v
+        run: go test ./cql-gen/tests -coverpkg=./cql-gen/... -coverprofile=coverage_cli.out -v
       - uses: actions/upload-artifact@v3
         with:
           name: coverage_cli

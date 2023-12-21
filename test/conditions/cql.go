@@ -1,6 +1,6 @@
 package conditions
 
-//go:generate cql-cli gen conditions ../models
+//go:generate cql-gen ../models
 
 // for development
-// ../../cql-cli/cql-cli gen conditions --dest_package conditions ../models
+// ../../cql-gen/cql-gen --dest_package conditions ../models

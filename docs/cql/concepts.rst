@@ -147,7 +147,7 @@ Conditions generation
 
 Conditions are the basis of the compiled query system. 
 They are generated for each model and attribute and can then be used. 
-Their generation is done with cql-cli.
+Their generation is done with cql-gen.
 
 For details visit :ref:`cql/query:Conditions generation`.
 
