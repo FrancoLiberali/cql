@@ -70,7 +70,7 @@ func FindLastCaller(skip int) (string, int, int) {
 var (
 	cqlSourceDir      string
 	gormSourceDir     = filepath.Join("gorm.io", "gorm")
-	gormForkSourceDir = filepath.Join("FrancoLiberali", "gorm")
+	gormForkSourceDir = filepath.Join("!franco!liberali", "gorm")
 )
 
 func init() {
