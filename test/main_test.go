@@ -1,8 +1,11 @@
 package test
 
 import (
+	"fmt"
 	"log"
+	"net"
 	"os"
+	"strconv"
 	"testing"
 	"time"
 
@@ -13,9 +16,8 @@ import (
 	"gorm.io/driver/sqlserver"
 	"gorm.io/gorm"
 
-	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/logger"
+	"github.com/FrancoLiberali/cql/sql"
 )
 
 const dbTypeEnvKey = "DB"
@@ -53,14 +55,32 @@ func NewDBConnection() (*gorm.DB, error) {
 	var dialector gorm.Dialector
 
 	switch getDBDialector() {
-	case condition.SQLite:
-		dialector = sqlite.Open(cql.CreateSQLiteDSN(host))
-	case condition.MySQL:
-		dialector = mysql.Open(cql.CreateMySQLDSN(host, username, password, dbName, port))
-	case condition.SQLServer:
-		dialector = sqlserver.Open(cql.CreateSQLServerDSN(host, username, password, dbName, port))
+	case sql.Postgres:
+		dialector = postgres.Open(
+			fmt.Sprintf(
+				"user=%s password=%s host=%s port=%d sslmode=%s dbname=%s",
+				username, password, host, port, sslMode, dbName,
+			),
+		)
+	case sql.MySQL:
+		dialector = mysql.Open(
+			fmt.Sprintf(
+				"%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
+				username, password, net.JoinHostPort(host, strconv.Itoa(port)), dbName,
+			),
+		)
+	case sql.SQLServer:
+		dialector = sqlserver.Open(
+			fmt.Sprintf(
+				"sqlserver://%s:%s@%s?database=%s",
+				username,
+				password,
+				net.JoinHostPort(host, strconv.Itoa(port)),
+				dbName,
+			),
+		)
 	default:
-		dialector = postgres.Open(cql.CreatePostgreSQLDSN(host, username, password, sslMode, dbName, port))
+		dialector = sqlite.Open(fmt.Sprintf("sqlite:%s", host))
 	}
 
 	return OpenWithRetry(
@@ -70,6 +90,6 @@ func NewDBConnection() (*gorm.DB, error) {
 	)
 }
 
-func getDBDialector() condition.Dialector {
-	return condition.Dialector(os.Getenv(dbTypeEnvKey))
+func getDBDialector() sql.Dialector {
+	return sql.Dialector(os.Getenv(dbTypeEnvKey))
 }

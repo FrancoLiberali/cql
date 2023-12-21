@@ -18,8 +18,12 @@ const (
 	cqlNewCollectionPreload = "NewCollectionPreloadCondition"
 	cqlNewPreloadCondition  = "NewPreloadCondition"
 	cqlField                = "Field"
+	cqlUpdatableField       = "UpdatableField"
+	cqlNullableField        = "NullableField"
 	cqlBoolField            = "BoolField"
+	cqlNullableBoolField    = "NullableBoolField"
 	cqlStringField          = "StringField"
+	cqlNullableStringField  = "NullableStringField"
 	// cql/model
 	modelPath = cqlPath + "/model"
 	uIntID    = "UIntID"
@@ -75,7 +79,7 @@ func (condition *Condition) generate(objectType Type, field Field) {
 		// the field is a pointer
 		condition.generate(
 			objectType,
-			field.ChangeType(fieldType.Elem()),
+			field.ChangeType(fieldType.Elem(), true),
 		)
 	case *types.Slice:
 		// the field is a slice
@@ -84,7 +88,7 @@ func (condition *Condition) generate(objectType Type, field Field) {
 		condition.param.ToSlice()
 		condition.generateForSlice(
 			objectType,
-			field.ChangeType(fieldType.Elem()),
+			field.ChangeType(fieldType.Elem(), false),
 		)
 	default:
 		log.Logger.Debugf("struct field type not handled: %T", fieldType)
@@ -113,7 +117,7 @@ func (condition *Condition) generateForSlice(objectType Type, field Field) {
 		// slice of pointers, generate code for a slice of the pointed type
 		condition.generateForSlice(
 			objectType,
-			field.ChangeType(elemType.Elem()),
+			field.ChangeType(elemType.Elem(), false),
 		)
 	default:
 		log.Logger.Debugf("struct field list elem type not handled: %T", elemType)
@@ -202,20 +206,35 @@ func (condition *Condition) createField(objectType Type, field Field) {
 		objectTypeQual,
 		condition.param.GenericType(),
 	)
+
+	if field.IsUpdatable() {
+		fieldValues = jen.Dict{
+			jen.Id(cqlField): fieldQual.Clone().Values(fieldValues),
+		}
+		fieldQual = jen.Qual(
+			conditionPath, cqlUpdatableField,
+		).Types(
+			objectTypeQual,
+			condition.param.GenericType(),
+		)
+
+		if field.IsNullable() {
+			fieldValues = jen.Dict{
+				jen.Id(cqlUpdatableField): fieldQual.Clone().Values(fieldValues),
+			}
+			fieldQual = jen.Qual(
+				conditionPath, cqlNullableField,
+			).Types(
+				objectTypeQual,
+				condition.param.GenericType(),
+			)
+		}
+	}
+
 	if condition.param.isString {
-		fieldValues = jen.Dict{
-			jen.Id("Field"): fieldQual.Clone().Values(fieldValues),
-		}
-		fieldQual = jen.Qual(
-			conditionPath, cqlStringField,
-		).Types(objectTypeQual)
+		fieldQual, fieldValues = condition.transformIntoSpecificField(field, objectTypeQual, fieldQual, fieldValues, cqlNullableStringField, cqlStringField)
 	} else if condition.param.isBool {
-		fieldValues = jen.Dict{
-			jen.Id("Field"): fieldQual.Clone().Values(fieldValues),
-		}
-		fieldQual = jen.Qual(
-			conditionPath, cqlBoolField,
-		).Types(objectTypeQual)
+		fieldQual, fieldValues = condition.transformIntoSpecificField(field, objectTypeQual, fieldQual, fieldValues, cqlNullableBoolField, cqlBoolField)
 	}
 
 	condition.FieldType = jen.Id(condition.FieldName).Add(
@@ -223,6 +242,31 @@ func (condition *Condition) createField(objectType Type, field Field) {
 	)
 
 	condition.FieldDefinition = fieldQual.Clone().Values(fieldValues)
+}
+
+// Transforms the fieldQual and the fieldValues into a specific type (string, bool) depending if the type is nullable or not
+func (condition *Condition) transformIntoSpecificField(
+	field Field, objectTypeQual *jen.Statement,
+	fieldQual *jen.Statement, fieldValues jen.Dict,
+	nullableType string, notNullableType string,
+) (*jen.Statement, jen.Dict) {
+	if field.IsNullable() {
+		fieldValues = jen.Dict{
+			jen.Id(cqlNullableField): fieldQual.Clone().Values(fieldValues),
+		}
+		fieldQual = jen.Qual(
+			conditionPath, nullableType,
+		).Types(objectTypeQual)
+	} else {
+		fieldValues = jen.Dict{
+			jen.Id(cqlUpdatableField): fieldQual.Clone().Values(fieldValues),
+		}
+		fieldQual = jen.Qual(
+			conditionPath, notNullableType,
+		).Types(objectTypeQual)
+	}
+
+	return fieldQual, fieldValues
 }
 
 // Generate a JoinCondition between the object and field's object

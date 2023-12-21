@@ -14,15 +14,15 @@ type parentParentConditions struct {
 	UpdatedAt condition.Field[models.ParentParent, time.Time]
 	DeletedAt condition.Field[models.ParentParent, time.Time]
 	Name      condition.StringField[models.ParentParent]
-	Number    condition.Field[models.ParentParent, int]
+	Number    condition.UpdatableField[models.ParentParent, int]
 }
 
 var ParentParent = parentParentConditions{
 	CreatedAt: condition.Field[models.ParentParent, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.ParentParent, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.ParentParent, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.ParentParent]{Field: condition.Field[models.ParentParent, string]{Name: "Name"}},
-	Number:    condition.Field[models.ParentParent, int]{Name: "Number"},
+	Name:      condition.StringField[models.ParentParent]{UpdatableField: condition.UpdatableField[models.ParentParent, string]{Field: condition.Field[models.ParentParent, string]{Name: "Name"}}},
+	Number:    condition.UpdatableField[models.ParentParent, int]{Field: condition.Field[models.ParentParent, int]{Name: "Number"}},
 	UpdatedAt: condition.Field[models.ParentParent, time.Time]{Name: "UpdatedAt"},
 }
 

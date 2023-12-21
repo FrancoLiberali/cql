@@ -14,47 +14,47 @@ type basicTypesConditions struct {
 	UpdatedAt  condition.Field[basictypes.BasicTypes, time.Time]
 	DeletedAt  condition.Field[basictypes.BasicTypes, time.Time]
 	Bool       condition.BoolField[basictypes.BasicTypes]
-	Int        condition.Field[basictypes.BasicTypes, int]
-	Int8       condition.Field[basictypes.BasicTypes, int8]
-	Int16      condition.Field[basictypes.BasicTypes, int16]
-	Int32      condition.Field[basictypes.BasicTypes, int32]
-	Int64      condition.Field[basictypes.BasicTypes, int64]
-	UInt       condition.Field[basictypes.BasicTypes, uint]
-	UInt8      condition.Field[basictypes.BasicTypes, uint8]
-	UInt16     condition.Field[basictypes.BasicTypes, uint16]
-	UInt32     condition.Field[basictypes.BasicTypes, uint32]
-	UInt64     condition.Field[basictypes.BasicTypes, uint64]
-	UIntptr    condition.Field[basictypes.BasicTypes, uintptr]
-	Float32    condition.Field[basictypes.BasicTypes, float32]
-	Float64    condition.Field[basictypes.BasicTypes, float64]
-	Complex64  condition.Field[basictypes.BasicTypes, complex64]
-	Complex128 condition.Field[basictypes.BasicTypes, complex128]
+	Int        condition.UpdatableField[basictypes.BasicTypes, int]
+	Int8       condition.UpdatableField[basictypes.BasicTypes, int8]
+	Int16      condition.UpdatableField[basictypes.BasicTypes, int16]
+	Int32      condition.UpdatableField[basictypes.BasicTypes, int32]
+	Int64      condition.UpdatableField[basictypes.BasicTypes, int64]
+	UInt       condition.UpdatableField[basictypes.BasicTypes, uint]
+	UInt8      condition.UpdatableField[basictypes.BasicTypes, uint8]
+	UInt16     condition.UpdatableField[basictypes.BasicTypes, uint16]
+	UInt32     condition.UpdatableField[basictypes.BasicTypes, uint32]
+	UInt64     condition.UpdatableField[basictypes.BasicTypes, uint64]
+	UIntptr    condition.UpdatableField[basictypes.BasicTypes, uintptr]
+	Float32    condition.UpdatableField[basictypes.BasicTypes, float32]
+	Float64    condition.UpdatableField[basictypes.BasicTypes, float64]
+	Complex64  condition.UpdatableField[basictypes.BasicTypes, complex64]
+	Complex128 condition.UpdatableField[basictypes.BasicTypes, complex128]
 	String     condition.StringField[basictypes.BasicTypes]
-	Byte       condition.Field[basictypes.BasicTypes, uint8]
+	Byte       condition.UpdatableField[basictypes.BasicTypes, uint8]
 }
 
 var BasicTypes = basicTypesConditions{
-	Bool:       condition.BoolField[basictypes.BasicTypes]{Field: condition.Field[basictypes.BasicTypes, bool]{Name: "Bool"}},
-	Byte:       condition.Field[basictypes.BasicTypes, uint8]{Name: "Byte"},
-	Complex128: condition.Field[basictypes.BasicTypes, complex128]{Name: "Complex128"},
-	Complex64:  condition.Field[basictypes.BasicTypes, complex64]{Name: "Complex64"},
+	Bool:       condition.BoolField[basictypes.BasicTypes]{UpdatableField: condition.UpdatableField[basictypes.BasicTypes, bool]{Field: condition.Field[basictypes.BasicTypes, bool]{Name: "Bool"}}},
+	Byte:       condition.UpdatableField[basictypes.BasicTypes, uint8]{Field: condition.Field[basictypes.BasicTypes, uint8]{Name: "Byte"}},
+	Complex128: condition.UpdatableField[basictypes.BasicTypes, complex128]{Field: condition.Field[basictypes.BasicTypes, complex128]{Name: "Complex128"}},
+	Complex64:  condition.UpdatableField[basictypes.BasicTypes, complex64]{Field: condition.Field[basictypes.BasicTypes, complex64]{Name: "Complex64"}},
 	CreatedAt:  condition.Field[basictypes.BasicTypes, time.Time]{Name: "CreatedAt"},
 	DeletedAt:  condition.Field[basictypes.BasicTypes, time.Time]{Name: "DeletedAt"},
-	Float32:    condition.Field[basictypes.BasicTypes, float32]{Name: "Float32"},
-	Float64:    condition.Field[basictypes.BasicTypes, float64]{Name: "Float64"},
+	Float32:    condition.UpdatableField[basictypes.BasicTypes, float32]{Field: condition.Field[basictypes.BasicTypes, float32]{Name: "Float32"}},
+	Float64:    condition.UpdatableField[basictypes.BasicTypes, float64]{Field: condition.Field[basictypes.BasicTypes, float64]{Name: "Float64"}},
 	ID:         condition.Field[basictypes.BasicTypes, model.UUID]{Name: "ID"},
-	Int:        condition.Field[basictypes.BasicTypes, int]{Name: "Int"},
-	Int16:      condition.Field[basictypes.BasicTypes, int16]{Name: "Int16"},
-	Int32:      condition.Field[basictypes.BasicTypes, int32]{Name: "Int32"},
-	Int64:      condition.Field[basictypes.BasicTypes, int64]{Name: "Int64"},
-	Int8:       condition.Field[basictypes.BasicTypes, int8]{Name: "Int8"},
-	String:     condition.StringField[basictypes.BasicTypes]{Field: condition.Field[basictypes.BasicTypes, string]{Name: "String"}},
-	UInt:       condition.Field[basictypes.BasicTypes, uint]{Name: "UInt"},
-	UInt16:     condition.Field[basictypes.BasicTypes, uint16]{Name: "UInt16"},
-	UInt32:     condition.Field[basictypes.BasicTypes, uint32]{Name: "UInt32"},
-	UInt64:     condition.Field[basictypes.BasicTypes, uint64]{Name: "UInt64"},
-	UInt8:      condition.Field[basictypes.BasicTypes, uint8]{Name: "UInt8"},
-	UIntptr:    condition.Field[basictypes.BasicTypes, uintptr]{Name: "UIntptr"},
+	Int:        condition.UpdatableField[basictypes.BasicTypes, int]{Field: condition.Field[basictypes.BasicTypes, int]{Name: "Int"}},
+	Int16:      condition.UpdatableField[basictypes.BasicTypes, int16]{Field: condition.Field[basictypes.BasicTypes, int16]{Name: "Int16"}},
+	Int32:      condition.UpdatableField[basictypes.BasicTypes, int32]{Field: condition.Field[basictypes.BasicTypes, int32]{Name: "Int32"}},
+	Int64:      condition.UpdatableField[basictypes.BasicTypes, int64]{Field: condition.Field[basictypes.BasicTypes, int64]{Name: "Int64"}},
+	Int8:       condition.UpdatableField[basictypes.BasicTypes, int8]{Field: condition.Field[basictypes.BasicTypes, int8]{Name: "Int8"}},
+	String:     condition.StringField[basictypes.BasicTypes]{UpdatableField: condition.UpdatableField[basictypes.BasicTypes, string]{Field: condition.Field[basictypes.BasicTypes, string]{Name: "String"}}},
+	UInt:       condition.UpdatableField[basictypes.BasicTypes, uint]{Field: condition.Field[basictypes.BasicTypes, uint]{Name: "UInt"}},
+	UInt16:     condition.UpdatableField[basictypes.BasicTypes, uint16]{Field: condition.Field[basictypes.BasicTypes, uint16]{Name: "UInt16"}},
+	UInt32:     condition.UpdatableField[basictypes.BasicTypes, uint32]{Field: condition.Field[basictypes.BasicTypes, uint32]{Name: "UInt32"}},
+	UInt64:     condition.UpdatableField[basictypes.BasicTypes, uint64]{Field: condition.Field[basictypes.BasicTypes, uint64]{Name: "UInt64"}},
+	UInt8:      condition.UpdatableField[basictypes.BasicTypes, uint8]{Field: condition.Field[basictypes.BasicTypes, uint8]{Name: "UInt8"}},
+	UIntptr:    condition.UpdatableField[basictypes.BasicTypes, uintptr]{Field: condition.Field[basictypes.BasicTypes, uintptr]{Name: "UIntptr"}},
 	UpdatedAt:  condition.Field[basictypes.BasicTypes, time.Time]{Name: "UpdatedAt"},
 }
 

@@ -8,6 +8,7 @@ import (
 	"github.com/FrancoLiberali/cql/cql-cli/cmd/version"
 )
 
+// TODO cli can be simplified, it is just a command
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{
 	Use:     "cql-cli",

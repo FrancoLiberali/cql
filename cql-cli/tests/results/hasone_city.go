@@ -20,11 +20,11 @@ type cityConditions struct {
 	CreatedAt condition.Field[hasone.City, time.Time]
 	UpdatedAt condition.Field[hasone.City, time.Time]
 	DeletedAt condition.Field[hasone.City, time.Time]
-	CountryID condition.Field[hasone.City, model.UUID]
+	CountryID condition.UpdatableField[hasone.City, model.UUID]
 }
 
 var City = cityConditions{
-	CountryID: condition.Field[hasone.City, model.UUID]{Name: "CountryID"},
+	CountryID: condition.UpdatableField[hasone.City, model.UUID]{Field: condition.Field[hasone.City, model.UUID]{Name: "CountryID"}},
 	CreatedAt: condition.Field[hasone.City, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[hasone.City, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[hasone.City, model.UUID]{Name: "ID"},

@@ -13,14 +13,14 @@ type package2Conditions struct {
 	CreatedAt  condition.Field[package2.Package2, time.Time]
 	UpdatedAt  condition.Field[package2.Package2, time.Time]
 	DeletedAt  condition.Field[package2.Package2, time.Time]
-	Package1ID condition.Field[package2.Package2, model.UUID]
+	Package1ID condition.UpdatableField[package2.Package2, model.UUID]
 }
 
 var Package2 = package2Conditions{
 	CreatedAt:  condition.Field[package2.Package2, time.Time]{Name: "CreatedAt"},
 	DeletedAt:  condition.Field[package2.Package2, time.Time]{Name: "DeletedAt"},
 	ID:         condition.Field[package2.Package2, model.UUID]{Name: "ID"},
-	Package1ID: condition.Field[package2.Package2, model.UUID]{Name: "Package1ID"},
+	Package1ID: condition.UpdatableField[package2.Package2, model.UUID]{Field: condition.Field[package2.Package2, model.UUID]{Name: "Package1ID"}},
 	UpdatedAt:  condition.Field[package2.Package2, time.Time]{Name: "UpdatedAt"},
 }
 

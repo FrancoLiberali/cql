@@ -11,6 +11,7 @@ import (
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/mysql"
 	"github.com/FrancoLiberali/cql/psql"
+	cqlSQL "github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/sqlite"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -454,9 +455,9 @@ func (ts *OperatorsIntTestSuite) TestLikeEscape() {
 
 func (ts *OperatorsIntTestSuite) TestLikeOnNumeric() {
 	switch getDBDialector() {
-	case condition.Postgres, condition.SQLServer, condition.SQLite:
+	case cqlSQL.Postgres, cqlSQL.SQLServer, cqlSQL.SQLite:
 		log.Println("Like with numeric not compatible")
-	case condition.MySQL:
+	case cqlSQL.MySQL:
 		match1 := ts.createProduct("", 10, 0, false, nil)
 		match2 := ts.createProduct("", 100, 0, false, nil)
 
@@ -477,9 +478,16 @@ func (ts *OperatorsIntTestSuite) TestLikeOnNumeric() {
 
 func (ts *OperatorsIntTestSuite) TestILike() {
 	switch getDBDialector() {
-	case condition.MySQL, condition.SQLServer, condition.SQLite:
-		log.Println("ILike not compatible")
-	case condition.Postgres:
+	case cqlSQL.MySQL, cqlSQL.SQLServer, cqlSQL.SQLite:
+		_, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.String.Is().Custom(
+				psql.ILike("_a%"),
+			),
+		).Find()
+		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "operator: psql.ILike")
+	case cqlSQL.Postgres:
 		match1 := ts.createProduct("basd", 0, 0, false, nil)
 		match2 := ts.createProduct("cape", 0, 0, false, nil)
 		match3 := ts.createProduct("bAsd", 0, 0, false, nil)
@@ -501,9 +509,16 @@ func (ts *OperatorsIntTestSuite) TestILike() {
 
 func (ts *OperatorsIntTestSuite) TestSimilarTo() {
 	switch getDBDialector() {
-	case condition.MySQL, condition.SQLServer, condition.SQLite:
-		log.Println("SimilarTo not compatible")
-	case condition.Postgres:
+	case cqlSQL.MySQL, cqlSQL.SQLServer, cqlSQL.SQLite:
+		_, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.String.Is().Custom(
+				psql.SimilarTo("%(b|d)%"),
+			),
+		).Find()
+		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "operator: psql.SimilarTo")
+	case cqlSQL.Postgres:
 		match1 := ts.createProduct("abc", 0, 0, false, nil)
 		match2 := ts.createProduct("aabcc", 0, 0, false, nil)
 
@@ -533,11 +548,29 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseSensitive() {
 	var posixRegexOperator condition.Operator[string]
 
 	switch getDBDialector() {
-	case condition.SQLServer, condition.MySQL:
-		log.Println("PosixRegex not compatible")
-	case condition.Postgres:
+	case cqlSQL.SQLServer, cqlSQL.MySQL:
+		_, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.String.Is().Custom(
+				psql.POSIXMatch("^a(b|x)"),
+			),
+		).Find()
+
+		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "operator: psql.POSIXMatch")
+
+		_, err = cql.Query[models.Product](
+			ts.db,
+			conditions.Product.String.Is().Custom(
+				sqlite.Glob("a[bx]"),
+			),
+		).Find()
+
+		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "operator: sqlite.Glob")
+	case cqlSQL.Postgres:
 		posixRegexOperator = psql.POSIXMatch("^a(b|x)")
-	case condition.SQLite:
+	case cqlSQL.SQLite:
 		posixRegexOperator = sqlite.Glob("a[bx]")
 	}
 
@@ -565,11 +598,29 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseInsensitive() {
 	var posixRegexOperator condition.Operator[string]
 
 	switch getDBDialector() {
-	case condition.SQLServer, condition.SQLite:
-		log.Println("PosixRegex Case Insensitive not compatible")
-	case condition.MySQL:
-		posixRegexOperator = mysql.RegexP("^a(b|x)")
-	case condition.Postgres:
+	case cqlSQL.SQLServer, cqlSQL.SQLite:
+		_, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.String.Is().Custom(
+				mysql.Regexp("^a(b|x)"),
+			),
+		).Find()
+
+		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "operator: mysql.Regexp")
+
+		_, err = cql.Query[models.Product](
+			ts.db,
+			conditions.Product.String.Is().Custom(
+				psql.POSIXIMatch("^a(b|x)"),
+			),
+		).Find()
+
+		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "operator: psql.POSIXIMatch")
+	case cqlSQL.MySQL:
+		posixRegexOperator = mysql.Regexp("^a(b|x)")
+	case cqlSQL.Postgres:
 		posixRegexOperator = psql.POSIXIMatch("^a(b|x)")
 	}
 
@@ -666,7 +717,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchConvertibl
 
 func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvertible() {
 	switch getDBDialector() {
-	case condition.SQLite:
+	case cqlSQL.SQLite:
 		// comparisons between types are allowed and matches nothing if not convertible
 		ts.createProduct("", 0, 0, false, nil)
 		ts.createProduct("", 0, 2, false, nil)
@@ -679,7 +730,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{}, entities)
-	case condition.MySQL:
+	case cqlSQL.MySQL:
 		// comparisons between types are allowed but matches 0s if not convertible
 		match := ts.createProduct("", 0, 0, false, nil)
 		ts.createProduct("", 0, 2, false, nil)
@@ -692,14 +743,14 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{match}, entities)
-	case condition.SQLServer:
+	case cqlSQL.SQLServer:
 		// returns an error
 		_, err := cql.Query[models.Product](
 			ts.db,
 			conditions.Product.Float.Is().Unsafe().Eq("not_convertible_to_float"),
 		).Find()
 		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
-	case condition.Postgres:
+	case cqlSQL.Postgres:
 		// returns an error
 		_, err := cql.Query[models.Product](
 			ts.db,
@@ -711,7 +762,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 
 func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch() {
 	switch getDBDialector() {
-	case condition.SQLite:
+	case cqlSQL.SQLite:
 		// comparisons between fields with different types are allowed
 		match1 := ts.createProduct("0", 0, 0, false, nil)
 		match2 := ts.createProduct("1", 0, 1, false, nil)
@@ -725,7 +776,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
-	case condition.MySQL:
+	case cqlSQL.MySQL:
 		// comparisons between fields with different types are allowed but matches 0s on not convertible
 		match1 := ts.createProduct("0", 1, 0, false, nil)
 		match2 := ts.createProduct("1", 2, 1, false, nil)
@@ -739,7 +790,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 		ts.Require().NoError(err)
 
 		EqualList(&ts.Suite, []*models.Product{match1, match2, match3}, entities)
-	case condition.SQLServer:
+	case cqlSQL.SQLServer:
 		// comparisons between fields with different types are allowed and returns error only if at least one is not convertible
 		match1 := ts.createProduct("0", 1, 0, false, nil)
 		match2 := ts.createProduct("1", 2, 1, false, nil)
@@ -760,7 +811,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 			conditions.Product.Float.Is().Unsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
-	case condition.Postgres:
+	case cqlSQL.Postgres:
 		// returns an error
 		_, err := cql.Query[models.Product](
 			ts.db,

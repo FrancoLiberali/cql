@@ -67,9 +67,9 @@ In the tutorial_1.go file you will find that we can perform this query as follow
 
 .. code-block:: go
 
-    cities, err := orm.NewQuery[models.City](
+    cities, err := cql.Query[models.City](
         db,
-        conditions.City.NameIs().Eq("Paris"),
+        conditions.City.Name.Is().Eq("Paris"),
     ).Find()
 
 We can run this tutorial with `make tutorial_1` and we will obtain the following result:
@@ -96,10 +96,10 @@ In the tutorial_2.go file you will find that we can perform this query as follow
 
 .. code-block:: go
 
-    cities, err := orm.NewQuery[models.City](
+    cities, err := cql.Query[models.City](
         db,
-        conditions.City.NameIs().Eq("Paris"),
-        conditions.City.PopulationIs().Gt(1000000),
+        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Population.Is().Gt(1000000),
     ).Find()
 
 We can run this tutorial with `make tutorial_2` and we will obtain the following result:
@@ -126,9 +126,9 @@ In the tutorial_3.go file you will find that we can perform this query as follow
 
 .. code-block:: go
 
-    parisFrance, err := orm.NewQuery[models.City](
+    parisFrance, err := cql.Query[models.City](
 		db,
-		conditions.City.NameIs().Eq("Paris"),
+		conditions.City.Name.Is().Eq("Paris"),
 	).Descending(
 		conditions.City.Population,
 	).Limit(1).FindOne()
@@ -159,11 +159,11 @@ In the tutorial_4.go file you will find that we can perform this query as follow
 
 .. code-block:: go
 
-    parisFrance, err := orm.NewQuery[models.City](
+    parisFrance, err := cql.Query[models.City](
         db,
-        conditions.City.NameIs().Eq("Paris"),
+        conditions.City.Name.Is().Eq("Paris"),
         conditions.City.Country(
-            conditions.Country.NameIs().Eq("France"),
+            conditions.Country.Name.Is().Eq("France"),
         ),
     ).FindOne()
 
@@ -184,16 +184,16 @@ Tutorial 5: preloading
 
 You may have noticed that in the results of the previous tutorials the Country field of the cities was null (Country:<nil>). 
 This is because, to ensure performance, cql will retrieve only the attributes of the model 
-you are querying (City in this case because the method used is orm.NewQuery[models.City]) 
+you are querying (City in this case because the method used is cql.Query[models.City]) 
 but not of its relationships. If we also want to obtain this data, we must perform preloading.
 
 In the tutorial_5.go file you will find that we can perform this query as follows:
 
 .. code-block:: go
 
-    cities, err := orm.NewQuery[models.City](
+    cities, err := cql.Query[models.City](
         db,
-        conditions.City.NameIs().Eq("Paris"),
+        conditions.City.Name.Is().Eq("Paris"),
         conditions.City.PreloadCountry(),
     ).Find()
 
@@ -228,11 +228,11 @@ In the tutorial_6.go file you will find that we can perform this query as follow
 
 .. code-block:: go
 
-    cities, err := orm.NewQuery[models.City](
+    cities, err := cql.Query[models.City](
         db,
-        conditions.City.NameIs().Eq("Paris"),
+        conditions.City.Name.Is().Eq("Paris"),
         conditions.City.Country(
-            conditions.Country.CapitalIdIs().Dynamic().Eq(conditions.City.ID),
+            conditions.Country.CapitalID.Is().Dynamic().Eq(conditions.City.ID),
         ),
     ).Find()
 
@@ -247,3 +247,77 @@ As you can see, again we only get the Paris in France.
 
 In this tutorial we have used dynamic conditions, 
 for more details you can read :ref:`cql/advanced_query:Dynamic operators`.
+
+Tutorial 7: update
+-------------------------------
+
+So far we have only made select queries, but in this tutorial we want to edit the population of Paris.
+
+In the tutorial_7.go file you will find that we can perform this query as follows:
+
+.. code-block:: go
+
+    updated, err := cql.Update[models.City](
+        db,
+        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Country(
+            conditions.Country.Name.Is().Eq("France"),
+        ),
+    ).Returning(&cities).Set(
+        conditions.City.Population.Set().Eq(2102650),
+    )
+
+We can run this tutorial with `make tutorial_7` and we will obtain the following result:
+
+.. code-block:: bash
+
+    Updated 1 city: {{eaa480a3-694e-4be3-9af5-ad935cdd57e2 2023-08-11 16:43:27.451393348 +0200 +0200 2023-12-21 10:02:36.420763701 -0300 -0300 {0001-01-01 00:00:00 +0000 UTC false}} Paris 2102650 <nil> 3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
+    Initial population was 2161000
+
+As you can see, first we can know the number of updated models with the value "updated" returned by the Set method 
+(according to the number of models that meet the conditions entered in the Update method). 
+On the other hand, it is also possible to obtain the information of the updated models using the Returning method.
+
+In this tutorial we have used updates, 
+for more details you can read :ref:`cql/update`.
+
+Tutorial 8: create and delete
+-------------------------------
+
+In this tutorial we want to create a new city called Rennes and then delete it.
+
+In the tutorial_8.go file you will find that we can perform this query as follows:
+
+Create:
+
+.. code-block:: go
+
+    rennes := models.City{
+        Country:    france,
+        Name:       "Rennes",
+        Population: 215366,
+    }
+    if err := db.Create(&rennes).Error; err != nil {
+        log.Panicln(err)
+    }
+
+Delete:
+
+.. code-block:: go
+
+    deleted, err := cql.Delete[models.City](
+		db,
+		conditions.City.Name.Is().Eq("Rennes"),
+	).Exec()
+
+We can run this tutorial with `make tutorial_8` and we will obtain the following result:
+
+.. code-block:: bash
+
+    Deleted 1 city
+
+Here, we simply get the number of deleted models through the "deleted" variable returned by the Exec method 
+(according to the number of models that meet the conditions entered in the Delete method).
+
+In this tutorial we have used create and delete, 
+for more details you can read :ref:`cql/create` and :ref:`cql/delete`.

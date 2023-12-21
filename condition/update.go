@@ -4,12 +4,14 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/FrancoLiberali/cql/sql"
 )
 
 type Update[T model.Model] struct {
 	OrderLimitReturning[T]
 }
 
+// Set allows updating multiple attributes of the same table.
 func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
 	setsAsInterface := []ISet{}
 	for _, set := range sets {
@@ -19,14 +21,14 @@ func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
 	return update.unsafeSet(setsAsInterface)
 }
 
+// SetMultiple allows updating multiple tables in the same query.
+//
 // available for: mysql
 func (update *Update[T]) SetMultiple(sets ...ISet) (int64, error) {
-	// TODO hacer lo mismo con todos los operadores
-	if update.query.gormQuery.Dialector() != MySQL {
+	if update.query.gormQuery.Dialector() != sql.MySQL {
 		update.query.addError(methodError(ErrUnsupportedByDatabase, "SetMultiple"))
 	}
 
-	// TODO que pasa si esta vacio?
 	return update.unsafeSet(sets)
 }
 
@@ -80,7 +82,6 @@ func (update *Update[T]) Limit(limit int) *Update[T] {
 //
 // warning: in sqlite preloads are not allowed
 func (update *Update[T]) Returning(dest *[]T) *Update[T] {
-	// TODO hacer el update del logger para que no muestre internals de ditrit/gorm
 	update.OrderLimitReturning.Returning(dest)
 
 	return update
@@ -96,14 +97,12 @@ func NewUpdate[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Update[T
 	}
 }
 
-// TODO mover todo esto
 type ISet interface {
 	Field() IField
 	Value() any
 	JoinNumber() int
 }
 
-// TODO ver donde pongo esto
 type Set[T model.Model] struct {
 	field      IField
 	value      any
@@ -122,10 +121,8 @@ func (set Set[T]) JoinNumber() int {
 	return set.joinNumber
 }
 
-// TODO ver donde pongo esto
-// TODO nombre muy parecido
 type FieldSet[TModel model.Model, TAttribute any] struct {
-	Field Field[TModel, TAttribute]
+	Field UpdatableField[TModel, TAttribute]
 }
 
 func (set FieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
@@ -148,5 +145,16 @@ func (set FieldSet[TModel, TAttribute]) Unsafe(value any) *Set[TModel] {
 	return &Set[TModel]{
 		field: set.Field,
 		value: value,
+	}
+}
+
+type NullableFieldSet[TModel model.Model, TAttribute any] struct {
+	FieldSet[TModel, TAttribute]
+}
+
+func (set NullableFieldSet[TModel, TAttribute]) Null() *Set[TModel] {
+	return &Set[TModel]{
+		field: set.Field,
+		value: nil,
 	}
 }

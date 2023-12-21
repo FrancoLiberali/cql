@@ -19,7 +19,7 @@ type ConditionsGenerator struct {
 func NewConditionsGenerator(object types.Object) *ConditionsGenerator {
 	return &ConditionsGenerator{
 		object:     object,
-		objectType: Type{object.Type()},
+		objectType: Type{Type: object.Type()},
 	}
 }
 

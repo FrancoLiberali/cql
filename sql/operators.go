@@ -92,7 +92,28 @@ var operatorToName = map[Operator]string{
 	MySQLNullSafeEqual:    "IsNotDistinct",
 	PostgreSQLILike:       "psql.ILike",
 	PostgreSQLSimilarTo:   "psql.SimilarTo",
-	PostgreSQLPosixMatch:  "psql.PosixMatch",
-	PostgreSQLPosixIMatch: "psql.PosixIMatch",
+	PostgreSQLPosixMatch:  "psql.POSIXMatch",
+	PostgreSQLPosixIMatch: "psql.POSIXIMatch",
 	SQLiteGlob:            "sqlite.Glob",
+}
+
+func (op Operator) Supports(dialector Dialector) bool {
+	supportedDialector, present := operatorDialector[op]
+	if !present {
+		// supports all dialectors
+		return true
+	}
+
+	return supportedDialector == dialector
+}
+
+var operatorDialector = map[Operator]Dialector{ //nolint:exhaustive // missing key is supported
+	MySQLXor:              MySQL,
+	MySQLRegexp:           MySQL,
+	MySQLNullSafeEqual:    MySQL,
+	PostgreSQLILike:       Postgres,
+	PostgreSQLSimilarTo:   Postgres,
+	PostgreSQLPosixMatch:  Postgres,
+	PostgreSQLPosixIMatch: Postgres,
+	SQLiteGlob:            SQLite,
 }

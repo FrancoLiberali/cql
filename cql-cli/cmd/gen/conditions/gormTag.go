@@ -14,6 +14,7 @@ const (
 	columnTagName         GormTag = "column"
 	foreignKeyTagName     GormTag = "foreignKey"
 	referencesTagName     GormTag = "references"
+	notNullTagName        GormTag = "not null"
 )
 
 type GormTags map[GormTag]string
@@ -28,7 +29,15 @@ func (tags GormTags) getEmbeddedPrefix() string {
 }
 
 func (tags GormTags) hasEmbedded() bool {
-	_, isPresent := tags[embeddedTagName]
+	return tags.hasTag(embeddedTagName)
+}
+
+func (tags GormTags) hasNotNull() bool {
+	return tags.hasTag(notNullTagName)
+}
+
+func (tags GormTags) hasTag(name GormTag) bool {
+	_, isPresent := tags[name]
 	return isPresent
 }
 

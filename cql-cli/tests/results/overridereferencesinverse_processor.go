@@ -17,7 +17,7 @@ type processorConditions struct {
 }
 
 var Processor = processorConditions{
-	ComputerName: condition.StringField[overridereferencesinverse.Processor]{Field: condition.Field[overridereferencesinverse.Processor, string]{Name: "ComputerName"}},
+	ComputerName: condition.StringField[overridereferencesinverse.Processor]{UpdatableField: condition.UpdatableField[overridereferencesinverse.Processor, string]{Field: condition.Field[overridereferencesinverse.Processor, string]{Name: "ComputerName"}}},
 	CreatedAt:    condition.Field[overridereferencesinverse.Processor, time.Time]{Name: "CreatedAt"},
 	DeletedAt:    condition.Field[overridereferencesinverse.Processor, time.Time]{Name: "DeletedAt"},
 	ID:           condition.Field[overridereferencesinverse.Processor, model.UUID]{Name: "ID"},

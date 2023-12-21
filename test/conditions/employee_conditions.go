@@ -21,15 +21,15 @@ type employeeConditions struct {
 	UpdatedAt condition.Field[models.Employee, time.Time]
 	DeletedAt condition.Field[models.Employee, time.Time]
 	Name      condition.StringField[models.Employee]
-	BossID    condition.Field[models.Employee, model.UUID]
+	BossID    condition.NullableField[models.Employee, model.UUID]
 }
 
 var Employee = employeeConditions{
-	BossID:    condition.Field[models.Employee, model.UUID]{Name: "BossID"},
+	BossID:    condition.NullableField[models.Employee, model.UUID]{UpdatableField: condition.UpdatableField[models.Employee, model.UUID]{Field: condition.Field[models.Employee, model.UUID]{Name: "BossID"}}},
 	CreatedAt: condition.Field[models.Employee, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[models.Employee, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[models.Employee, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.Employee]{Field: condition.Field[models.Employee, string]{Name: "Name"}},
+	Name:      condition.StringField[models.Employee]{UpdatableField: condition.UpdatableField[models.Employee, string]{Field: condition.Field[models.Employee, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[models.Employee, time.Time]{Name: "UpdatedAt"},
 }
 

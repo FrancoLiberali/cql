@@ -20,7 +20,7 @@ var Brand = brandConditions{
 	CreatedAt: condition.Field[overridereferences.Brand, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[overridereferences.Brand, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[overridereferences.Brand, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[overridereferences.Brand]{Field: condition.Field[overridereferences.Brand, string]{Name: "Name"}},
+	Name:      condition.StringField[overridereferences.Brand]{UpdatableField: condition.UpdatableField[overridereferences.Brand, string]{Field: condition.Field[overridereferences.Brand, string]{Name: "Name"}}},
 	UpdatedAt: condition.Field[overridereferences.Brand, time.Time]{Name: "UpdatedAt"},
 }
 

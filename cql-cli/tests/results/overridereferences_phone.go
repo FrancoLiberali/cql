@@ -24,7 +24,7 @@ type phoneConditions struct {
 }
 
 var Phone = phoneConditions{
-	BrandName: condition.StringField[overridereferences.Phone]{Field: condition.Field[overridereferences.Phone, string]{Name: "BrandName"}},
+	BrandName: condition.StringField[overridereferences.Phone]{UpdatableField: condition.UpdatableField[overridereferences.Phone, string]{Field: condition.Field[overridereferences.Phone, string]{Name: "BrandName"}}},
 	CreatedAt: condition.Field[overridereferences.Phone, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[overridereferences.Phone, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[overridereferences.Phone, model.UUID]{Name: "ID"},

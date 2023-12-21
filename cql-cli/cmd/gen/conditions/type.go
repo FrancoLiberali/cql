@@ -39,6 +39,8 @@ var ErrFkNotInTypeFields = errors.New("fk not in type's fields")
 
 type Type struct {
 	types.Type
+
+	wasPointer bool
 }
 
 // Get the name of the type depending of the internal type
@@ -139,4 +141,9 @@ func (t Type) IsGormCustomType() bool {
 // Returns true if the type is a sql nullable type (sql.NullBool, sql.NullInt, etc.)
 func (t Type) IsSQLNullableType() bool {
 	return pie.Contains(sqlNullableTypes, t.String())
+}
+
+// Returns true if the type used to be a pointer (pointers are transformed into the pointed type)
+func (t Type) WasPointer() bool {
+	return t.wasPointer
 }

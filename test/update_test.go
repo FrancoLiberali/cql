@@ -1,11 +1,14 @@
 package test
 
 import (
+	"database/sql"
+
 	"gorm.io/gorm"
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
+	cqlSQL "github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -216,6 +219,105 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	ts.NotEqual(match.UpdatedAt.UnixMicro(), sale.UpdatedAt.UnixMicro())
 }
 
+func (ts *UpdateIntTestSuite) TestUpdateSetNull() {
+	product := ts.createProduct("", 0, 0, false, nil)
+	product.NullFloat = sql.NullFloat64{Valid: true, Float64: 1.3}
+	err := ts.db.Save(product).Error
+	ts.Require().NoError(err)
+
+	updated, err := cql.Update[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(0),
+	).Set(
+		conditions.Product.NullFloat.Set().Null(),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.NullFloat.Is().Null(),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(product.ID, productReturned.ID)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateSetNullForBool() {
+	product := ts.createProduct("", 0, 0, false, nil)
+	product.NullBool = sql.NullBool{Valid: true, Bool: true}
+	err := ts.db.Save(product).Error
+	ts.Require().NoError(err)
+
+	updated, err := cql.Update[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(0),
+	).Set(
+		conditions.Product.NullBool.Set().Null(),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.NullBool.Is().Unknown(),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(product.ID, productReturned.ID)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNewValue() {
+	company := ts.createCompany("mcdonald's")
+	company2 := ts.createCompany("burger king")
+	seller := ts.createSeller("franco", company)
+
+	updated, err := cql.Update[models.Seller](
+		ts.db,
+		conditions.Seller.Name.Is().Eq("franco"),
+	).Set(
+		conditions.Seller.CompanyID.Set().Eq(company2.ID),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	sellerReturned, err := cql.Query[models.Seller](
+		ts.db,
+		conditions.Seller.Company(
+			conditions.Company.Name.Is().Eq("burger king"),
+		),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(seller.ID, sellerReturned.ID)
+	ts.NotEqual(seller.UpdatedAt.UnixMicro(), sellerReturned.UpdatedAt.UnixMicro())
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNull() {
+	company := ts.createCompany("mcdonald's")
+	seller := ts.createSeller("franco", company)
+
+	updated, err := cql.Update[models.Seller](
+		ts.db,
+		conditions.Seller.Name.Is().Eq("franco"),
+	).Set(
+		conditions.Seller.CompanyID.Set().Null(),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	sellerReturned, err := cql.Query[models.Seller](
+		ts.db,
+		conditions.Seller.CompanyID.Is().Null(),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(seller.ID, sellerReturned.ID)
+	ts.NotEqual(seller.UpdatedAt.UnixMicro(), sellerReturned.UpdatedAt.UnixMicro())
+}
+
 func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	google := ts.createBrand("google")
 	apple := ts.createBrand("apple")
@@ -322,13 +424,13 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case condition.MySQL:
+	case cqlSQL.MySQL:
 		_, err := cql.Update[models.Phone](
 			ts.db,
 		).Returning(nil).Set()
 		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
-	case condition.Postgres, condition.SQLite, condition.SQLServer:
+	case cqlSQL.Postgres, cqlSQL.SQLite, cqlSQL.SQLServer:
 		product := ts.createProduct("", 0, 0, false, nil)
 
 		productsReturned := []models.Product{}
@@ -352,7 +454,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 	switch getDBDialector() {
 	// update returning with preload only supported for postgres
-	case condition.SQLite, condition.SQLServer:
+	case cqlSQL.SQLite, cqlSQL.SQLServer:
 		salesReturned := []models.Sale{}
 		_, err := cql.Update[models.Sale](
 			ts.db,
@@ -364,7 +466,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		ts.ErrorIs(err, condition.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database")
 		ts.ErrorContains(err, "method: Returning")
-	case condition.Postgres:
+	case cqlSQL.Postgres:
 		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
 		product2 := ts.createProduct("", 2, 0.0, false, nil)
 
@@ -395,7 +497,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 	// update returning with preloads only supported for postgres
-	if getDBDialector() != condition.Postgres {
+	if getDBDialector() != cqlSQL.Postgres {
 		return
 	}
 
@@ -439,7 +541,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 	switch getDBDialector() {
 	// update returning only supported for postgres, sqlite, sqlserver
-	case condition.Postgres, condition.SQLite, condition.SQLServer:
+	case cqlSQL.Postgres, cqlSQL.SQLite, cqlSQL.SQLServer:
 		company := ts.createCompany("ditrit")
 		seller1 := ts.createSeller("1", company)
 		seller2 := ts.createSeller("2", company)
@@ -468,7 +570,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	// update join only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Phone](
 			ts.db,
 		).SetMultiple()
@@ -517,7 +619,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoined() {
 	// update join only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		return
 	}
 
@@ -533,7 +635,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoin
 
 func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),
@@ -573,7 +675,7 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 
 func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 	// update order by limit only supported for mysql
-	if getDBDialector() != condition.MySQL {
+	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Product](
 			ts.db,
 			conditions.Product.Bool.Is().False(),

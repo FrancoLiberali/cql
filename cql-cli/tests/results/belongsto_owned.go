@@ -20,14 +20,14 @@ type ownedConditions struct {
 	CreatedAt condition.Field[belongsto.Owned, time.Time]
 	UpdatedAt condition.Field[belongsto.Owned, time.Time]
 	DeletedAt condition.Field[belongsto.Owned, time.Time]
-	OwnerID   condition.Field[belongsto.Owned, model.UUID]
+	OwnerID   condition.UpdatableField[belongsto.Owned, model.UUID]
 }
 
 var Owned = ownedConditions{
 	CreatedAt: condition.Field[belongsto.Owned, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[belongsto.Owned, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[belongsto.Owned, model.UUID]{Name: "ID"},
-	OwnerID:   condition.Field[belongsto.Owned, model.UUID]{Name: "OwnerID"},
+	OwnerID:   condition.UpdatableField[belongsto.Owned, model.UUID]{Field: condition.Field[belongsto.Owned, model.UUID]{Name: "OwnerID"}},
 	UpdatedAt: condition.Field[belongsto.Owned, time.Time]{Name: "UpdatedAt"},
 }
 

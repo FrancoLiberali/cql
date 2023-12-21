@@ -13,48 +13,48 @@ type basicSlicesConditions struct {
 	CreatedAt  condition.Field[basicslices.BasicSlices, time.Time]
 	UpdatedAt  condition.Field[basicslices.BasicSlices, time.Time]
 	DeletedAt  condition.Field[basicslices.BasicSlices, time.Time]
-	Bool       condition.Field[basicslices.BasicSlices, []bool]
-	Int        condition.Field[basicslices.BasicSlices, []int]
-	Int8       condition.Field[basicslices.BasicSlices, []int8]
-	Int16      condition.Field[basicslices.BasicSlices, []int16]
-	Int32      condition.Field[basicslices.BasicSlices, []int32]
-	Int64      condition.Field[basicslices.BasicSlices, []int64]
-	UInt       condition.Field[basicslices.BasicSlices, []uint]
-	UInt8      condition.Field[basicslices.BasicSlices, []uint8]
-	UInt16     condition.Field[basicslices.BasicSlices, []uint16]
-	UInt32     condition.Field[basicslices.BasicSlices, []uint32]
-	UInt64     condition.Field[basicslices.BasicSlices, []uint64]
-	UIntptr    condition.Field[basicslices.BasicSlices, []uintptr]
-	Float32    condition.Field[basicslices.BasicSlices, []float32]
-	Float64    condition.Field[basicslices.BasicSlices, []float64]
-	Complex64  condition.Field[basicslices.BasicSlices, []complex64]
-	Complex128 condition.Field[basicslices.BasicSlices, []complex128]
-	String     condition.Field[basicslices.BasicSlices, []string]
-	Byte       condition.Field[basicslices.BasicSlices, []uint8]
+	Bool       condition.UpdatableField[basicslices.BasicSlices, []bool]
+	Int        condition.UpdatableField[basicslices.BasicSlices, []int]
+	Int8       condition.UpdatableField[basicslices.BasicSlices, []int8]
+	Int16      condition.UpdatableField[basicslices.BasicSlices, []int16]
+	Int32      condition.UpdatableField[basicslices.BasicSlices, []int32]
+	Int64      condition.UpdatableField[basicslices.BasicSlices, []int64]
+	UInt       condition.UpdatableField[basicslices.BasicSlices, []uint]
+	UInt8      condition.UpdatableField[basicslices.BasicSlices, []uint8]
+	UInt16     condition.UpdatableField[basicslices.BasicSlices, []uint16]
+	UInt32     condition.UpdatableField[basicslices.BasicSlices, []uint32]
+	UInt64     condition.UpdatableField[basicslices.BasicSlices, []uint64]
+	UIntptr    condition.UpdatableField[basicslices.BasicSlices, []uintptr]
+	Float32    condition.UpdatableField[basicslices.BasicSlices, []float32]
+	Float64    condition.UpdatableField[basicslices.BasicSlices, []float64]
+	Complex64  condition.UpdatableField[basicslices.BasicSlices, []complex64]
+	Complex128 condition.UpdatableField[basicslices.BasicSlices, []complex128]
+	String     condition.UpdatableField[basicslices.BasicSlices, []string]
+	Byte       condition.UpdatableField[basicslices.BasicSlices, []uint8]
 }
 
 var BasicSlices = basicSlicesConditions{
-	Bool:       condition.Field[basicslices.BasicSlices, []bool]{Name: "Bool"},
-	Byte:       condition.Field[basicslices.BasicSlices, []uint8]{Name: "Byte"},
-	Complex128: condition.Field[basicslices.BasicSlices, []complex128]{Name: "Complex128"},
-	Complex64:  condition.Field[basicslices.BasicSlices, []complex64]{Name: "Complex64"},
+	Bool:       condition.UpdatableField[basicslices.BasicSlices, []bool]{Field: condition.Field[basicslices.BasicSlices, []bool]{Name: "Bool"}},
+	Byte:       condition.UpdatableField[basicslices.BasicSlices, []uint8]{Field: condition.Field[basicslices.BasicSlices, []uint8]{Name: "Byte"}},
+	Complex128: condition.UpdatableField[basicslices.BasicSlices, []complex128]{Field: condition.Field[basicslices.BasicSlices, []complex128]{Name: "Complex128"}},
+	Complex64:  condition.UpdatableField[basicslices.BasicSlices, []complex64]{Field: condition.Field[basicslices.BasicSlices, []complex64]{Name: "Complex64"}},
 	CreatedAt:  condition.Field[basicslices.BasicSlices, time.Time]{Name: "CreatedAt"},
 	DeletedAt:  condition.Field[basicslices.BasicSlices, time.Time]{Name: "DeletedAt"},
-	Float32:    condition.Field[basicslices.BasicSlices, []float32]{Name: "Float32"},
-	Float64:    condition.Field[basicslices.BasicSlices, []float64]{Name: "Float64"},
+	Float32:    condition.UpdatableField[basicslices.BasicSlices, []float32]{Field: condition.Field[basicslices.BasicSlices, []float32]{Name: "Float32"}},
+	Float64:    condition.UpdatableField[basicslices.BasicSlices, []float64]{Field: condition.Field[basicslices.BasicSlices, []float64]{Name: "Float64"}},
 	ID:         condition.Field[basicslices.BasicSlices, model.UUID]{Name: "ID"},
-	Int:        condition.Field[basicslices.BasicSlices, []int]{Name: "Int"},
-	Int16:      condition.Field[basicslices.BasicSlices, []int16]{Name: "Int16"},
-	Int32:      condition.Field[basicslices.BasicSlices, []int32]{Name: "Int32"},
-	Int64:      condition.Field[basicslices.BasicSlices, []int64]{Name: "Int64"},
-	Int8:       condition.Field[basicslices.BasicSlices, []int8]{Name: "Int8"},
-	String:     condition.Field[basicslices.BasicSlices, []string]{Name: "String"},
-	UInt:       condition.Field[basicslices.BasicSlices, []uint]{Name: "UInt"},
-	UInt16:     condition.Field[basicslices.BasicSlices, []uint16]{Name: "UInt16"},
-	UInt32:     condition.Field[basicslices.BasicSlices, []uint32]{Name: "UInt32"},
-	UInt64:     condition.Field[basicslices.BasicSlices, []uint64]{Name: "UInt64"},
-	UInt8:      condition.Field[basicslices.BasicSlices, []uint8]{Name: "UInt8"},
-	UIntptr:    condition.Field[basicslices.BasicSlices, []uintptr]{Name: "UIntptr"},
+	Int:        condition.UpdatableField[basicslices.BasicSlices, []int]{Field: condition.Field[basicslices.BasicSlices, []int]{Name: "Int"}},
+	Int16:      condition.UpdatableField[basicslices.BasicSlices, []int16]{Field: condition.Field[basicslices.BasicSlices, []int16]{Name: "Int16"}},
+	Int32:      condition.UpdatableField[basicslices.BasicSlices, []int32]{Field: condition.Field[basicslices.BasicSlices, []int32]{Name: "Int32"}},
+	Int64:      condition.UpdatableField[basicslices.BasicSlices, []int64]{Field: condition.Field[basicslices.BasicSlices, []int64]{Name: "Int64"}},
+	Int8:       condition.UpdatableField[basicslices.BasicSlices, []int8]{Field: condition.Field[basicslices.BasicSlices, []int8]{Name: "Int8"}},
+	String:     condition.UpdatableField[basicslices.BasicSlices, []string]{Field: condition.Field[basicslices.BasicSlices, []string]{Name: "String"}},
+	UInt:       condition.UpdatableField[basicslices.BasicSlices, []uint]{Field: condition.Field[basicslices.BasicSlices, []uint]{Name: "UInt"}},
+	UInt16:     condition.UpdatableField[basicslices.BasicSlices, []uint16]{Field: condition.Field[basicslices.BasicSlices, []uint16]{Name: "UInt16"}},
+	UInt32:     condition.UpdatableField[basicslices.BasicSlices, []uint32]{Field: condition.Field[basicslices.BasicSlices, []uint32]{Name: "UInt32"}},
+	UInt64:     condition.UpdatableField[basicslices.BasicSlices, []uint64]{Field: condition.Field[basicslices.BasicSlices, []uint64]{Name: "UInt64"}},
+	UInt8:      condition.UpdatableField[basicslices.BasicSlices, []uint8]{Field: condition.Field[basicslices.BasicSlices, []uint8]{Name: "UInt8"}},
+	UIntptr:    condition.UpdatableField[basicslices.BasicSlices, []uintptr]{Field: condition.Field[basicslices.BasicSlices, []uintptr]{Name: "UIntptr"}},
 	UpdatedAt:  condition.Field[basicslices.BasicSlices, time.Time]{Name: "UpdatedAt"},
 }
 
