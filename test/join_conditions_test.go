@@ -4,7 +4,6 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 	"github.com/FrancoLiberali/cql/unsafe"
@@ -401,7 +400,7 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturns
 			cql.Not[models.Product](),
 		),
 	).Find()
-	ts.ErrorIs(err, condition.ErrEmptyConditions)
+	ts.ErrorIs(err, cql.ErrEmptyConditions)
 	ts.ErrorContains(err, "connector: Not; model: models.Product")
 }
 
@@ -454,7 +453,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelRetur
 		ts.db,
 		conditions.Child.ID.Is().Dynamic().Eq(conditions.ParentParent.ID),
 	).Find()
-	ts.ErrorIs(err, condition.ErrFieldModelNotConcerned)
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
@@ -469,7 +468,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		),
 		conditions.Child.ID.Is().Dynamic().Eq(conditions.ParentParent.ID),
 	).Find()
-	ts.ErrorIs(err, condition.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
@@ -510,6 +509,6 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 			conditions.ParentParent.ID,
 		),
 	).Find()
-	ts.ErrorIs(err, condition.ErrJoinMustBeSelected)
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Between; model: models.Child, field: ID")
 }
