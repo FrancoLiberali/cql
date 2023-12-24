@@ -97,7 +97,7 @@ which means a big risk of making decisions in our business logic on incomplete i
 
 For this reason, cql provides the Relation getters. 
 These are methods that will be added to your models to safely navigate a relation, 
-responding `condition.ErrRelationNotLoaded` in case you try to navigate a relation 
+responding `cql.ErrRelationNotLoaded` in case you try to navigate a relation 
 that was not loaded from the database. 
 They are created in a file called cql.go in your model package when 
 :ref:`generating conditions <cql/concepts:conditions generation>`.
@@ -126,7 +126,7 @@ Here is an example of its use:
         if err == nil {
             // you can safely apply your business logic
         } else {
-            // err is condition.ErrRelationNotLoaded
+            // err is cql.ErrRelationNotLoaded
         }
     }
 

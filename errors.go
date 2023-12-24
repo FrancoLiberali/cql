@@ -2,6 +2,7 @@ package cql
 
 import (
 	"github.com/FrancoLiberali/cql/condition"
+	"github.com/FrancoLiberali/cql/preload"
 )
 
 var (
@@ -19,4 +20,7 @@ var (
 
 	ErrUnsupportedByDatabase = condition.ErrUnsupportedByDatabase
 	ErrOrderByMustBeCalled   = condition.ErrOrderByMustBeCalled
+
+	// preload
+	ErrRelationNotLoaded = preload.ErrRelationNotLoaded
 )

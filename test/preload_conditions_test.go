@@ -9,7 +9,6 @@ import (
 
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/model"
-	"github.com/FrancoLiberali/cql/preload"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -42,11 +41,11 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadReturnsErrorOnGetRelation(
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
+	ts.ErrorIs(err, cql.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)       // is nil but we cant determine why directly (not loaded or really null)
 	_, err = saleLoaded.GetSeller() // GetSeller give us that information
-	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
+	ts.ErrorIs(err, cql.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyNull() {
@@ -62,7 +61,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadWhenItsNullKnowsItsReallyN
 
 	ts.False(saleLoaded.Product.IsLoaded())
 	_, err = saleLoaded.GetProduct()
-	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
+	ts.ErrorIs(err, cql.ErrRelationNotLoaded)
 
 	ts.Nil(saleLoaded.Seller)                 // is nil but we cant determine why directly (not loaded or really null)
 	saleSeller, err := saleLoaded.GetSeller() // GetSeller give us that information
@@ -205,7 +204,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 		// the not null one is not loaded
 		sellerCompany, err := saleSeller.GetCompany()
-		return errors.Is(err, preload.ErrRelationNotLoaded) && sellerCompany == nil
+		return errors.Is(err, cql.ErrRelationNotLoaded) && sellerCompany == nil
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
 		saleSeller, err := sale.GetSeller()
@@ -357,7 +356,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadOneToOne() {
 
 	EqualList(&ts.Suite, []*models.City{&capital1}, entities)
 	_, err = entities[0].GetCountry()
-	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
+	ts.ErrorIs(err, cql.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
@@ -751,7 +750,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadCollection() {
 
 	EqualList(&ts.Suite, []*models.Company{company}, entities)
 	_, err = entities[0].GetSellers()
-	ts.ErrorIs(err, preload.ErrRelationNotLoaded)
+	ts.ErrorIs(err, cql.ErrRelationNotLoaded)
 }
 
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
