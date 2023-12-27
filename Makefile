@@ -37,7 +37,7 @@ test_sqlite:
 test_sqlserver: sqlserver
 	DB=sqlserver gotestsum --format testname ./...
 
-test: test_postgresql
+test: test_sqlite
 
 .PHONY: test
 
