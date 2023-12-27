@@ -47,7 +47,7 @@ type joinConditionImpl[T1, T2 model.Model] struct {
 	T1PreloadCondition Condition[T1]
 }
 
-func (condition joinConditionImpl[T1, T2]) InterfaceVerificationMethod(_ T1) {
+func (condition joinConditionImpl[T1, T2]) interfaceVerificationMethod(_ T1) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
@@ -75,7 +75,7 @@ func (condition joinConditionImpl[T1, T2]) makesFilter() bool {
 // Applies a join between the tables of T1 and T2
 // previousTableName is the name of the table of T1
 // It also applies the nested conditions
-func (condition joinConditionImpl[T1, T2]) ApplyTo(query *GormQuery, t1Table Table) error {
+func (condition joinConditionImpl[T1, T2]) applyTo(query *GormQuery, t1Table Table) error {
 	whereConditions, joinConditions, t2PreloadCondition := divideConditionsByType(condition.Conditions)
 
 	// get the sql to do the join with T2
@@ -95,7 +95,7 @@ func (condition joinConditionImpl[T1, T2]) ApplyTo(query *GormQuery, t1Table Tab
 	// and this is not first level (T1 is the type of the repository)
 	// because T1 is always loaded in that case
 	if condition.makesPreload() && !t1Table.IsInitial() {
-		err = condition.T1PreloadCondition.ApplyTo(query, t1Table)
+		err = condition.T1PreloadCondition.applyTo(query, t1Table)
 		if err != nil {
 			return err
 		}
@@ -103,7 +103,7 @@ func (condition joinConditionImpl[T1, T2]) ApplyTo(query *GormQuery, t1Table Tab
 
 	// apply T2 preload condition
 	if t2PreloadCondition != nil {
-		err = t2PreloadCondition.ApplyTo(query, t2Table)
+		err = t2PreloadCondition.applyTo(query, t2Table)
 		if err != nil {
 			return err
 		}
@@ -111,7 +111,7 @@ func (condition joinConditionImpl[T1, T2]) ApplyTo(query *GormQuery, t1Table Tab
 
 	// apply nested joins
 	for _, joinCondition := range joinConditions {
-		err = joinCondition.ApplyTo(query, t2Table)
+		err = joinCondition.applyTo(query, t2Table)
 		if err != nil {
 			return err
 		}
@@ -136,7 +136,7 @@ func (condition joinConditionImpl[T1, T2]) addJoin(query *GormQuery, t1Table, t2
 	// apply WhereConditions to the join in the "on" clause
 	connectionCondition := And(whereConditions...)
 
-	onQuery, onValues, err := connectionCondition.GetSQL(query, t2Table)
+	onQuery, onValues, err := connectionCondition.getSQL(query, t2Table)
 	if err != nil {
 		return err
 	}
@@ -145,7 +145,7 @@ func (condition joinConditionImpl[T1, T2]) addJoin(query *GormQuery, t1Table, t2
 		joinQuery += clause.AndWithSpace + onQuery
 	}
 
-	if !connectionCondition.AffectsDeletedAt() {
+	if !connectionCondition.affectsDeletedAt() {
 		joinQuery += fmt.Sprintf(
 			clause.AndWithSpace+"%s.deleted_at IS NULL",
 			t2Table.Alias,

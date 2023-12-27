@@ -13,12 +13,12 @@ type collectionPreloadCondition[T1, T2 model.Model] struct {
 	NestedPreloads  []JoinCondition[T2]
 }
 
-func (condition collectionPreloadCondition[T1, T2]) InterfaceVerificationMethod(_ T1) {
+func (condition collectionPreloadCondition[T1, T2]) interfaceVerificationMethod(_ T1) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T1]
 }
 
-func (condition collectionPreloadCondition[T1, T2]) ApplyTo(query *GormQuery, _ Table) error {
+func (condition collectionPreloadCondition[T1, T2]) applyTo(query *GormQuery, _ Table) error {
 	if len(condition.NestedPreloads) == 0 {
 		query.Preload(condition.CollectionField)
 		return nil
