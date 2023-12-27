@@ -16,21 +16,24 @@ type connectionCondition[T model.Model] struct {
 	Conditions []WhereCondition[T]
 }
 
-func (condition connectionCondition[T]) InterfaceVerificationMethod(_ T) {
+//nolint:unused // is used
+func (condition connectionCondition[T]) interfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
 
-func (condition connectionCondition[T]) ApplyTo(query *GormQuery, table Table) error {
+//nolint:unused // is used
+func (condition connectionCondition[T]) applyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }
 
-func (condition connectionCondition[T]) GetSQL(query *GormQuery, table Table) (string, []any, error) {
+//nolint:unused // is used
+func (condition connectionCondition[T]) getSQL(query *GormQuery, table Table) (string, []any, error) {
 	sqlStrings := []string{}
 	values := []any{}
 
 	for _, internalCondition := range condition.Conditions {
-		internalSQLString, internalValues, err := internalCondition.GetSQL(query, table)
+		internalSQLString, internalValues, err := internalCondition.getSQL(query, table)
 		if err != nil {
 			return "", nil, err
 		}
@@ -46,9 +49,10 @@ func (condition connectionCondition[T]) GetSQL(query *GormQuery, table Table) (s
 	), values, nil
 }
 
-func (condition connectionCondition[T]) AffectsDeletedAt() bool {
+//nolint:unused // is used
+func (condition connectionCondition[T]) affectsDeletedAt() bool {
 	return pie.Any(condition.Conditions, func(internalCondition WhereCondition[T]) bool {
-		return internalCondition.AffectsDeletedAt()
+		return internalCondition.affectsDeletedAt()
 	})
 }
 

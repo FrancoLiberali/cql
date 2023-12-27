@@ -5,20 +5,24 @@ type invalidCondition[T any] struct {
 	Err error
 }
 
-func (condition invalidCondition[T]) InterfaceVerificationMethod(_ T) {
+//nolint:unused // is used
+func (condition invalidCondition[T]) interfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
 
-func (condition invalidCondition[T]) ApplyTo(_ *GormQuery, _ Table) error {
+//nolint:unused // is used
+func (condition invalidCondition[T]) applyTo(_ *GormQuery, _ Table) error {
 	return condition.Err
 }
 
-func (condition invalidCondition[T]) GetSQL(_ *GormQuery, _ Table) (string, []any, error) {
+//nolint:unused // is used
+func (condition invalidCondition[T]) getSQL(_ *GormQuery, _ Table) (string, []any, error) {
 	return "", nil, condition.Err
 }
 
-func (condition invalidCondition[T]) AffectsDeletedAt() bool {
+//nolint:unused // is used
+func (condition invalidCondition[T]) affectsDeletedAt() bool {
 	return false
 }
 

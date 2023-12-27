@@ -41,7 +41,6 @@ func (cg ConditionsGenerator) Into(file *File) error {
 	)
 
 	fieldIdentifiers := []jen.Code{}
-	relationPreloads := []jen.Code{}
 
 	conditionsModelType := getConditionsModelType(objectName)
 	conditionsModelAttributesDef := []jen.Code{}
@@ -65,38 +64,14 @@ func (cg ConditionsGenerator) Into(file *File) error {
 		// add the preload to the list of all possible preloads
 		if condition.PreloadRelationMethod != nil {
 			file.Add(condition.PreloadRelationMethod)
-			relationPreloads = append(
-				relationPreloads,
-				jen.Id(conditionsModelType).Dot(condition.PreloadRelationName).Call(),
-			)
 		}
 	}
 
 	addConditionsModelDefinition(file, conditionsModelType, conditionsModelAttributesDef)
 	addConditionsModelInstantiation(file, objectName, conditionsModelType, conditionsModelAttributesIns)
 	addPreloadMethod(file, objectName, objectQual, conditionsModelType, fieldIdentifiers)
-	addPreloadRelationsMethod(file, objectName, objectQual, conditionsModelType, relationPreloads)
 
 	return nil
-}
-
-func addPreloadRelationsMethod(file *File, objectName string, objectQual *jen.Statement, conditionsModelType string, relationPreloads []jen.Code) {
-	if len(relationPreloads) > 0 {
-		condition := jen.Index().Add(jen.Qual(
-			conditionPath, cqlCondition,
-		)).Types(
-			objectQual,
-		)
-
-		file.Add(
-			jen.Comment(fmt.Sprintf("PreloadRelations allows preloading all the %s's relation when doing a query", objectName)),
-			createMethod(conditionsModelType, "PreloadRelations").Params().Add(condition).Block(
-				jen.Return(
-					condition.Clone().Values(relationPreloads...),
-				),
-			),
-		)
-	}
 }
 
 func addPreloadMethod(file *File, objectName string, objectQual *jen.Statement, conditionsModelType string, fieldIdentifiers []jen.Code) {

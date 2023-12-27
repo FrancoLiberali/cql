@@ -458,7 +458,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		_, err := cql.Update[models.Sale](
 			ts.db,
 			conditions.Sale.Code.Is().Eq(0),
-			conditions.Sale.PreloadProduct(),
+			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Set(
 			conditions.Sale.Code.Set().Eq(2),
 		)
@@ -476,7 +476,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		updated, err := cql.Update[models.Sale](
 			ts.db,
 			conditions.Sale.Code.Is().Eq(0),
-			conditions.Sale.PreloadProduct(),
+			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Set(
 			conditions.Sale.Code.Set().Eq(2),
 		)
@@ -516,7 +516,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 		ts.db,
 		conditions.Sale.Code.Is().Eq(0),
 		conditions.Sale.Seller(
-			conditions.Seller.PreloadCompany(),
+			conditions.Seller.Company().Preload(),
 		),
 	).Returning(&salesReturned).Set(
 		conditions.Sale.Code.Set().Eq(2),
