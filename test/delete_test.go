@@ -202,7 +202,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 		_, err := cql.Delete[models.Sale](
 			ts.db,
 			conditions.Sale.Code.Is().Eq(0),
-			conditions.Sale.PreloadProduct(),
+			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Exec()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database")
@@ -218,7 +218,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 		deleted, err := cql.Delete[models.Sale](
 			ts.db,
 			conditions.Sale.Code.Is().Eq(0),
-			conditions.Sale.PreloadProduct(),
+			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Exec()
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), deleted)
@@ -254,7 +254,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadAtSecondLevel() {
 		ts.db,
 		conditions.Sale.Code.Is().Eq(0),
 		conditions.Sale.Seller(
-			conditions.Seller.PreloadCompany(),
+			conditions.Seller.Company().Preload(),
 		),
 	).Returning(&salesReturned).Exec()
 	ts.Require().NoError(err)

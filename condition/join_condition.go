@@ -13,6 +13,9 @@ import (
 type JoinCondition[T model.Model] interface {
 	Condition[T]
 
+	// Preload activates the preloading of the joined model.
+	Preload() JoinCondition[T]
+
 	// Returns true if this condition or any nested condition makes a preload
 	makesPreload() bool
 
@@ -27,13 +30,16 @@ func NewJoinCondition[T1, T2 model.Model](
 	t1Field string,
 	t1PreloadCondition Condition[T1],
 	t2Field string,
+	t2PreloadCondition Condition[T2],
 ) JoinCondition[T1] {
 	return joinConditionImpl[T1, T2]{
 		Conditions:         conditions,
 		RelationField:      relationField,
 		T1Field:            t1Field,
-		T1PreloadCondition: t1PreloadCondition,
 		T2Field:            t2Field,
+		T1PreloadCondition: t1PreloadCondition,
+		T2PreloadCondition: t2PreloadCondition,
+		T2Preload:          false,
 	}
 }
 
@@ -43,8 +49,16 @@ type joinConditionImpl[T1, T2 model.Model] struct {
 	T2Field       string
 	RelationField string
 	Conditions    []Condition[T2]
-	// condition to preload T1 in case T2 any nested object is preloaded by user
-	T1PreloadCondition Condition[T1]
+
+	T1PreloadCondition Condition[T1] // Condition to preload T1 in case T2 any nested object is preloaded by user
+	T2PreloadCondition Condition[T2] // Condition to preload T2
+	T2Preload          bool          // Indicates if T2PreloadCondition must be applied
+}
+
+func (condition joinConditionImpl[T1, T2]) Preload() JoinCondition[T1] {
+	condition.T2Preload = true
+
+	return condition
 }
 
 func (condition joinConditionImpl[T1, T2]) interfaceVerificationMethod(_ T1) {
@@ -54,9 +68,9 @@ func (condition joinConditionImpl[T1, T2]) interfaceVerificationMethod(_ T1) {
 
 // Returns true if this condition or any nested condition makes a preload
 func (condition joinConditionImpl[T1, T2]) makesPreload() bool {
-	_, joinConditions, t2PreloadCondition := divideConditionsByType(condition.Conditions)
+	_, joinConditions := divideConditionsByType(condition.Conditions)
 
-	return t2PreloadCondition != nil || pie.Any(joinConditions, func(cond JoinCondition[T2]) bool {
+	return condition.T2Preload || pie.Any(joinConditions, func(cond JoinCondition[T2]) bool {
 		return cond.makesPreload()
 	})
 }
@@ -65,7 +79,7 @@ func (condition joinConditionImpl[T1, T2]) makesPreload() bool {
 //
 //nolint:unused // is used
 func (condition joinConditionImpl[T1, T2]) makesFilter() bool {
-	whereConditions, joinConditions, _ := divideConditionsByType(condition.Conditions)
+	whereConditions, joinConditions := divideConditionsByType(condition.Conditions)
 
 	return len(whereConditions) != 0 || pie.Any(joinConditions, func(cond JoinCondition[T2]) bool {
 		return cond.makesFilter()
@@ -76,7 +90,7 @@ func (condition joinConditionImpl[T1, T2]) makesFilter() bool {
 // previousTableName is the name of the table of T1
 // It also applies the nested conditions
 func (condition joinConditionImpl[T1, T2]) applyTo(query *GormQuery, t1Table Table) error {
-	whereConditions, joinConditions, t2PreloadCondition := divideConditionsByType(condition.Conditions)
+	whereConditions, joinConditions := divideConditionsByType(condition.Conditions)
 
 	// get the sql to do the join with T2
 	t2Table, err := t1Table.DeliverTable(query, *new(T2), condition.RelationField)
@@ -102,8 +116,8 @@ func (condition joinConditionImpl[T1, T2]) applyTo(query *GormQuery, t1Table Tab
 	}
 
 	// apply T2 preload condition
-	if t2PreloadCondition != nil {
-		err = t2PreloadCondition.applyTo(query, t2Table)
+	if condition.T2Preload {
+		err = condition.T2PreloadCondition.applyTo(query, t2Table)
 		if err != nil {
 			return err
 		}
@@ -184,17 +198,11 @@ func (condition joinConditionImpl[T1, T2]) getSQLJoin(
 // Divides a list of conditions by its type: WhereConditions and JoinConditions
 func divideConditionsByType[T model.Model](
 	conditions []Condition[T],
-) (whereConditions []WhereCondition[T], joinConditions []JoinCondition[T], preload *preloadCondition[T]) {
+) (whereConditions []WhereCondition[T], joinConditions []JoinCondition[T]) {
 	for _, condition := range conditions {
 		possibleWhereCondition, ok := condition.(WhereCondition[T])
 		if ok {
 			whereConditions = append(whereConditions, possibleWhereCondition)
-			continue
-		}
-
-		possiblePreloadCondition, ok := condition.(preloadCondition[T])
-		if ok {
-			preload = &possiblePreloadCondition
 			continue
 		}
 
