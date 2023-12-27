@@ -32,14 +32,13 @@ const (
 	uIntModel = "UIntModel"
 )
 
-const preloadMethod = "Preload"
+const preloadMethod = "preload"
 
 type Condition struct {
 	FieldName             string
 	FieldType             *jen.Statement
 	FieldDefinition       *jen.Statement
 	ConditionMethod       *jen.Statement
-	PreloadRelationName   string
 	PreloadRelationMethod *jen.Statement
 	param                 *JenParam
 	destPkg               string
@@ -331,24 +330,10 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 				jen.Lit(t1Field),
 				jen.Id(condition.modelType).Dot(preloadMethod).Call(),
 				jen.Lit(t2Field),
+				jen.Id(field.Type.Name()).Dot(preloadMethod).Call(),
 			),
 		),
 	)
-
-	// preload for the relation
-	condition.setPreloadRelationName(field)
-
-	condition.PreloadRelationMethod = createMethod(condition.modelType, condition.PreloadRelationName).Params().Add(
-		ormT1IJoinCondition,
-	).Block(
-		jen.Return(jen.Id(condition.modelType).Dot(conditionName).Call(
-			jen.Id(field.TypeName()).Dot(preloadMethod).Call(),
-		)),
-	)
-}
-
-func (condition *Condition) setPreloadRelationName(field Field) {
-	condition.PreloadRelationName = "Preload" + field.Name
 }
 
 func (condition *Condition) generateCollectionPreload(objectType Type, field Field) {
@@ -374,9 +359,7 @@ func (condition *Condition) generateCollectionPreload(objectType Type, field Fie
 		t1, t2,
 	)
 
-	condition.setPreloadRelationName(field)
-
-	condition.PreloadRelationMethod = createMethod(condition.modelType, condition.PreloadRelationName).Params(
+	condition.PreloadRelationMethod = createMethod(condition.modelType, "Preload"+field.Name).Params(
 		jen.Id("nestedPreloads").Op("...").Add(ormT2IJoinCondition),
 	).Add(
 		ormT1Condition,

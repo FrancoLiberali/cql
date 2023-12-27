@@ -80,7 +80,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.PreloadSeller(),
+		conditions.Sale.Seller().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -109,7 +109,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadNullableAtSecondLevel() {
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.PreloadCompany(),
+			conditions.Seller.Company().Preload(),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -150,9 +150,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadAtSecondLevelWorksWithManual
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.Preload(),
-			conditions.Seller.PreloadCompany(),
-		),
+			conditions.Seller.Company().Preload(),
+		).Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -191,7 +190,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.PreloadSeller(),
+		conditions.Sale.Seller().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -230,7 +229,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.PreloadCompany(),
+			conditions.Seller.Company().Preload(),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -263,7 +262,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadUIntModel() {
 
 	entities, err := cql.Query[models.Phone](
 		ts.db,
-		conditions.Phone.PreloadBrand(),
+		conditions.Phone.Brand().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -293,9 +292,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithWhereConditionFilters() 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Preload(),
 			conditions.Product.Int.Is().Eq(1),
-		),
+		).Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -321,7 +319,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOne() {
 
 	entities, err := cql.Query[models.City](
 		ts.db,
-		conditions.City.PreloadCountry(),
+		conditions.City.Country().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -372,7 +370,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadOneToOneReversed() {
 
 	entities, err := cql.Query[models.Country](
 		ts.db,
-		conditions.Country.PreloadCapital(),
+		conditions.Country.Capital().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -396,7 +394,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadHasManyReversed() {
 
 	entities, err := cql.Query[models.Seller](
 		ts.db,
-		conditions.Seller.PreloadCompany(),
+		conditions.Seller.Company().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -421,7 +419,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferential() {
 
 	entities, err := cql.Query[models.Employee](
 		ts.db,
-		conditions.Employee.PreloadBoss(),
+		conditions.Employee.Boss().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -450,9 +448,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel
 	entities, err := cql.Query[models.Employee](
 		ts.db,
 		conditions.Employee.Boss(
-			conditions.Employee.Boss(
-				conditions.Employee.Preload(),
-			),
+			conditions.Employee.Boss().Preload(),
 		),
 		conditions.Employee.Name.Is().Eq("franco"),
 	).Find()
@@ -484,13 +480,11 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Preload(),
 			conditions.Product.Int.Is().Eq(1),
-		),
+		).Preload(),
 		conditions.Sale.Seller(
-			conditions.Seller.Preload(),
 			conditions.Seller.Name.Is().Eq("franco"),
-		),
+		).Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -523,41 +517,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithoutCond
 
 	entities, err := cql.Query[models.Child](
 		ts.db,
-		conditions.Child.PreloadParent1(),
-		conditions.Child.PreloadParent2(),
-	).Find()
-	ts.Require().NoError(err)
-
-	EqualList(&ts.Suite, []*models.Child{child}, entities)
-	childParent1, err := entities[0].GetParent1()
-	ts.Require().NoError(err)
-	assert.DeepEqual(ts.T(), parent1, childParent1)
-
-	childParent2, err := entities[0].GetParent2()
-	ts.Require().NoError(err)
-	assert.DeepEqual(ts.T(), parent2, childParent2)
-}
-
-func (ts *PreloadConditionsIntTestSuite) TestPreloadRelations() {
-	parentParent := &models.ParentParent{}
-	err := ts.db.Create(parentParent).Error
-	ts.Require().NoError(err)
-
-	parent1 := &models.Parent1{ParentParent: *parentParent}
-	err = ts.db.Create(parent1).Error
-	ts.Require().NoError(err)
-
-	parent2 := &models.Parent2{ParentParent: *parentParent}
-	err = ts.db.Create(parent2).Error
-	ts.Require().NoError(err)
-
-	child := &models.Child{Parent1: *parent1, Parent2: *parent2}
-	err = ts.db.Create(child).Error
-	ts.Require().NoError(err)
-
-	entities, err := cql.Query[models.Child](
-		ts.db,
-		conditions.Child.PreloadRelations()...,
+		conditions.Child.Parent1().Preload(),
+		conditions.Child.Parent2().Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -591,9 +552,8 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithoutC
 	entities, err := cql.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
-			conditions.Parent1.Preload(),
-			conditions.Parent1.PreloadParentParent(),
-		),
+			conditions.Parent1.ParentParent().Preload(),
+		).Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -645,12 +605,10 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCond
 	entities, err := cql.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
-			conditions.Parent1.Preload(),
 			conditions.Parent1.ParentParent(
-				conditions.ParentParent.Preload(),
 				conditions.ParentParent.Name.Is().Eq("parentParent1"),
-			),
-		),
+			).Preload(),
+		).Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -684,10 +642,10 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadDiamond(
 	entities, err := cql.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
-			conditions.Parent1.PreloadParentParent(),
+			conditions.Parent1.ParentParent().Preload(),
 		),
 		conditions.Child.Parent2(
-			conditions.Parent2.PreloadParentParent(),
+			conditions.Parent2.ParentParent().Preload(),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -771,7 +729,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(
-			conditions.Seller.PreloadUniversity(),
+			conditions.Seller.University().Preload(),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -820,7 +778,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.PreloadSellers(
-			conditions.Seller.PreloadUniversity(),
+			conditions.Seller.University().Preload(),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -868,9 +826,8 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 		ts.db,
 		conditions.Company.PreloadSellers(
 			conditions.Seller.University(
-				conditions.University.Preload(),
 				conditions.University.ID.Is().Eq(model.NilUUID),
-			),
+			).Preload(),
 		),
 	).Find()
 	ts.ErrorIs(err, cql.ErrOnlyPreloadsAllowed)

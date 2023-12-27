@@ -2,20 +2,9 @@
 Preloading
 ==============================
 
-PreloadConditions
----------------------------
-
-During the :ref:`conditions generation <cql/query:conditions generation>` the following 
-methods will also be created for the condition models:
-
-- Preload() will allow to preload this model when doing a query.
-- Preload<Relation>() for each of the relations of your model, 
-  where <Relation> is the name of the attribute that creates the relation, 
-  to preload that the related object when doing a query. 
-  This is really just a facility that translates to using the JoinCondition of 
-  that relation and then the Preload method of the related model.
-- PreloadRelations() to preload all the related models of your model 
-  (only generated if the model has at least one relation).
+When doing a join, conditions can be applied on joined models but, 
+by default, only the information of the main model is returned as a result. 
+To also get the joined models, it is necessary to use the Preload() method.
 
 Examples
 ----------------------------------
@@ -39,19 +28,7 @@ In this example we query all MyModels and preload whose related MyOtherModel.
 
     myModels, err := cql.Query[MyModel](
         gormDB,
-        conditions.MyModel.Related(
-            conditions.Related.Preload(),
-        ),
-    ).Find()
-
-Or using the PreloadRelation method to avoid the JoinCondition 
-(only useful when you don't want to add other conditions to that Join):
-
-.. code-block:: go
-
-    myModels, err := cql.Query[MyModel](
-        gormDB,
-        conditions.MyModel.PreloadRelated(),
+        conditions.MyModel.Related().Preload(),
     ).Find()
 
 **Nested preloads**
@@ -79,7 +56,7 @@ Or using the PreloadRelation method to avoid the JoinCondition
     myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.PreloadParent(),
+            conditions.MyOtherModel.Parent().Preload(),
         ),
     ).Find()
 
@@ -118,7 +95,7 @@ Here is an example of its use:
     }
 
     myModel, err := cql.Query[MyModel](
-        conditions.MyModel.PreloadRelated(),
+        conditions.MyModel.Related().Preload(),
     ).FindOne()
 
     if err == nil {
@@ -136,3 +113,12 @@ Unfortunately, these relation getters cannot be created in all cases but only in
   (which is not recommended as described :ref:`here <cql/declaring_models:references>`).
 - The relation is made with pointers and the foreign key (typically the ID) is in the same model.
 - The relation is made with a pointer to a list.
+
+Preload collections
+---------------------------
+
+During the :ref:`conditions generation <cql/query:conditions generation>` the following 
+methods will also be created for the condition models:
+
+- Preload<Collection>() for each of the collection of models of your model, 
+  where <Collection> is the name of the collection,  to preload it when doing a query. 

@@ -194,7 +194,7 @@ In the tutorial_5.go file you will find that we can perform this query as follow
     cities, err := cql.Query[models.City](
         db,
         conditions.City.Name.Is().Eq("Paris"),
-        conditions.City.PreloadCountry(),
+        conditions.City.Country().Preload(),
     ).Find()
 
 We can run this tutorial with `make tutorial_5` and we will obtain the following result:
