@@ -50,7 +50,7 @@ Condition
 
 Conditions are the basis of the cql query system, every query is composed of a set of conditions. 
 Conditions belong to a particular model and there are 4 different types: 
-WhereConditions, ConnectionConditions, JoinConditions and PreloadConditions.
+WhereConditions, ConnectionConditions and JoinConditions.
 
 For details visit :doc:`/cql/query`.
 
@@ -79,14 +79,6 @@ which will result in a join in the executed query
 you don't need to understand the queries that cql executes).
 
 For details visit :doc:`/cql/query`.
-
-PreloadCondition
------------------------------
-
-Type of condition that allows retrieving information from a model as a result of the database (preload). 
-This information can be all its attributes and/or another model that is related to it.
-
-For details visit :doc:`/cql/preloading`.
 
 Operator
 -----------------------------
@@ -154,7 +146,7 @@ For details visit :ref:`cql/query:Conditions generation`.
 Relation getter
 -----------------------------------
 
-Relationships between objects can be loaded from the database using PreloadConditions. 
+Relationships between objects can be loaded from the database using the Preload method. 
 In order to safely navigate the relations in the loaded model cql provides methods 
 called "relation getters".
 
