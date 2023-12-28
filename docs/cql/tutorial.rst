@@ -95,6 +95,7 @@ whose population is greater than one million inhabitants.
 In the tutorial_2.go file you will find that we can perform this query as follows:
 
 .. code-block:: go
+    :emphasize-lines: 5
 
     cities, err := cql.Query[models.City](
         db,
@@ -321,3 +322,38 @@ Here, we simply get the number of deleted models through the "deleted" variable 
 
 In this tutorial we have used create and delete, 
 for more details you can read :ref:`cql/create` and :ref:`cql/delete`.
+
+Tutorial 9: Compile type safety
+-------------------------------
+
+In this tutorial we want to verify that cql is compile-time safe.
+
+In the tutorial_9.go file you will find that we try to perform a query as follows:
+
+.. code-block:: go
+
+    _, err := cql.Query[models.City](
+        db,
+        conditions.Country.Name.Is().Eq("Paris"),
+    ).Find()
+
+We can run this tutorial with `make tutorial_9` and we will obtain the following error during compilation:
+
+.. code-block:: bash
+
+    ./tutorial_9.go:20:3:
+        cannot use conditions.Country.Name.Is().Eq("Paris")
+        (value of type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
+
+As you can see, in this tutorial we are trying to put a condition on Country 
+(conditions.Country) to a Query whose main model is City (Query[models.City]). 
+This would be equivalent to trying to execute the following SQL query:
+
+.. code-block:: SQL
+
+    SELECT * FROM cities
+    WHERE countries.name = "Paris"
+
+Therefore, we will get a compilation error and this incorrect code will never be executed.
+
+For more details you can read :ref:`cql/compile_time_safety`.

@@ -17,6 +17,7 @@ Introduction
    cql/create
    cql/update
    cql/delete
+   cql/compile_time_safety
    cql/logger
 
 .. toctree::
@@ -26,3 +27,6 @@ Introduction
    contributing/developing
    contributing/maintaining
    Github <https://www.github.com/FrancoLiberali/cql>
+
+.. role:: compilation-error
+   :class: compilation-error
