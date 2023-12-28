@@ -2,7 +2,9 @@
 Compile-type safety
 ==============================
 
-One of the most important features of the CQL is::
+One of the most important features of the CQL is
+
+.. code-block:: none
 
     Is compile-time safe:
         its query system is validated at compile time to avoid errors 
@@ -20,6 +22,7 @@ prohibiting the use of conditions from other models in the wrong place:
 
 .. code-block:: go
     :caption: Correct
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
@@ -27,16 +30,19 @@ prohibiting the use of conditions from other models in the wrong place:
     ).Find()
 
 .. code-block:: go
+    :class: with-errors
     :caption: Incorrect
+    :emphasize-lines: 3
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
-        :compilation-error:`conditions.Country.Name.Is().Eq("Paris"),`
+        conditions.Country.Name.Is().Eq("Paris"),
     ).Find()
 
 In this case, the compilation error will be:
 
-.. code-block:: bash
+.. code-block:: none
 
     cannot use conditions.Country.Name.Is().Eq("Paris")
     (value of type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
@@ -45,6 +51,7 @@ Similarly, conditions are checked when making joins:
 
 .. code-block:: go
     :caption: Correct
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
@@ -55,11 +62,14 @@ Similarly, conditions are checked when making joins:
 
 .. code-block:: go
     :caption: Incorrect
+    :class: with-errors
+    :emphasize-lines: 4
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
         conditions.City.Country(
-            :compilation-error:`conditions.City.Name.Is().Eq("France"),`
+            conditions.City.Name.Is().Eq("France"),
         ),
     ).Find()
 
@@ -72,6 +82,7 @@ the attributes and methods used on it will only allow us to use attributes and o
 
 .. code-block:: go
     :caption: Correct
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
@@ -80,15 +91,18 @@ the attributes and methods used on it will only allow us to use attributes and o
 
 .. code-block:: go
     :caption: Incorrect
+    :class: with-errors
+    :emphasize-lines: 3
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
-        conditions.City.:compilation-error:`Namee`.Is().Eq("Paris"),
+        conditions.City.Namee.Is().Eq("Paris"),
     ).Find()
 
 In this case, the compilation error will be:
 
-.. code-block:: bash
+.. code-block:: none
 
     conditions.City.Namee undefined (type conditions.cityConditions has no field or method Namee)
 
@@ -100,6 +114,7 @@ the value compared to the attribute is of the correct type:
 
 .. code-block:: go
     :caption: Correct
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
@@ -108,14 +123,17 @@ the value compared to the attribute is of the correct type:
 
 .. code-block:: go
     :caption: Incorrect
+    :class: with-errors
+    :emphasize-lines: 3
+    :linenos:
 
     _, err := cql.Query[models.City](
         db,
-        conditions.City.Name.Is().Eq(:compilation-error:`100`),
+        conditions.City.Name.Is().Eq(100),
     ).Find()
 
 In this case, the compilation error will be:
 
-.. code-block:: bash
+.. code-block:: none
 
     cannot use 100 (untyped int constant) as string value in argument to conditions.City.Name.Is().Eq

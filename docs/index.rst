@@ -27,6 +27,3 @@ Introduction
    contributing/developing
    contributing/maintaining
    Github <https://www.github.com/FrancoLiberali/cql>
-
-.. role:: compilation-error
-   :class: compilation-error
