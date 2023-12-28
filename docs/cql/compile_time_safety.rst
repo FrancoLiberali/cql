@@ -137,3 +137,39 @@ In this case, the compilation error will be:
 .. code-block:: none
 
     cannot use 100 (untyped int constant) as string value in argument to conditions.City.Name.Is().Eq
+
+Type of an attribute (dynamic operator)
+-----------------------------------------
+
+cql also checks that the type of the attributes is correct when using dynamic operators. 
+In this case, the type of the two attributes being compared must be the same: 
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    _, err := cql.Query[models.City](
+        db,
+        conditions.City.Country(
+            conditions.Country.Name.Is().Dynamic().Eq(conditions.City.Name),
+        ),
+    ).Find()
+
+.. code-block:: go
+    :caption: Incorrect
+    :class: with-errors
+    :emphasize-lines: 4
+    :linenos:
+
+    _, err := cql.Query[models.City](
+        db,
+        conditions.City.Country(
+            conditions.Country.Name.Is().Dynamic().Eq(conditions.City.Population),
+        ),
+    ).Find()
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    cannot use conditions.City.Population (variable of type condition.UpdatableField[models.City, int]) as condition.FieldOfType[string] value in argument to conditions.Country.Name.Is().Dynamic().Eq...
