@@ -132,7 +132,7 @@ The set of conditions that are received by the
 `cql.Query`, `cql.Update` and `cql.Delete` methods form the cql compiled query system. 
 It is so named because the conditions will verify at compile time that the query to be executed is correct.
 
-For details visit :ref:`cql/query:conditions`.
+For details visit :ref:`cql/query:conditions` and :doc:`/cql/compile_time_safety`.
 
 Conditions generation
 ----------------------------
