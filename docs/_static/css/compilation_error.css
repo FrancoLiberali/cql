@@ -1,0 +1,3 @@
+.with-errors span.hll span:not(.w,.linenos) {
+  text-decoration: red underline;
+}
