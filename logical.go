@@ -18,5 +18,5 @@ func Or[T model.Model](conditions ...condition.WhereCondition[T]) condition.Wher
 }
 
 func Not[T model.Model](conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
-	return condition.NewContainerCondition(sql.Not, conditions...)
+	return condition.Not(conditions...)
 }

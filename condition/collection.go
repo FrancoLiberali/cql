@@ -27,6 +27,16 @@ func (collection Collection[TObject, TAttribute]) Any(conditions ...WhereConditi
 	}
 }
 
+// None generates a condition that is true if no model in the collection fulfills the conditions
+func (collection Collection[TObject, TAttribute]) None(conditions ...WhereCondition[TAttribute]) WhereCondition[TObject] {
+	return Not[TObject](existsCondition[TObject, TAttribute]{
+		Conditions:    conditions,
+		RelationField: collection.name,
+		T1Field:       collection.t1Field,
+		T2Field:       collection.t2Field,
+	})
+}
+
 func NewCollection[TObject model.Model, TAttribute model.Model](name, t1Field, t2Field string) Collection[TObject, TAttribute] {
 	return Collection[TObject, TAttribute]{
 		name:    name,
