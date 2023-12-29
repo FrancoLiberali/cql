@@ -18,6 +18,7 @@ var (
 	ErrMoreThanOneObjectFound = condition.ErrMoreThanOneObjectFound
 	ErrObjectNotFound         = condition.ErrObjectNotFound
 
+	// database
 	ErrUnsupportedByDatabase = condition.ErrUnsupportedByDatabase
 	ErrOrderByMustBeCalled   = condition.ErrOrderByMustBeCalled
 

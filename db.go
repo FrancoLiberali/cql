@@ -8,6 +8,8 @@ import (
 )
 
 // Open initialize db session based on dialector
+//
+// For details see https://compiledquerylenguage.readthedocs.io/en/latest/cql/connecting_to_a_database.html
 func Open(dialector gorm.Dialector, opts ...gorm.Option) (*gorm.DB, error) {
 	configs := pie.Filter(opts, func(opt gorm.Option) bool {
 		_, isConfig := opt.(*gorm.Config)
