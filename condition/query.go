@@ -61,7 +61,7 @@ func (query *Query[T]) Offset(offset int) *Query[T] {
 
 // Finishing methods
 
-// Count returns the amount of models that fulfil the conditions
+// Count returns the amount of models that fulfill the conditions
 func (query *Query[T]) Count() (int64, error) {
 	if query.err != nil {
 		return 0, query.err

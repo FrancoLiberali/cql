@@ -40,7 +40,7 @@ Finishing methods
 
 Finishing methods are those that cause the query to be executed and the result(s) of the query to be returned:
 
-- Count: returns the amount of models that fulfil the conditions.
+- Count: returns the amount of models that fulfill the conditions.
 - First: finds the first model ordered by primary key.
 - Take: finds the first model returned by the database in no specified order.
 - Last: finds the last model ordered by primary key.

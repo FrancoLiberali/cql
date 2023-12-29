@@ -80,7 +80,7 @@ func (query *GormQuery) Limit(limit int) {
 	query.GormDB = query.GormDB.Limit(limit)
 }
 
-// Count returns the amount of models that fulfil the conditions
+// Count returns the amount of models that fulfill the conditions
 func (query *GormQuery) Count() (int64, error) {
 	query.cleanSelects()
 
