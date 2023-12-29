@@ -37,7 +37,7 @@ func (collection Collection[TObject, TAttribute]) None(conditions ...WhereCondit
 	})
 }
 
-// All generates a condition that is true if at all models in the collection fulfill the conditions (or is empty)
+// All generates a condition that is true if all models in the collection fulfill the conditions (or is empty)
 func (collection Collection[TObject, TAttribute]) All(conditions ...WhereCondition[TAttribute]) WhereCondition[TObject] {
 	return Not[TObject](existsCondition[TObject, TAttribute]{
 		Conditions:    []WhereCondition[TAttribute]{Not[TAttribute](conditions...)},

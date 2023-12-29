@@ -325,12 +325,41 @@ Here, we simply get the number of deleted models through the "deleted" variable 
 In this tutorial we have used create and delete, 
 for more details you can read :doc:`/cql/create` and :doc:`/cql/delete`.
 
-Tutorial 9: Compile type safety
+Tutorial 9: Collections
+-------------------------------
+
+In this tutorial we want to obtain all the countries that have a city called 'Paris'
+
+In the tutorial_9.go file you will find that we can perform a query as follows:
+
+.. code-block:: go
+
+    countries, err := cql.Query[models.Country](
+        db,
+        conditions.Country.Cities.Any(
+            conditions.City.Name.Is().Eq("Paris"),
+        ),
+    ).Find()
+
+We can run this tutorial with `make tutorial_9` and we will obtain the following result:
+
+.. code-block:: none
+
+    Countries that have a city called 'Paris' are:
+        1: &{UUIDModel:{ID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4 CreatedAt:2023-08-11 16:43:27.445202858 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.457191337 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:France Capital:<nil> CapitalID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 Cities:<nil>}
+        2: &{UUIDModel:{ID:0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921 CreatedAt:2023-08-11 16:43:27.462357133 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.479800337 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:United States of America Capital:<nil> CapitalID:df44272e-c3db-4e18-876c-f9f579488716 Cities:<nil>}
+
+As you can see, again we only get the Paris in France.
+
+In this tutorial we have used conditions over collections, 
+for more details you can read :doc:`/cql/advanced_query:Collections`.
+
+Tutorial 10: Compile type safety
 -------------------------------
 
 In this tutorial we want to verify that cql is compile-time safe.
 
-In the tutorial_9.go file you will find that we try to perform a query as follows:
+In the tutorial_10.go file you will find that we try to perform a query as follows:
 
 .. code-block:: go
 
@@ -339,11 +368,11 @@ In the tutorial_9.go file you will find that we try to perform a query as follow
         conditions.Country.Name.Is().Eq("Paris"),
     ).Find()
 
-We can run this tutorial with `make tutorial_9` and we will obtain the following error during compilation:
+We can run this tutorial with `make tutorial_10` and we will obtain the following error during compilation:
 
 .. code-block:: bash
 
-    ./tutorial_9.go:20:3:
+    ./tutorial_10.go:20:3:
         cannot use conditions.Country.Name.Is().Eq("Paris")
         (value of type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
 
