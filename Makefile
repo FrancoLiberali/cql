@@ -39,5 +39,5 @@ test_sqlserver: sqlserver
 
 test: test_sqlite
 
-.PHONY: test
+.PHONY: test test_postgresql test_sqlserver test_sqlite test_mysql mysql postgresql cockroachdb sqlserver
 

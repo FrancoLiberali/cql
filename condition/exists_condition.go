@@ -42,7 +42,7 @@ func (condition existsCondition[T1, T2]) getSQL(query *GormQuery, t1Table Table)
 	deletedAtSQL := ""
 	if !connectionCondition.affectsDeletedAt() {
 		deletedAtSQL = fmt.Sprintf(
-			"AND %s.`deleted_at` IS NULL",
+			"AND %s.deleted_at IS NULL",
 			t2Table.Alias,
 		)
 	}
