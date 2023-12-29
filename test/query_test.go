@@ -25,6 +25,49 @@ func NewQueryIntTestSuite(
 	}
 }
 
+// ------------------------- Count --------------------------------
+
+func (ts *QueryIntTestSuite) TestCountReturns0IfNotModels() {
+	count, err := cql.Query[models.Product](
+		ts.db,
+	).Count()
+
+	ts.Require().NoError(err)
+	ts.Equal(int64(0), count)
+}
+
+func (ts *QueryIntTestSuite) TestCountReturns0IfConditionsDontMatch() {
+	ts.createProduct("", 0, 0, false, nil)
+	count, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(1),
+	).Count()
+
+	ts.Require().NoError(err)
+	ts.Equal(int64(0), count)
+}
+
+func (ts *QueryIntTestSuite) TestCountReturns1IfConditionsMatch() {
+	ts.createProduct("", 1, 0, false, nil)
+	count, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(1),
+	).Count()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), count)
+}
+
+func (ts *QueryIntTestSuite) TestReturnsNIfMoreThanOneMatchConditions() {
+	ts.createProduct("", 0, 0, false, nil)
+	ts.createProduct("", 0, 0, false, nil)
+	count, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(0),
+	).Count()
+	ts.Require().NoError(err)
+	ts.Equal(int64(2), count)
+}
+
 // ------------------------- FindOne --------------------------------
 
 func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfConditionsDontMatch() {
