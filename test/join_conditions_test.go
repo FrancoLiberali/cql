@@ -637,3 +637,71 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionNoneReturnsEmptyIfMoreThanOn
 
 	EqualList(&ts.Suite, []*models.Company{}, entities)
 }
+
+func (ts *JoinConditionsIntTestSuite) TestCollectionAllReturnsWhenIsEmpty() {
+	company1 := ts.createCompany("ditrit")
+
+	entities, err := cql.Query[models.Company](
+		ts.db,
+		conditions.Company.Sellers.All(
+			conditions.Seller.Name.Is().Eq("not"),
+		),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Company{company1}, entities)
+}
+
+func (ts *JoinConditionsIntTestSuite) TestCollectionAllReturnsEmptyWhenNothingMatches() {
+	company1 := ts.createCompany("ditrit")
+
+	ts.createSeller("franco", company1)
+	ts.createSeller("agustin", company1)
+
+	entities, err := cql.Query[models.Company](
+		ts.db,
+		conditions.Company.Sellers.All(
+			conditions.Seller.Name.Is().Eq("not"),
+		),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Company{}, entities)
+}
+
+func (ts *JoinConditionsIntTestSuite) TestCollectionReturnsEmptyIfOneMatches() {
+	company1 := ts.createCompany("ditrit")
+
+	ts.createSeller("franco", company1)
+	ts.createSeller("agustin", company1)
+
+	entities, err := cql.Query[models.Company](
+		ts.db,
+		conditions.Company.Sellers.All(
+			conditions.Seller.Name.Is().Eq("franco"),
+		),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Company{}, entities)
+}
+
+func (ts *JoinConditionsIntTestSuite) TestCollectionAllReturnsIfAllMatch() {
+	company1 := ts.createCompany("ditrit")
+
+	ts.createSeller("franco", company1)
+	ts.createSeller("agustin", company1)
+
+	entities, err := cql.Query[models.Company](
+		ts.db,
+		conditions.Company.Sellers.All(
+			cql.Or(
+				conditions.Seller.Name.Is().Eq("franco"),
+				conditions.Seller.Name.Is().Eq("agustin"),
+			),
+		),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Company{company1}, entities)
+}
