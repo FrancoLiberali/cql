@@ -283,7 +283,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
 		deleted, err := cql.Delete[models.Company](
 			ts.db,
 			conditions.Company.Name.Is().Eq("ditrit"),
-			conditions.Company.PreloadSellers(),
+			conditions.Company.Sellers.Preload(),
 		).Returning(&companiesReturned).Exec()
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), deleted)

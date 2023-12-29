@@ -675,7 +675,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadCollection() {
 
 	entities, err := cql.Query[models.Company](
 		ts.db,
-		conditions.Company.PreloadSellers(),
+		conditions.Company.Sellers.Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -690,7 +690,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadEmptyCollection() {
 
 	entities, err := cql.Query[models.Company](
 		ts.db,
-		conditions.Company.PreloadSellers(),
+		conditions.Company.Sellers.Preload(),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -728,7 +728,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributes() {
 
 	entities, err := cql.Query[models.Company](
 		ts.db,
-		conditions.Company.PreloadSellers(
+		conditions.Company.Sellers.Preload(
 			conditions.Seller.University().Preload(),
 		),
 	).Find()
@@ -777,7 +777,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 
 	entities, err := cql.Query[models.Company](
 		ts.db,
-		conditions.Company.PreloadSellers(
+		conditions.Company.Sellers.Preload(
 			conditions.Seller.University().Preload(),
 		),
 	).Find()
@@ -824,7 +824,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadMultipleListsAndNestedAttrib
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithFiltersReturnsError() {
 	_, err := cql.Query[models.Company](
 		ts.db,
-		conditions.Company.PreloadSellers(
+		conditions.Company.Sellers.Preload(
 			conditions.Seller.University(
 				conditions.University.ID.Is().Eq(model.NilUUID),
 			).Preload(),
@@ -837,7 +837,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithoutPreloadReturnsError() {
 	_, err := cql.Query[models.Company](
 		ts.db,
-		conditions.Company.PreloadSellers(
+		conditions.Company.Sellers.Preload(
 			conditions.Seller.University(),
 		),
 	).Find()

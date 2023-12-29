@@ -2,6 +2,43 @@
 Advanced query
 ==============================
 
+Collections
+-------------------------------
+
+cql also allows you to set conditions on a collection of models (one to many or many to many relationships):
+
+.. code-block:: go
+    :caption: Example model
+
+    type Seller struct {
+        model.UUIDModel
+
+        Name string
+
+        Company   *Company
+        CompanyID *model.UUID // Company HasMany Seller (Company 0..1 -> 0..* Seller)
+    }
+
+    type Company struct {
+        model.UUIDModel
+
+        Sellers *[]Seller // Company HasMany Seller (Company 0..1 -> 0..* Seller)
+    }
+
+.. code-block:: go
+    :caption: Query
+
+    companies, err := cql.Query[Company](
+        conditions.Company.Sellers.Any(
+            conditions.Seller.Name.Is().Eq("franco"),
+        ),
+    ).Find()
+
+The methods for collections are:
+- None: generates a condition that is true if no model in the collection fulfills the conditions.
+- Any: generates a condition that is true if at least one model in the collection fulfills the conditions.
+- All: generates a condition that is true if all models in the collection fulfill the conditions (or is empty).
+
 Dynamic operators
 --------------------------------
 

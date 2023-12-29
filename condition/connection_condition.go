@@ -38,15 +38,21 @@ func (condition connectionCondition[T]) getSQL(query *GormQuery, table Table) (s
 			return "", nil, err
 		}
 
-		sqlStrings = append(sqlStrings, internalSQLString)
+		if internalSQLString != "" {
+			sqlStrings = append(sqlStrings, internalSQLString)
 
-		values = append(values, internalValues...)
+			values = append(values, internalValues...)
+		}
 	}
 
-	return strings.Join(
-		sqlStrings,
-		" "+condition.Connector.String()+" ",
-	), values, nil
+	if len(sqlStrings) > 0 {
+		return "(" + strings.Join(
+			sqlStrings,
+			" "+condition.Connector.String()+" ",
+		) + ")", values, nil
+	}
+
+	return "", values, nil
 }
 
 //nolint:unused // is used
