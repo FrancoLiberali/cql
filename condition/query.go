@@ -59,6 +59,17 @@ func (query *Query[T]) Offset(offset int) *Query[T] {
 	return query
 }
 
+// Finishing methods
+
+// Count returns the amount of models that fulfill the conditions
+func (query *Query[T]) Count() (int64, error) {
+	if query.err != nil {
+		return 0, query.err
+	}
+
+	return query.gormQuery.Count()
+}
+
 // First finds the first model ordered by primary key, matching given conditions
 // or returns gorm.ErrRecordNotFound is if no model does it
 func (query *Query[T]) First() (*T, error) {

@@ -80,6 +80,15 @@ func (query *GormQuery) Limit(limit int) {
 	query.GormDB = query.GormDB.Limit(limit)
 }
 
+// Count returns the amount of models that fulfill the conditions
+func (query *GormQuery) Count() (int64, error) {
+	query.cleanSelects()
+
+	var count int64
+
+	return count, query.GormDB.Count(&count).Error
+}
+
 // First finds the first record ordered by primary key, matching given conditions
 func (query *GormQuery) First(dest any) error {
 	return query.GormDB.First(dest).Error
@@ -243,6 +252,10 @@ func (query *GormQuery) Returning(dest any) error {
 	return nil
 }
 
+func (query *GormQuery) cleanSelects() {
+	query.GormDB.Statement.Selects = []string{}
+}
+
 // Find finds all models matching given conditions
 func (query *GormQuery) Update(sets []ISet) (int64, error) {
 	tablesAndValues, err := getUpdateTablesAndValues(query, sets)
@@ -252,7 +265,7 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 
 	updateMap := map[string]any{}
 
-	query.GormDB.Statement.Selects = []string{}
+	query.cleanSelects()
 
 	switch query.Dialector() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
