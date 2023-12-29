@@ -194,13 +194,30 @@ func (condition joinConditionImpl[T1, T2]) getSQLJoin(
 	t2Table Table,
 ) string {
 	return fmt.Sprintf(
-		`%[1]s %[2]s ON %[2]s.%[3]s = %[4]s.%[5]s
+		`%s %s ON %s
 		`,
 		t2Table.Name,
 		t2Table.Alias,
-		query.ColumnName(t2Table, condition.T2Field),
+		getSQLJoin(query, t1Table, condition.T1Field, t2Table, condition.T2Field),
+	)
+}
+
+// Returns the SQL string to verify a join between T1 and T2
+//
+//nolint:unused // is used
+func getSQLJoin(
+	query *GormQuery,
+	t1Table Table,
+	t1Field string,
+	t2Table Table,
+	t2Field string,
+) string {
+	return fmt.Sprintf(
+		"%s.%s = %s.%s",
+		t2Table.Alias,
+		query.ColumnName(t2Table, t2Field),
 		t1Table.Alias,
-		query.ColumnName(t1Table, condition.T1Field),
+		query.ColumnName(t1Table, t1Field),
 	)
 }
 

@@ -362,7 +362,11 @@ func (condition *Condition) createCollection(objectType Type, field Field) {
 	).Types(
 		t1,
 		t2,
-	).Call(jen.Lit(field.Name))
+	).Call(
+		jen.Lit(field.Name),
+		jen.Lit(field.getFKReferencesAttribute()),
+		jen.Lit(field.getRelatedTypeFKAttribute(objectType.Name())),
+	)
 
 	condition.FieldIsCollection = true
 }

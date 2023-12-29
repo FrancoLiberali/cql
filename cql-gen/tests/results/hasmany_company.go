@@ -20,7 +20,7 @@ var Company = companyConditions{
 	CreatedAt: condition.Field[hasmany.Company, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[hasmany.Company, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[hasmany.Company, model.UUID]{Name: "ID"},
-	Sellers:   condition.NewCollection[hasmany.Company, hasmany.Seller]("Sellers"),
+	Sellers:   condition.NewCollection[hasmany.Company, hasmany.Seller]("Sellers", "ID", "CompanyID"),
 	UpdatedAt: condition.Field[hasmany.Company, time.Time]{Name: "UpdatedAt"},
 }
 

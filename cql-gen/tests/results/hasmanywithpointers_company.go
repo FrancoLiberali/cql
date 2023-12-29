@@ -20,7 +20,7 @@ var CompanyWithPointers = companyWithPointersConditions{
 	CreatedAt: condition.Field[hasmanywithpointers.CompanyWithPointers, time.Time]{Name: "CreatedAt"},
 	DeletedAt: condition.Field[hasmanywithpointers.CompanyWithPointers, time.Time]{Name: "DeletedAt"},
 	ID:        condition.Field[hasmanywithpointers.CompanyWithPointers, model.UUID]{Name: "ID"},
-	Sellers:   condition.NewCollection[hasmanywithpointers.CompanyWithPointers, hasmanywithpointers.SellerInPointers]("Sellers"),
+	Sellers:   condition.NewCollection[hasmanywithpointers.CompanyWithPointers, hasmanywithpointers.SellerInPointers]("Sellers", "ID", "CompanyWithPointersID"),
 	UpdatedAt: condition.Field[hasmanywithpointers.CompanyWithPointers, time.Time]{Name: "UpdatedAt"},
 }
 
