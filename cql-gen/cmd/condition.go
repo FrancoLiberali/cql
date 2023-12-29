@@ -11,19 +11,20 @@ import (
 
 const (
 	// cql/condition
-	conditionPath           = cqlPath + "/condition"
-	cqlCondition            = "Condition"
-	cqlJoinCondition        = "JoinCondition"
-	cqlNewJoinCondition     = "NewJoinCondition"
-	cqlNewCollectionPreload = "NewCollectionPreloadCondition"
-	cqlNewPreloadCondition  = "NewPreloadCondition"
-	cqlField                = "Field"
-	cqlUpdatableField       = "UpdatableField"
-	cqlNullableField        = "NullableField"
-	cqlBoolField            = "BoolField"
-	cqlNullableBoolField    = "NullableBoolField"
-	cqlStringField          = "StringField"
-	cqlNullableStringField  = "NullableStringField"
+	conditionPath          = cqlPath + "/condition"
+	cqlCondition           = "Condition"
+	cqlJoinCondition       = "JoinCondition"
+	cqlNewJoinCondition    = "NewJoinCondition"
+	cqlNewPreloadCondition = "NewPreloadCondition"
+	cqlField               = "Field"
+	cqlUpdatableField      = "UpdatableField"
+	cqlNullableField       = "NullableField"
+	cqlBoolField           = "BoolField"
+	cqlNullableBoolField   = "NullableBoolField"
+	cqlStringField         = "StringField"
+	cqlNullableStringField = "NullableStringField"
+	cqlCollection          = "Collection"
+	cqlNewCollection       = "NewCollection"
 	// cql/model
 	modelPath = cqlPath + "/model"
 	uIntID    = "UIntID"
@@ -38,6 +39,7 @@ type Condition struct {
 	FieldName             string
 	FieldType             *jen.Statement
 	FieldDefinition       *jen.Statement
+	FieldIsCollection     bool
 	ConditionMethod       *jen.Statement
 	PreloadRelationMethod *jen.Statement
 	param                 *JenParam
@@ -82,9 +84,7 @@ func (condition *Condition) generate(objectType Type, field Field) {
 		)
 	case *types.Slice:
 		// the field is a slice
-		// adapt param to slice and
 		// generate code for the type of the elements of the slice
-		condition.param.ToSlice()
 		condition.generateForSlice(
 			objectType,
 			field.ChangeType(fieldType.Elem(), false),
@@ -101,6 +101,7 @@ func (condition *Condition) generateForSlice(objectType Type, field Field) {
 		// slice of basic types ([]string, []int, etc.)
 		// the only one supported directly by gorm is []byte
 		// but the others can be used after configuration in some dbs
+		condition.param.ToSlice()
 		condition.generate(
 			objectType,
 			field,
@@ -110,7 +111,7 @@ func (condition *Condition) generateForSlice(objectType Type, field Field) {
 		_, err := field.Type.CQLModelStruct()
 		if err == nil {
 			// field is a CQL Model
-			condition.generateCollectionPreload(objectType, field)
+			condition.createCollection(objectType, field)
 		}
 	case *types.Pointer:
 		// slice of pointers, generate code for a slice of the pointed type
@@ -336,7 +337,7 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 	)
 }
 
-func (condition *Condition) generateCollectionPreload(objectType Type, field Field) {
+func (condition *Condition) createCollection(objectType Type, field Field) {
 	t1 := jen.Qual(
 		getRelativePackagePath(condition.destPkg, objectType),
 		objectType.Name(),
@@ -347,30 +348,23 @@ func (condition *Condition) generateCollectionPreload(objectType Type, field Fie
 		field.TypeName(),
 	)
 
-	ormT1Condition := jen.Qual(
-		conditionPath, cqlCondition,
-	).Types(t1)
-	ormT2IJoinCondition := jen.Qual(
-		conditionPath, cqlJoinCondition,
-	).Types(t2)
-	ormNewCollectionPreload := jen.Qual(
-		conditionPath, cqlNewCollectionPreload,
-	).Types(
-		t1, t2,
-	)
-
-	condition.PreloadRelationMethod = createMethod(condition.modelType, "Preload"+field.Name).Params(
-		jen.Id("nestedPreloads").Op("...").Add(ormT2IJoinCondition),
-	).Add(
-		ormT1Condition,
-	).Block(
-		jen.Return(
-			ormNewCollectionPreload.Call(
-				jen.Lit(field.Name),
-				jen.Id("nestedPreloads"),
-			),
+	condition.FieldType = jen.Id(condition.FieldName).Add(
+		jen.Qual(
+			conditionPath, cqlCollection,
+		).Types(
+			t1,
+			t2,
 		),
 	)
+
+	condition.FieldDefinition = jen.Qual(
+		conditionPath, cqlNewCollection,
+	).Types(
+		t1,
+		t2,
+	).Call(jen.Lit(field.Name))
+
+	condition.FieldIsCollection = true
 }
 
 // Generate condition names

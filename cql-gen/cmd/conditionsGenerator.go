@@ -55,10 +55,13 @@ func (cg ConditionsGenerator) Into(file *File) error {
 		if condition.FieldDefinition != nil {
 			conditionsModelAttributesDef = append(conditionsModelAttributesDef, condition.FieldType)
 			conditionsModelAttributesIns[jen.Id(condition.FieldName)] = condition.FieldDefinition
-			fieldIdentifiers = append(
-				fieldIdentifiers,
-				jen.Id(conditionsModelType).Dot(condition.FieldName),
-			)
+
+			if !condition.FieldIsCollection {
+				fieldIdentifiers = append(
+					fieldIdentifiers,
+					jen.Id(conditionsModelType).Dot(condition.FieldName),
+				)
+			}
 		}
 
 		// add the preload to the list of all possible preloads

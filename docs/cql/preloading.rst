@@ -117,8 +117,88 @@ Unfortunately, these relation getters cannot be created in all cases but only in
 Preload collections
 ---------------------------
 
-During the :ref:`conditions generation <cql/query:conditions generation>` the following 
-methods will also be created for the condition models:
+Model collections can also be preloaded (relations has many or many to many): 
 
-- Preload<Collection>() for each of the collection of models of your model, 
-  where <Collection> is the name of the collection,  to preload it when doing a query. 
+.. code-block:: go
+    :caption: Example model
+
+    type Seller struct {
+        model.UUIDModel
+
+        Company   *Company
+        CompanyID *model.UUID // Company HasMany Seller (Company 0..1 -> 0..* Seller)
+    }
+
+    type Company struct {
+        model.UUIDModel
+
+        Sellers *[]Seller // Company HasMany Seller (Company 0..1 -> 0..* Seller)
+    }
+
+.. code-block:: go
+    :caption: Query
+
+    company, err := cql.Query[Company](
+        conditions.Company.Sellers.Preload(),
+    ).FindOne()
+
+    if err == nil {
+        sellers, err := company.GetSellers()
+        if err == nil {
+            // you can safely apply your business logic
+        } else {
+            // err is cql.ErrRelationNotLoaded
+        }
+    }
+
+Nested preloads can also be applied to preload model relationships within the collection:
+
+.. code-block:: go
+    :caption: Example model
+
+    type Office struct {
+        model.UUIDModel
+
+        Seller   *Seller
+        SellerID *model.UUID `gorm:"not null"` // Seller HasOne Office (Seller 1 -> 1 Office)
+    }
+
+    type Seller struct {
+        model.UUIDModel
+
+        Office   *Office // Seller HasOne Office (Seller 1 -> 1 Office)
+
+        Company   *Company
+        CompanyID *model.UUID // Company HasMany Seller (Company 0..1 -> 0..* Seller)
+    }
+
+    type Company struct {
+        model.UUIDModel
+
+        Sellers *[]Seller // Company HasMany Seller (Company 0..1 -> 0..* Seller)
+    }
+
+.. code-block:: go
+    :caption: Query
+
+    company, err := cql.Query[Company](
+        conditions.Company.Sellers.Preload(
+            conditions.Seller.Office().Preload()
+        ),
+    ).FindOne()
+
+    if err == nil {
+        sellers, err := company.GetSellers()
+        if err == nil {
+            for _, seller := range sellers {
+                office, err := seller.GetOffice()
+                if err == nil {
+                    // you can safely apply your business logic
+                } else {
+                    // err is cql.ErrRelationNotLoaded
+                }
+            }
+        } else {
+            // err is cql.ErrRelationNotLoaded
+        }
+    }

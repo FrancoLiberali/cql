@@ -549,7 +549,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 		updated, err := cql.Update[models.Company](
 			ts.db,
 			conditions.Company.Name.Is().Eq("ditrit"),
-			conditions.Company.PreloadSellers(),
+			conditions.Company.Sellers.Preload(),
 		).Returning(&companiesReturned).Set(
 			conditions.Company.Name.Set().Eq("orness"),
 		)
