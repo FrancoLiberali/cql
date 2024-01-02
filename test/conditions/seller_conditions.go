@@ -26,13 +26,13 @@ type sellerConditions struct {
 }
 
 var Seller = sellerConditions{
-	CompanyID:    condition.NullableField[models.Seller, model.UUID]{UpdatableField: condition.UpdatableField[models.Seller, model.UUID]{Field: condition.Field[models.Seller, model.UUID]{Name: "CompanyID"}}},
-	CreatedAt:    condition.Field[models.Seller, time.Time]{Name: "CreatedAt"},
-	DeletedAt:    condition.Field[models.Seller, time.Time]{Name: "DeletedAt"},
-	ID:           condition.Field[models.Seller, model.UUID]{Name: "ID"},
-	Name:         condition.StringField[models.Seller]{UpdatableField: condition.UpdatableField[models.Seller, string]{Field: condition.Field[models.Seller, string]{Name: "Name"}}},
-	UniversityID: condition.NullableField[models.Seller, model.UUID]{UpdatableField: condition.UpdatableField[models.Seller, model.UUID]{Field: condition.Field[models.Seller, model.UUID]{Name: "UniversityID"}}},
-	UpdatedAt:    condition.Field[models.Seller, time.Time]{Name: "UpdatedAt"},
+	CompanyID:    condition.NewNullableField[models.Seller, model.UUID]("CompanyID", "", ""),
+	CreatedAt:    condition.NewField[models.Seller, time.Time]("CreatedAt", "", ""),
+	DeletedAt:    condition.NewField[models.Seller, time.Time]("DeletedAt", "", ""),
+	ID:           condition.NewField[models.Seller, model.UUID]("ID", "", ""),
+	Name:         condition.NewStringField[models.Seller]("Name", "", ""),
+	UniversityID: condition.NewNullableField[models.Seller, model.UUID]("UniversityID", "", ""),
+	UpdatedAt:    condition.NewField[models.Seller, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Seller when doing a query

@@ -27,14 +27,14 @@ type saleConditions struct {
 }
 
 var Sale = saleConditions{
-	Code:        condition.UpdatableField[models.Sale, int]{Field: condition.Field[models.Sale, int]{Name: "Code"}},
-	CreatedAt:   condition.Field[models.Sale, time.Time]{Name: "CreatedAt"},
-	DeletedAt:   condition.Field[models.Sale, time.Time]{Name: "DeletedAt"},
-	Description: condition.StringField[models.Sale]{UpdatableField: condition.UpdatableField[models.Sale, string]{Field: condition.Field[models.Sale, string]{Name: "Description"}}},
-	ID:          condition.Field[models.Sale, model.UUID]{Name: "ID"},
-	ProductID:   condition.UpdatableField[models.Sale, model.UUID]{Field: condition.Field[models.Sale, model.UUID]{Name: "ProductID"}},
-	SellerID:    condition.NullableField[models.Sale, model.UUID]{UpdatableField: condition.UpdatableField[models.Sale, model.UUID]{Field: condition.Field[models.Sale, model.UUID]{Name: "SellerID"}}},
-	UpdatedAt:   condition.Field[models.Sale, time.Time]{Name: "UpdatedAt"},
+	Code:        condition.NewUpdatableField[models.Sale, int]("Code", "", ""),
+	CreatedAt:   condition.NewField[models.Sale, time.Time]("CreatedAt", "", ""),
+	DeletedAt:   condition.NewField[models.Sale, time.Time]("DeletedAt", "", ""),
+	Description: condition.NewStringField[models.Sale]("Description", "", ""),
+	ID:          condition.NewField[models.Sale, model.UUID]("ID", "", ""),
+	ProductID:   condition.NewUpdatableField[models.Sale, model.UUID]("ProductID", "", ""),
+	SellerID:    condition.NewNullableField[models.Sale, model.UUID]("SellerID", "", ""),
+	UpdatedAt:   condition.NewField[models.Sale, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Sale when doing a query

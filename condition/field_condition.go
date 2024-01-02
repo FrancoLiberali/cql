@@ -29,14 +29,14 @@ func (condition fieldCondition[TObject, TAtribute]) applyTo(query *GormQuery, ta
 
 //nolint:unused // is used
 func (condition fieldCondition[TObject, TAtribute]) affectsDeletedAt() bool {
-	return condition.FieldIdentifier.FieldName() == deletedAtField
+	return condition.FieldIdentifier.fieldName() == deletedAtField
 }
 
 //nolint:unused // is used
 func (condition fieldCondition[TObject, TAtribute]) getSQL(query *GormQuery, table Table) (string, []any, error) {
 	sqlString, values, err := condition.Operator.ToSQL(
 		query,
-		condition.FieldIdentifier.ColumnSQL(query, table),
+		condition.FieldIdentifier.columnSQL(query, table),
 	)
 	if err != nil {
 		return "", nil, conditionOperatorError[TObject](err, condition)
