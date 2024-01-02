@@ -2,8 +2,8 @@
 package conditions
 
 import (
+	basicslices "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/basicslices"
 	condition "github.com/FrancoLiberali/cql/condition"
-	basicslices "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basicslices"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )
