@@ -2,8 +2,8 @@
 package conditions
 
 import (
-	condition "github.com/FrancoLiberali/cql/condition"
 	package2 "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
+	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

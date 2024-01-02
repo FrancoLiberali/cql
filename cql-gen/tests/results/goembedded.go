@@ -2,8 +2,8 @@
 package conditions
 
 import (
-	condition "github.com/FrancoLiberali/cql/condition"
 	goembedded "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/goembedded"
+	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )
