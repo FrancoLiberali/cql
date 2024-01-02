@@ -702,18 +702,26 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Set(
-		conditions.Product.Int.Set().Dynamic(conditions.Product.Float.Value().Plus(1)),
+		conditions.Product.Int.Set().Dynamic(conditions.Product.Float.Value().Plus(1.1)),
 	)
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), updated)
 
-	productReturned, err := cql.Query[models.Product](
-		ts.db,
-		conditions.Product.Int.Is().Eq(2),
-	).FindOne()
-	ts.Require().NoError(err)
+	if getDBDialector() == cqlSQL.Postgres && err != nil {
+		// cockroachdb
+		ts.ErrorContains(err, "unsupported binary operator: <decimal> + <anyelement> (desired <int>) (SQLSTATE 22023); method: Set")
+	} else {
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), updated)
 
-	ts.Equal(product1.ID, productReturned.ID)
-	ts.Equal(2, productReturned.Int)
-	ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+		productReturned, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.Is().Eq(2),
+		).FindOne()
+
+		ts.Require().NoError(err)
+
+		ts.Equal(product1.ID, productReturned.ID)
+		ts.Equal(2, productReturned.Int)
+		ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+	}
+
 }

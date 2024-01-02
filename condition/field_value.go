@@ -62,29 +62,21 @@ func (value NumericFieldValue[TModel, TAttribute]) getType() numeric {
 }
 
 // Plus sums other to value
-//
-// Warning: in PostgreSQL the value received by parameter could be casted to integer
 func (value *NumericFieldValue[TModel, TAttribute]) Plus(other float64) *NumericFieldValue[TModel, TAttribute] {
 	return value.addOperation(other, "+")
 }
 
 // Minus subtracts other from the value
-//
-// Warning: in PostgreSQL the value received by parameter could be casted to integer
 func (value *NumericFieldValue[TModel, TAttribute]) Minus(other float64) *NumericFieldValue[TModel, TAttribute] {
 	return value.addOperation(other, "-")
 }
 
 // Times multiplies value by other
-//
-// Warning: in PostgreSQL the value received by parameter could be casted to integer
 func (value *NumericFieldValue[TModel, TAttribute]) Times(other float64) *NumericFieldValue[TModel, TAttribute] {
 	return value.addOperation(other, "*")
 }
 
 // Divided divides value by other
-//
-// Warning: in PostgreSQL the value received by parameter could be casted to integer
 func (value *NumericFieldValue[TModel, TAttribute]) Divided(other float64) *NumericFieldValue[TModel, TAttribute] {
 	return value.addOperation(other, "/")
 }
