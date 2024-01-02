@@ -22,12 +22,12 @@ type phoneConditions struct {
 }
 
 var Phone = phoneConditions{
-	BrandID:   condition.UpdatableField[models.Phone, uint]{Field: condition.Field[models.Phone, uint]{Name: "BrandID"}},
-	CreatedAt: condition.Field[models.Phone, time.Time]{Name: "CreatedAt"},
-	DeletedAt: condition.Field[models.Phone, time.Time]{Name: "DeletedAt"},
-	ID:        condition.Field[models.Phone, model.UIntID]{Name: "ID"},
-	Name:      condition.StringField[models.Phone]{UpdatableField: condition.UpdatableField[models.Phone, string]{Field: condition.Field[models.Phone, string]{Name: "Name"}}},
-	UpdatedAt: condition.Field[models.Phone, time.Time]{Name: "UpdatedAt"},
+	BrandID:   condition.NewUpdatableField[models.Phone, uint]("BrandID", "", ""),
+	CreatedAt: condition.NewField[models.Phone, time.Time]("CreatedAt", "", ""),
+	DeletedAt: condition.NewField[models.Phone, time.Time]("DeletedAt", "", ""),
+	ID:        condition.NewField[models.Phone, model.UIntID]("ID", "", ""),
+	Name:      condition.NewStringField[models.Phone]("Name", "", ""),
+	UpdatedAt: condition.NewField[models.Phone, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Phone when doing a query

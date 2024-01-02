@@ -32,14 +32,14 @@ func methodError(err error, method string) error {
 func fieldModelNotConcernedError(field IField) error {
 	return fmt.Errorf("%w; not concerned model: %s",
 		ErrFieldModelNotConcerned,
-		field.GetModelType(),
+		field.getModelType(),
 	)
 }
 
 func joinMustBeSelectedError(field IField) error {
 	return fmt.Errorf("%w; joined multiple times model: %s",
 		ErrJoinMustBeSelected,
-		field.GetModelType(),
+		field.getModelType(),
 	)
 }
 
@@ -56,7 +56,7 @@ func conditionOperatorError[TObject model.Model, TAtribute any](operatorErr erro
 		"%w; model: %T, field: %s",
 		operatorErr,
 		*new(TObject),
-		condition.FieldIdentifier.Name,
+		condition.FieldIdentifier.name,
 	)
 }
 
