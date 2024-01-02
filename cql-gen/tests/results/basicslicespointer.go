@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	basicslicespointer "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basicslicespointer"
+	basicslicespointer "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/basicslicespointer"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

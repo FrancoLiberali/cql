@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	uuidmodel "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/uuidmodel"
+	uuidmodel "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/uuidmodel"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

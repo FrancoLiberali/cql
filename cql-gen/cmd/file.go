@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/dave/jennifer/jen"
 
-	"github.com/FrancoLiberali/cql/cql-gen/cmd/version"
+	"github.com/FrancoLiberali/cql-gen/cmd/version"
 )
 
 type File struct {

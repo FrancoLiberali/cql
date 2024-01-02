@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	overridereferences "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/overridereferences"
+	overridereferences "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/overridereferences"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

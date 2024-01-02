@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	selfreferential "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/selfreferential"
+	selfreferential "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/selfreferential"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

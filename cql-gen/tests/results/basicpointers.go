@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	basicpointers "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basicpointers"
+	basicpointers "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/basicpointers"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

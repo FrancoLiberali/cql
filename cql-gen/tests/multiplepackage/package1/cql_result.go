@@ -2,7 +2,7 @@
 package package1
 
 import (
-	package2 "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
+	package2 "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
 	preload "github.com/FrancoLiberali/cql/preload"
 )
 

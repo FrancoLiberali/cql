@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	hasmany "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/hasmany"
+	hasmany "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/hasmany"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

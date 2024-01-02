@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	package2 "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
+	package2 "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

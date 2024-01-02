@@ -3,7 +3,7 @@ package conditions
 
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
-	gormembedded "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/gormembedded"
+	gormembedded "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/gormembedded"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )
