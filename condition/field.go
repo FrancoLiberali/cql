@@ -24,6 +24,7 @@ type Field[TModel model.Model, TAttribute any] struct {
 	columnPrefix string
 }
 
+//nolint:unused // necessary for FieldOfType[T any]
 func (field Field[TModel, TAttribute]) getType() TAttribute {
 	return *new(TAttribute)
 }

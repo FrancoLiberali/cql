@@ -208,20 +208,23 @@ func (condition *Condition) createField(objectType Type, field Field) {
 	)
 
 	var fieldQual *jen.Statement
+
 	var newFieldQual *jen.Statement
 
-	if condition.param.isString {
+	switch {
+	case condition.param.isString:
 		fieldQual, newFieldQual = condition.specificField(field, objectTypeQual, cqlNullableStringField, cqlNewNullableStringField, cqlStringField, cqlNewStringField)
-	} else if condition.param.isBool {
+	case condition.param.isBool:
 		fieldQual, newFieldQual = condition.specificField(field, objectTypeQual, cqlNullableBoolField, cqlNewNullableBoolField, cqlBoolField, cqlNewBoolField)
-	} else {
-		if field.IsNullable() {
+	default:
+		switch {
+		case field.IsNullable():
 			fieldQual = jen.Qual(conditionPath, cqlNullableField)
 			newFieldQual = jen.Qual(conditionPath, cqlNewNullableField)
-		} else if field.IsUpdatable() {
+		case field.IsUpdatable():
 			fieldQual = jen.Qual(conditionPath, cqlUpdatableField)
 			newFieldQual = jen.Qual(conditionPath, cqlNewUpdatableField)
-		} else {
+		default:
 			fieldQual = jen.Qual(conditionPath, cqlField)
 			newFieldQual = jen.Qual(conditionPath, cqlNewField)
 		}
@@ -249,6 +252,7 @@ func (condition *Condition) specificField(
 	notNullableType, newNotNullableType string,
 ) (*jen.Statement, *jen.Statement) {
 	var fieldQual *jen.Statement
+
 	var newFieldQual *jen.Statement
 
 	if field.IsNullable() {

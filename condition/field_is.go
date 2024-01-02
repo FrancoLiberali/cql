@@ -135,14 +135,10 @@ func (is FieldIs[TObject, TAttribute]) Custom(op Operator[TAttribute]) WhereCond
 
 // Dynamic transforms the FieldIs in a DynamicFieldIs to use dynamic operators
 func (is FieldIs[TObject, TAttribute]) Dynamic() DynamicFieldIs[TObject, TAttribute] {
-	return DynamicFieldIs[TObject, TAttribute]{
-		field: is.field,
-	}
+	return DynamicFieldIs[TObject, TAttribute](is)
 }
 
 // Unsafe transforms the FieldIs in an UnsafeFieldIs to use unsafe operators
 func (is FieldIs[TObject, TAttribute]) Unsafe() UnsafeFieldIs[TObject, TAttribute] {
-	return UnsafeFieldIs[TObject, TAttribute]{
-		field: is.field,
-	}
+	return UnsafeFieldIs[TObject, TAttribute](is)
 }
