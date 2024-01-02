@@ -27,27 +27,21 @@ type productConditions struct {
 }
 
 var Product = productConditions{
-	Bool:      condition.BoolField[models.Product]{UpdatableField: condition.UpdatableField[models.Product, bool]{Field: condition.Field[models.Product, bool]{Name: "Bool"}}},
-	ByteArray: condition.UpdatableField[models.Product, []uint8]{Field: condition.Field[models.Product, []uint8]{Name: "ByteArray"}},
-	CreatedAt: condition.Field[models.Product, time.Time]{Name: "CreatedAt"},
-	DeletedAt: condition.Field[models.Product, time.Time]{Name: "DeletedAt"},
-	Float:     condition.UpdatableField[models.Product, float64]{Field: condition.Field[models.Product, float64]{Name: "Float"}},
-	GormEmbeddedInt: condition.UpdatableField[models.Product, int]{Field: condition.Field[models.Product, int]{
-		ColumnPrefix: "gorm_embedded_",
-		Name:         "Int",
-	}},
-	ID:          condition.Field[models.Product, model.UUID]{Name: "ID"},
-	Int:         condition.UpdatableField[models.Product, int]{Field: condition.Field[models.Product, int]{Name: "Int"}},
-	IntPointer:  condition.NullableField[models.Product, int]{UpdatableField: condition.UpdatableField[models.Product, int]{Field: condition.Field[models.Product, int]{Name: "IntPointer"}}},
-	MultiString: condition.UpdatableField[models.Product, models.MultiString]{Field: condition.Field[models.Product, models.MultiString]{Name: "MultiString"}},
-	NullBool:    condition.NullableBoolField[models.Product]{NullableField: condition.NullableField[models.Product, bool]{UpdatableField: condition.UpdatableField[models.Product, bool]{Field: condition.Field[models.Product, bool]{Name: "NullBool"}}}},
-	NullFloat:   condition.NullableField[models.Product, float64]{UpdatableField: condition.UpdatableField[models.Product, float64]{Field: condition.Field[models.Product, float64]{Name: "NullFloat"}}},
-	String: condition.StringField[models.Product]{UpdatableField: condition.UpdatableField[models.Product, string]{Field: condition.Field[models.Product, string]{
-		Column: "string_something_else",
-		Name:   "String",
-	}}},
-	ToBeEmbeddedEmbeddedInt: condition.UpdatableField[models.Product, int]{Field: condition.Field[models.Product, int]{Name: "EmbeddedInt"}},
-	UpdatedAt:               condition.Field[models.Product, time.Time]{Name: "UpdatedAt"},
+	Bool:                    condition.NewBoolField[models.Product]("Bool", "", ""),
+	ByteArray:               condition.NewUpdatableField[models.Product, []uint8]("ByteArray", "", ""),
+	CreatedAt:               condition.NewField[models.Product, time.Time]("CreatedAt", "", ""),
+	DeletedAt:               condition.NewField[models.Product, time.Time]("DeletedAt", "", ""),
+	Float:                   condition.NewUpdatableField[models.Product, float64]("Float", "", ""),
+	GormEmbeddedInt:         condition.NewUpdatableField[models.Product, int]("Int", "", "gorm_embedded_"),
+	ID:                      condition.NewField[models.Product, model.UUID]("ID", "", ""),
+	Int:                     condition.NewUpdatableField[models.Product, int]("Int", "", ""),
+	IntPointer:              condition.NewNullableField[models.Product, int]("IntPointer", "", ""),
+	MultiString:             condition.NewUpdatableField[models.Product, models.MultiString]("MultiString", "", ""),
+	NullBool:                condition.NewNullableBoolField[models.Product]("NullBool", "", ""),
+	NullFloat:               condition.NewNullableField[models.Product, float64]("NullFloat", "", ""),
+	String:                  condition.NewStringField[models.Product]("String", "string_something_else", ""),
+	ToBeEmbeddedEmbeddedInt: condition.NewUpdatableField[models.Product, int]("EmbeddedInt", "", ""),
+	UpdatedAt:               condition.NewField[models.Product, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Product when doing a query

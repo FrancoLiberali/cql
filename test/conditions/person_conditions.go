@@ -17,11 +17,11 @@ type personConditions struct {
 }
 
 var Person = personConditions{
-	CreatedAt: condition.Field[models.Person, time.Time]{Name: "CreatedAt"},
-	DeletedAt: condition.Field[models.Person, time.Time]{Name: "DeletedAt"},
-	ID:        condition.Field[models.Person, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.Person]{UpdatableField: condition.UpdatableField[models.Person, string]{Field: condition.Field[models.Person, string]{Name: "Name"}}},
-	UpdatedAt: condition.Field[models.Person, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.NewField[models.Person, time.Time]("CreatedAt", "", ""),
+	DeletedAt: condition.NewField[models.Person, time.Time]("DeletedAt", "", ""),
+	ID:        condition.NewField[models.Person, model.UUID]("ID", "", ""),
+	Name:      condition.NewStringField[models.Person]("Name", "", ""),
+	UpdatedAt: condition.NewField[models.Person, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Person when doing a query
