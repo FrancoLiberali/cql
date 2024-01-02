@@ -17,11 +17,11 @@ type brandConditions struct {
 }
 
 var Brand = brandConditions{
-	CreatedAt: condition.Field[models.Brand, time.Time]{Name: "CreatedAt"},
-	DeletedAt: condition.Field[models.Brand, time.Time]{Name: "DeletedAt"},
-	ID:        condition.Field[models.Brand, model.UIntID]{Name: "ID"},
-	Name:      condition.StringField[models.Brand]{UpdatableField: condition.UpdatableField[models.Brand, string]{Field: condition.Field[models.Brand, string]{Name: "Name"}}},
-	UpdatedAt: condition.Field[models.Brand, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.NewField[models.Brand, time.Time]("CreatedAt", "", ""),
+	DeletedAt: condition.NewField[models.Brand, time.Time]("DeletedAt", "", ""),
+	ID:        condition.NewField[models.Brand, model.UIntID]("ID", "", ""),
+	Name:      condition.NewStringField[models.Brand]("Name", "", ""),
+	UpdatedAt: condition.NewField[models.Brand, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Brand when doing a query

@@ -9,7 +9,7 @@ import (
 
 	"github.com/elliotchance/pie/v2"
 
-	"github.com/FrancoLiberali/cql-gen/cmd/utils"
+	"github.com/FrancoLiberali/cql/cql-gen/cmd/utils"
 )
 
 var (

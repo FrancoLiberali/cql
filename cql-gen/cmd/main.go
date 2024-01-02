@@ -13,8 +13,8 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/tools/go/packages"
 
-	"github.com/FrancoLiberali/cql-gen/cmd/log"
-	"github.com/FrancoLiberali/cql-gen/cmd/version"
+	"github.com/FrancoLiberali/cql/cql-gen/cmd/log"
+	"github.com/FrancoLiberali/cql/cql-gen/cmd/version"
 )
 
 var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{

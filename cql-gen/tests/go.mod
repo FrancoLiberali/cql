@@ -1,10 +1,10 @@
-module github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests
+module github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests
 
 go 1.18
 
 require (
 	github.com/FrancoLiberali/cql v0.0.1
-	github.com/FrancoLiberali/cql-gen v0.0.1
+	github.com/FrancoLiberali/cql/cql-gen v0.0.1
 	github.com/spf13/viper v1.18.2
 	gotest.tools v2.2.0+incompatible
 )
@@ -47,6 +47,6 @@ require (
 	gorm.io/gorm v1.25.5 // indirect
 )
 
-replace github.com/FrancoLiberali/cql-gen => ./..
+replace github.com/FrancoLiberali/cql/cql-gen => ./..
 
 replace github.com/FrancoLiberali/cql => ./../..
