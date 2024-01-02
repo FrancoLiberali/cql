@@ -24,6 +24,7 @@ type productConditions struct {
 	MultiString             condition.UpdatableField[models.Product, models.MultiString]
 	ToBeEmbeddedEmbeddedInt condition.NumericField[models.Product, int]
 	GormEmbeddedInt         condition.NumericField[models.Product, int]
+	String2                 condition.StringField[models.Product]
 }
 
 var Product = productConditions{
@@ -40,11 +41,12 @@ var Product = productConditions{
 	NullBool:                condition.NewNullableBoolField[models.Product]("NullBool", "", ""),
 	NullFloat:               condition.NewNullableNumericField[models.Product, float64]("NullFloat", "", ""),
 	String:                  condition.NewStringField[models.Product]("String", "string_something_else", ""),
+	String2:                 condition.NewStringField[models.Product]("String2", "", ""),
 	ToBeEmbeddedEmbeddedInt: condition.NewNumericField[models.Product, int]("EmbeddedInt", "", ""),
 	UpdatedAt:               condition.NewField[models.Product, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Product when doing a query
 func (productConditions productConditions) preload() condition.Condition[models.Product] {
-	return condition.NewPreloadCondition[models.Product](productConditions.ID, productConditions.CreatedAt, productConditions.UpdatedAt, productConditions.DeletedAt, productConditions.String, productConditions.Int, productConditions.IntPointer, productConditions.Float, productConditions.NullFloat, productConditions.Bool, productConditions.NullBool, productConditions.ByteArray, productConditions.MultiString, productConditions.ToBeEmbeddedEmbeddedInt, productConditions.GormEmbeddedInt)
+	return condition.NewPreloadCondition[models.Product](productConditions.ID, productConditions.CreatedAt, productConditions.UpdatedAt, productConditions.DeletedAt, productConditions.String, productConditions.Int, productConditions.IntPointer, productConditions.Float, productConditions.NullFloat, productConditions.Bool, productConditions.NullBool, productConditions.ByteArray, productConditions.MultiString, productConditions.ToBeEmbeddedEmbeddedInt, productConditions.GormEmbeddedInt, productConditions.String2)
 }

@@ -414,7 +414,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
 	entities, err := cql.Query[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
-			conditions.Company.Name.IsDynamic().Eq(conditions.Seller.Name),
+			conditions.Company.Name.IsDynamic().Eq(conditions.Seller.Name.Value()),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -439,7 +439,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Company(
-				conditions.Company.Name.IsDynamic().Eq(conditions.Seller.Name),
+				conditions.Company.Name.IsDynamic().Eq(conditions.Seller.Name.Value()),
 			),
 		),
 	).Find()
@@ -451,7 +451,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelReturnsError() {
 	_, err := cql.Query[models.Child](
 		ts.db,
-		conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID),
+		conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID.Value()),
 	).Find()
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
@@ -466,7 +466,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID),
+		conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID.Value()),
 	).Find()
 	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
 	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
@@ -488,7 +488,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name).SelectJoin(0, 0),
+		conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name.Value()).SelectJoin(0, 0),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -505,8 +505,8 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 			conditions.Parent2.ParentParent(),
 		),
 		conditions.Child.ID.IsDynamic().Between(
-			conditions.ParentParent.ID,
-			conditions.ParentParent.ID,
+			conditions.ParentParent.ID.Value(),
+			conditions.ParentParent.ID.Value(),
 		),
 	).Find()
 	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)

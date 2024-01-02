@@ -67,22 +67,25 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 			return "", nil, operatorError(ErrUnsupportedByDatabase, sqlOperator)
 		}
 
-		field, isField := operation.Value.(IField)
-		if isField {
+		iValue, isIValue := operation.Value.(IValue)
+		if isIValue {
 			// if the value of the operation is a field,
 			// verify that this field is concerned by the query
 			// (a join was performed with the model to which this field belongs)
 			// and get the alias of the table of this model.
-			modelTable, err := getModelTable(query, field, operation.JoinNumber, sqlOperator)
+			modelTable, err := getModelTable(query, iValue.getField(), operation.JoinNumber, sqlOperator)
 			if err != nil {
 				return "", nil, err
 			}
 
+			valueSQL, valueValues := iValue.toSQL(query, modelTable)
+
 			operationString += fmt.Sprintf(
 				" %s %s",
 				sqlOperator,
-				field.columnSQL(query, modelTable),
+				valueSQL,
 			)
+			values = append(values, valueValues...)
 		} else {
 			operationString += " " + sqlOperator.String() + " ?"
 			values = append(values, operation.Value)

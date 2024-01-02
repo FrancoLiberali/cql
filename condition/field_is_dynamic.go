@@ -16,33 +16,33 @@ type DynamicFieldIs[TObject model.Model, TAttribute any] struct {
 // - SQLite: https://www.sqlite.org/lang_expr.html
 
 // EqualTo
-func (is DynamicFieldIs[TObject, TAttribute]) Eq(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Eq[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) Eq(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Eq[TAttribute](value))
 }
 
 // NotEqualTo
-func (is DynamicFieldIs[TObject, TAttribute]) NotEq(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, NotEq[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) NotEq(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, NotEq[TAttribute](value))
 }
 
 // LessThan
-func (is DynamicFieldIs[TObject, TAttribute]) Lt(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Lt[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) Lt(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Lt[TAttribute](value))
 }
 
 // LessThanOrEqualTo
-func (is DynamicFieldIs[TObject, TAttribute]) LtOrEq(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, LtOrEq[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) LtOrEq(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, LtOrEq[TAttribute](value))
 }
 
 // GreaterThan
-func (is DynamicFieldIs[TObject, TAttribute]) Gt(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Gt[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) Gt(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Gt[TAttribute](value))
 }
 
 // GreaterThanOrEqualTo
-func (is DynamicFieldIs[TObject, TAttribute]) GtOrEq(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, GtOrEq[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) GtOrEq(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, GtOrEq[TAttribute](value))
 }
 
 // Comparison Predicates
@@ -53,21 +53,21 @@ func (is DynamicFieldIs[TObject, TAttribute]) GtOrEq(field FieldOfType[TAttribut
 // - SQLite: https://www.sqlite.org/lang_expr.html
 
 // Equivalent to field1 < value < field2
-func (is DynamicFieldIs[TObject, TAttribute]) Between(field1, field2 FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Between[TAttribute](field1, field2))
+func (is DynamicFieldIs[TObject, TAttribute]) Between(value1, value2 ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Between[TAttribute](value1, value2))
 }
 
 // Equivalent to NOT (field1 < value < field2)
-func (is DynamicFieldIs[TObject, TAttribute]) NotBetween(field1, field2 FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, NotBetween[TAttribute](field1, field2))
+func (is DynamicFieldIs[TObject, TAttribute]) NotBetween(value1, value2 ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, NotBetween[TAttribute](value1, value2))
 }
 
-func (is DynamicFieldIs[TObject, TAttribute]) Distinct(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, IsDistinct[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) Distinct(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, IsDistinct[TAttribute](value))
 }
 
-func (is DynamicFieldIs[TObject, TAttribute]) NotDistinct(field FieldOfType[TAttribute]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, IsNotDistinct[TAttribute](field))
+func (is DynamicFieldIs[TObject, TAttribute]) NotDistinct(value ValueOfType[TAttribute]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, IsNotDistinct[TAttribute](value))
 }
 
 type NumericDynamicFieldIs[TObject model.Model, TAttribute any] struct {
@@ -82,33 +82,33 @@ type NumericDynamicFieldIs[TObject model.Model, TAttribute any] struct {
 // - SQLite: https://www.sqlite.org/lang_expr.html
 
 // EqualTo
-func (is NumericDynamicFieldIs[TObject, TAttribute]) Eq(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Eq[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) Eq(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Eq[TAttribute](value))
 }
 
 // NotEqualTo
-func (is NumericDynamicFieldIs[TObject, TAttribute]) NotEq(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, NotEq[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) NotEq(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, NotEq[TAttribute](value))
 }
 
 // LessThan
-func (is NumericDynamicFieldIs[TObject, TAttribute]) Lt(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Lt[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) Lt(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Lt[TAttribute](value))
 }
 
 // LessThanOrEqualTo
-func (is NumericDynamicFieldIs[TObject, TAttribute]) LtOrEq(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, LtOrEq[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) LtOrEq(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, LtOrEq[TAttribute](value))
 }
 
 // GreaterThan
-func (is NumericDynamicFieldIs[TObject, TAttribute]) Gt(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Gt[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) Gt(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Gt[TAttribute](value))
 }
 
 // GreaterThanOrEqualTo
-func (is NumericDynamicFieldIs[TObject, TAttribute]) GtOrEq(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, GtOrEq[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) GtOrEq(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, GtOrEq[TAttribute](value))
 }
 
 // Comparison Predicates
@@ -119,19 +119,19 @@ func (is NumericDynamicFieldIs[TObject, TAttribute]) GtOrEq(field FieldOfType[nu
 // - SQLite: https://www.sqlite.org/lang_expr.html
 
 // Equivalent to field1 < value < field2
-func (is NumericDynamicFieldIs[TObject, TAttribute]) Between(field1, field2 FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, Between[TAttribute](field1, field2))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) Between(value1, value2 ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, Between[TAttribute](value1, value2))
 }
 
 // Equivalent to NOT (field1 < value < field2)
-func (is NumericDynamicFieldIs[TObject, TAttribute]) NotBetween(field1, field2 FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, NotBetween[TAttribute](field1, field2))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) NotBetween(value1, value2 ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, NotBetween[TAttribute](value1, value2))
 }
 
-func (is NumericDynamicFieldIs[TObject, TAttribute]) Distinct(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, IsDistinct[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) Distinct(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, IsDistinct[TAttribute](value))
 }
 
-func (is NumericDynamicFieldIs[TObject, TAttribute]) NotDistinct(field FieldOfType[numeric]) DynamicCondition[TObject] {
-	return NewFieldCondition(is.field, IsNotDistinct[TAttribute](field))
+func (is NumericDynamicFieldIs[TObject, TAttribute]) NotDistinct(value ValueOfType[numeric]) DynamicCondition[TObject] {
+	return NewFieldCondition(is.field, IsNotDistinct[TAttribute](value))
 }

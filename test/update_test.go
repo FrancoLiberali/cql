@@ -330,7 +330,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 			conditions.Brand.Name.Is().Eq("google"),
 		),
 	).Set(
-		conditions.Phone.Name.Set().Dynamic(conditions.Brand.Name),
+		conditions.Phone.Name.Set().Dynamic(conditions.Brand.Name.Value()),
 	)
 
 	ts.Require().NoError(err)
@@ -357,7 +357,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJo
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name),
+		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Value()),
 	)
 
 	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
@@ -381,7 +381,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name, 0),
+		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Value(), 0),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
@@ -693,4 +693,27 @@ func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 		ts.ErrorIs(err, cql.ErrOrderByMustBeCalled)
 		ts.ErrorContains(err, "method: Limit")
 	}
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
+	product1 := ts.createProduct("1", 0, 1.0, false, nil)
+
+	updated, err := cql.Update[models.Product](
+		ts.db,
+		conditions.Product.Bool.Is().False(),
+	).Set(
+		conditions.Product.Int.Set().Dynamic(conditions.Product.Float.Value().Plus(1)),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(2),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(product1.ID, productReturned.ID)
+	ts.Equal(2, productReturned.Int)
+	ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }

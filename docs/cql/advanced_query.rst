@@ -57,6 +57,7 @@ For example we query all MyModels that has the same value in its Name attribute 
 its related MyOtherModel's Name attribute.
 
 .. code-block:: go
+    :caption: Example model
 
     type MyOtherModel struct {
         model.UUIDModel
@@ -73,10 +74,13 @@ its related MyOtherModel's Name attribute.
         RelatedID model.UUID
     }
 
+.. code-block:: go
+    :caption: Query
+
     myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.IsDynamic().Eq(conditions.MyModel.Name),
+            conditions.MyOtherModel.Name.IsDynamic().Eq(conditions.MyModel.Name.Value()),
         ),
     ).Find()
 
@@ -85,6 +89,7 @@ is concerned by the query is performed at run time, returning an error otherwise
 For example:
 
 .. code-block:: go
+    :caption: Example model
 
      type MyOtherModel struct {
         model.UUIDModel
@@ -101,15 +106,57 @@ For example:
         RelatedID model.UUID
     }
 
+.. code-block:: go
+    :caption: Query
+
     myModels, err := cql.Query[MyModel](
         gormDB,
-        conditions.MyModel.Name.IsDynamic().Eq(conditions.MyOtherModel.Name),
+        conditions.MyModel.Name.IsDynamic().Eq(conditions.MyOtherModel.Name.Value()),
     ).Find()
 
 will respond cql.ErrFieldModelNotConcerned in err.
 
 All operators supported by cql that receive any value are available in their dynamic version 
 after using the Dynamic() method of the FieldIs object.
+
+Functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+When using dynamic operators it is also possible to apply functions on the values to be used. 
+For example, if we seek to obtain the cities whose population represents at least half of the population of their country:
+
+.. code-block:: go
+    :caption: Example model
+
+    type Country struct {
+        model.UUIDModel
+
+        Population int
+    }
+
+    type City struct {
+        model.UUIDModel
+
+        Population int
+
+        Country   Country
+        CountryID model.UUID
+    }
+
+.. code-block:: go
+    :caption: Query
+    :linenos:
+    :emphasize-lines: 5
+
+    cities, err := cql.Query[City](
+        gormDB,
+        conditions.City.Country(
+            conditions.Country.Population.IsDynamic().Lt(
+                conditions.City.Population.Value().Times(2),
+            ),
+        ),
+    ).Find()
+
 
 Select join
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -157,7 +204,7 @@ To do this, you must use the SelectJoin method, as in the following example:
         conditions.Child.Parent2(
             conditions.Parent2.ParentParent(),
         ),
-        conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name).SelectJoin(
+        conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name.Value()).SelectJoin(
             0, // for the parameter in position 0 of the operator (conditions.ParentParent.Name),
             0, // choose the first (0) join (made by conditions.Child.Parent1())
         ),
@@ -176,7 +223,7 @@ If it is neither of these two cases, the use of an unsafe operator will result i
 an error in the execution of the query that depends on the database used.
 
 All operators supported by cql that receive any value are available 
-in their unsafe version after using the Unsafe() method of the FieldIs object.
+in their unsafe version after using the IsUnsafe() method of the Field object.
 
 
 Unsafe conditions (raw SQL)
