@@ -27,14 +27,14 @@ type childConditions struct {
 }
 
 var Child = childConditions{
-	CreatedAt: condition.Field[models.Child, time.Time]{Name: "CreatedAt"},
-	DeletedAt: condition.Field[models.Child, time.Time]{Name: "DeletedAt"},
-	ID:        condition.Field[models.Child, model.UUID]{Name: "ID"},
-	Name:      condition.StringField[models.Child]{UpdatableField: condition.UpdatableField[models.Child, string]{Field: condition.Field[models.Child, string]{Name: "Name"}}},
-	Number:    condition.UpdatableField[models.Child, int]{Field: condition.Field[models.Child, int]{Name: "Number"}},
-	Parent1ID: condition.UpdatableField[models.Child, model.UUID]{Field: condition.Field[models.Child, model.UUID]{Name: "Parent1ID"}},
-	Parent2ID: condition.UpdatableField[models.Child, model.UUID]{Field: condition.Field[models.Child, model.UUID]{Name: "Parent2ID"}},
-	UpdatedAt: condition.Field[models.Child, time.Time]{Name: "UpdatedAt"},
+	CreatedAt: condition.NewField[models.Child, time.Time]("CreatedAt", "", ""),
+	DeletedAt: condition.NewField[models.Child, time.Time]("DeletedAt", "", ""),
+	ID:        condition.NewField[models.Child, model.UUID]("ID", "", ""),
+	Name:      condition.NewStringField[models.Child]("Name", "", ""),
+	Number:    condition.NewUpdatableField[models.Child, int]("Number", "", ""),
+	Parent1ID: condition.NewUpdatableField[models.Child, model.UUID]("Parent1ID", "", ""),
+	Parent2ID: condition.NewUpdatableField[models.Child, model.UUID]("Parent2ID", "", ""),
+	UpdatedAt: condition.NewField[models.Child, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Child when doing a query
