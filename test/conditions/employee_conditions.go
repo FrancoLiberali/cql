@@ -22,12 +22,12 @@ type employeeConditions struct {
 }
 
 var Employee = employeeConditions{
-	BossID:    condition.NewNullableField[models.Employee, model.UUID]("BossID", "", ""),
-	CreatedAt: condition.NewField[models.Employee, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Employee, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.Employee, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.Employee]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.Employee, time.Time]("UpdatedAt", "", ""),
+	BossID:    condition.NullableField[models.Employee, model.UUID]{UpdatableField: condition.UpdatableField[models.Employee, model.UUID]{Field: condition.Field[models.Employee, model.UUID]{Name: "BossID"}}},
+	CreatedAt: condition.Field[models.Employee, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.Employee, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.Employee, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.Employee]{UpdatableField: condition.UpdatableField[models.Employee, string]{Field: condition.Field[models.Employee, string]{Name: "Name"}}},
+	UpdatedAt: condition.Field[models.Employee, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Employee when doing a query
