@@ -723,5 +723,4 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 		ts.Equal(2, productReturned.Int)
 		ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 	}
-
 }
