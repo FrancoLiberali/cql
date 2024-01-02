@@ -83,6 +83,7 @@ type Product struct {
 	MultiString MultiString
 	ToBeEmbedded
 	GormEmbedded ToBeGormEmbedded `gorm:"embedded;embeddedPrefix:gorm_embedded_"`
+	String2      string
 }
 
 func (m Product) Equal(other Product) bool {

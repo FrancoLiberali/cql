@@ -374,13 +374,15 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 func getUpdateValue(query *GormQuery, set ISet) (any, error) {
 	value := set.getValue()
 
-	if field, isField := value.(IField); isField {
-		table, err := query.GetModelTable(field, set.getJoinNumber())
+	if iValue, isIValue := value.(IValue); isIValue {
+		table, err := query.GetModelTable(iValue.getField(), set.getJoinNumber())
 		if err != nil {
 			return nil, err
 		}
 
-		return gorm.Expr(field.columnSQL(query, table)), nil
+		valueSQL, valueValues := iValue.toSQL(query, table)
+
+		return gorm.Expr(valueSQL, valueValues...), nil
 	}
 
 	return value, nil
