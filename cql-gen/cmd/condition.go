@@ -25,6 +25,7 @@ const (
 	cqlNullableStringField  = "NullableStringField"
 	cqlNumericField         = "NumericField"
 	cqlNullableNumericField = "NullableNumericField"
+	cqlNewField             = "New"
 	cqlCollection           = "Collection"
 	cqlNewCollection        = "NewCollection"
 	// cql/model
@@ -265,13 +266,13 @@ func (condition *Condition) switchFieldType(
 	switch {
 	case field.IsNullable():
 		fieldQual = jen.Qual(conditionPath, nullableType)
-		newFieldQual = jen.Qual(conditionPath, "New"+nullableType)
+		newFieldQual = jen.Qual(conditionPath, cqlNewField+nullableType)
 	case field.IsUpdatable():
 		fieldQual = jen.Qual(conditionPath, updatableType)
-		newFieldQual = jen.Qual(conditionPath, "New"+updatableType)
+		newFieldQual = jen.Qual(conditionPath, cqlNewField+updatableType)
 	default:
 		fieldQual = jen.Qual(conditionPath, notNullableType)
-		newFieldQual = jen.Qual(conditionPath, "New"+notNullableType)
+		newFieldQual = jen.Qual(conditionPath, cqlNewField+notNullableType)
 	}
 
 	return fieldQual, newFieldQual

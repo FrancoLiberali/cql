@@ -174,7 +174,10 @@ type NumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | in
 	UpdatableField[TModel, TAttribute]
 }
 
-func NewNumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64](name, column, columnPrefix string) NumericField[TModel, TAttribute] {
+func NewNumericField[
+	TModel model.Model,
+	TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64,
+](name, column, columnPrefix string) NumericField[TModel, TAttribute] {
 	return NumericField[TModel, TAttribute]{
 		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix),
 	}
@@ -193,15 +196,21 @@ func (numericField NumericField[TModel, TAttribute]) Set() NumericFieldSet[TMode
 	return NumericFieldSet[TModel, TAttribute]{field: numericField}
 }
 
-type NullableNumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64] struct {
+type NullableNumericField[
+	TModel model.Model,
+	TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64,
+] struct {
 	NumericField[TModel, TAttribute]
 }
 
 func (field NullableNumericField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
-	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: UpdatableField[TModel, TAttribute](field.UpdatableField)}}
+	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: field.UpdatableField}}
 }
 
-func NewNullableNumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64](name, column, columnPrefix string) NullableNumericField[TModel, TAttribute] {
+func NewNullableNumericField[
+	TModel model.Model,
+	TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64,
+](name, column, columnPrefix string) NullableNumericField[TModel, TAttribute] {
 	return NullableNumericField[TModel, TAttribute]{
 		NumericField: NewNumericField[TModel, TAttribute](name, column, columnPrefix),
 	}

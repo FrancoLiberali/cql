@@ -22,13 +22,13 @@ type FieldValue[TModel model.Model, TAttribute any] struct {
 	values []any
 }
 
-const column_SQL = "COLUMN_SQL"
+const columnSQL = "COLUMN_SQL"
 
 func NewFieldValue[TModel model.Model, TAttribute any](field Field[TModel, TAttribute]) *FieldValue[TModel, TAttribute] {
 	return &FieldValue[TModel, TAttribute]{
 		field:  field,
 		values: []any{},
-		sql:    column_SQL,
+		sql:    columnSQL,
 	}
 }
 
@@ -39,7 +39,7 @@ func (value FieldValue[TModel, TAttribute]) getField() IField {
 func (value FieldValue[TModel, TAttribute]) toSQL(query *GormQuery, table Table) (string, []any) {
 	return strings.Replace(
 		value.sql,
-		column_SQL,
+		columnSQL,
 		value.field.columnSQL(query, table),
 		1,
 	), value.values
