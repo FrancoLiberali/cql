@@ -2,8 +2,8 @@
 package conditions
 
 import (
+	overrideforeignkey "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/overrideforeignkey"
 	condition "github.com/FrancoLiberali/cql/condition"
-	overrideforeignkey "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/overrideforeignkey"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

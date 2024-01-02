@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/viper"
 	"gotest.tools/assert"
 
-	"github.com/FrancoLiberali/cql/cql-gen/cmd"
+	"github.com/FrancoLiberali/cql-gen/cmd"
 )
 
 const chunkSize = 100000

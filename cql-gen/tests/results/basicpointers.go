@@ -2,8 +2,8 @@
 package conditions
 
 import (
+	basicpointers "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/basicpointers"
 	condition "github.com/FrancoLiberali/cql/condition"
-	basicpointers "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basicpointers"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

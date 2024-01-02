@@ -2,8 +2,8 @@
 package conditions
 
 import (
+	hasmanywithpointers "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/hasmanywithpointers"
 	condition "github.com/FrancoLiberali/cql/condition"
-	hasmanywithpointers "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/hasmanywithpointers"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )
