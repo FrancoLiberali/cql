@@ -51,7 +51,7 @@ func (query *GormQuery) Order(field IField, descending bool, joinNumber int) err
 		query.GormDB = query.GormDB.Order(
 			clause.OrderByColumn{
 				Column: clause.Column{
-					Name: field.columnSQL(
+					Name: field.ColumnSQL(
 						query,
 						table,
 					),
@@ -115,7 +115,7 @@ func (query *GormQuery) AddSelect(table Table, fieldID IField) {
 		fmt.Sprintf(
 			"%s.%s AS %s",
 			table.Alias,
-			fieldID.columnName(query, table),
+			fieldID.ColumnName(query, table),
 			query.getSelectAlias(table, fieldID),
 		),
 	)
@@ -125,7 +125,7 @@ func (query *GormQuery) getSelectAlias(table Table, fieldID IField) string {
 	return fmt.Sprintf(
 		"\"%[1]s__%[2]s\"", // name used by gorm to load the fields inside the models
 		table.Alias,
-		fieldID.columnName(query, table),
+		fieldID.ColumnName(query, table),
 	)
 }
 
@@ -171,7 +171,7 @@ func (query *GormQuery) GetTables(modelType reflect.Type) []Table {
 const UndefinedJoinNumber = -1
 
 func (query *GormQuery) GetModelTable(field IField, joinNumber int) (Table, error) {
-	modelTables := query.GetTables(field.getModelType())
+	modelTables := query.GetTables(field.GetModelType())
 	if modelTables == nil {
 		return Table{}, fieldModelNotConcernedError(field)
 	}
@@ -270,7 +270,7 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 	switch query.Dialector() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
 		for field, tableAndValue := range tablesAndValues {
-			updateMap[field.columnName(query, tableAndValue.table)] = tableAndValue.value
+			updateMap[field.ColumnName(query, tableAndValue.table)] = tableAndValue.value
 		}
 
 		query.joinsToFrom()
@@ -287,7 +287,7 @@ func (query *GormQuery) Update(sets []ISet) (int64, error) {
 		for field, tableAndValue := range tablesAndValues {
 			sets = append(sets, clause.Assignment{
 				Column: clause.Column{
-					Name:  field.columnName(query, tableAndValue.table),
+					Name:  field.ColumnName(query, tableAndValue.table),
 					Table: tableAndValue.table.SQLName(),
 				},
 				Value: tableAndValue.value,
@@ -350,7 +350,7 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 	tables := map[IField]TableAndValue{}
 
 	for _, set := range sets {
-		field := set.getField()
+		field := set.Field()
 
 		table, err := query.GetModelTable(field, 0)
 		if err != nil {
@@ -372,15 +372,15 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 }
 
 func getUpdateValue(query *GormQuery, set ISet) (any, error) {
-	value := set.getValue()
+	value := set.Value()
 
 	if field, isField := value.(IField); isField {
-		table, err := query.GetModelTable(field, set.getJoinNumber())
+		table, err := query.GetModelTable(field, set.JoinNumber())
 		if err != nil {
 			return nil, err
 		}
 
-		return gorm.Expr(field.columnSQL(query, table)), nil
+		return gorm.Expr(field.ColumnSQL(query, table)), nil
 	}
 
 	return value, nil

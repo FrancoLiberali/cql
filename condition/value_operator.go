@@ -81,7 +81,7 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 			operationString += fmt.Sprintf(
 				" %s %s",
 				sqlOperator,
-				field.columnSQL(query, modelTable),
+				field.ColumnSQL(query, modelTable),
 			)
 		} else {
 			operationString += " " + sqlOperator.String() + " ?"

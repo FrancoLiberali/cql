@@ -18,12 +18,12 @@ type parentParentConditions struct {
 }
 
 var ParentParent = parentParentConditions{
-	CreatedAt: condition.NewField[models.ParentParent, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.ParentParent, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.ParentParent, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.ParentParent]("Name", "", ""),
-	Number:    condition.NewUpdatableField[models.ParentParent, int]("Number", "", ""),
-	UpdatedAt: condition.NewField[models.ParentParent, time.Time]("UpdatedAt", "", ""),
+	CreatedAt: condition.Field[models.ParentParent, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.ParentParent, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.ParentParent, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.ParentParent]{UpdatableField: condition.UpdatableField[models.ParentParent, string]{Field: condition.Field[models.ParentParent, string]{Name: "Name"}}},
+	Number:    condition.UpdatableField[models.ParentParent, int]{Field: condition.Field[models.ParentParent, int]{Name: "Number"}},
+	UpdatedAt: condition.Field[models.ParentParent, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the ParentParent when doing a query

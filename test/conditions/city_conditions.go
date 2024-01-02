@@ -22,12 +22,12 @@ type cityConditions struct {
 }
 
 var City = cityConditions{
-	CountryID: condition.NewUpdatableField[models.City, model.UUID]("CountryID", "", ""),
-	CreatedAt: condition.NewField[models.City, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.City, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.City, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.City]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.City, time.Time]("UpdatedAt", "", ""),
+	CountryID: condition.UpdatableField[models.City, model.UUID]{Field: condition.Field[models.City, model.UUID]{Name: "CountryID"}},
+	CreatedAt: condition.Field[models.City, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.City, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.City, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.City]{UpdatableField: condition.UpdatableField[models.City, string]{Field: condition.Field[models.City, string]{Name: "Name"}}},
+	UpdatedAt: condition.Field[models.City, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the City when doing a query

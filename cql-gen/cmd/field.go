@@ -40,7 +40,7 @@ func (field Field) IsUpdatable() bool {
 }
 
 func (field Field) IsNullable() bool {
-	return field.IsUpdatable() && (field.Type.IsSQLNullableType() || field.Type.WasPointer()) && !field.Tags.hasNotNull()
+	return (field.Type.IsSQLNullableType() || field.Type.WasPointer()) && !field.Tags.hasNotNull()
 }
 
 // Get the name of the column where the data for a field will be saved

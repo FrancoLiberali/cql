@@ -18,12 +18,12 @@ type companyConditions struct {
 }
 
 var Company = companyConditions{
-	CreatedAt: condition.NewField[models.Company, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Company, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.Company, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.Company]("Name", "", ""),
+	CreatedAt: condition.Field[models.Company, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.Company, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.Company, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.Company]{UpdatableField: condition.UpdatableField[models.Company, string]{Field: condition.Field[models.Company, string]{Name: "Name"}}},
 	Sellers:   condition.NewCollection[models.Company, models.Seller]("Sellers", "ID", "CompanyID"),
-	UpdatedAt: condition.NewField[models.Company, time.Time]("UpdatedAt", "", ""),
+	UpdatedAt: condition.Field[models.Company, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Company when doing a query

@@ -7,63 +7,54 @@ import (
 )
 
 type IField interface {
-	columnName(query *GormQuery, table Table) string
-	fieldName() string
-	columnSQL(query *GormQuery, table Table) string
-	getModelType() reflect.Type
+	ColumnName(query *GormQuery, table Table) string
+	FieldName() string
+	ColumnSQL(query *GormQuery, table Table) string
+	GetModelType() reflect.Type
 }
 
 type FieldOfType[T any] interface {
 	IField
-	getType() T
+	GetType() T
 }
 
 type Field[TModel model.Model, TAttribute any] struct {
-	column       string
-	name         string
-	columnPrefix string
+	Column       string
+	Name         string
+	ColumnPrefix string
 }
 
-//nolint:unused // necessary for FieldOfType[T any]
-func (field Field[TModel, TAttribute]) getType() TAttribute {
+func (field Field[TModel, TAttribute]) GetType() TAttribute {
 	return *new(TAttribute)
 }
 
 func (field Field[TModel, TAttribute]) Is() FieldIs[TModel, TAttribute] {
-	return FieldIs[TModel, TAttribute]{field: field}
+	return FieldIs[TModel, TAttribute]{Field: field}
 }
 
-func (field Field[TModel, TAttribute]) getModelType() reflect.Type {
+func (field Field[TModel, TAttribute]) GetModelType() reflect.Type {
 	return reflect.TypeOf(*new(TModel))
 }
 
 // Returns the name of the field identified
-func (field Field[TModel, TAttribute]) fieldName() string {
-	return field.name
+func (field Field[TModel, TAttribute]) FieldName() string {
+	return field.Name
 }
 
 // Returns the name of the column in which the field is saved in the table
-func (field Field[TModel, TAttribute]) columnName(query *GormQuery, table Table) string {
-	columnName := field.column
+func (field Field[TModel, TAttribute]) ColumnName(query *GormQuery, table Table) string {
+	columnName := field.Column
 	if columnName == "" {
-		columnName = query.ColumnName(table, field.name)
+		columnName = query.ColumnName(table, field.Name)
 	}
 
 	// add column prefix and table name once we know the column name
-	return field.columnPrefix + columnName
+	return field.ColumnPrefix + columnName
 }
 
 // Returns the SQL to get the value of the field in the table
-func (field Field[TModel, TAttribute]) columnSQL(query *GormQuery, table Table) string {
-	return table.Alias + "." + field.columnName(query, table)
-}
-
-func NewField[TModel model.Model, TAttribute any](name, column, columnPrefix string) Field[TModel, TAttribute] {
-	return Field[TModel, TAttribute]{
-		name:         name,
-		column:       column,
-		columnPrefix: columnPrefix,
-	}
+func (field Field[TModel, TAttribute]) ColumnSQL(query *GormQuery, table Table) string {
+	return table.Alias + "." + field.ColumnName(query, table)
 }
 
 type UpdatableField[TModel model.Model, TAttribute any] struct {
@@ -71,13 +62,7 @@ type UpdatableField[TModel model.Model, TAttribute any] struct {
 }
 
 func (field UpdatableField[TModel, TAttribute]) Set() FieldSet[TModel, TAttribute] {
-	return FieldSet[TModel, TAttribute]{field: field}
-}
-
-func NewUpdatableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) UpdatableField[TModel, TAttribute] {
-	return UpdatableField[TModel, TAttribute]{
-		Field: NewField[TModel, TAttribute](name, column, columnPrefix),
-	}
+	return FieldSet[TModel, TAttribute]{Field: field}
 }
 
 type NullableField[TModel model.Model, TAttribute any] struct {
@@ -85,13 +70,7 @@ type NullableField[TModel model.Model, TAttribute any] struct {
 }
 
 func (field NullableField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
-	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: field.UpdatableField}}
-}
-
-func NewNullableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) NullableField[TModel, TAttribute] {
-	return NullableField[TModel, TAttribute]{
-		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix),
-	}
+	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{Field: field.UpdatableField}}
 }
 
 type BoolField[TModel model.Model] struct {
@@ -100,13 +79,7 @@ type BoolField[TModel model.Model] struct {
 
 func (boolField BoolField[TModel]) Is() BoolFieldIs[TModel] {
 	return BoolFieldIs[TModel]{
-		field: boolField.Field,
-	}
-}
-
-func NewBoolField[TModel model.Model](name, column, columnPrefix string) BoolField[TModel] {
-	return BoolField[TModel]{
-		UpdatableField: NewUpdatableField[TModel, bool](name, column, columnPrefix),
+		Field: boolField.Field,
 	}
 }
 
@@ -116,13 +89,7 @@ type NullableBoolField[TModel model.Model] struct {
 
 func (boolField NullableBoolField[TModel]) Is() BoolFieldIs[TModel] {
 	return BoolFieldIs[TModel]{
-		field: boolField.Field,
-	}
-}
-
-func NewNullableBoolField[TModel model.Model](name, column, columnPrefix string) NullableBoolField[TModel] {
-	return NullableBoolField[TModel]{
-		NullableField: NewNullableField[TModel, bool](name, column, columnPrefix),
+		Field: boolField.Field,
 	}
 }
 
@@ -133,14 +100,8 @@ type StringField[TModel model.Model] struct {
 func (stringField StringField[TModel]) Is() StringFieldIs[TModel] {
 	return StringFieldIs[TModel]{
 		FieldIs: FieldIs[TModel, string]{
-			field: stringField.Field,
+			Field: stringField.Field,
 		},
-	}
-}
-
-func NewStringField[TModel model.Model](name, column, columnPrefix string) StringField[TModel] {
-	return StringField[TModel]{
-		UpdatableField: NewUpdatableField[TModel, string](name, column, columnPrefix),
 	}
 }
 
@@ -151,13 +112,7 @@ type NullableStringField[TModel model.Model] struct {
 func (stringField NullableStringField[TModel]) Is() StringFieldIs[TModel] {
 	return StringFieldIs[TModel]{
 		FieldIs: FieldIs[TModel, string]{
-			field: stringField.Field,
+			Field: stringField.Field,
 		},
-	}
-}
-
-func NewNullableStringField[TModel model.Model](name, column, columnPrefix string) NullableStringField[TModel] {
-	return NullableStringField[TModel]{
-		NullableField: NewNullableField[TModel, string](name, column, columnPrefix),
 	}
 }

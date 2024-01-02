@@ -22,12 +22,12 @@ type bicycleConditions struct {
 }
 
 var Bicycle = bicycleConditions{
-	CreatedAt: condition.NewField[models.Bicycle, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Bicycle, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.Bicycle, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.Bicycle]("Name", "", ""),
-	OwnerName: condition.NewStringField[models.Bicycle]("OwnerName", "", ""),
-	UpdatedAt: condition.NewField[models.Bicycle, time.Time]("UpdatedAt", "", ""),
+	CreatedAt: condition.Field[models.Bicycle, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.Bicycle, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.Bicycle, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.Bicycle]{UpdatableField: condition.UpdatableField[models.Bicycle, string]{Field: condition.Field[models.Bicycle, string]{Name: "Name"}}},
+	OwnerName: condition.StringField[models.Bicycle]{UpdatableField: condition.UpdatableField[models.Bicycle, string]{Field: condition.Field[models.Bicycle, string]{Name: "OwnerName"}}},
+	UpdatedAt: condition.Field[models.Bicycle, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Bicycle when doing a query
