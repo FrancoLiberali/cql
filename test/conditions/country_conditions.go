@@ -21,11 +21,11 @@ type countryConditions struct {
 }
 
 var Country = countryConditions{
-	CreatedAt: condition.NewField[models.Country, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Country, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.Country, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.Country]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.Country, time.Time]("UpdatedAt", "", ""),
+	CreatedAt: condition.Field[models.Country, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.Country, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.Country, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.Country]{UpdatableField: condition.UpdatableField[models.Country, string]{Field: condition.Field[models.Country, string]{Name: "Name"}}},
+	UpdatedAt: condition.Field[models.Country, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the Country when doing a query

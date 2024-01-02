@@ -11,27 +11,20 @@ import (
 
 const (
 	// cql/condition
-	conditionPath             = cqlPath + "/condition"
-	cqlCondition              = "Condition"
-	cqlJoinCondition          = "JoinCondition"
-	cqlNewJoinCondition       = "NewJoinCondition"
-	cqlNewPreloadCondition    = "NewPreloadCondition"
-	cqlField                  = "Field"
-	cqlNewField               = "NewField"
-	cqlUpdatableField         = "UpdatableField"
-	cqlNewUpdatableField      = "NewUpdatableField"
-	cqlNullableField          = "NullableField"
-	cqlNewNullableField       = "NewNullableField"
-	cqlBoolField              = "BoolField"
-	cqlNewBoolField           = "NewBoolField"
-	cqlNullableBoolField      = "NullableBoolField"
-	cqlNewNullableBoolField   = "NewNullableBoolField"
-	cqlStringField            = "StringField"
-	cqlNewStringField         = "NewStringField"
-	cqlNullableStringField    = "NullableStringField"
-	cqlNewNullableStringField = "NewNullableStringField"
-	cqlCollection             = "Collection"
-	cqlNewCollection          = "NewCollection"
+	conditionPath          = cqlPath + "/condition"
+	cqlCondition           = "Condition"
+	cqlJoinCondition       = "JoinCondition"
+	cqlNewJoinCondition    = "NewJoinCondition"
+	cqlNewPreloadCondition = "NewPreloadCondition"
+	cqlField               = "Field"
+	cqlUpdatableField      = "UpdatableField"
+	cqlNullableField       = "NullableField"
+	cqlBoolField           = "BoolField"
+	cqlNullableBoolField   = "NullableBoolField"
+	cqlStringField         = "StringField"
+	cqlNullableStringField = "NullableStringField"
+	cqlCollection          = "Collection"
+	cqlNewCollection       = "NewCollection"
 	// cql/model
 	modelPath = cqlPath + "/model"
 	uIntID    = "UIntID"
@@ -187,19 +180,19 @@ func createMethod(typeName, methodName string) *jen.Statement {
 // create a variable containing the definition of the field identifier
 // to use it in the where condition and in the preload condition
 func (condition *Condition) createField(objectType Type, field Field) {
-	fieldName := jen.Lit(field.Name)
-	fieldColumn := jen.Lit("")
-	fieldColumnPrefix := jen.Lit("")
+	fieldValues := jen.Dict{
+		jen.Id("Name"): jen.Lit(field.Name),
+	}
 
 	columnName := field.getColumnName()
 
 	if columnName != "" {
-		fieldColumn = jen.Lit(columnName)
+		fieldValues[jen.Id("Column")] = jen.Lit(columnName)
 	}
 
 	columnPrefix := field.ColumnPrefix
 	if columnPrefix != "" {
-		fieldColumnPrefix = jen.Lit(columnPrefix)
+		fieldValues[jen.Id("ColumnPrefix")] = jen.Lit(columnPrefix)
 	}
 
 	objectTypeQual := jen.Qual(
@@ -207,66 +200,73 @@ func (condition *Condition) createField(objectType Type, field Field) {
 		objectType.Name(),
 	)
 
-	var fieldQual *jen.Statement
+	fieldQual := jen.Qual(
+		conditionPath, cqlField,
+	).Types(
+		objectTypeQual,
+		condition.param.GenericType(),
+	)
 
-	var newFieldQual *jen.Statement
-
-	switch {
-	case condition.param.isString:
-		fieldQual, newFieldQual = condition.specificField(field, objectTypeQual, cqlNullableStringField, cqlNewNullableStringField, cqlStringField, cqlNewStringField)
-	case condition.param.isBool:
-		fieldQual, newFieldQual = condition.specificField(field, objectTypeQual, cqlNullableBoolField, cqlNewNullableBoolField, cqlBoolField, cqlNewBoolField)
-	default:
-		switch {
-		case field.IsNullable():
-			fieldQual = jen.Qual(conditionPath, cqlNullableField)
-			newFieldQual = jen.Qual(conditionPath, cqlNewNullableField)
-		case field.IsUpdatable():
-			fieldQual = jen.Qual(conditionPath, cqlUpdatableField)
-			newFieldQual = jen.Qual(conditionPath, cqlNewUpdatableField)
-		default:
-			fieldQual = jen.Qual(conditionPath, cqlField)
-			newFieldQual = jen.Qual(conditionPath, cqlNewField)
+	if field.IsUpdatable() {
+		fieldValues = jen.Dict{
+			jen.Id(cqlField): fieldQual.Clone().Values(fieldValues),
 		}
+		fieldQual = jen.Qual(
+			conditionPath, cqlUpdatableField,
+		).Types(
+			objectTypeQual,
+			condition.param.GenericType(),
+		)
 
-		fieldQual = fieldQual.Types(
-			objectTypeQual,
-			condition.param.GenericType(),
-		)
-		newFieldQual = newFieldQual.Types(
-			objectTypeQual,
-			condition.param.GenericType(),
-		)
+		if field.IsNullable() {
+			fieldValues = jen.Dict{
+				jen.Id(cqlUpdatableField): fieldQual.Clone().Values(fieldValues),
+			}
+			fieldQual = jen.Qual(
+				conditionPath, cqlNullableField,
+			).Types(
+				objectTypeQual,
+				condition.param.GenericType(),
+			)
+		}
+	}
+
+	if condition.param.isString {
+		fieldQual, fieldValues = condition.transformIntoSpecificField(field, objectTypeQual, fieldQual, fieldValues, cqlNullableStringField, cqlStringField)
+	} else if condition.param.isBool {
+		fieldQual, fieldValues = condition.transformIntoSpecificField(field, objectTypeQual, fieldQual, fieldValues, cqlNullableBoolField, cqlBoolField)
 	}
 
 	condition.FieldType = jen.Id(condition.FieldName).Add(
 		fieldQual,
 	)
 
-	condition.FieldDefinition = newFieldQual.Call(fieldName, fieldColumn, fieldColumnPrefix)
+	condition.FieldDefinition = fieldQual.Clone().Values(fieldValues)
 }
 
-func (condition *Condition) specificField(
+// Transforms the fieldQual and the fieldValues into a specific type (string, bool) depending if the type is nullable or not
+func (condition *Condition) transformIntoSpecificField(
 	field Field, objectTypeQual *jen.Statement,
-	nullableType, newNullableType string,
-	notNullableType, newNotNullableType string,
-) (*jen.Statement, *jen.Statement) {
-	var fieldQual *jen.Statement
-
-	var newFieldQual *jen.Statement
-
+	fieldQual *jen.Statement, fieldValues jen.Dict,
+	nullableType string, notNullableType string,
+) (*jen.Statement, jen.Dict) {
 	if field.IsNullable() {
-		fieldQual = jen.Qual(conditionPath, nullableType)
-		newFieldQual = jen.Qual(conditionPath, newNullableType)
+		fieldValues = jen.Dict{
+			jen.Id(cqlNullableField): fieldQual.Clone().Values(fieldValues),
+		}
+		fieldQual = jen.Qual(
+			conditionPath, nullableType,
+		).Types(objectTypeQual)
 	} else {
-		fieldQual = jen.Qual(conditionPath, notNullableType)
-		newFieldQual = jen.Qual(conditionPath, newNotNullableType)
+		fieldValues = jen.Dict{
+			jen.Id(cqlUpdatableField): fieldQual.Clone().Values(fieldValues),
+		}
+		fieldQual = jen.Qual(
+			conditionPath, notNullableType,
+		).Types(objectTypeQual)
 	}
 
-	fieldQual = fieldQual.Types(objectTypeQual)
-	newFieldQual = newFieldQual.Types(objectTypeQual)
-
-	return fieldQual, newFieldQual
+	return fieldQual, fieldValues
 }
 
 // Generate a JoinCondition between the object and field's object

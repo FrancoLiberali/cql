@@ -17,11 +17,11 @@ type universityConditions struct {
 }
 
 var University = universityConditions{
-	CreatedAt: condition.NewField[models.University, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.University, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.University, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.University]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.University, time.Time]("UpdatedAt", "", ""),
+	CreatedAt: condition.Field[models.University, time.Time]{Name: "CreatedAt"},
+	DeletedAt: condition.Field[models.University, time.Time]{Name: "DeletedAt"},
+	ID:        condition.Field[models.University, model.UUID]{Name: "ID"},
+	Name:      condition.StringField[models.University]{UpdatableField: condition.UpdatableField[models.University, string]{Field: condition.Field[models.University, string]{Name: "Name"}}},
+	UpdatedAt: condition.Field[models.University, time.Time]{Name: "UpdatedAt"},
 }
 
 // Preload allows preloading the University when doing a query
