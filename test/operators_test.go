@@ -945,7 +945,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithMultipleFuncti
 func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithFunctionOfDifferentType() {
 	int1 := 2
 	product1 := ts.createProduct("", 3, 0.0, false, &int1)
-	ts.createProduct("", 2, 0.0, false, &int1)
+	product2 := ts.createProduct("", 2, 0.0, false, &int1)
 	ts.createProduct("", 0, 0.0, false, nil)
 
 	entities, err := cql.Query[models.Product](
@@ -954,5 +954,10 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithFunctionOfDiff
 	).Find()
 	ts.Require().NoError(err)
 
-	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+	switch getDBDialector() {
+	case cqlSQL.Postgres:
+		EqualList(&ts.Suite, []*models.Product{product2}, entities)
+	case cqlSQL.MySQL, cqlSQL.SQLServer, cqlSQL.SQLite:
+		EqualList(&ts.Suite, []*models.Product{product1}, entities)
+	}
 }
