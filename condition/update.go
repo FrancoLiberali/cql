@@ -98,9 +98,9 @@ func NewUpdate[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Update[T
 }
 
 type ISet interface {
-	Field() IField
-	Value() any
-	JoinNumber() int
+	getField() IField
+	getValue() any
+	getJoinNumber() int
 }
 
 type Set[T model.Model] struct {
@@ -109,25 +109,25 @@ type Set[T model.Model] struct {
 	joinNumber int
 }
 
-func (set Set[T]) Field() IField {
+func (set Set[T]) getField() IField {
 	return set.field
 }
 
-func (set Set[T]) Value() any {
+func (set Set[T]) getValue() any {
 	return set.value
 }
 
-func (set Set[T]) JoinNumber() int {
+func (set Set[T]) getJoinNumber() int {
 	return set.joinNumber
 }
 
 type FieldSet[TModel model.Model, TAttribute any] struct {
-	Field UpdatableField[TModel, TAttribute]
+	field UpdatableField[TModel, TAttribute]
 }
 
 func (set FieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
 	return &Set[TModel]{
-		field: set.Field,
+		field: set.field,
 		value: value,
 	}
 }
@@ -135,7 +135,7 @@ func (set FieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
 // joinNumber can be used to select the join in case the field is joined more than once
 func (set FieldSet[TModel, TAttribute]) Dynamic(field FieldOfType[TAttribute], joinNumber ...uint) *Set[TModel] {
 	return &Set[TModel]{
-		field:      set.Field,
+		field:      set.field,
 		value:      field,
 		joinNumber: GetJoinNumber(joinNumber),
 	}
@@ -143,7 +143,7 @@ func (set FieldSet[TModel, TAttribute]) Dynamic(field FieldOfType[TAttribute], j
 
 func (set FieldSet[TModel, TAttribute]) Unsafe(value any) *Set[TModel] {
 	return &Set[TModel]{
-		field: set.Field,
+		field: set.field,
 		value: value,
 	}
 }
@@ -154,7 +154,7 @@ type NullableFieldSet[TModel model.Model, TAttribute any] struct {
 
 func (set NullableFieldSet[TModel, TAttribute]) Null() *Set[TModel] {
 	return &Set[TModel]{
-		field: set.Field,
+		field: set.field,
 		value: nil,
 	}
 }
