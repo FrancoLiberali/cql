@@ -1,4 +1,4 @@
-module github.com/FrancoLiberali/cql-gen
+module github.com/FrancoLiberali/cql/cql-gen
 
 go 1.18
 

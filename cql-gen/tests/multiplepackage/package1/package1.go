@@ -1,7 +1,7 @@
 package package1
 
 import (
-	"github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
+	"github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
 	"github.com/FrancoLiberali/cql/model"
 )
 

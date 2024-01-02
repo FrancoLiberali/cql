@@ -7,7 +7,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/ettle/strcase"
 
-	"github.com/FrancoLiberali/cql-gen/cmd/log"
+	"github.com/FrancoLiberali/cql/cql-gen/cmd/log"
 )
 
 type ConditionsGenerator struct {

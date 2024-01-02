@@ -2,8 +2,8 @@
 package conditions
 
 import (
-	basicslicespointer "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/basicslicespointer"
 	condition "github.com/FrancoLiberali/cql/condition"
+	basicslicespointer "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basicslicespointer"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

@@ -2,8 +2,8 @@
 package conditions
 
 import (
-	basictypes "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/basictypes"
 	condition "github.com/FrancoLiberali/cql/condition"
+	basictypes "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basictypes"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

@@ -2,8 +2,8 @@
 package conditions
 
 import (
-	columndefinition "github.com/FrancoLiberali/cql-gen/cmd/gen/conditions/tests/columndefinition"
 	condition "github.com/FrancoLiberali/cql/condition"
+	columndefinition "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/columndefinition"
 	model "github.com/FrancoLiberali/cql/model"
 	"time"
 )

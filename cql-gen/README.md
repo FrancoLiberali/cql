@@ -13,7 +13,7 @@
 For simply installing it, use:
 
 ```bash
-go install github.com/FrancoLiberali/cql-gen@latest
+go install github.com/FrancoLiberali/cql/cql-gen
 ```
 
 Or you can build it from sources.
