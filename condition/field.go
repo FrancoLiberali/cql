@@ -71,7 +71,7 @@ type UpdatableField[TModel model.Model, TAttribute any] struct {
 }
 
 func (field UpdatableField[TModel, TAttribute]) Set() FieldSet[TModel, TAttribute] {
-	return FieldSet[TModel, TAttribute]{Field: field}
+	return FieldSet[TModel, TAttribute]{field: field}
 }
 
 func NewUpdatableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) UpdatableField[TModel, TAttribute] {
@@ -85,7 +85,7 @@ type NullableField[TModel model.Model, TAttribute any] struct {
 }
 
 func (field NullableField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
-	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{Field: field.UpdatableField}}
+	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: field.UpdatableField}}
 }
 
 func NewNullableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) NullableField[TModel, TAttribute] {

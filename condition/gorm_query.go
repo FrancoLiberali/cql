@@ -350,7 +350,7 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 	tables := map[IField]TableAndValue{}
 
 	for _, set := range sets {
-		field := set.Field()
+		field := set.getField()
 
 		table, err := query.GetModelTable(field, 0)
 		if err != nil {
@@ -372,10 +372,10 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 }
 
 func getUpdateValue(query *GormQuery, set ISet) (any, error) {
-	value := set.Value()
+	value := set.getValue()
 
 	if field, isField := value.(IField); isField {
-		table, err := query.GetModelTable(field, set.JoinNumber())
+		table, err := query.GetModelTable(field, set.getJoinNumber())
 		if err != nil {
 			return nil, err
 		}
