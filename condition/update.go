@@ -133,10 +133,10 @@ func (set FieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
 }
 
 // joinNumber can be used to select the join in case the field is joined more than once
-func (set FieldSet[TModel, TAttribute]) Dynamic(field FieldOfType[TAttribute], joinNumber ...uint) *Set[TModel] {
+func (set FieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[TAttribute], joinNumber ...uint) *Set[TModel] {
 	return &Set[TModel]{
 		field:      set.field,
-		value:      field,
+		value:      value,
 		joinNumber: GetJoinNumber(joinNumber),
 	}
 }
@@ -156,5 +156,32 @@ func (set NullableFieldSet[TModel, TAttribute]) Null() *Set[TModel] {
 	return &Set[TModel]{
 		field: set.field,
 		value: nil,
+	}
+}
+
+type NumericFieldSet[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64] struct {
+	field NumericField[TModel, TAttribute]
+}
+
+func (set NumericFieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
+	return &Set[TModel]{
+		field: set.field,
+		value: value,
+	}
+}
+
+// joinNumber can be used to select the join in case the field is joined more than once
+func (set NumericFieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[numeric], joinNumber ...uint) *Set[TModel] {
+	return &Set[TModel]{
+		field:      set.field,
+		value:      value,
+		joinNumber: GetJoinNumber(joinNumber),
+	}
+}
+
+func (set NumericFieldSet[TModel, TAttribute]) Unsafe(value any) *Set[TModel] {
+	return &Set[TModel]{
+		field: set.field,
+		value: value,
 	}
 }

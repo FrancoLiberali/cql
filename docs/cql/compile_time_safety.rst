@@ -151,7 +151,7 @@ In this case, the type of the two attributes being compared must be the same:
     _, err := cql.Query[models.City](
         db,
         conditions.City.Country(
-            conditions.Country.Name.Is().Dynamic().Eq(conditions.City.Name),
+            conditions.Country.Name.IsDynamic().Eq(conditions.City.Name.Value()),
         ),
     ).Find()
 
@@ -164,7 +164,7 @@ In this case, the type of the two attributes being compared must be the same:
     _, err := cql.Query[models.City](
         db,
         conditions.City.Country(
-            conditions.Country.Name.Is().Dynamic().Eq(conditions.City.Population),
+            conditions.Country.Name.IsDynamic().Eq(conditions.City.Population.Value()),
         ),
     ).Find()
 
@@ -172,4 +172,4 @@ In this case, the compilation error will be:
 
 .. code-block:: none
 
-    cannot use conditions.City.Population (variable of type condition.UpdatableField[models.City, int]) as condition.FieldOfType[string] value in argument to conditions.Country.Name.Is().Dynamic().Eq...
+    cannot use conditions.City.Population (variable of type condition.UpdatableField[models.City, int]) as condition.FieldOfType[string] value in argument to conditions.Country.Name.IsDynamic().Eq...
