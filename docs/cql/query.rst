@@ -65,7 +65,7 @@ The generation of conditions is done with cql-gen. For this, we need to install 
 
 .. code-block:: bash
 
-    go install github.com/FrancoLiberali/cql/cql-gen
+    go install github.com/FrancoLiberali/cql/cql-gen@latest
 
 Then, inside our project we will have to create a package called conditions 
 (or another name if you wish) and inside it a file with the following content:
