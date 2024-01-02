@@ -637,7 +637,7 @@ func (ts *OperatorsIntTestSuite) TestPosixRegexCaseInsensitive() {
 	}
 }
 
-func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBasicType() {
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericTypeWithSameType() {
 	int1 := 1
 	product1 := ts.createProduct("", 1, 0.0, false, &int1)
 	ts.createProduct("", 2, 0.0, false, &int1)
@@ -645,7 +645,22 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBasicType() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Dynamic().Eq(conditions.Product.IntPointer),
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericTypeWithDifferentType() {
+	int1 := 1
+	product1 := ts.createProduct("", 1, 1.0, false, &int1)
+	ts.createProduct("", 2, 2.1, false, &int1)
+	ts.createProduct("", 0, 2.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.Float),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -663,7 +678,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForCustomType() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.MultiString.Is().Dynamic().Eq(conditions.Product.MultiString),
+		conditions.Product.MultiString.IsDynamic().Eq(conditions.Product.MultiString),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -675,7 +690,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBaseModelAttribute() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.CreatedAt.Is().Dynamic().Eq(conditions.Product.CreatedAt),
+		conditions.Product.CreatedAt.IsDynamic().Eq(conditions.Product.CreatedAt),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -692,7 +707,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNotNullTypeCanBeComparedW
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Float.Is().Dynamic().Eq(conditions.Product.NullFloat),
+		conditions.Product.Float.IsDynamic().Eq(conditions.Product.NullFloat),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -708,7 +723,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchConvertibl
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Float.Is().Unsafe().Eq("2.1"),
+		conditions.Product.Float.IsUnsafe().Eq("2.1"),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -725,7 +740,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq("not_convertible_to_float"),
+			conditions.Product.Float.IsUnsafe().Eq("not_convertible_to_float"),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -738,7 +753,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq("not_convertible_to_float"),
+			conditions.Product.Float.IsUnsafe().Eq("not_convertible_to_float"),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -747,14 +762,14 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseTypesNotMatchNotConvert
 		// returns an error
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq("not_convertible_to_float"),
+			conditions.Product.Float.IsUnsafe().Eq("not_convertible_to_float"),
 		).Find()
 		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
 	case cqlSQL.Postgres:
 		// returns an error
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq("not_convertible_to_float"),
+			conditions.Product.Float.IsUnsafe().Eq("not_convertible_to_float"),
 		).Find()
 		ts.ErrorContains(err, "not_convertible_to_float")
 	}
@@ -771,7 +786,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq(conditions.Product.String),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -785,7 +800,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq(conditions.Product.String),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -797,7 +812,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq(conditions.Product.String),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -808,14 +823,14 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		_, err = cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq(conditions.Product.String),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
 	case cqlSQL.Postgres:
 		// returns an error
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.Is().Unsafe().Eq(conditions.Product.String),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 
 		ts.True(
@@ -845,7 +860,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorCanCompareFieldsThatMapToTheS
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Unsafe().Eq(conditions.Product.MultiString),
+		conditions.Product.String.IsUnsafe().Eq(conditions.Product.MultiString),
 	).Find()
 	ts.Require().NoError(err)
 

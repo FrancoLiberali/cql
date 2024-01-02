@@ -11,27 +11,22 @@ import (
 
 const (
 	// cql/condition
-	conditionPath             = cqlPath + "/condition"
-	cqlCondition              = "Condition"
-	cqlJoinCondition          = "JoinCondition"
-	cqlNewJoinCondition       = "NewJoinCondition"
-	cqlNewPreloadCondition    = "NewPreloadCondition"
-	cqlField                  = "Field"
-	cqlNewField               = "NewField"
-	cqlUpdatableField         = "UpdatableField"
-	cqlNewUpdatableField      = "NewUpdatableField"
-	cqlNullableField          = "NullableField"
-	cqlNewNullableField       = "NewNullableField"
-	cqlBoolField              = "BoolField"
-	cqlNewBoolField           = "NewBoolField"
-	cqlNullableBoolField      = "NullableBoolField"
-	cqlNewNullableBoolField   = "NewNullableBoolField"
-	cqlStringField            = "StringField"
-	cqlNewStringField         = "NewStringField"
-	cqlNullableStringField    = "NullableStringField"
-	cqlNewNullableStringField = "NewNullableStringField"
-	cqlCollection             = "Collection"
-	cqlNewCollection          = "NewCollection"
+	conditionPath           = cqlPath + "/condition"
+	cqlCondition            = "Condition"
+	cqlJoinCondition        = "JoinCondition"
+	cqlNewJoinCondition     = "NewJoinCondition"
+	cqlNewPreloadCondition  = "NewPreloadCondition"
+	cqlField                = "Field"
+	cqlUpdatableField       = "UpdatableField"
+	cqlNullableField        = "NullableField"
+	cqlBoolField            = "BoolField"
+	cqlNullableBoolField    = "NullableBoolField"
+	cqlStringField          = "StringField"
+	cqlNullableStringField  = "NullableStringField"
+	cqlNumericField         = "NumericField"
+	cqlNullableNumericField = "NullableNumericField"
+	cqlCollection           = "Collection"
+	cqlNewCollection        = "NewCollection"
 	// cql/model
 	modelPath = cqlPath + "/model"
 	uIntID    = "UIntID"
@@ -213,30 +208,13 @@ func (condition *Condition) createField(objectType Type, field Field) {
 
 	switch {
 	case condition.param.isString:
-		fieldQual, newFieldQual = condition.specificField(field, objectTypeQual, cqlNullableStringField, cqlNewNullableStringField, cqlStringField, cqlNewStringField)
+		fieldQual, newFieldQual = condition.oneGenericField(field, objectTypeQual, cqlNullableStringField, cqlStringField, cqlStringField)
 	case condition.param.isBool:
-		fieldQual, newFieldQual = condition.specificField(field, objectTypeQual, cqlNullableBoolField, cqlNewNullableBoolField, cqlBoolField, cqlNewBoolField)
+		fieldQual, newFieldQual = condition.oneGenericField(field, objectTypeQual, cqlNullableBoolField, cqlBoolField, cqlBoolField)
+	case condition.param.isNumeric:
+		fieldQual, newFieldQual = condition.twoGenericField(field, objectTypeQual, cqlNullableNumericField, cqlNumericField, cqlNumericField)
 	default:
-		switch {
-		case field.IsNullable():
-			fieldQual = jen.Qual(conditionPath, cqlNullableField)
-			newFieldQual = jen.Qual(conditionPath, cqlNewNullableField)
-		case field.IsUpdatable():
-			fieldQual = jen.Qual(conditionPath, cqlUpdatableField)
-			newFieldQual = jen.Qual(conditionPath, cqlNewUpdatableField)
-		default:
-			fieldQual = jen.Qual(conditionPath, cqlField)
-			newFieldQual = jen.Qual(conditionPath, cqlNewField)
-		}
-
-		fieldQual = fieldQual.Types(
-			objectTypeQual,
-			condition.param.GenericType(),
-		)
-		newFieldQual = newFieldQual.Types(
-			objectTypeQual,
-			condition.param.GenericType(),
-		)
+		fieldQual, newFieldQual = condition.twoGenericField(field, objectTypeQual, cqlNullableField, cqlUpdatableField, cqlField)
 	}
 
 	condition.FieldType = jen.Id(condition.FieldName).Add(
@@ -246,25 +224,55 @@ func (condition *Condition) createField(objectType Type, field Field) {
 	condition.FieldDefinition = newFieldQual.Call(fieldName, fieldColumn, fieldColumnPrefix)
 }
 
-func (condition *Condition) specificField(
+func (condition *Condition) oneGenericField(
 	field Field, objectTypeQual *jen.Statement,
-	nullableType, newNullableType string,
-	notNullableType, newNotNullableType string,
+	nullableType, updatableType, notNullableType string,
+) (*jen.Statement, *jen.Statement) {
+	fieldQual, newFieldQual := condition.switchFieldType(field, nullableType, updatableType, notNullableType)
+
+	fieldQual = fieldQual.Types(objectTypeQual)
+	newFieldQual = newFieldQual.Types(objectTypeQual)
+
+	return fieldQual, newFieldQual
+}
+
+func (condition *Condition) twoGenericField(
+	field Field, objectTypeQual *jen.Statement,
+	nullableType, updatableType, notNullableType string,
+) (*jen.Statement, *jen.Statement) {
+	fieldQual, newFieldQual := condition.switchFieldType(field, nullableType, updatableType, notNullableType)
+
+	fieldQual = fieldQual.Types(
+		objectTypeQual,
+		condition.param.GenericType(),
+	)
+	newFieldQual = newFieldQual.Types(
+		objectTypeQual,
+		condition.param.GenericType(),
+	)
+
+	return fieldQual, newFieldQual
+}
+
+func (condition *Condition) switchFieldType(
+	field Field,
+	nullableType, updatableType, notNullableType string,
 ) (*jen.Statement, *jen.Statement) {
 	var fieldQual *jen.Statement
 
 	var newFieldQual *jen.Statement
 
-	if field.IsNullable() {
+	switch {
+	case field.IsNullable():
 		fieldQual = jen.Qual(conditionPath, nullableType)
-		newFieldQual = jen.Qual(conditionPath, newNullableType)
-	} else {
+		newFieldQual = jen.Qual(conditionPath, "New"+nullableType)
+	case field.IsUpdatable():
+		fieldQual = jen.Qual(conditionPath, updatableType)
+		newFieldQual = jen.Qual(conditionPath, "New"+updatableType)
+	default:
 		fieldQual = jen.Qual(conditionPath, notNullableType)
-		newFieldQual = jen.Qual(conditionPath, newNotNullableType)
+		newFieldQual = jen.Qual(conditionPath, "New"+notNullableType)
 	}
-
-	fieldQual = fieldQual.Types(objectTypeQual)
-	newFieldQual = newFieldQual.Types(objectTypeQual)
 
 	return fieldQual, newFieldQual
 }

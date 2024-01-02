@@ -76,7 +76,7 @@ its related MyOtherModel's Name attribute.
     myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.Is().Dynamic().Eq(conditions.MyModel.Name),
+            conditions.MyOtherModel.Name.IsDynamic().Eq(conditions.MyModel.Name),
         ),
     ).Find()
 
@@ -103,7 +103,7 @@ For example:
 
     myModels, err := cql.Query[MyModel](
         gormDB,
-        conditions.MyModel.Name.Is().Dynamic().Eq(conditions.MyOtherModel.Name),
+        conditions.MyModel.Name.IsDynamic().Eq(conditions.MyOtherModel.Name),
     ).Find()
 
 will respond cql.ErrFieldModelNotConcerned in err.
@@ -157,7 +157,7 @@ To do this, you must use the SelectJoin method, as in the following example:
         conditions.Child.Parent2(
             conditions.Parent2.ParentParent(),
         ),
-        conditions.Child.Name.Is().Dynamic().Eq(conditions.ParentParent.Name).SelectJoin(
+        conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name).SelectJoin(
             0, // for the parameter in position 0 of the operator (conditions.ParentParent.Name),
             0, // choose the first (0) join (made by conditions.Child.Parent1())
         ),

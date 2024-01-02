@@ -12,6 +12,7 @@ type JenParam struct {
 	isBool       bool
 	isString     bool
 	isSlice      bool
+	isNumeric    bool
 }
 
 func NewJenParam() *JenParam {
@@ -29,31 +30,31 @@ func (param *JenParam) ToBasicKind(basicType *types.Basic) {
 	case types.Bool:
 		param.ToBool()
 	case types.Int:
-		param.internalType.Int()
+		param.ToNumeric(param.internalType.Int())
 	case types.Int8:
-		param.internalType.Int8()
+		param.ToNumeric(param.internalType.Int8())
 	case types.Int16:
-		param.internalType.Int16()
+		param.ToNumeric(param.internalType.Int16())
 	case types.Int32:
-		param.internalType.Int32()
+		param.ToNumeric(param.internalType.Int32())
 	case types.Int64:
-		param.internalType.Int64()
+		param.ToNumeric(param.internalType.Int64())
 	case types.Uint:
-		param.internalType.Uint()
+		param.ToNumeric(param.internalType.Uint())
 	case types.Uint8:
-		param.internalType.Uint8()
+		param.ToNumeric(param.internalType.Uint8())
 	case types.Uint16:
-		param.internalType.Uint16()
+		param.ToNumeric(param.internalType.Uint16())
 	case types.Uint32:
-		param.internalType.Uint32()
+		param.ToNumeric(param.internalType.Uint32())
 	case types.Uint64:
-		param.internalType.Uint64()
+		param.ToNumeric(param.internalType.Uint64())
 	case types.Uintptr:
 		param.internalType.Uintptr()
 	case types.Float32:
-		param.internalType.Float32()
+		param.ToNumeric(param.internalType.Float32())
 	case types.Float64:
-		param.internalType.Float64()
+		param.ToNumeric(param.internalType.Float64())
 	case types.Complex64:
 		param.internalType.Complex64()
 	case types.Complex128:
@@ -86,15 +87,15 @@ func (param *JenParam) SQLToBasicType(typeV Type) {
 	case nullString:
 		param.ToString()
 	case nullInt64:
-		param.internalType.Int64()
+		param.ToNumeric(param.internalType.Int64())
 	case nullInt32:
-		param.internalType.Int32()
+		param.ToNumeric(param.internalType.Int32())
 	case nullInt16:
-		param.internalType.Int16()
+		param.ToNumeric(param.internalType.Int16())
 	case nullByte:
-		param.internalType.Int8()
+		param.ToNumeric(param.internalType.Int8())
 	case nullFloat64:
-		param.internalType.Float64()
+		param.ToNumeric(param.internalType.Float64())
 	case nullBool:
 		param.ToBool()
 	case nullTime, deletedAt:
@@ -119,4 +120,10 @@ func (param *JenParam) ToString() {
 	}
 
 	param.internalType.String()
+}
+
+func (param *JenParam) ToNumeric(*jen.Statement) {
+	if !param.isSlice {
+		param.isNumeric = true
+	}
 }

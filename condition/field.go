@@ -29,8 +29,21 @@ func (field Field[TModel, TAttribute]) getType() TAttribute {
 	return *new(TAttribute)
 }
 
+// Is allows creating conditions that include the field and a static value
 func (field Field[TModel, TAttribute]) Is() FieldIs[TModel, TAttribute] {
 	return FieldIs[TModel, TAttribute]{field: field}
+}
+
+// IsDynamic allows creating conditions that include the field and other fields
+func (field Field[TModel, TAttribute]) IsDynamic() DynamicFieldIs[TModel, TAttribute] {
+	return DynamicFieldIs[TModel, TAttribute]{field: field}
+}
+
+// Should not be used.
+//
+// IsUnsafe allows creating conditions that include the field and are not verified in compilation time.
+func (field Field[TModel, TAttribute]) IsUnsafe() UnsafeFieldIs[TModel, TAttribute] {
+	return UnsafeFieldIs[TModel, TAttribute]{field: field}
 }
 
 func (field Field[TModel, TAttribute]) getModelType() reflect.Type {
@@ -159,5 +172,40 @@ func (stringField NullableStringField[TModel]) Is() StringFieldIs[TModel] {
 func NewNullableStringField[TModel model.Model](name, column, columnPrefix string) NullableStringField[TModel] {
 	return NullableStringField[TModel]{
 		NullableField: NewNullableField[TModel, string](name, column, columnPrefix),
+	}
+}
+
+type NumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64] struct {
+	UpdatableField[TModel, TAttribute]
+}
+
+func NewNumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64](name, column, columnPrefix string) NumericField[TModel, TAttribute] {
+	return NumericField[TModel, TAttribute]{
+		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix),
+	}
+}
+
+type numeric struct{}
+
+//nolint:unused // necessary for FieldOfType[Numeric]
+func (numericField NumericField[TModel, TAttribute]) getType() numeric {
+	return numeric{}
+}
+
+func (numericField NumericField[TModel, TAttribute]) IsDynamic() NumericDynamicFieldIs[TModel, TAttribute] {
+	return NumericDynamicFieldIs[TModel, TAttribute]{field: numericField.Field}
+}
+
+type NullableNumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64] struct {
+	NumericField[TModel, TAttribute]
+}
+
+func (field NullableNumericField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
+	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: UpdatableField[TModel, TAttribute](field.UpdatableField)}}
+}
+
+func NewNullableNumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64](name, column, columnPrefix string) NullableNumericField[TModel, TAttribute] {
+	return NullableNumericField[TModel, TAttribute]{
+		NumericField: NewNumericField[TModel, TAttribute](name, column, columnPrefix),
 	}
 }

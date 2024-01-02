@@ -132,13 +132,3 @@ func (is StringFieldIs[TObject]) Like(pattern string) WhereCondition[TObject] {
 func (is FieldIs[TObject, TAttribute]) Custom(op Operator[TAttribute]) WhereCondition[TObject] {
 	return NewFieldCondition(is.field, op)
 }
-
-// Dynamic transforms the FieldIs in a DynamicFieldIs to use dynamic operators
-func (is FieldIs[TObject, TAttribute]) Dynamic() DynamicFieldIs[TObject, TAttribute] {
-	return DynamicFieldIs[TObject, TAttribute](is)
-}
-
-// Unsafe transforms the FieldIs in an UnsafeFieldIs to use unsafe operators
-func (is FieldIs[TObject, TAttribute]) Unsafe() UnsafeFieldIs[TObject, TAttribute] {
-	return UnsafeFieldIs[TObject, TAttribute](is)
-}
