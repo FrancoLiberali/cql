@@ -702,7 +702,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Set(
-		conditions.Product.Int.Set().Dynamic(conditions.Product.Float.Value().Plus(1.1)),
+		conditions.Product.Int.Set().Dynamic(conditions.Product.Float.Value().Plus(1)),
 	)
 
 	if getDBDialector() == cqlSQL.Postgres && err != nil {
