@@ -78,7 +78,10 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 				return "", nil, err
 			}
 
-			valueSQL, valueValues := iValue.toSQL(query, modelTable)
+			valueSQL, valueValues, err := iValue.toSQL(query, modelTable)
+			if err != nil {
+				return "", nil, err
+			}
 
 			operationString += fmt.Sprintf(
 				" %s %s",

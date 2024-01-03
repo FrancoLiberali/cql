@@ -10,6 +10,7 @@ services:
       POSTGRES_PASSWORD: cql_password2023
       POSTGRES_DB: cql_db
       PGDATA: /data/postgres
+    command: ["postgres", "-c", "log_statement=all", "-c", "log_destination=stderr"]
     ports:
       - "5000:5432"
     volumes:

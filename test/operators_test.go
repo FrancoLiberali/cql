@@ -927,6 +927,36 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithDivided() {
 	EqualList(&ts.Suite, []*models.Product{product1}, entities)
 }
 
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithModulo() {
+	int1 := 5
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 2, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Modulo(2)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPower() {
+	int1 := 2
+	product1 := ts.createProduct("", 4, 0.0, false, &int1)
+	ts.createProduct("", 2, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Power(2)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
 func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithMultipleFunction() {
 	int1 := 1
 	product1 := ts.createProduct("", 4, 0.0, false, &int1)

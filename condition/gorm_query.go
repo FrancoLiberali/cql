@@ -380,7 +380,10 @@ func getUpdateValue(query *GormQuery, set ISet) (any, error) {
 			return nil, err
 		}
 
-		valueSQL, valueValues := iValue.toSQL(query, table)
+		valueSQL, valueValues, err := iValue.toSQL(query, table)
+		if err != nil {
+			return nil, err
+		}
 
 		return gorm.Expr(valueSQL, valueValues...), nil
 	}
