@@ -984,9 +984,14 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithSquareRoot() {
 			ts.db,
 			conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().SquareRoot()),
 		).Find()
-		ts.Require().NoError(err)
 
-		EqualList(&ts.Suite, []*models.Product{product1}, entities)
+		if getDBDialector() == cqlSQL.Postgres && err != nil {
+			// cockroach
+			ts.ErrorContains(err, "unknown signature: sqrt(int) (SQLSTATE 42883)")
+		} else {
+			ts.Require().NoError(err)
+			EqualList(&ts.Suite, []*models.Product{product1}, entities)
+		}
 	}
 }
 

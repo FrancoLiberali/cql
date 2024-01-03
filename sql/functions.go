@@ -50,12 +50,10 @@ var (
 		all:      FunctionFunction{sqlFunction: "POWER"},
 	}, Name: "Power"}
 	SquareRoot = FunctionByDialector{functions: map[Dialector]Function{ //nolint:exhaustive // all present
-		Postgres: PreOperatorFunction{sqlOperator: "|/"},
-		all:      FunctionFunction{sqlFunction: "SQRT"},
+		all: FunctionFunction{sqlFunction: "SQRT"},
 	}, Name: "SquareRoot"}
 	Absolute = FunctionByDialector{functions: map[Dialector]Function{ //nolint:exhaustive // all present
-		Postgres: PreOperatorFunction{sqlOperator: "@"},
-		all:      FunctionFunction{sqlFunction: "abs"},
+		all: FunctionFunction{sqlFunction: "ABS"},
 	}, Name: "Absolute"}
 	BitAnd = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "&"}}, Name: "And"} //nolint:exhaustive // all present
 	BitOr  = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "|"}}, Name: "Or"}  //nolint:exhaustive // all present
