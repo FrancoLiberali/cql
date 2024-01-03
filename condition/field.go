@@ -146,6 +146,11 @@ func (stringField StringField[TModel]) Is() StringFieldIs[TModel] {
 	}
 }
 
+// Value allows using the value of the field inside dynamic conditions.
+func (stringField StringField[TModel]) Value() *StringFieldValue[TModel] {
+	return &StringFieldValue[TModel]{FieldValue: *stringField.UpdatableField.Value()}
+}
+
 func NewStringField[TModel model.Model](name, column, columnPrefix string) StringField[TModel] {
 	return StringField[TModel]{
 		UpdatableField: NewUpdatableField[TModel, string](name, column, columnPrefix),
@@ -162,6 +167,11 @@ func (stringField NullableStringField[TModel]) Is() StringFieldIs[TModel] {
 			field: stringField.Field,
 		},
 	}
+}
+
+// Value allows using the value of the field inside dynamic conditions.
+func (stringField NullableStringField[TModel]) Value() *StringFieldValue[TModel] {
+	return &StringFieldValue[TModel]{FieldValue: *stringField.UpdatableField.Value()}
 }
 
 func NewNullableStringField[TModel model.Model](name, column, columnPrefix string) NullableStringField[TModel] {
