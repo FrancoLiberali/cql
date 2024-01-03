@@ -40,37 +40,49 @@ type FunctionByDialector struct {
 const all = "all"
 
 var (
-	Plus    = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "+"}}, Name: "Plus"}
-	Minus   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "-"}}, Name: "Minus"}
-	Times   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "*"}}, Name: "Times"}
-	Divided = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "/"}}, Name: "Divided"}
-	Modulo  = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "%"}}, Name: "Modulo"}
-	Power   = FunctionByDialector{functions: map[Dialector]Function{
+	Plus    = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "+"}}, Name: "Plus"}    //nolint:exhaustive // all present
+	Minus   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "-"}}, Name: "Minus"}   //nolint:exhaustive // all present
+	Times   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "*"}}, Name: "Times"}   //nolint:exhaustive // all present
+	Divided = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "/"}}, Name: "Divided"} //nolint:exhaustive // all present
+	Modulo  = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "%"}}, Name: "Modulo"}  //nolint:exhaustive // all present
+	Power   = FunctionByDialector{functions: map[Dialector]Function{                                                           //nolint:exhaustive // all present
 		Postgres: OperatorFunction{sqlOperator: "^"},
 		all:      FunctionFunction{sqlFunction: "POWER"},
 	}, Name: "Power"}
-	SquareRoot = FunctionByDialector{functions: map[Dialector]Function{
+	SquareRoot = FunctionByDialector{functions: map[Dialector]Function{ //nolint:exhaustive // all present
 		Postgres: PreOperatorFunction{sqlOperator: "|/"},
 		all:      FunctionFunction{sqlFunction: "SQRT"},
 	}, Name: "SquareRoot"}
-	Absolute = FunctionByDialector{functions: map[Dialector]Function{
+	Absolute = FunctionByDialector{functions: map[Dialector]Function{ //nolint:exhaustive // all present
 		Postgres: PreOperatorFunction{sqlOperator: "@"},
 		all:      FunctionFunction{sqlFunction: "abs"},
 	}, Name: "Absolute"}
-	BitAnd = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "&"}}, Name: "And"}
-	BitOr  = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "|"}}, Name: "Or"}
-	BitXor = FunctionByDialector{functions: map[Dialector]Function{
+	BitAnd = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "&"}}, Name: "And"} //nolint:exhaustive // all present
+	BitOr  = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "|"}}, Name: "Or"}  //nolint:exhaustive // all present
+	BitXor = FunctionByDialector{functions: map[Dialector]Function{                                                       //nolint:exhaustive // supported
 		Postgres:  OperatorFunction{sqlOperator: "#"},
 		MySQL:     OperatorFunction{sqlOperator: "^"},
 		SQLServer: OperatorFunction{sqlOperator: "^"},
 	}, Name: "Xor"}
-	BitNot        = FunctionByDialector{functions: map[Dialector]Function{all: PreOperatorFunction{sqlOperator: "~"}}, Name: "Not"}
-	BitShiftLeft  = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "<<"}}, Name: "ShiftLeft"}
-	BitShiftRight = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: ">>"}}, Name: "ShiftRight"}
-	Concat        = FunctionByDialector{functions: map[Dialector]Function{
-		Postgres: OperatorFunction{sqlOperator: "||"},
-		all:      FunctionFunction{sqlFunction: "CONCAT"},
-	}, Name: "Concat"}
+	BitNot = FunctionByDialector{
+		functions: map[Dialector]Function{all: PreOperatorFunction{sqlOperator: "~"}}, //nolint:exhaustive // all present
+		Name:      "Not",
+	}
+	BitShiftLeft = FunctionByDialector{
+		functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "<<"}}, //nolint:exhaustive // all present
+		Name:      "ShiftLeft",
+	}
+	BitShiftRight = FunctionByDialector{
+		functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: ">>"}}, //nolint:exhaustive // all present
+		Name:      "ShiftRight",
+	}
+	Concat = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+			Postgres: OperatorFunction{sqlOperator: "||"},
+			all:      FunctionFunction{sqlFunction: "CONCAT"},
+		},
+		Name: "Concat",
+	}
 )
 
 func (f FunctionByDialector) Get(dialector Dialector) (Function, bool) {
