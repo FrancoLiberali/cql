@@ -82,6 +82,6 @@ func operatorError(err error, sqlOperator sql.Operator) error {
 	return fmt.Errorf("%w; operator: %s", err, sqlOperator.Name())
 }
 
-func functionError(err error, function sql.Function) error {
-	return fmt.Errorf("%w; function: %s", err, function.Name())
+func functionError(err error, function sql.FunctionByDialector) error {
+	return fmt.Errorf("%w; function: %s", err, function.Name)
 }

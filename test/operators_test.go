@@ -943,14 +943,162 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithModulo() {
 }
 
 func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPower() {
-	int1 := 2
-	product1 := ts.createProduct("", 4, 0.0, false, &int1)
+	switch getDBDialector() {
+	case cqlSQL.SQLite:
+		_, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Power(2)),
+		).Find()
+		ts.ErrorContains(err, "no such function: POWER")
+	default:
+		int1 := 2
+		product1 := ts.createProduct("", 4, 0.0, false, &int1)
+		ts.createProduct("", 2, 0.0, false, &int1)
+		ts.createProduct("", 0, 0.0, false, nil)
+
+		entities, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Power(2)),
+		).Find()
+		ts.Require().NoError(err)
+
+		EqualList(&ts.Suite, []*models.Product{product1}, entities)
+	}
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithSquareRoot() {
+	switch getDBDialector() {
+	case cqlSQL.SQLite:
+		_, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().SquareRoot()),
+		).Find()
+		ts.ErrorContains(err, "no such function: SQRT")
+	default:
+		int1 := 4
+		product1 := ts.createProduct("", 2, 0.0, false, &int1)
+		ts.createProduct("", 4, 0.0, false, &int1)
+		ts.createProduct("", 0, 0.0, false, nil)
+
+		entities, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().SquareRoot()),
+		).Find()
+		ts.Require().NoError(err)
+
+		EqualList(&ts.Suite, []*models.Product{product1}, entities)
+	}
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithAbsolute() {
+	int1 := -2
+	product1 := ts.createProduct("", 2, 0.0, false, &int1)
+	ts.createProduct("", -2, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Absolute()),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithAnd() {
+	int1 := 7
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 7, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().And(1)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithOr() {
+	int1 := 5
+	product1 := ts.createProduct("", 7, 0.0, false, &int1)
 	ts.createProduct("", 2, 0.0, false, &int1)
 	ts.createProduct("", 0, 0.0, false, nil)
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Power(2)),
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Or(3)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithXor() {
+	switch getDBDialector() {
+	case cqlSQL.SQLite:
+		_, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Xor(3)),
+		).Find()
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "function: Xor")
+	default:
+		int1 := 5
+		product1 := ts.createProduct("", 6, 0.0, false, &int1)
+		ts.createProduct("", 3, 0.0, false, &int1)
+		ts.createProduct("", 0, 0.0, false, nil)
+
+		entities, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Xor(3)),
+		).Find()
+		ts.Require().NoError(err)
+
+		EqualList(&ts.Suite, []*models.Product{product1}, entities)
+	}
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithNot() {
+	int1 := 1
+	product1 := ts.createProduct("", 4, 0.0, false, &int1)
+	ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().Not().And(5)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithShiftLeft() {
+	int1 := 1
+	product1 := ts.createProduct("", 4, 0.0, false, &int1)
+	ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().ShiftLeft(2)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithShiftRight() {
+	int1 := 4
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 4, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.IsDynamic().Eq(conditions.Product.IntPointer.Value().ShiftRight(2)),
 	).Find()
 	ts.Require().NoError(err)
 
