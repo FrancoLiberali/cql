@@ -87,3 +87,15 @@ func (value *NumericFieldValue[TModel, TAttribute]) addOperation(other float64, 
 
 	return value
 }
+
+type StringFieldValue[TModel model.Model] struct {
+	FieldValue[TModel, string]
+}
+
+// Concat concatenates other to value
+func (value *StringFieldValue[TModel]) Concat(other string) *StringFieldValue[TModel] {
+	value.sql = "CONCAT(" + value.sql + ", ?)"
+	value.values = append(value.values, other)
+
+	return value
+}

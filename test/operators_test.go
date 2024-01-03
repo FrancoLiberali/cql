@@ -961,3 +961,26 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithFunctionOfDiff
 		EqualList(&ts.Suite, []*models.Product{product1}, entities)
 	}
 }
+
+func (ts *OperatorsIntTestSuite) TestDynamicOperatorForStringWithConcat() {
+	product1 := ts.createProduct("asd123", 2, 0.0, false, nil)
+	product1.String2 = "asd"
+	err := ts.db.Save(product1).Error
+	ts.Require().NoError(err)
+
+	product2 := ts.createProduct("asd", 3, 0.0, false, nil)
+	product2.String2 = "asd"
+	err = ts.db.Save(product2).Error
+	ts.Require().NoError(err)
+
+	ts.createProduct("asd123", 3, 0.0, false, nil)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.String.IsDynamic().Eq(conditions.Product.String2.Value().Concat("123")),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
