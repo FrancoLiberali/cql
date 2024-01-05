@@ -24,6 +24,32 @@ func NewDeleteIntTestSuite(
 	}
 }
 
+func (ts *DeleteIntTestSuite) TestDeleteWithoutConditions() {
+	_, err := cql.Delete[models.Product](
+		ts.db,
+	).Exec()
+	ts.ErrorIs(err, cql.ErrEmptyConditions)
+	ts.ErrorContains(err, "method: Delete")
+}
+
+func (ts *DeleteIntTestSuite) TestDeleteWithTrue() {
+	ts.createProduct("", 0, 0, false, nil)
+	ts.createProduct("", 1, 0, false, nil)
+
+	deleted, err := cql.Delete[models.Product](
+		ts.db,
+		cql.True[models.Product](),
+	).Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(2), deleted)
+
+	productsReturned, err := cql.Query[models.Product](
+		ts.db,
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 0)
+}
+
 func (ts *DeleteIntTestSuite) TestDeleteWhenNothingMatchConditions() {
 	ts.createProduct("", 0, 0, false, nil)
 
@@ -167,6 +193,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 	case sql.MySQL:
 		_, err := cql.Delete[models.Phone](
 			ts.db,
+			conditions.Phone.Name.Is().Eq("asd"),
 		).Returning(nil).Exec()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")

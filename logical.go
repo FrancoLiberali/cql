@@ -4,6 +4,7 @@ import (
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
 	"github.com/FrancoLiberali/cql/sql"
+	"github.com/FrancoLiberali/cql/unsafe"
 )
 
 // Logical Operators
@@ -40,4 +41,11 @@ func Or[T model.Model](conditions ...condition.WhereCondition[T]) condition.Wher
 // NOT (name = "Paris" AND name = "Buenos Aires")
 func Not[T model.Model](conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
 	return condition.Not(conditions...)
+}
+
+// True represents a condition that is always true.
+//
+// In general, it should not be used. It can only be useful in case you want to perform an operation on all models in a table.
+func True[T model.Model]() condition.Condition[T] {
+	return unsafe.NewCondition[T]("1 = 1")
 }

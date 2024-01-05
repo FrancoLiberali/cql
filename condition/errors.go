@@ -14,7 +14,7 @@ var (
 	ErrJoinMustBeSelected     = errors.New("field's model is joined more than once, select which one you want to use")
 
 	// conditions
-	ErrEmptyConditions     = errors.New("condition must have at least one inner condition")
+	ErrEmptyConditions     = errors.New("at least one condition is required")
 	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
 
 	// crud

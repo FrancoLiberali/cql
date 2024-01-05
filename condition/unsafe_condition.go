@@ -2,6 +2,7 @@ package condition
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/FrancoLiberali/cql/model"
 )
@@ -26,10 +27,14 @@ func (unsafeCondition UnsafeCondition[T]) applyTo(query *GormQuery, table Table)
 
 //nolint:unused // is used
 func (unsafeCondition UnsafeCondition[T]) getSQL(_ *GormQuery, table Table) (string, []any, error) {
-	return fmt.Sprintf(
-		unsafeCondition.SQLCondition,
-		table.Alias,
-	), unsafeCondition.Values, nil
+	if strings.Contains(unsafeCondition.SQLCondition, "%s") {
+		return fmt.Sprintf(
+			unsafeCondition.SQLCondition,
+			table.Alias,
+		), unsafeCondition.Values, nil
+	}
+
+	return unsafeCondition.SQLCondition, unsafeCondition.Values, nil
 }
 
 //nolint:unused // is used
