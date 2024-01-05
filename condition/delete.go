@@ -62,9 +62,20 @@ func (deleteS *Delete[T]) Exec() (int64, error) {
 
 // Create a Delete to which the conditions are applied inside transaction tx
 func NewDelete[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Delete[T] {
+	var err error
+
+	if len(conditions) == 0 {
+		err = methodError(ErrEmptyConditions, "Delete")
+	}
+
+	query := NewQuery(tx, conditions...)
+	if err != nil {
+		query.err = err
+	}
+
 	return &Delete[T]{
 		OrderLimitReturning: OrderLimitReturning[T]{
-			query:         NewQuery(tx, conditions...),
+			query:         query,
 			orderByCalled: false,
 		},
 	}

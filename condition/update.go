@@ -89,9 +89,20 @@ func (update *Update[T]) Returning(dest *[]T) *Update[T] {
 
 // Create a Update to which the conditions are applied inside transaction tx
 func NewUpdate[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Update[T] {
+	var err error
+
+	if len(conditions) == 0 {
+		err = methodError(ErrEmptyConditions, "Update")
+	}
+
+	query := NewQuery(tx, conditions...)
+	if err != nil {
+		query.err = err
+	}
+
 	return &Update[T]{
 		OrderLimitReturning: OrderLimitReturning[T]{
-			query:         NewQuery(tx, conditions...),
+			query:         query,
 			orderByCalled: false,
 		},
 	}

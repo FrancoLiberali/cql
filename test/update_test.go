@@ -26,6 +26,37 @@ func NewUpdateIntTestSuite(
 	}
 }
 
+func (ts *UpdateIntTestSuite) TestUpdateWithoutConditions() {
+	_, err := cql.Update[models.Product](
+		ts.db,
+	).Set(
+		conditions.Product.Int.Set().Eq(0),
+	)
+	ts.ErrorIs(err, cql.ErrEmptyConditions)
+	ts.ErrorContains(err, "method: Update")
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateWithTrue() {
+	ts.createProduct("", 0, 0, false, nil)
+	ts.createProduct("", 1, 0, false, nil)
+
+	updated, err := cql.Update[models.Product](
+		ts.db,
+		cql.True[models.Product](),
+	).Set(
+		conditions.Product.Int.Set().Eq(2),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(2), updated)
+
+	productsReturned, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(2),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 2)
+}
+
 func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
 	ts.createProduct("", 0, 0, false, nil)
 
@@ -572,6 +603,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Phone](
 			ts.db,
+			conditions.Phone.Name.Is().Eq("asd"),
 		).SetMultiple()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: SetMultiple")
