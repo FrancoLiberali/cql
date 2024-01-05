@@ -457,6 +457,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 	case cqlSQL.MySQL:
 		_, err := cql.Update[models.Phone](
 			ts.db,
+			conditions.Phone.Name.Is().Eq("asd"),
 		).Returning(nil).Set()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
@@ -656,6 +657,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoin
 
 	_, err := cql.Update[models.Phone](
 		ts.db,
+		conditions.Phone.Name.Is().Eq("asd"),
 	).SetMultiple(
 		conditions.Phone.Name.Set().Eq("7"),
 		conditions.Brand.Name.Set().Eq("google pixel"),

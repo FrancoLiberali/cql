@@ -193,6 +193,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 	case sql.MySQL:
 		_, err := cql.Delete[models.Phone](
 			ts.db,
+			conditions.Phone.Name.Is().Eq("asd"),
 		).Returning(nil).Exec()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
