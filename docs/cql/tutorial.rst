@@ -24,12 +24,12 @@ In `sqlite:db` you will find a sqlite database with the following data:
    * - ID
      - Name
      - CapitalID
-   * - 3739a825-bc5c-4350-a2bc-6e77e22fe3f4
-     - France
-     - eaa480a3-694e-4be3-9af5-ad935cdd57e2
-   * - 0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921
+   * - 1
      - United States of America
-     - df44272e-c3db-4e18-876c-f9f579488716
+     - 2
+   * - 2
+     - France
+     - 3
 
 .. list-table:: Cities
    :header-rows: 1
@@ -38,18 +38,18 @@ In `sqlite:db` you will find a sqlite database with the following data:
      - Name
      - Population
      - CountryID
-   * - eaa480a3-694e-4be3-9af5-ad935cdd57e2
-     - Paris
-     - 2161000
-     - 3739a825-bc5c-4350-a2bc-6e77e22fe3f4
-   * - df44272e-c3db-4e18-876c-f9f579488716
-     - Washington D. C.
-     - 689545
-     - 0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921
-   * - 8c3dfc38-1fc6-4ec9-a89b-e41018a54b4a
+   * - 1
      - Paris
      - 25171
-     - 0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921
+     - 1
+   * - 2
+     - Washington D. C.
+     - 689545
+     - 1
+   * - 3
+     - Paris
+     - 2161000
+     - 2
 
 As you can see, there are two cities called Paris in this database: 
 the well known Paris, capital of France and site of the iconic Eiffel tower, 
@@ -74,11 +74,11 @@ In the tutorial_1.go file you will find that we can perform this query as follow
 
 We can run this tutorial with `make tutorial_1` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
     Cities named 'Paris' are:
-        1: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:<nil> CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
-        2: &{UUIDModel:{ID:8c3dfc38-1fc6-4ec9-a89b-e41018a54b4a CreatedAt:2023-08-11 16:43:27.468149185 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.468149185 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:25171 Country:<nil> CountryID:0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921}
+        1: City{ID: 1, Name: Paris, Population: 25171, CountryID:1, Country:<nil> }
+        2: City{ID: 3, Name: Paris, Population: 2161000, CountryID:2, Country:<nil> }
 
 As you can see, in this case we will get both cities which we can differentiate by their population and the id of the country.
 
@@ -105,10 +105,10 @@ In the tutorial_2.go file you will find that we can perform this query as follow
 
 We can run this tutorial with `make tutorial_2` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
     Cities named 'Paris' with a population bigger than 1.000.000 are:
-        1: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:<nil> CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
+        1: City{ID: 3, Name: Paris, Population: 2161000, CountryID:2, Country:<nil> }
 
 As you can see, in this case we only get one city, Paris in France.
 
@@ -137,9 +137,9 @@ In the tutorial_3.go file you will find that we can perform this query as follow
 
 We can run this tutorial with `make tutorial_3` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
-    City named 'Paris' with the largest population is: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:<nil> CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
+    City named 'Paris' with the largest population is: City{ID: 3, Name: Paris, Population: 2161000, CountryID:2, Country:<nil> }
 
 As you can see, again we get only the Paris in France. 
 As you may have noticed, in this case we have used the `FindOne` method instead of `Find`. 
@@ -172,10 +172,9 @@ In the tutorial_4.go file you will find that we can perform this query as follow
 
 We can run this tutorial with `make tutorial_4` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
-    Cities named 'Paris' in 'France' are:
-        1: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:<nil> CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
+    City named 'Paris' in 'France' is: City{ID: 3, Name: Paris, Population: 2161000, CountryID:2, Country:<nil> }
 
 As you can see, again we get only the Paris in France. 
 
@@ -203,13 +202,11 @@ In the tutorial_5.go file you will find that we can perform this query as follow
 
 We can run this tutorial with `make tutorial_5` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
     Cities named 'Paris' are:
-        1: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:0xc0001d1600 CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
-            with country: &{UUIDModel:{ID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4 CreatedAt:2023-08-11 16:43:27.445202858 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.457191337 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:France Capital:<nil> CapitalID:eaa480a3-694e-4be3-9af5-ad935cdd57e2}
-        2: &{UUIDModel:{ID:8c3dfc38-1fc6-4ec9-a89b-e41018a54b4a CreatedAt:2023-08-11 16:43:27.468149185 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.468149185 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:25171 Country:0xc0001d1780 CountryID:0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921}
-            with country: &{UUIDModel:{ID:0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921 CreatedAt:2023-08-11 16:43:27.462357133 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.479800337 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:United States of America Capital:<nil> CapitalID:df44272e-c3db-4e18-876c-f9f579488716}
+        1: City{ID: 1, Name: Paris, Population: 25171, CountryID:1, Country:Country{ID: 1, Name: United States of America, CapitalID:2, Capital:<nil> } } with country: Country{ID: 1, Name: United States of America, CapitalID:2, Capital:<nil> }
+        2: City{ID: 3, Name: Paris, Population: 2161000, CountryID:2, Country:Country{ID: 2, Name: France, CapitalID:3, Capital:<nil> } } with country: Country{ID: 2, Name: France, CapitalID:3, Capital:<nil> }
 
 As you can see, now the country attribute is a valid pointer to a Country object (Country:0xc0001d1600).
 Then the Country object information is accessed with the `GetCountry` method. 
@@ -243,10 +240,10 @@ In the tutorial_6.go file you will find that we can perform this query as follow
 
 We can run this tutorial with `make tutorial_6` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
     Cities named 'Paris' that are the capital of their country are:
-        1: &{UUIDModel:{ID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 CreatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.451393348 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:Paris Population:2161000 Country:<nil> CountryID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
+        1: City{ID: 3, Name: Paris, Population: 2161000, CountryID:2, Country:<nil> }
 
 As you can see, again we only get the Paris in France.
 
@@ -274,9 +271,9 @@ In the tutorial_7.go file you will find that we can perform this query as follow
 
 We can run this tutorial with `make tutorial_7` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
-    Updated 1 city: {{eaa480a3-694e-4be3-9af5-ad935cdd57e2 2023-08-11 16:43:27.451393348 +0200 +0200 2023-12-21 10:02:36.420763701 -0300 -0300 {0001-01-01 00:00:00 +0000 UTC false}} Paris 2102650 <nil> 3739a825-bc5c-4350-a2bc-6e77e22fe3f4}
+    Updated 1 city: City{ID: 3, Name: Paris, Population: 2102650, CountryID:2, Country:<nil> }
     Initial population was 2161000
 
 As you can see, first we can know the number of updated models with the value "updated" returned by the Set method 
@@ -309,13 +306,13 @@ In the tutorial_8.go file you will find that we can perform this query as follow
     :caption: Delete
 
     deleted, err := cql.Delete[models.City](
-		db,
-		conditions.City.Name.Is().Eq("Rennes"),
-	).Exec()
+        db,
+        conditions.City.Name.Is().Eq("Rennes"),
+    ).Exec()
 
 We can run this tutorial with `make tutorial_8` and we will obtain the following result:
 
-.. code-block:: bash
+.. code-block:: none
 
     Deleted 1 city
 
@@ -346,16 +343,16 @@ We can run this tutorial with `make tutorial_9` and we will obtain the following
 .. code-block:: none
 
     Countries that have a city called 'Paris' are:
-        1: &{UUIDModel:{ID:3739a825-bc5c-4350-a2bc-6e77e22fe3f4 CreatedAt:2023-08-11 16:43:27.445202858 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.457191337 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:France Capital:<nil> CapitalID:eaa480a3-694e-4be3-9af5-ad935cdd57e2 Cities:<nil>}
-        2: &{UUIDModel:{ID:0c4404f6-83c2-4bdf-93d5-a5ff2fe4f921 CreatedAt:2023-08-11 16:43:27.462357133 +0200 +0200 UpdatedAt:2023-08-11 16:43:27.479800337 +0200 +0200 DeletedAt:{Time:0001-01-01 00:00:00 +0000 UTC Valid:false}} Name:United States of America Capital:<nil> CapitalID:df44272e-c3db-4e18-876c-f9f579488716 Cities:<nil>}
+        1: Country{ID: 1, Name: United States of America, CapitalID:2, Capital:<nil> }
+        2: Country{ID: 2, Name: France, CapitalID:3, Capital:<nil> }
 
 As you can see, again we only get the Paris in France.
 
 In this tutorial we have used conditions over collections, 
-for more details you can read :doc:`/cql/advanced_query:Collections`.
+for more details you can read :ref:`cql/advanced_query:Collections`.
 
 Tutorial 10: Compile type safety
--------------------------------
+-----------------------------------
 
 In this tutorial we want to verify that cql is compile-time safe.
 
@@ -370,7 +367,7 @@ In the tutorial_10.go file you will find that we try to perform a query as follo
 
 We can run this tutorial with `make tutorial_10` and we will obtain the following error during compilation:
 
-.. code-block:: bash
+.. code-block:: none
 
     ./tutorial_10.go:20:3:
         cannot use conditions.Country.Name.Is().Eq("Paris")
