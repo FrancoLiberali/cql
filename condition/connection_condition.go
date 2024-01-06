@@ -22,7 +22,6 @@ func (condition connectionCondition[T]) interfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-//nolint:unused // is used
 func (condition connectionCondition[T]) applyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }

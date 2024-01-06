@@ -1,11 +1,12 @@
 package test
 
 import (
+	"gorm.io/gorm"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
-	"gorm.io/gorm"
 )
 
 type GroupByIntTestSuite struct {
@@ -117,6 +118,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCount() {
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
 	int1 := 1
+
 	ts.createProduct("1", 1, 0, false, nil)
 	ts.createProduct("2", 1, 0, false, &int1)
 	ts.createProduct("3", 0, 0, false, nil)
@@ -137,6 +139,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
 	int1 := 1
+
 	ts.createProduct("1", 1, 0, false, nil)
 	ts.createProduct("2", 1, 0, false, &int1)
 	ts.createProduct("3", 0, 0, false, nil)
@@ -281,10 +284,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 	switch getDBDialector() {
 	case sql.Postgres, sql.MySQL:
 		int1 := 1
-		ts.createProduct("1", 1, 0.25, false, &int1)
 		int2 := 3
-		ts.createProduct("2", 1, 0.75, false, &int2)
 		int3 := 3
+
+		ts.createProduct("1", 1, 0.25, false, &int1)
+		ts.createProduct("2", 1, 0.75, false, &int2)
 		ts.createProduct("1", 2, 0.25, false, &int3)
 		ts.createProduct("3", 0, 1, false, nil)
 		ts.createProduct("3", 3, 1, false, &int1)
@@ -321,10 +325,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 	switch getDBDialector() {
 	case sql.Postgres, sql.MySQL:
 		int1 := 1
-		ts.createProduct("1", 1, 0.25, false, &int1)
 		int2 := 2
-		ts.createProduct("2", 1, 0.75, false, &int2)
 		int3 := 3
+
+		ts.createProduct("1", 1, 0.25, false, &int1)
+		ts.createProduct("2", 1, 0.75, false, &int2)
 		ts.createProduct("1", 2, 0.25, false, &int3)
 		ts.createProduct("3", 0, 1, false, nil)
 		ts.createProduct("3", 3, 1, false, &int1)

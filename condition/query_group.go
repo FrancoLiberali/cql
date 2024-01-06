@@ -11,6 +11,7 @@ func (query *QueryGroup) Select(aggregation Aggregation, as string) *QueryGroup 
 
 	if aggregation.field != nil { // CountAll
 		var err error
+
 		table, err = query.gormQuery.GetModelTable(aggregation.field, UndefinedJoinNumber)
 		if err != nil {
 			query.addError(methodError(err, "Select"))
