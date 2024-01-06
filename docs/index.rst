@@ -17,7 +17,7 @@ Index
    cql/create
    cql/update
    cql/delete
-   cql/compile_time_safety
+   cql/type_safety
    cql/logger
 
 .. toctree::

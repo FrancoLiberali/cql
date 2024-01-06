@@ -384,4 +384,4 @@ This would be equivalent to trying to execute the following SQL query:
 
 Therefore, we will get a compilation error and this incorrect code will never be executed.
 
-For more details you can read :doc:`/cql/compile_time_safety`.
+For more details you can read :doc:`/cql/type_safety`.
