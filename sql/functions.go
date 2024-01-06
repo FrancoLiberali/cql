@@ -7,13 +7,25 @@ type Function interface {
 }
 
 type FunctionFunction struct {
+	sqlPrefix   string
 	sqlFunction string
+	sqlSuffix   string
 }
 
 func (f FunctionFunction) ApplyTo(internalSQL string, values int) string {
-	placeholders := strings.Repeat(", ?", values)
+	finalSQL := f.sqlPrefix
 
-	return f.sqlFunction + "(" + internalSQL + placeholders + ")"
+	if f.sqlFunction != "" {
+		placeholders := strings.Repeat(", ?", values)
+
+		finalSQL += f.sqlFunction + "(" + internalSQL + placeholders + ")"
+	}
+
+	if f.sqlSuffix != "" {
+		finalSQL += " " + f.sqlSuffix
+	}
+
+	return finalSQL
 }
 
 type OperatorFunction struct {
@@ -88,11 +100,71 @@ var (
 	}
 
 	// Aggregators
+	// All
+
+	Count = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "COUNT"}}, //nolint:exhaustive // all present
+		Name:      "Count",
+	}
+	CountAll = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlPrefix: "COUNT(*)"}}, //nolint:exhaustive // all present
+		Name:      "CountAll",
+	}
+	Min = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "MIN"}}, //nolint:exhaustive // all present
+		Name:      "Min",
+	}
+	Max = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "MAX"}}, //nolint:exhaustive // all present
+		Name:      "Max",
+	}
+
 	// Numeric
 
 	Sum = FunctionByDialector{
 		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "SUM"}}, //nolint:exhaustive // all present
 		Name:      "Sum",
+	}
+	Average = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "AVG"}}, //nolint:exhaustive // all present
+		Name:      "Average",
+	}
+	BitAndAggregation = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // supported
+			Postgres: FunctionFunction{sqlFunction: "BIT_AND"},
+			MySQL:    FunctionFunction{sqlFunction: "BIT_AND"},
+		},
+		Name: "And",
+	}
+	BitOrAggregation = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // supported
+			Postgres: FunctionFunction{sqlFunction: "BIT_OR"},
+			MySQL:    FunctionFunction{sqlFunction: "BIT_OR"},
+		},
+		Name: "Or",
+	}
+
+	// Bool
+	All = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+			Postgres: FunctionFunction{sqlFunction: "EVERY"},
+			all:      FunctionFunction{sqlFunction: "AVG", sqlSuffix: "== 1"},
+		},
+		Name: "All",
+	}
+	Any = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+			Postgres: FunctionFunction{sqlFunction: "BOOL_OR"},
+			all:      FunctionFunction{sqlFunction: "AVG", sqlSuffix: "> 0"},
+		},
+		Name: "Any",
+	}
+	None = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+			Postgres: FunctionFunction{sqlFunction: "NOT BOOL_OR"},
+			all:      FunctionFunction{sqlFunction: "AVG", sqlSuffix: "== 0"},
+		},
+		Name: "None",
 	}
 )
 

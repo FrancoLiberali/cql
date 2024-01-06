@@ -4,21 +4,23 @@ type QueryGroup struct {
 	gormQuery *GormQuery
 	err       error
 	fields    []IField
-	selects   []string
 }
 
 func (query *QueryGroup) Select(aggregation Aggregation, as string) *QueryGroup {
-	table, err := query.gormQuery.GetModelTable(aggregation.field, UndefinedJoinNumber)
-	if err != nil {
-		// TODO error correcto
-		query.addError(err)
-		return query
+	var table Table
+
+	if aggregation.field != nil { // CountAll
+		var err error
+		table, err = query.gormQuery.GetModelTable(aggregation.field, UndefinedJoinNumber)
+		if err != nil {
+			query.addError(methodError(err, "Select"))
+			return query
+		}
 	}
 
 	selectSQL, err := aggregation.toSQL(query.gormQuery, table, as)
 	if err != nil {
-		// TODO error correcto
-		query.addError(err)
+		query.addError(methodError(err, "Select"))
 		return query
 	}
 

@@ -92,5 +92,10 @@ func NewDBConnection() (*gorm.DB, error) {
 }
 
 func getDBDialector() sql.Dialector {
-	return sql.Dialector(os.Getenv(dbTypeEnvKey))
+	dialector := os.Getenv(dbTypeEnvKey)
+	if dialector != "" {
+		return sql.Dialector(os.Getenv(dbTypeEnvKey))
+	}
+
+	return sql.SQLite
 }
