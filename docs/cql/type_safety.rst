@@ -1,5 +1,5 @@
 ==============================
-Compile-type safety
+Type safety
 ==============================
 
 One of the most important features of the CQL is
