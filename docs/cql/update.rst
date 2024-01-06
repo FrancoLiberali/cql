@@ -14,7 +14,7 @@ Update methods
 
 Update operations are divided into two parts: the Update method and the Set method. 
 In the first one, we must define the conditions that will determine which models will be updated. 
-Here, the whole system of compilable queries is valid (for details visit :ref:`cql/query`). 
+Here, the whole system of compilable queries is valid (for details visit :doc:`/cql/query`). 
 In the second one, we define the updates to be performed.
 
 The object obtained using `cql.Update` has different methods that 
@@ -98,6 +98,7 @@ This limitation is imposed by the database engines, with the exception of MySQL,
 which allows multiple tables to be updated at the same time. To do this, you use the SetMultiple method:
 
 .. code-block:: go
+
     updatedCount, err := cql.Update[MyModel](
         gormDB,
         conditions.MyModel.Related(

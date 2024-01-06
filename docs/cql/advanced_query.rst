@@ -35,6 +35,7 @@ cql also allows you to set conditions on a collection of models (one to many or 
     ).Find()
 
 The methods for collections are:
+
 - None: generates a condition that is true if no model in the collection fulfills the conditions.
 - Any: generates a condition that is true if at least one model in the collection fulfills the conditions.
 - All: generates a condition that is true if all models in the collection fulfill the conditions (or is empty).

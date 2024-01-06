@@ -14,7 +14,7 @@ Delete methods
 
 Delete operations are divided into two parts: the Delete method and the Exec method. 
 In the first one, we must define the conditions that will determine which models will be deleted. 
-Here, the whole system of compilable queries is valid (for details visit :ref:`cql/query`). 
+Here, the whole system of compilable queries is valid (for details visit :doc:`/cql/query`). 
 
 The object obtained using `cql.Delete` has different methods that 
 will allow you to modify the query:
