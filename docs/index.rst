@@ -1,11 +1,11 @@
 ==============================
-Introduction
+Index
 ==============================
 
 .. toctree::
    :caption: CQL
 
-   cql/index
+   cql/introduction
    cql/quickstart
    cql/tutorial
    cql/concepts
