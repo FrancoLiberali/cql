@@ -65,6 +65,11 @@ func (field Field[TModel, TAttribute]) getAppearance() int {
 	return int(field.appearance)
 }
 
+// Aggregate TODO
+func (field Field[TModel, TAttribute]) Aggregate() FieldAggregation {
+	return FieldAggregation{field: field}
+}
+
 func (field Field[TModel, TAttribute]) getModelType() reflect.Type {
 	return reflect.TypeOf(*new(TModel))
 }
@@ -268,6 +273,11 @@ func (numericField NumericField[TModel, TAttribute]) Appearance(number uint) Num
 	return NumericField[TModel, TAttribute]{
 		UpdatableField: UpdatableField[TModel, TAttribute]{Field: numericField.Field.Appearance(number)},
 	}
+}
+
+// Aggregate TODO
+func (numericField NumericField[TModel, TAttribute]) Aggregate() NumericFieldAggregation {
+	return NumericFieldAggregation{FieldAggregation: numericField.Field.Aggregate()}
 }
 
 type NullableNumericField[

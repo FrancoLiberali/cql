@@ -34,7 +34,7 @@ func (query *GormQuery) Order(field IField, descending bool) error {
 	switch query.Dialector() {
 	case sql.Postgres:
 		// postgres supports only order by selected fields
-		query.AddSelect(table, field)
+		query.AddSelectField(table, field, true)
 		query.GormDB = query.GormDB.Order(
 			clause.OrderByColumn{
 				Column: clause.Column{
@@ -78,6 +78,25 @@ func (query *GormQuery) Limit(limit int) {
 	query.GormDB = query.GormDB.Limit(limit)
 }
 
+// TODO docs
+func (query *GormQuery) GroupBy(fields []IField) error {
+	query.cleanSelects()
+
+	for _, field := range fields {
+		// TODO que pasa con los joins
+		table, err := query.GetModelTable(field, UndefinedJoinNumber)
+		if err != nil {
+			return err
+		}
+
+		query.AddSelectField(table, field, false)
+
+		query.GormDB.Group(query.ColumnName(table, field.fieldName()))
+	}
+
+	return nil
+}
+
 // Count returns the amount of models that fulfill the conditions
 func (query *GormQuery) Count() (int64, error) {
 	query.cleanSelects()
@@ -107,16 +126,29 @@ func (query *GormQuery) Find(dest any) error {
 	return query.GormDB.Find(dest).Error
 }
 
-func (query *GormQuery) AddSelect(table Table, fieldID IField) {
+// Select specify fields that you want when querying, creating, updating
+func (query *GormQuery) AddSelect(value string) {
 	query.GormDB.Statement.Selects = append(
 		query.GormDB.Statement.Selects,
-		fmt.Sprintf(
-			"%s.%s AS %s",
-			table.Alias,
-			fieldID.columnName(query, table),
-			query.getSelectAlias(table, fieldID),
-		),
+		value,
 	)
+}
+
+func (query *GormQuery) AddSelectField(table Table, fieldID IField, addAs bool) {
+	columnName := fmt.Sprintf(
+		"%s.%s",
+		table.Alias,
+		fieldID.columnName(query, table),
+	)
+
+	if addAs {
+		columnName += fmt.Sprintf(
+			" AS %s",
+			query.getSelectAlias(table, fieldID),
+		)
+	}
+
+	query.AddSelect(columnName)
 }
 
 func (query *GormQuery) getSelectAlias(table Table, fieldID IField) string {

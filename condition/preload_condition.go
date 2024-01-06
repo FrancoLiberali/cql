@@ -18,7 +18,7 @@ func (condition preloadCondition[T]) interfaceVerificationMethod(_ T) {
 //nolint:unused // is used
 func (condition preloadCondition[T]) applyTo(query *GormQuery, table Table) error {
 	for _, fieldID := range condition.Fields {
-		query.AddSelect(table, fieldID)
+		query.AddSelectField(table, fieldID, true)
 	}
 
 	return nil

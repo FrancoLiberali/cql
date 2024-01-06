@@ -40,6 +40,8 @@ type FunctionByDialector struct {
 const all = "all"
 
 var (
+	// Numeric
+
 	Plus    = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "+"}}, Name: "Plus"}    //nolint:exhaustive // all present
 	Minus   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "-"}}, Name: "Minus"}   //nolint:exhaustive // all present
 	Times   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "*"}}, Name: "Times"}   //nolint:exhaustive // all present
@@ -74,12 +76,23 @@ var (
 		functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: ">>"}}, //nolint:exhaustive // all present
 		Name:      "ShiftRight",
 	}
+
+	// String
+
 	Concat = FunctionByDialector{
 		functions: map[Dialector]Function{ //nolint:exhaustive // all present
 			Postgres: OperatorFunction{sqlOperator: "||"},
 			all:      FunctionFunction{sqlFunction: "CONCAT"},
 		},
 		Name: "Concat",
+	}
+
+	// Aggregators
+	// Numeric
+
+	Sum = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "SUM"}}, //nolint:exhaustive // all present
+		Name:      "Sum",
 	}
 )
 
