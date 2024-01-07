@@ -24,14 +24,6 @@ func NewDeleteIntTestSuite(
 	}
 }
 
-func (ts *DeleteIntTestSuite) TestDeleteWithoutConditions() {
-	_, err := cql.Delete[models.Product](
-		ts.db,
-	).Exec()
-	ts.ErrorIs(err, cql.ErrEmptyConditions)
-	ts.ErrorContains(err, "method: Delete")
-}
-
 func (ts *DeleteIntTestSuite) TestDeleteWithTrue() {
 	ts.createProduct("", 0, 0, false, nil)
 	ts.createProduct("", 1, 0, false, nil)

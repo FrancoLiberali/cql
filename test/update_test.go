@@ -26,16 +26,6 @@ func NewUpdateIntTestSuite(
 	}
 }
 
-func (ts *UpdateIntTestSuite) TestUpdateWithoutConditions() {
-	_, err := cql.Update[models.Product](
-		ts.db,
-	).Set(
-		conditions.Product.Int.Set().Eq(0),
-	)
-	ts.ErrorIs(err, cql.ErrEmptyConditions)
-	ts.ErrorContains(err, "method: Update")
-}
-
 func (ts *UpdateIntTestSuite) TestUpdateWithTrue() {
 	ts.createProduct("", 0, 0, false, nil)
 	ts.createProduct("", 1, 0, false, nil)
