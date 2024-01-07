@@ -21,6 +21,8 @@ func (condition fieldCondition[TObject, TAtribute]) interfaceVerificationMethod(
 
 // Returns a gorm Where condition that can be used
 // to filter that the Field as a value of Value
+//
+//nolint:unused // is used
 func (condition fieldCondition[TObject, TAtribute]) applyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[TObject](condition, query, table)
 }

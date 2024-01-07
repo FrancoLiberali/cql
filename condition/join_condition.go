@@ -68,6 +68,8 @@ func (condition joinConditionImpl[T1, T2]) interfaceVerificationMethod(_ T1) {
 }
 
 // Returns true if this condition or any nested condition makes a preload
+//
+//nolint:unused // is used
 func (condition joinConditionImpl[T1, T2]) makesPreload() bool {
 	_, joinConditions := divideConditionsByType(condition.Conditions)
 
@@ -90,6 +92,8 @@ func (condition joinConditionImpl[T1, T2]) makesFilter() bool {
 // Applies a join between the tables of T1 and T2
 // previousTableName is the name of the table of T1
 // It also applies the nested conditions
+//
+//nolint:unused // is used
 func (condition joinConditionImpl[T1, T2]) applyTo(query *GormQuery, t1Table Table) error {
 	whereConditions, joinConditions := divideConditionsByType(condition.Conditions)
 
@@ -136,6 +140,8 @@ func (condition joinConditionImpl[T1, T2]) applyTo(query *GormQuery, t1Table Tab
 }
 
 // Adds the join between t1Table and t2Table to the query and the whereConditions in the "ON"
+//
+//nolint:unused // is used
 func (condition joinConditionImpl[T1, T2]) addJoin(query *GormQuery, t1Table, t2Table Table, whereConditions []WhereCondition[T2]) error {
 	joinQuery := condition.getSQLJoin(
 		query,
@@ -180,6 +186,8 @@ func (condition joinConditionImpl[T1, T2]) addJoin(query *GormQuery, t1Table, t2
 // Returns the SQL string to do a join between T1 and T2
 // taking into account that the ID attribute necessary to do it
 // can be either in T1's or T2's table.
+//
+//nolint:unused // is used
 func (condition joinConditionImpl[T1, T2]) getSQLJoin(
 	query *GormQuery,
 	t1Table Table,
@@ -195,6 +203,8 @@ func (condition joinConditionImpl[T1, T2]) getSQLJoin(
 }
 
 // Returns the SQL string to verify a join between T1 and T2
+//
+//nolint:unused // is used
 func getSQLJoin(
 	query *GormQuery,
 	t1Table Table,
@@ -212,6 +222,8 @@ func getSQLJoin(
 }
 
 // Divides a list of conditions by its type: WhereConditions and JoinConditions
+//
+//nolint:unused // is used
 func divideConditionsByType[T model.Model](
 	conditions []Condition[T],
 ) (whereConditions []WhereCondition[T], joinConditions []JoinCondition[T]) {

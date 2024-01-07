@@ -18,6 +18,7 @@ func (condition containerCondition[T]) interfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
+//nolint:unused // is used
 func (condition containerCondition[T]) applyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }

@@ -20,6 +20,7 @@ func (unsafeCondition UnsafeCondition[T]) interfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
+//nolint:unused // is used
 func (unsafeCondition UnsafeCondition[T]) applyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[T](unsafeCondition, query, table)
 }

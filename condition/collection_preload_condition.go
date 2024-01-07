@@ -19,6 +19,7 @@ func (condition collectionPreloadCondition[T1, T2]) interfaceVerificationMethod(
 	// that an object is of type Condition[T1]
 }
 
+//nolint:unused // is used
 func (condition collectionPreloadCondition[T1, T2]) applyTo(query *GormQuery, _ Table) error {
 	if len(condition.NestedPreloads) == 0 {
 		query.Preload(condition.CollectionField)

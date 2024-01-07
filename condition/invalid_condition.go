@@ -11,6 +11,7 @@ func (condition invalidCondition[T]) interfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
+//nolint:unused // is used
 func (condition invalidCondition[T]) applyTo(_ *GormQuery, _ Table) error {
 	return condition.Err
 }
