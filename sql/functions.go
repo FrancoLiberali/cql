@@ -18,7 +18,11 @@ func (f FunctionFunction) ApplyTo(internalSQL string, values int) string {
 	if f.sqlFunction != "" {
 		placeholders := strings.Repeat(", ?", values)
 
-		finalSQL += f.sqlFunction + "(" + internalSQL + placeholders + ")"
+		finalSQL += f.sqlFunction + "(" + internalSQL + placeholders
+
+		if !strings.Contains(f.sqlFunction, "(") {
+			finalSQL += ")"
+		}
 	}
 
 	if f.sqlSuffix != "" {
@@ -147,22 +151,25 @@ var (
 	// Bool
 	All = FunctionByDialector{
 		functions: map[Dialector]Function{ //nolint:exhaustive // all present
-			Postgres: FunctionFunction{sqlFunction: "EVERY"},
-			all:      FunctionFunction{sqlFunction: "AVG", sqlSuffix: "== 1"},
+			Postgres:  FunctionFunction{sqlFunction: "EVERY"},
+			SQLServer: FunctionFunction{sqlFunction: "AVG(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) = 1 then 1 else 0 end"},
+			all:       FunctionFunction{sqlFunction: "AVG", sqlSuffix: "= 1"},
 		},
 		Name: "All",
 	}
 	Any = FunctionByDialector{
 		functions: map[Dialector]Function{ //nolint:exhaustive // all present
-			Postgres: FunctionFunction{sqlFunction: "BOOL_OR"},
-			all:      FunctionFunction{sqlFunction: "AVG", sqlSuffix: "> 0"},
+			Postgres:  FunctionFunction{sqlFunction: "BOOL_OR"},
+			SQLServer: FunctionFunction{sqlFunction: "SUM(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) > 0 then 1 else 0 end"},
+			all:       FunctionFunction{sqlFunction: "SUM", sqlSuffix: "> 0"},
 		},
 		Name: "Any",
 	}
 	None = FunctionByDialector{
 		functions: map[Dialector]Function{ //nolint:exhaustive // all present
-			Postgres: FunctionFunction{sqlFunction: "NOT BOOL_OR"},
-			all:      FunctionFunction{sqlFunction: "AVG", sqlSuffix: "== 0"},
+			Postgres:  FunctionFunction{sqlFunction: "NOT BOOL_OR"},
+			SQLServer: FunctionFunction{sqlFunction: "SUM(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) = 0 then 1 else 0 end"},
+			all:       FunctionFunction{sqlFunction: "SUM", sqlSuffix: "= 0"},
 		},
 		Name: "None",
 	}

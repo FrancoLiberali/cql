@@ -282,7 +282,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 	results := []ResultInt{}
 
 	switch getDBDialector() {
-	case sql.Postgres, sql.MySQL:
+	case sql.Postgres:
 		int1 := 1
 		int2 := 3
 		int3 := 3
@@ -304,6 +304,26 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 
 		ts.Require().NoError(err)
 		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 1}, {Int: 2, Aggregation: 3}, {Int: 0, Aggregation: 0}, {Int: 3, Aggregation: 1}}, results)
+	case sql.MySQL:
+		int1 := 1
+		int2 := 3
+		int3 := 3
+
+		ts.createProduct("1", 1, 0.25, false, &int1)
+		ts.createProduct("2", 1, 0.75, false, &int2)
+		ts.createProduct("1", 2, 0.25, false, &int3)
+		ts.createProduct("3", 3, 1, false, &int1)
+
+		err := cql.Query[models.Product](
+			ts.db,
+		).GroupBy(
+			conditions.Product.Int,
+		).Select(
+			conditions.Product.IntPointer.Aggregate().And(), "aggregation",
+		).Into(&results)
+
+		ts.Require().NoError(err)
+		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 1}, {Int: 2, Aggregation: 3}, {Int: 3, Aggregation: 1}}, results)
 	case sql.SQLite, sql.SQLServer:
 		err := cql.Query[models.Product](
 			ts.db,
