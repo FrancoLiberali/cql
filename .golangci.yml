@@ -227,7 +227,7 @@ issues:
         - exhaustive
         - dupl
         - goerr113
-    - path: ^cmd/
+    - path: ^cmd/|^cql-gen/cmd/
       linters:
         - goerr113
     # We need to use the deprecated module since the jsonpb replacement is not backwards compatible.
