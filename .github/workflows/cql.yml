@@ -117,14 +117,12 @@ jobs:
         with:
           name: coverage
       - name: Download gen line coverage report
-        id: download-artifact
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: gen.yml
           workflow_conclusion: success
           name: coverage_gen
       - name: Download lint line coverage report
-        id: download-artifact
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: lint.yml
