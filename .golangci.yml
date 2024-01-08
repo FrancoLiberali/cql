@@ -226,10 +226,10 @@ issues:
         - gomnd
         - exhaustive
         - dupl
-    - path: ^cmd/
+    - path: ^cmd/|^cql-gen/cmd/
       linters:
         - goerr113
-    - path: ^pkg/analyzer/
+    - path: ^pkg/analyzer/|^cql-lint/pkg/analyzer/
       linters:
         - errcheck
         - forcetypeassert
