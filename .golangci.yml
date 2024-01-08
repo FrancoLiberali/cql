@@ -230,7 +230,7 @@ issues:
     - path: ^cmd/|^cql-gen/cmd/
       linters:
         - goerr113
-    - path: ^pkg/analyzer/|^cqllint/pkg/analyzer/
+    - path: ^pkg/analyzer/|^cql-lint/pkg/analyzer/
       linters:
         - errcheck
         - forcetypeassert

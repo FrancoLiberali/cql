@@ -6,7 +6,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-    - cqllint/**
+    - cql-lint/**
 
 jobs:
   check-style:
@@ -23,7 +23,7 @@ jobs:
       - name: lint
         uses: golangci/golangci-lint-action@v3
         with:
-          working-directory: cqllint
+          working-directory: cql-lint
           args: --config=../.golangci.yml
           skip-cache: true
           skip-pkg-cache: true
@@ -44,7 +44,7 @@ jobs:
       - name: Mod download
         run: go mod download
       - name: Run tests
-        run: go test ./cqllint/... -coverpkg=./cqllint/... -coverprofile=coverage_lint.out -v
+        run: go test ./cql-lint/... -coverpkg=./cql-lint/... -coverprofile=coverage_lint.out -v
       - uses: actions/upload-artifact@v3
         with:
           name: coverage_lint

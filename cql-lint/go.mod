@@ -1,4 +1,4 @@
-module github.com/FrancoLiberali/cql/cqllint
+module github.com/FrancoLiberali/cql/cql-lint
 
 go 1.18
 
