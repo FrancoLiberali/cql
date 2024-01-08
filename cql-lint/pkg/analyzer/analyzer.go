@@ -19,11 +19,22 @@ var Analyzer = &analysis.Analyzer{
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
 }
 
-var cqlMethods = []string{"Query", "Update", "Delete"}
+var (
+	cqlMethods   = []string{"Query", "Update", "Delete"}
+	cqlOrder     = []string{"Descending", "Ascending"}
+	cqlSet       = []string{"SetMultiple"}
+	cqlSelectors = append(cqlOrder, cqlSet...)
+)
 
 type Position struct {
 	Number token.Pos
 	Model  string
+}
+
+type Model struct {
+	pkg  string
+	name string
+	pos  token.Pos
 }
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -43,30 +54,17 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 		callExpr := node.(*ast.CallExpr)
 
-		// cql.Query, cql.Update and cql.Delete have at least db as parameter
+		// methods to be verified have at least one parameter (cql.Query, cql.Update, cql.Delete, Descending, Ascending)
 		if len(callExpr.Args) < 1 {
 			return
 		}
 
-		selectorExpr, isSelector := callExpr.Fun.(*ast.IndexExpr).X.(*ast.SelectorExpr)
-		if !isSelector {
-			return
+		_, isSelector := callExpr.Fun.(*ast.SelectorExpr)
+		if isSelector {
+			positionsToReport = findForSelector(callExpr, positionsToReport)
+		} else {
+			positionsToReport, _ = findForIndex(callExpr, positionsToReport)
 		}
-
-		ident, isIdent := selectorExpr.X.(*ast.Ident)
-		if !isIdent {
-			return
-		}
-
-		if ident.Name != "cql" {
-			return
-		}
-
-		if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
-			return
-		}
-
-		positionsToReport, _ = findErrorIsDynamic(positionsToReport, []string{}, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 	})
 
 	for _, position := range positionsToReport {
@@ -80,9 +78,78 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil //nolint:nilnil // is necessary
 }
 
+// TODO set dynamic
+
+// Finds errors in selector functions: Descending, Ascending, SetMultiple
+func findForSelector(callExpr *ast.CallExpr, positionsToReport []Position) []Position {
+	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
+
+	if !pie.Contains(cqlSelectors, selectorExpr.Sel.Name) {
+		return positionsToReport
+	}
+
+	_, models := findForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
+
+	for _, arg := range callExpr.Args {
+		var model Model
+
+		if pie.Contains(cqlOrder, selectorExpr.Sel.Name) {
+			model = getModel(arg.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+		} else {
+			// TODO tambien podria ser ser set dynamic que es distitno, hay que unificar para que ambos sean un solo llamado
+			model = getModel(arg.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+		}
+
+		positionsToReport = addPositionsToReport(positionsToReport, models, model)
+	}
+
+	return positionsToReport
+}
+
+// Finds errors in index functions: cql.Query, cql.Update, cql.Delete
+func findForIndex(callExpr *ast.CallExpr, positionsToReport []Position) ([]Position, []string) {
+	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
+	if !isIndex {
+		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
+		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
+		if isSelector {
+			callExpr, isCall := selectorExpr.X.(*ast.CallExpr)
+			if isCall {
+				return findForIndex(callExpr, positionsToReport)
+			}
+		}
+
+		return positionsToReport, []string{}
+	}
+
+	selectorExpr, isSelector := indexExpr.X.(*ast.SelectorExpr)
+	if !isSelector {
+		return positionsToReport, []string{}
+	}
+
+	ident, isIdent := selectorExpr.X.(*ast.Ident)
+	if !isIdent {
+		return positionsToReport, []string{}
+	}
+
+	if ident.Name != "cql" || !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
+		return positionsToReport, []string{}
+	}
+
+	var models []string
+
+	positionsToReport, models = findErrorIsDynamic(positionsToReport, []string{}, callExpr.Args[1:]) // first parameters is ignored as it's the db object
+
+	if len(models) == 0 {
+		// add method generic in case there where not conditions
+		models = append(models, indexExpr.Index.(*ast.SelectorExpr).Sel.Name)
+	}
+
+	return positionsToReport, models
+}
+
 func findErrorIsDynamic(positionsToReport []Position, models []string, conditions []ast.Expr) ([]Position, []string) {
 	for _, condition := range conditions {
-		// TODO puede haber problems con el orden de las condiciones, ver testNotJoinedWithJoinedWithConditionBefore
 		conditionCall := condition.(*ast.CallExpr)
 		conditionSelector := conditionCall.Fun.(*ast.SelectorExpr)
 
@@ -121,22 +188,28 @@ func findErrorIsDynamicWhereCondition(
 ) ([]Position, []string) {
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
 	if isWhereCondition {
-		_, modelName, _ := getModel(whereCondition)
+		model := getModelFromWhereCondition(whereCondition)
 
-		models = addUnique(models, modelName)
+		models = addUnique(models, model.name)
 
 		if getFieldIsMethodName(whereCondition) == "IsDynamic" {
-			modelPkg, isDynamicModelName, modelPos := getModel(conditionCall.Args[0].(*ast.CallExpr))
-			if !pie.Contains(models, isDynamicModelName) {
-				positionsToReport = append(positionsToReport, Position{
-					Number: modelPos,
-					Model:  modelPkg + "." + isDynamicModelName,
-				})
-			}
+			isDynamicModel := getModelFromWhereCondition(conditionCall.Args[0].(*ast.CallExpr))
+			positionsToReport = addPositionsToReport(positionsToReport, models, isDynamicModel)
 		}
 	}
 
 	return positionsToReport, models
+}
+
+func addPositionsToReport(positionsToReport []Position, models []string, model Model) []Position {
+	if !pie.Contains(models, model.name) {
+		return append(positionsToReport, Position{
+			Number: model.pos,
+			Model:  model.pkg + "." + model.name,
+		})
+	}
+
+	return positionsToReport
 }
 
 func addUnique(list []string, elem string) []string {
@@ -152,8 +225,15 @@ func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
 }
 
 // Returns model's package the model name
-func getModel(whereCondition *ast.CallExpr) (string, string, token.Pos) {
-	model := whereCondition.Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
+func getModelFromWhereCondition(whereCondition *ast.CallExpr) Model {
+	return getModel(whereCondition.Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+}
 
-	return model.X.(*ast.Ident).Name, model.Sel.Name, model.Pos()
+// Returns model's package the model name
+func getModel(selExpr *ast.SelectorExpr) Model {
+	return Model{
+		pkg:  selExpr.X.(*ast.Ident).Name,
+		name: selExpr.Sel.Name,
+		pos:  selExpr.Pos(),
+	}
 }
