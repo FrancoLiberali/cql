@@ -41,6 +41,8 @@ jobs:
         with:
           go-version: '^1.18'
           cache: true
+      - name: Mod download
+        run: go mod download
       - name: Run tests
         run: go test ./cql-lint/... -coverpkg=./cql-lint/... -coverprofile=coverage_lint.out -v
       - uses: actions/upload-artifact@v3
