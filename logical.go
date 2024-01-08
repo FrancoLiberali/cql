@@ -1,9 +1,10 @@
 package cql
 
 import (
+	"github.com/elliotchance/pie/v2"
+
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
-	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/unsafe"
 )
 
@@ -17,8 +18,8 @@ import (
 // Example:
 //
 // cql.And(conditions.City.Name.Is().Eq("Paris"), conditions.City.ZipCode.Is().Eq("75000"))
-func And[T model.Model](conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
-	return condition.And(conditions...)
+func And[T model.Model](firstCondition condition.WhereCondition[T], conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
+	return condition.And(pie.Unshift(conditions, firstCondition)...)
 }
 
 // Or allows the connection of multiple conditions by the OR logical connector.
@@ -26,8 +27,8 @@ func And[T model.Model](conditions ...condition.WhereCondition[T]) condition.Whe
 // Example:
 //
 // cql.Or(conditions.City.Name.Is().Eq("Paris"), conditions.City.Name.Is().Eq("Buenos Aires"))
-func Or[T model.Model](conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
-	return condition.NewConnectionCondition(sql.Or, conditions...)
+func Or[T model.Model](firstCondition condition.WhereCondition[T], conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
+	return condition.Or(pie.Unshift(conditions, firstCondition)...)
 }
 
 // Not allows the negation of the conditions within it. Multiple conditions are connected by an AND by default.
@@ -39,8 +40,8 @@ func Or[T model.Model](conditions ...condition.WhereCondition[T]) condition.Wher
 // translates as
 //
 // NOT (name = "Paris" AND name = "Buenos Aires")
-func Not[T model.Model](conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
-	return condition.Not(conditions...)
+func Not[T model.Model](firstCondition condition.WhereCondition[T], conditions ...condition.WhereCondition[T]) condition.WhereCondition[T] {
+	return condition.Not(pie.Unshift(conditions, firstCondition)...)
 }
 
 // True represents a condition that is always true.

@@ -1,6 +1,7 @@
 package cql
 
 import (
+	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql/condition"
@@ -16,6 +17,6 @@ import (
 func Update[T model.Model](tx *gorm.DB, firstCondition condition.Condition[T], conditions ...condition.Condition[T]) *condition.Update[T] {
 	return condition.NewUpdate(
 		tx,
-		append(conditions, firstCondition)...,
+		pie.Unshift(conditions, firstCondition),
 	)
 }
