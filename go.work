@@ -4,4 +4,7 @@ use (
 	.
 	./cql-gen
 	./cql-gen/tests
+	./cql-lint
+	./cql-lint/pkg/analyzer/testdata
+	./cql-lint/pkg/analyzer/testdata/src/a
 )

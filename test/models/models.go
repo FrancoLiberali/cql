@@ -217,6 +217,8 @@ func (m ParentParent) Equal(other ParentParent) bool {
 type Parent1 struct {
 	model.UUIDModel
 
+	Name string
+
 	ParentParent   ParentParent
 	ParentParentID model.UUID
 }

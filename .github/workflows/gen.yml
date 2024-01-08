@@ -1,4 +1,4 @@
-name: cli
+name: gen
 on:
   push:
     branches:
@@ -42,8 +42,8 @@ jobs:
           go-version: '^1.18'
           cache: true
       - name: Run tests
-        run: go test ./cql-gen/tests -coverpkg=./cql-gen/... -coverprofile=coverage_cli.out -v
+        run: go test ./cql-gen/tests -coverpkg=./cql-gen/... -coverprofile=coverage_gen.out -v
       - uses: actions/upload-artifact@v3
         with:
-          name: coverage_cli
-          path: coverage_cli.out
+          name: coverage_gen
+          path: coverage_gen.out
