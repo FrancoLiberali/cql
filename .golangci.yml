@@ -226,6 +226,7 @@ issues:
         - gomnd
         - exhaustive
         - dupl
+        - goerr113
     - path: ^cmd/|^cql-gen/cmd/
       linters:
         - goerr113
