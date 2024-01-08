@@ -41,6 +41,7 @@ func testJoinedWithMainModel() {
 		conditions.Phone.Brand(
 			conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Value()),
 		),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
 	).Find()
 }
 
@@ -63,6 +64,7 @@ func testJoinedInsideNestedJoinConditionWithMainModel() {
 				conditions.ParentParent.Name.IsDynamic().Eq(conditions.Child.Name.Value()),
 			),
 		),
+		conditions.Child.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
 	).Find()
 }
 
@@ -74,6 +76,7 @@ func testJoinedInsideNestedJoinConditionWithPreviousJoin() {
 				conditions.ParentParent.Name.IsDynamic().Eq(conditions.Parent1.Name.Value()),
 			),
 		),
+		conditions.Child.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
 	).Find()
 }
 
@@ -84,6 +87,16 @@ func testJoinedWithJoinedWithCondition() {
 			conditions.Brand.Name.Is().Eq("asd"),
 		),
 		conditions.Phone.Name.IsDynamic().Eq(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
+	).Find()
+}
+
+func testJoinedWithJoinedWithoutCondition() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
 	).Find()
 }
 
@@ -92,6 +105,18 @@ func testJoinedWithJoinedWithPreload() {
 		db,
 		conditions.Phone.Brand().Preload(),
 		conditions.Phone.Name.IsDynamic().Eq(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
+	).Find()
+}
+
+func testJoinedWithJoinedWithConditionsWithPreload() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.Is().Eq("asd"),
+		).Preload(),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
 	).Find()
 }
 
@@ -102,5 +127,43 @@ func testNotJoinedWithJoinedWithConditionBefore() {
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq("asd"),
 		),
+	).Find()
+}
+
+func testJoinedWithDifferentRelationNameWithConditionsUsesConditionName() {
+	cql.Query[models.Bicycle](
+		db,
+		conditions.Bicycle.Owner(
+			conditions.Person.Name.Is().Eq("asd"),
+		),
+		conditions.Bicycle.Name.IsDynamic().Eq(conditions.Person.Name.Value()),
+		conditions.Bicycle.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
+	).Find()
+}
+
+func testJoinedWithDifferentRelationNameWithConditionsWithPreloadUsesConditionName() {
+	cql.Query[models.Bicycle](
+		db,
+		conditions.Bicycle.Owner(
+			conditions.Person.Name.Is().Eq("asd"),
+		).Preload(),
+		conditions.Bicycle.Name.IsDynamic().Eq(conditions.Person.Name.Value()),
+		conditions.Bicycle.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "conditions.City is not joined by the query"
+	).Find()
+}
+
+func testJoinedWithDifferentRelationNameWithoutConditionsGeneratesFalsePositive() {
+	cql.Query[models.Bicycle](
+		db,
+		conditions.Bicycle.Owner(),
+		conditions.Bicycle.Name.IsDynamic().Eq(conditions.Person.Name.Value()), // want "conditions.Person is not joined by the query"
+	).Find()
+}
+
+func testJoinedWithDifferentRelationNameWithoutConditionsWithPreloadGeneratesFalsePositive() {
+	cql.Query[models.Bicycle](
+		db,
+		conditions.Bicycle.Owner().Preload(),
+		conditions.Bicycle.Name.IsDynamic().Eq(conditions.Person.Name.Value()), // want "conditions.Person is not joined by the query"
 	).Find()
 }

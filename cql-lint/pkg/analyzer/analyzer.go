@@ -82,22 +82,30 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 func findErrorIsDynamic(positionsToReport []Position, models []string, conditions []ast.Expr) ([]Position, []string) {
 	for _, condition := range conditions {
-		// TODO puede haber problems con el orden de las condiciones
+		// TODO puede haber problems con el orden de las condiciones, ver testNotJoinedWithJoinedWithConditionBefore
 		conditionCall := condition.(*ast.CallExpr)
 		conditionSelector := conditionCall.Fun.(*ast.SelectorExpr)
 
+		if conditionSelector.Sel.Name == "Preload" {
+			conditionCall = conditionSelector.X.(*ast.CallExpr)
+			conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
+		}
+
 		joinCondition, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr)
+
 		if isJoinCondition {
-			models = addUnique(models, joinCondition.Sel.Name)
-			// TODO que pasa si el join adentro no tiene wheres -> intentar con el nombre de la relacion y sino bueno falso positivo
-			// func testJoinedWithJoinedWithoutCondition() {
-			// 	cql.Query[models.Phone](
-			// 		db,
-			// 		conditions.Phone.Brand(),
-			// 		conditions.Phone.Name.IsDynamic().Eq(conditions.Brand.Name.Value()),
-			// 	).Find()
-			// }
+			models = addUnique(models, joinCondition.Sel.Name) // conditions.Phone.Brand -> Phone
+
+			oldLen := len(models)
+
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+
+			if len(models) == oldLen {
+				// only add the joined model if no model was added inside the join
+				// this is because maybe the joined model is called different that the relation
+				// so we prioritize conditions.Brand.Name over conditions.Phone.Brand
+				models = addUnique(models, conditionSelector.Sel.Name) // conditions.Phone.Brand -> Brand
+			}
 		} else {
 			positionsToReport, models = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
 		}
@@ -114,6 +122,7 @@ func findErrorIsDynamicWhereCondition(
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
 	if isWhereCondition {
 		_, modelName, _ := getModel(whereCondition)
+
 		models = addUnique(models, modelName)
 
 		if getFieldIsMethodName(whereCondition) == "IsDynamic" {
