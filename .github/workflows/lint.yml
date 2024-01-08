@@ -1,0 +1,49 @@
+name: lint
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+    - cql-lint/**
+
+jobs:
+  check-style:
+    name: Code style
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: lint
+        uses: golangci/golangci-lint-action@v3
+        with:
+          working-directory: cql-lint
+          args: --config=../.golangci.yml
+          skip-cache: true
+          skip-pkg-cache: true
+          skip-build-cache: true
+
+  test:
+    name: Test
+    needs: [check-style]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-go@v3
+        with:
+          go-version: '^1.18'
+          cache: true
+      - name: Run tests
+        run: go test ./cql-lint/... -coverpkg=./cql-lint/... -coverprofile=coverage_lint.out -v
+      - uses: actions/upload-artifact@v3
+        with:
+          name: coverage_lint
+          path: coverage_lint.out
