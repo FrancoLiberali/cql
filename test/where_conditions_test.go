@@ -554,24 +554,3 @@ func (ts *WhereConditionsIntTestSuite) TestUnsafeCondition() {
 
 	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
 }
-
-func (ts *WhereConditionsIntTestSuite) TestEmptyConnectionConditionMakesNothing() {
-	match1 := ts.createProduct("match", 1, 0.0, true, nil)
-	match2 := ts.createProduct("match", 1, 0.0, true, nil)
-
-	entities, err := cql.Query[models.Product](
-		ts.db,
-		cql.And[models.Product](),
-	).Find()
-	ts.Require().NoError(err)
-
-	EqualList(&ts.Suite, []*models.Product{match1, match2}, entities)
-}
-
-func (ts *WhereConditionsIntTestSuite) TestEmptyContainerConditionReturnsError() {
-	_, err := cql.Query[models.Product](
-		ts.db,
-		cql.Not[models.Product](),
-	).Find()
-	ts.ErrorIs(err, cql.ErrEmptyConditions)
-}

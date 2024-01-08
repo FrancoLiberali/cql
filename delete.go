@@ -5,6 +5,7 @@ import (
 
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/elliotchance/pie/v2"
 )
 
 // Create a Delete to which the conditions are applied inside transaction tx.
@@ -16,6 +17,6 @@ import (
 func Delete[T model.Model](tx *gorm.DB, firstCondition condition.Condition[T], conditions ...condition.Condition[T]) *condition.Delete[T] {
 	return condition.NewDelete(
 		tx,
-		append(conditions, firstCondition)...,
+		pie.Unshift(conditions, firstCondition),
 	)
 }

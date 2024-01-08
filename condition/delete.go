@@ -61,7 +61,7 @@ func (deleteS *Delete[T]) Exec() (int64, error) {
 }
 
 // Create a Delete to which the conditions are applied inside transaction tx
-func NewDelete[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Delete[T] {
+func NewDelete[T model.Model](tx *gorm.DB, conditions []Condition[T]) *Delete[T] {
 	var err error
 
 	if len(conditions) == 0 {

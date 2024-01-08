@@ -64,7 +64,7 @@ func (condition connectionCondition[T]) affectsDeletedAt() bool {
 
 // Condition that connects multiple conditions.
 // Example: condition1 AND condition2
-func NewConnectionCondition[T model.Model](connector sql.Operator, conditions ...WhereCondition[T]) WhereCondition[T] {
+func NewConnectionCondition[T model.Model](connector sql.Operator, conditions []WhereCondition[T]) WhereCondition[T] {
 	return connectionCondition[T]{
 		Connector:  connector,
 		Conditions: conditions,

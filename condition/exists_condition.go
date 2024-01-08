@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/elliotchance/pie/v2"
 )
 
 // Condition that generates a WHERE EXISTS
@@ -12,6 +13,19 @@ type existsCondition[T1 model.Model, T2 model.Model] struct {
 	RelationField string
 	T1Field       string
 	T2Field       string
+}
+
+func newExistsCondition[T1 model.Model, T2 model.Model](
+	firstCondition WhereCondition[T2],
+	conditions []WhereCondition[T2],
+	relationField, t1Field, t2Field string,
+) existsCondition[T1, T2] {
+	return existsCondition[T1, T2]{
+		Conditions:    pie.Unshift(conditions, firstCondition),
+		RelationField: relationField,
+		T1Field:       t1Field,
+		T2Field:       t2Field,
+	}
 }
 
 //nolint:unused // is used
