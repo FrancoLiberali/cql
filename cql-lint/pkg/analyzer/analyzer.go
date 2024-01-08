@@ -123,9 +123,9 @@ func findForIndex(callExpr *ast.CallExpr, positionsToReport []Position) ([]Posit
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
 		if isSelector {
-			callExpr, isCall := selectorExpr.X.(*ast.CallExpr)
+			internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 			if isCall {
-				return findForIndex(callExpr, positionsToReport)
+				return findForIndex(internalCallExpr, positionsToReport)
 			}
 		}
 
