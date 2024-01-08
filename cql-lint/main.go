@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 
-	"github.com/FrancoLiberali/cql/cql-lint/pkg/analyzer"
 	"golang.org/x/tools/go/analysis/singlechecker"
+
+	"github.com/FrancoLiberali/cql/cql-lint/pkg/analyzer"
 )
 
 func main() {

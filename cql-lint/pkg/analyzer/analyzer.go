@@ -5,13 +5,13 @@ import (
 	"go/token"
 
 	"github.com/elliotchance/pie/v2"
+	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
-
-	"golang.org/x/tools/go/analysis"
 )
 
-// TODO ver version para no tener problemas entre el linter y el cql
+// TODO ver version para no tener problems entre el linter y el cql
+
 var Analyzer = &analysis.Analyzer{
 	Name:     "cql",
 	Doc:      "Checks that cql queries will not generate run-time errors.",
@@ -77,21 +77,18 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		)
 	}
 
-	return nil, nil
+	return nil, nil //nolint:nilnil // is necessary
 }
 
 func findErrorIsDynamic(positionsToReport []Position, models []string, conditions []ast.Expr) ([]Position, []string) {
-	addedToModels := false
-
 	for _, condition := range conditions {
-		// TODO puede haber problemas con el orden de las condiciones
+		// TODO puede haber problems con el orden de las condiciones
 		conditionCall := condition.(*ast.CallExpr)
 		conditionSelector := conditionCall.Fun.(*ast.SelectorExpr)
 
 		joinCondition, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr)
 		if isJoinCondition {
-			addedToModels = true
-			models = append(models, joinCondition.Sel.Name)
+			models = addUnique(models, joinCondition.Sel.Name)
 			// TODO que pasa si el join adentro no tiene wheres -> intentar con el nombre de la relacion y sino bueno falso positivo
 			// func testJoinedWithJoinedWithoutCondition() {
 			// 	cql.Query[models.Phone](
@@ -102,28 +99,43 @@ func findErrorIsDynamic(positionsToReport []Position, models []string, condition
 			// }
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
 		} else {
-			whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
-			if isWhereCondition {
-				if !addedToModels {
-					addedToModels = true
-					_, modelName, _ := getModel(whereCondition)
-					models = append(models, modelName)
-				}
+			positionsToReport, models = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+		}
+	}
 
-				if getFieldIsMethodName(whereCondition) == "IsDynamic" {
-					modelPkg, isDynamicModelName, modelPos := getModel(conditionCall.Args[0].(*ast.CallExpr))
-					if !pie.Contains(models, isDynamicModelName) {
-						positionsToReport = append(positionsToReport, Position{
-							Number: modelPos,
-							Model:  modelPkg + "." + isDynamicModelName,
-						})
-					}
-				}
+	return positionsToReport, models
+}
+
+func findErrorIsDynamicWhereCondition(
+	positionsToReport []Position, models []string,
+	conditionCall *ast.CallExpr,
+	conditionSelector *ast.SelectorExpr,
+) ([]Position, []string) {
+	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
+	if isWhereCondition {
+		_, modelName, _ := getModel(whereCondition)
+		models = addUnique(models, modelName)
+
+		if getFieldIsMethodName(whereCondition) == "IsDynamic" {
+			modelPkg, isDynamicModelName, modelPos := getModel(conditionCall.Args[0].(*ast.CallExpr))
+			if !pie.Contains(models, isDynamicModelName) {
+				positionsToReport = append(positionsToReport, Position{
+					Number: modelPos,
+					Model:  modelPkg + "." + isDynamicModelName,
+				})
 			}
 		}
 	}
 
 	return positionsToReport, models
+}
+
+func addUnique(list []string, elem string) []string {
+	if !pie.Contains(list, elem) {
+		return append(list, elem)
+	}
+
+	return list
 }
 
 func getFieldIsMethodName(whereCondition *ast.CallExpr) string {

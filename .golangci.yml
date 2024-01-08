@@ -227,6 +227,10 @@ issues:
         - gomnd
         - exhaustive
         - dupl
+    - path: ^pkg/analyzer/
+      linters:
+        - errcheck
+        - forcetypeassert
     # We need to use the deprecated module since the jsonpb replacement is not backwards compatible.
     - linters:
         - staticcheck
