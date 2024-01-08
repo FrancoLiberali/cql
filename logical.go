@@ -1,10 +1,11 @@
 package cql
 
 import (
+	"github.com/elliotchance/pie/v2"
+
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
 	"github.com/FrancoLiberali/cql/unsafe"
-	"github.com/elliotchance/pie/v2"
 )
 
 // Logical Operators

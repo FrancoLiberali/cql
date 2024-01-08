@@ -3,8 +3,9 @@ package condition
 import (
 	"fmt"
 
-	"github.com/FrancoLiberali/cql/model"
 	"github.com/elliotchance/pie/v2"
+
+	"github.com/FrancoLiberali/cql/model"
 )
 
 // Condition that generates a WHERE EXISTS
