@@ -42,7 +42,7 @@ func (condition containerCondition[T]) affectsDeletedAt() bool {
 
 // Condition that contains a internal condition.
 // Example: NOT (internal condition)
-func NewContainerCondition[T model.Model](prefix sql.Operator, conditions ...WhereCondition[T]) WhereCondition[T] {
+func NewContainerCondition[T model.Model](prefix sql.Operator, conditions []WhereCondition[T]) WhereCondition[T] {
 	if len(conditions) == 0 {
 		return newInvalidCondition[T](emptyConditionsError[T](prefix))
 	}

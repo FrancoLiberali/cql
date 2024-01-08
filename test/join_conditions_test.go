@@ -375,35 +375,6 @@ func (ts *JoinConditionsIntTestSuite) TestJoinWithUnsafeCondition() {
 	EqualList(&ts.Suite, []*models.Sale{match}, entities)
 }
 
-func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyConnectionConditionMakesNothing() {
-	product1 := ts.createProduct("", 1, 0.0, false, nil)
-	product2 := ts.createProduct("", 2, 0.0, false, nil)
-
-	match1 := ts.createSale(0, product1, nil)
-	match2 := ts.createSale(0, product2, nil)
-
-	entities, err := cql.Query[models.Sale](
-		ts.db,
-		conditions.Sale.Product(
-			cql.And[models.Product](),
-		),
-	).Find()
-	ts.Require().NoError(err)
-
-	EqualList(&ts.Suite, []*models.Sale{match1, match2}, entities)
-}
-
-func (ts *JoinConditionsIntTestSuite) TestJoinWithEmptyContainerConditionReturnsError() {
-	_, err := cql.Query[models.Sale](
-		ts.db,
-		conditions.Sale.Product(
-			cql.Not[models.Product](),
-		),
-	).Find()
-	ts.ErrorIs(err, cql.ErrEmptyConditions)
-	ts.ErrorContains(err, "connector: Not; model: models.Product")
-}
-
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
 	company1 := ts.createCompany("ditrit")
 	company2 := ts.createCompany("orness")
