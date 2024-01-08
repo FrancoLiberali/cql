@@ -1,11 +1,11 @@
 package cql
 
 import (
+	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
-	"github.com/elliotchance/pie/v2"
 )
 
 // Create a Delete to which the conditions are applied inside transaction tx.
