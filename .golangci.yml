@@ -48,7 +48,6 @@ linters:
     - structcheck # [deprecated, replaced by unused] finds unused struct fields
     - varcheck # [deprecated, replaced by unused] finds unused global variables and constants
   # can be util in the future for better errors
-    - goerr113 # [too strict] checks the errors handling expressions
     - wrapcheck # [too strict] checks that errors returned from external packages are wrapped
   fast: false
 
@@ -227,10 +226,14 @@ issues:
         - gomnd
         - exhaustive
         - dupl
+    - path: ^cmd/
+      linters:
+        - goerr113
     - path: ^pkg/analyzer/
       linters:
         - errcheck
         - forcetypeassert
+        - goerr113
     # We need to use the deprecated module since the jsonpb replacement is not backwards compatible.
     - linters:
         - staticcheck
