@@ -20,10 +20,11 @@ var Analyzer = &analysis.Analyzer{
 }
 
 var (
-	cqlMethods   = []string{"Query", "Update", "Delete"}
-	cqlOrder     = []string{"Descending", "Ascending"}
-	cqlSet       = []string{"SetMultiple"}
-	cqlSelectors = append(cqlOrder, cqlSet...)
+	cqlMethods     = []string{"Query", "Update", "Delete"}
+	cqlOrder       = []string{"Descending", "Ascending"}
+	cqlSetMultiple = "SetMultiple"
+	cqlSet         = "Set"
+	cqlSelectors   = append(cqlOrder, cqlSetMultiple, cqlSet)
 )
 
 type Position struct {
@@ -78,9 +79,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil //nolint:nilnil // is necessary
 }
 
-// TODO set dynamic
-
-// Finds errors in selector functions: Descending, Ascending, SetMultiple
+// Finds errors in selector functions: Descending, Ascending, SetMultiple, Set
 func findForSelector(callExpr *ast.CallExpr, positionsToReport []Position) []Position {
 	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
 
@@ -93,14 +92,25 @@ func findForSelector(callExpr *ast.CallExpr, positionsToReport []Position) []Pos
 	for _, arg := range callExpr.Args {
 		var model Model
 
-		if pie.Contains(cqlOrder, selectorExpr.Sel.Name) {
-			model = getModel(arg.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
-		} else {
-			// TODO tambien podria ser ser set dynamic que es distitno, hay que unificar para que ambos sean un solo llamado
-			model = getModel(arg.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
-		}
+		methodName := selectorExpr.Sel.Name
 
-		positionsToReport = addPositionsToReport(positionsToReport, models, model)
+		if pie.Contains(cqlOrder, methodName) {
+			model = getModel(arg.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+			positionsToReport = addPositionsToReport(positionsToReport, models, model)
+		} else {
+			argCallExpr := arg.(*ast.CallExpr)
+			setFunction := argCallExpr.Fun.(*ast.SelectorExpr).Sel.Name
+
+			if setFunction == "Dynamic" {
+				model = getModel(argCallExpr.Args[0].(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+				positionsToReport = addPositionsToReport(positionsToReport, models, model)
+			}
+
+			if methodName == cqlSetMultiple {
+				model = getModel(argCallExpr.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+				positionsToReport = addPositionsToReport(positionsToReport, models, model)
+			}
+		}
 	}
 
 	return positionsToReport
