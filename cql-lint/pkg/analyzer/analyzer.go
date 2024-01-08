@@ -144,7 +144,11 @@ func findForIndex(callExpr *ast.CallExpr, positionsToReport []Model) ([]Model, [
 		return positionsToReport, []string{}
 	}
 
-	models := []string{passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named).TypeArgs().At(0).(*types.Named).String()}
+	models := []string{
+		getFirstGenericType(
+			passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
+		),
+	}
 
 	positionsToReport, models = findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 
@@ -182,7 +186,15 @@ func findErrorIsDynamic(positionsToReport []Model, models []string, conditions [
 
 // conditions.Phone.Brand -> Brand (or its correct type if not the same)
 func getModelFromJoinCondition(conditionSelector *ast.SelectorExpr) string {
-	return passG.TypesInfo.Types[conditionSelector].Type.(*types.Signature).Params().At(0).Type().(*types.Slice).Elem().(*types.Named).TypeArgs().At(0).(*types.Named).String()
+	return getFirstGenericType(
+		passG.TypesInfo.Types[conditionSelector].Type.(*types.Signature).Params().At(0).Type().(*types.Slice).Elem().(*types.Named),
+	)
+}
+
+func getFirstGenericType(parent *types.Named) string {
+	return parent.TypeArgs().At(
+		0,
+	).(*types.Named).String()
 }
 
 func findErrorIsDynamicWhereCondition(
