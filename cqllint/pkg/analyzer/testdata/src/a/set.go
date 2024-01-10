@@ -28,7 +28,6 @@ func testSetDynamicMainModel() {
 		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
 		conditions.Brand.Name.Set().Dynamic(
-			// TODO verificar que no sea el mismo
 			conditions.Brand.Name.Value(),
 		),
 	)
@@ -39,13 +38,10 @@ func testSetDynamicMainModelMultipleTimes() {
 		db,
 		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		// TODO ver que no se repitan
 		conditions.Brand.Name.Set().Dynamic(
-			// TODO verificar que no sea el mismo
 			conditions.Brand.Name.Value(),
 		),
 		conditions.Brand.Name.Set().Dynamic(
-			// TODO verificar que no sea el mismo
 			conditions.Brand.Name.Value(),
 		),
 	)
@@ -57,7 +53,6 @@ func testSetDynamicJoinedModel() {
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		// TODO ver que no se repitan
 		conditions.Phone.Name.Set().Dynamic(conditions.Brand.Name.Value()),
 		conditions.Phone.Name.Set().Dynamic(conditions.Brand.Name.Value()),
 	)
@@ -71,7 +66,6 @@ func testSetDynamicNestedJoinedModel() {
 		),
 		conditions.Child.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		// TODO ver que no se repitan
 		conditions.Child.Name.Set().Dynamic(conditions.Parent1.Name.Value()),
 		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Value()),
 	)
@@ -107,7 +101,6 @@ func testSetMultipleMainModelMultipleTimes() {
 		db,
 		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
-		// TODO ver que no se repitan
 		conditions.Brand.Name.Set().Eq("asd"),
 		conditions.Brand.Name.Set().Eq("asd"),
 	)
