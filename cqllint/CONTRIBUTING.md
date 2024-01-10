@@ -1,17 +1,17 @@
-# Contribute to the development of cql-gen <!-- omit in toc -->
+# Contribute to the development of cqllint <!-- omit in toc -->
 
 - [Local compilation](#local-compilation)
 - [Tests](#tests)
 
 ## Local compilation
 
-You can make modifications to the cql-gen source code and compile it locally with:
+You can make modifications to the cqllint source code and compile it locally with:
 
 ```bash
 go build .
 ```
 
-You can then run the cql-gen executable directly or add a link in your $GOPATH to run it from a project:
+You can then run the cqllint executable directly or add it to your $GOPATH to run it from a project:
 
 ```bash
 go install .
@@ -24,5 +24,5 @@ We use the standard test suite in combination with [github.com/stretchr/testify]
 To run them, please run:
 
 ```sh
-make test
+go test ./...
 ```

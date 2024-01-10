@@ -11,7 +11,6 @@ var (
 	ErrJoinMustBeSelected     = condition.ErrJoinMustBeSelected
 
 	// conditions
-	ErrEmptyConditions     = condition.ErrEmptyConditions
 	ErrOnlyPreloadsAllowed = condition.ErrOnlyPreloadsAllowed
 
 	// crud
