@@ -12,4 +12,4 @@ Steps to release:
 - Improve the version number in `cql-gen/version/version.go` and `cqllint/version/version.go`.
 - Commit the modifications with the label `Release version X.Y.Z`.
 - Create a pull request on github for this branch into `main`.
-- Once the pull request validated and merged, tag the `main` branch with `vX.Y.Z`.
+- Once the pull request validated and merged, tag the `main` branch using `./create_tag.sh X.Y.Z`.
