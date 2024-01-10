@@ -154,14 +154,7 @@ func findForIndex(callExpr *ast.CallExpr, positionsToReport []Model) ([]Model, [
 		),
 	}
 
-	positionsToReport, models = findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
-
-	if len(models) == 0 {
-		// add method generic in case there where not conditions
-		models = append(models, indexExpr.Index.(*ast.SelectorExpr).Sel.Name)
-	}
-
-	return positionsToReport, models
+	return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 }
 
 func findErrorIsDynamic(positionsToReport []Model, models []string, conditions []ast.Expr) ([]Model, []string) {
