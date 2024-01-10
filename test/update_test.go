@@ -368,6 +368,20 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	ts.NotEqual(pixel.UpdatedAt.UnixMicro(), phoneReturned.UpdatedAt.UnixMicro())
 }
 
+func (ts *UpdateIntTestSuite) TestUpdateDynamicNotJoinedReturnsError() {
+	_, err := cql.Update[models.Phone](
+		ts.db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.Is().Eq("google"),
+		),
+	).Set(
+		conditions.Phone.Name.Set().Dynamic(conditions.City.Name.Value()),
+	)
+
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
+	ts.ErrorContains(err, "not concerned model: models.City; method: Set")
+}
+
 func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJoinedMoreThanOnce() {
 	_, err := cql.Update[models.Child](
 		ts.db,

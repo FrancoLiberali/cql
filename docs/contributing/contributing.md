@@ -6,10 +6,9 @@ Thank you for your interest in CQL! This document provides the guidelines for ho
 
 ### Issue types
 
-There are 3 types of issues:
+There are 2 types of issues:
 
 - Bug report: You've found a bug with the code, and want to report it, or create an issue to track the bug.
-- Discussion: You have something on your mind, which requires input form others in a discussion, before it eventually manifests as a proposal.
 - Feature request: Used for items that propose a new idea or functionality. This allows feedback from others before code is written.
 
 ### Before submitting
@@ -30,12 +29,12 @@ All contributions come through pull requests. To submit a proposed change, follo
 
 1. Make sure there's an issue (bug report or feature request) opened, which sets the expectations for the contribution you are about to make
 2. Assign yourself to the issue and add the `wip` tag
-3. Fork the [repo](https://github.com/FrancoLiberali/cql) and create a new [branch](#branch-naming-policy) from the issue
+3. Fork the [repo](https://github.com/FrancoLiberali/cql) and create a new branch respecting the [naming policy](#branch-naming-policy) from the issue
 4. Install the necessary [development environment](developing.md#environment)
 5. Create your change and the corresponding [tests](developing.md#tests)
 6. Update relevant documentation for the change in `docs/`
 7. If changes are necessary in [cql quickstart](https://github.com/FrancoLiberali/cql-quickstart) and [cql tutorial](https://github.com/FrancoLiberali/cql-tutorial), follow the same workflow there
-8. Open a PR (and add links to the example repos' PR if they exist)
+8. Open a PR (and add links to the other repos' PR if they exist)
 9. Wait for the CI process to finish and make sure all checks are green
 10. A maintainer of the project will be assigned
 
