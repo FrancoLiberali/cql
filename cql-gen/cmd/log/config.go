@@ -4,7 +4,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 
-	"github.com/FrancoLiberali/cql/cql-gen/cmd/version"
+	"github.com/FrancoLiberali/cql/version"
 )
 
 var Logger = log.WithField("version", version.Version)

@@ -5,7 +5,7 @@ import (
 
 	"golang.org/x/tools/go/analysis/analysistest"
 
-	"github.com/FrancoLiberali/cql/cql-lint/pkg/analyzer"
+	"github.com/FrancoLiberali/cql/cqllint/pkg/analyzer"
 )
 
 func TestAll(t *testing.T) {

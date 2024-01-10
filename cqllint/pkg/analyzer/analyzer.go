@@ -9,15 +9,19 @@ import (
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
+
+	"github.com/FrancoLiberali/cql/version"
 )
 
-// TODO ver version para no tener problems entre el linter y el cql
+var doc = "v" + version.Version + "\nChecks that cql queries will not generate run-time errors."
 
 var Analyzer = &analysis.Analyzer{
-	Name:     "cql",
-	Doc:      "Checks that cql queries will not generate run-time errors.",
+	Name:     "cqllint",
+	Doc:      doc,
+	URL:      "compiledquerylenguage.readthedocs.io",
 	Run:      run,
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
+	// Version:  cql.Version,
 }
 
 var (
