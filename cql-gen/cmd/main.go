@@ -14,7 +14,7 @@ import (
 	"golang.org/x/tools/go/packages"
 
 	"github.com/FrancoLiberali/cql/cql-gen/cmd/log"
-	"github.com/FrancoLiberali/cql/version"
+	"github.com/FrancoLiberali/cql/cql-gen/cmd/version"
 )
 
 var GenConditionsCmd = verdeter.BuildVerdeterCommand(verdeter.VerdeterConfig{

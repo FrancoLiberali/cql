@@ -10,7 +10,7 @@ import (
 	"golang.org/x/tools/go/analysis/passes/inspect"
 	"golang.org/x/tools/go/ast/inspector"
 
-	"github.com/FrancoLiberali/cql/version"
+	"github.com/FrancoLiberali/cql/cqllint/pkg/version"
 )
 
 var doc = "v" + version.Version + "\nChecks that cql queries will not generate run-time errors."

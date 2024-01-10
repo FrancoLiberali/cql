@@ -3,7 +3,6 @@ module github.com/FrancoLiberali/cql/cql-gen
 go 1.18
 
 require (
-	github.com/FrancoLiberali/cql v0.0.1
 	github.com/dave/jennifer v1.7.0
 	github.com/ditrit/verdeter v0.4.0
 	github.com/elliotchance/pie/v2 v2.8.0
@@ -39,5 +38,3 @@ require (
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
-
-replace github.com/FrancoLiberali/cql => ./..
