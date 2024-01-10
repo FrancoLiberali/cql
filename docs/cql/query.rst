@@ -56,56 +56,7 @@ It is so named because the conditions will verify at compile time that the query
 
 These conditions are objects of type Condition that contain the 
 necessary information to perform the queries in a safe way. 
-They are generated from the definition of your models using cql-gen.
-
-Conditions generation
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The generation of conditions is done with cql-gen. For this, we need to install cql-gen:
-
-.. code-block:: bash
-
-    go install github.com/FrancoLiberali/cql/cql-gen@latest
-
-Then, inside our project we will have to create a package called conditions 
-(or another name if you wish) and inside it a file with the following content:
-
-.. code-block:: go
-
-    package conditions
-
-    //go:generate cql-gen ../models_path_1 ../models_path_2
-
-where ../models_path_1 ../models_path_2 are the relative paths between the package conditions 
-and the packages containing the definition of your models (can be only one).
-
-Now, from the root of your project you can execute:
-
-.. code-block:: bash
-
-  go generate ./...
-
-and the conditions for each of your models will be created in the conditions package.
-
-Use of the conditions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-After performing the conditions generation, 
-your conditions package will have a replica of your models package, 
-i.e. if, for example, the type models.MyModel is part of your models, 
-the variable conditions.MyModel will be in the conditions package. 
-This variable is called the condition model and it has:
-
-- An attribute for each attribute of your original model with the same name 
-  (if models.MyModel.Name exists, then conditions.MyModel.Name is generated), 
-  that allows to use that attribute in queries creating operations for that attribute in your queries.
-- A method for each relation of your original model with the same name 
-  (if models.MyModel.MyOtherModel exists, then conditions.MyModel.MyOtherModel() is generated), 
-  which will allow you to perform joins in your queries.
-- Methods for :doc:`/cql/preloading`.
-
-Then, combining these conditions, the Connection Conditions (cql.And, cql.Or, cql.Not) 
-you will be able to make all the queries you need in a safe way.
+They are generated from the definition of your models using :ref:`cql-gen <cql/cqlgen:Conditions generation>`.
 
 Examples
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

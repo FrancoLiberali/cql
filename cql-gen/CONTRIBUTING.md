@@ -14,7 +14,7 @@ go build .
 You can then run the cql-gen executable directly or add a link in your $GOPATH to run it from a project:
 
 ```bash
-ln -sf cql-gen $GOPATH/bin/cql-gen
+go install .
 ```
 
 ## Tests

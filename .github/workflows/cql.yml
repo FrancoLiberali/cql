@@ -9,6 +9,7 @@ on:
 permissions:
   id-token: write
   contents: read
+  actions: read
   checks: write
 
 jobs:
@@ -115,13 +116,20 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           name: coverage
-      - name: Download cli line coverage report
-        id: download-artifact
+      - name: Download gen line coverage report
+        id: download-gen-artifact
         uses: dawidd6/action-download-artifact@v3
         with:
-          workflow: cli.yml
+          workflow: gen.yml
           workflow_conclusion: success
-          name: coverage_cli
+          name: coverage_gen
+      - name: Download lint line coverage report
+        id: download-lint-artifact
+        uses: dawidd6/action-download-artifact@v3
+        with:
+          workflow: lint.yml
+          workflow_conclusion: success
+          name: coverage_lint
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:

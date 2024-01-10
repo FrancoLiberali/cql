@@ -230,6 +230,11 @@ issues:
     - path: ^cmd/|^cql-gen/cmd/
       linters:
         - goerr113
+    - path: ^pkg/analyzer/|^cqllint/pkg/analyzer/
+      linters:
+        - errcheck
+        - forcetypeassert
+        - goerr113
     # We need to use the deprecated module since the jsonpb replacement is not backwards compatible.
     - linters:
         - staticcheck
