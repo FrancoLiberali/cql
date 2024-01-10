@@ -24,10 +24,6 @@ For simply installing it, use:
 
     go install github.com/FrancoLiberali/cql/cqllint@latest
 
-.. note::
-
-    At the moment, only the error cql.ErrFieldModelNotConcerned is detected.
-
 .. warning::
 
     The version of cqllint used must be the same as the version of cql. 
@@ -43,7 +39,7 @@ cqllint can be used independently by running:
 
     cqllint ./...
 
-o using `go vet`:
+or using `go vet`:
 
 .. code-block:: bash
 
