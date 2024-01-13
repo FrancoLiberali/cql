@@ -155,7 +155,7 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 			if comparedFieldName == fieldName {
 				passG.Reportf(
 					comparedField.Sel.NamePos,
-					"%s is set to the same value",
+					"%s is set to itself",
 					comparedFieldName,
 				)
 			}

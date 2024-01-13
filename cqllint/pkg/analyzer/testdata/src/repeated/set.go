@@ -71,6 +71,6 @@ func testSetDynamicSameValue() {
 		db,
 		conditions.Product.Int.Is().Eq(0),
 	).Set(
-		conditions.Product.Int.Set().Dynamic(conditions.Product.Int.Value()), // want "conditions.Product.Int is set to the same value"
+		conditions.Product.Int.Set().Dynamic(conditions.Product.Int.Value()), // want "conditions.Product.Int is set to itself"
 	)
 }

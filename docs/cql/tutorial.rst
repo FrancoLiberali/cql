@@ -178,8 +178,7 @@ We can run this tutorial with `make tutorial_4` and we will obtain the following
 
 As you can see, again we get only the Paris in France. 
 
-In this tutorial we have used a condition that performs a join, 
-for more details you can read :ref:`cql/query:Use of the conditions`.
+In this tutorial we have used a condition that performs a join.
 
 Tutorial 5: preloading
 -------------------------------
