@@ -395,7 +395,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicNotJoinedReturnsError() {
 	ts.ErrorContains(err, "not concerned model: models.City; method: Set")
 }
 
-func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJoinedMoreThanOnce() {
+func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutAppearanceReturnsErrorIfJoinedMoreThanOnce() {
 	_, err := cql.Update[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
@@ -412,7 +412,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJo
 	ts.ErrorContains(err, "model: models.ParentParent; method: Set")
 }
 
-func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
+func (ts *UpdateIntTestSuite) TestUpdateDynamicWithAppearance() {
 	parentParent := &models.ParentParent{Name: "franco"}
 	parent1 := &models.Parent1{ParentParent: *parentParent}
 	parent2 := &models.Parent2{ParentParent: *parentParent}
@@ -429,7 +429,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Value(), 0),
+		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Appearance(0).Value()),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
@@ -681,6 +681,70 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoin
 	)
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.Brand; method: Set")
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableJoinedMultipleTimesAndNoAppearance() {
+	// update join only supported for mysql
+	if getDBDialector() != cqlSQL.MySQL {
+		return
+	}
+
+	_, err := cql.Update[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).SetMultiple(
+		conditions.ParentParent.Name.Set().Dynamic(conditions.Child.Name.Value()),
+	)
+
+	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
+	ts.ErrorContains(err, "model: models.ParentParent; method: SetMultiple")
+}
+
+func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesTableJoinedMultipleTimesAndAppearance() {
+	// update join only supported for mysql
+	if getDBDialector() != cqlSQL.MySQL {
+		return
+	}
+
+	parentParent1 := &models.ParentParent{Name: "franco"}
+	parentParent2 := &models.ParentParent{Name: "ruben"}
+	err := ts.db.Create(parentParent2).Error
+	ts.Require().NoError(err)
+
+	parent1 := &models.Parent1{ParentParent: *parentParent1}
+	parent2 := &models.Parent2{ParentParent: *parentParent2}
+	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "not_franco"}
+	err = ts.db.Create(child).Error
+	ts.Require().NoError(err)
+
+	updated, err := cql.Update[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).SetMultiple(
+		conditions.ParentParent.Name.Appearance(1).Set().Dynamic(conditions.Child.Name.Value()),
+	)
+
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	parentParentReturned, err := cql.Query[models.ParentParent](
+		ts.db,
+		conditions.ParentParent.Name.Is().Eq("not_franco"),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(parentParent2.ID, parentParentReturned.ID)
+	ts.NotEqual(parentParent2.UpdatedAt.UnixMicro(), parentParentReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {

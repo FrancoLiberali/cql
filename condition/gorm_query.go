@@ -26,7 +26,7 @@ type GormQuery struct {
 //
 // if descending is true, the ordering is in descending direction.
 func (query *GormQuery) Order(field IField, descending bool) error {
-	table, err := query.GetModelTable(field, field.getAppearance())
+	table, err := query.GetModelTable(field)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func (query *GormQuery) GetTables(modelType reflect.Type) []Table {
 
 const undefinedAppearance = -1
 
-func (query *GormQuery) GetModelTable(field IField, appearance int) (Table, error) {
+func (query *GormQuery) GetModelTable(field IField) (Table, error) {
 	modelTables := query.GetTables(field.getModelType())
 	if modelTables == nil {
 		return Table{}, fieldModelNotConcernedError(field)
@@ -177,6 +177,8 @@ func (query *GormQuery) GetModelTable(field IField, appearance int) (Table, erro
 	if len(modelTables) == 1 {
 		return modelTables[0], nil
 	}
+
+	appearance := field.getAppearance()
 
 	if appearance == undefinedAppearance {
 		return Table{}, appearanceMustBeSelectedError(field)
@@ -350,7 +352,7 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 	for _, set := range sets {
 		field := set.getField()
 
-		table, err := query.GetModelTable(field, 0)
+		table, err := query.GetModelTable(field)
 		if err != nil {
 			return nil, err
 		}
@@ -378,7 +380,7 @@ func getUpdateValue(query *GormQuery, set ISet) (any, error) {
 	value := set.getValue()
 
 	if iValue, isIValue := value.(IValue); isIValue {
-		table, err := query.GetModelTable(iValue.getField(), set.getJoinNumber())
+		table, err := query.GetModelTable(iValue.getField())
 		if err != nil {
 			return nil, err
 		}

@@ -58,7 +58,7 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 			// and get the alias of the table of this model.
 			field := iValue.getField()
 
-			modelTable, err := getModelTable(query, field, field.getAppearance(), sqlOperator)
+			modelTable, err := getModelTable(query, field, sqlOperator)
 			if err != nil {
 				return "", nil, err
 			}
@@ -84,8 +84,8 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 	return operationString, values, nil
 }
 
-func getModelTable(query *GormQuery, field IField, appearance int, sqlOperator sql.Operator) (Table, error) {
-	table, err := query.GetModelTable(field, appearance)
+func getModelTable(query *GormQuery, field IField, sqlOperator sql.Operator) (Table, error) {
+	table, err := query.GetModelTable(field)
 	if err != nil {
 		return Table{}, operatorError(err, sqlOperator)
 	}
