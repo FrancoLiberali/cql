@@ -23,12 +23,12 @@ func testSetDynamicNotJoinedInDifferentLines() {
 }
 
 func testSetDynamicMainModel() {
-	cql.Update[models.Brand](
+	cql.Update[models.Product](
 		db,
-		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Product.String.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		conditions.Brand.Name.Set().Dynamic(
-			conditions.Brand.Name.Value(),
+		conditions.Product.Int.Set().Dynamic(
+			conditions.Product.IntPointer.Value(),
 		),
 	)
 }
@@ -39,10 +39,10 @@ func testSetDynamicMainModelMultipleTimes() {
 		conditions.Product.String.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
 		conditions.Product.String.Set().Dynamic(
-			conditions.Product.String.Value(),
+			conditions.Product.String2.Value(),
 		),
 		conditions.Product.Int.Set().Dynamic(
-			conditions.Product.Int.Value(),
+			conditions.Product.IntPointer.Value(),
 		),
 	)
 }

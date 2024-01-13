@@ -65,3 +65,12 @@ func testSetMultipleNotRepeated() {
 		conditions.Product.Int.Set().Eq(2),
 	)
 }
+
+func testSetDynamicSameValue() {
+	cql.Update[models.Product](
+		db,
+		conditions.Product.Int.Is().Eq(0),
+	).Set(
+		conditions.Product.Int.Set().Dynamic(conditions.Product.Int.Value()), // want "conditions.Product.Int is set to the same value"
+	)
+}

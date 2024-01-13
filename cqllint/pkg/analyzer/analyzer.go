@@ -29,6 +29,7 @@ var (
 	cqlSetMultiple = "SetMultiple"
 	cqlSets        = []string{cqlSetMultiple, "Set"}
 	cqlSelectors   = append(cqlOrder, cqlSets...)
+	dynamicMethod  = "Dynamic"
 )
 
 type Model struct {
@@ -110,7 +111,7 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 
 			setFunction := argCallExpr.Fun.(*ast.SelectorExpr).Sel.Name
 
-			if setFunction == "Dynamic" {
+			if setFunction == dynamicMethod {
 				model = getModel(argCallExpr.Args[0].(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
 				positionsToReport = addPositionsToReport(positionsToReport, models, model)
 			}
@@ -133,10 +134,11 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 	fields := map[string][]token.Pos{}
 
 	for _, arg := range call.Args {
-		condition := arg.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
-		conditionModel := condition.X.(*ast.SelectorExpr)
+		argCall := arg.(*ast.CallExpr)
+		argSelector := argCall.Fun.(*ast.SelectorExpr)
+		condition := argSelector.X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
 
-		fieldName := conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
+		fieldName := getFieldName(condition)
 		fieldPos := condition.Sel.NamePos
 
 		_, isPresent := fields[fieldName]
@@ -144,6 +146,19 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 			fields[fieldName] = []token.Pos{fieldPos}
 		} else {
 			fields[fieldName] = append(fields[fieldName], fieldPos)
+		}
+
+		if argSelector.Sel.Name == dynamicMethod && len(argCall.Args) == 1 {
+			comparedField := argCall.Args[0].(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
+			comparedFieldName := getFieldName(comparedField)
+
+			if comparedFieldName == fieldName {
+				passG.Reportf(
+					comparedField.Sel.NamePos,
+					"%s is set to the same value",
+					comparedFieldName,
+				)
+			}
 		}
 	}
 
@@ -158,6 +173,12 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 			}
 		}
 	}
+}
+
+func getFieldName(condition *ast.SelectorExpr) string {
+	conditionModel := condition.X.(*ast.SelectorExpr)
+
+	return conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
 }
 
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete
