@@ -6,5 +6,6 @@ use (
 	./cql-gen/tests
 	./cqllint
 	./cqllint/pkg/analyzer/testdata
-	./cqllint/pkg/analyzer/testdata/src/a
+	./cqllint/pkg/analyzer/testdata/src/not_concerned
+	./cqllint/pkg/analyzer/testdata/src/repeated
 )

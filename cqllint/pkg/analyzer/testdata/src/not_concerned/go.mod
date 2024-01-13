@@ -1,4 +1,4 @@
-module github.com/FrancoLiberali/cql/cqllint/pkg/analyzer/testdata/src/a
+module github.com/FrancoLiberali/cql/cqllint/pkg/analyzer/testdata/src/not_concerned
 
 go 1.18
 

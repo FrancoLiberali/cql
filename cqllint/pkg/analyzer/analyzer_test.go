@@ -8,7 +8,12 @@ import (
 	"github.com/FrancoLiberali/cql/cqllint/pkg/analyzer"
 )
 
-func TestAll(t *testing.T) {
+func TestErrNotConcerned(t *testing.T) {
 	testdata := analysistest.TestData()
-	analysistest.Run(t, testdata, analyzer.Analyzer, "a")
+	analysistest.Run(t, testdata, analyzer.Analyzer, "not_concerned")
+}
+
+func TestErrRepeated(t *testing.T) {
+	testdata := analysistest.TestData()
+	analysistest.Run(t, testdata, analyzer.Analyzer, "repeated")
 }

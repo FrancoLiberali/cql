@@ -191,6 +191,7 @@ there are still some possible cases that generate the following run-time errors:
   to the rest of the query (not joined).
 - cql.ErrJoinMustBeSelected: generated when you try to use a model that is included 
   (joined) more than once in the query without selecting which one you want to use (see :ref:`cql/advanced_query:select join`).
+- cql.ErrFieldIsRepeated **(1)**: generated when a field is repeated inside a Set call (see :doc:`/cql/update`).
 - cql.ErrOnlyPreloadsAllowed: generated when trying to use conditions within a preload of collections (see :ref:`cql/advanced_query:collections`).
 - cql.ErrUnsupportedByDatabase: generated when an attempt is made to use a method or function that is not supported by the database engine used.
 - cql.ErrOrderByMustBeCalled: generated when in MySQL you try to do a delete/update with Limit but without using OrderBy.

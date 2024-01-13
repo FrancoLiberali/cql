@@ -362,6 +362,11 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 			return nil, err
 		}
 
+		_, fieldAlreadyPresent := tables[field]
+		if fieldAlreadyPresent {
+			return nil, fieldIsRepeatedError(field)
+		}
+
 		tables[field] = TableAndValue{
 			table: table,
 			value: updateValue,
