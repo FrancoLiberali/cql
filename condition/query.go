@@ -12,21 +12,19 @@ type Query[T model.Model] struct {
 }
 
 // Ascending specify an ascending order when retrieving models from database
-// joinNumber can be used to select the join in case the field is joined more than once
-func (query *Query[T]) Ascending(field IField, joinNumber ...uint) *Query[T] {
-	return query.order(field, false, joinNumber)
+func (query *Query[T]) Ascending(field IField) *Query[T] {
+	return query.order(field, false)
 }
 
 // Descending specify a descending order when retrieving models from database
-// joinNumber can be used to select the join in case the field is joined more than once
-func (query *Query[T]) Descending(field IField, joinNumber ...uint) *Query[T] {
-	return query.order(field, true, joinNumber)
+func (query *Query[T]) Descending(field IField) *Query[T] {
+	return query.order(field, true)
 }
 
 // Order specify order when retrieving models from database
 // if descending is true, the ordering is in descending direction
-func (query *Query[T]) order(field IField, descending bool, joinNumberList []uint) *Query[T] {
-	err := query.gormQuery.Order(field, descending, GetJoinNumber(joinNumberList))
+func (query *Query[T]) order(field IField, descending bool) *Query[T] {
+	err := query.gormQuery.Order(field, descending)
 	if err != nil {
 		methodName := "Ascending"
 		if descending {

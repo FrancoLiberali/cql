@@ -11,9 +11,9 @@ import (
 var (
 	// query
 
-	ErrFieldModelNotConcerned = errors.New("field's model is not concerned by the query (not joined)")
-	ErrJoinMustBeSelected     = errors.New("field's model is joined more than once, select which one you want to use")
-	ErrFieldIsRepeated        = errors.New("field is repeated")
+	ErrFieldModelNotConcerned   = errors.New("field's model is not concerned by the query (not joined)")
+	ErrAppearanceMustBeSelected = errors.New("field's model appears more than once, select which one you want to use")
+	ErrFieldIsRepeated          = errors.New("field is repeated")
 
 	// conditions
 
@@ -45,9 +45,9 @@ func fieldModelNotConcernedError(field IField) error {
 	)
 }
 
-func joinMustBeSelectedError(field IField) error {
-	return fmt.Errorf("%w; joined multiple times model: %s",
-		ErrJoinMustBeSelected,
+func appearanceMustBeSelectedError(field IField) error {
+	return fmt.Errorf("%w; model: %s",
+		ErrAppearanceMustBeSelected,
 		field.getModelType(),
 	)
 }

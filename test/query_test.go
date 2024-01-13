@@ -228,7 +228,7 @@ func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsNotConcerned() {
 	ts.ErrorContains(err, "not concerned model: models.Seller; method: Descending")
 }
 
-func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAndJoinIsNotSelected() {
+func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAndAppearanceIsNotSelected() {
 	_, err := cql.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
@@ -238,11 +238,11 @@ func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAnd
 			conditions.Parent2.ParentParent(),
 		),
 	).Descending(conditions.ParentParent.ID).Find()
-	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
-	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; method: Descending")
+	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
+	ts.ErrorContains(err, "model: models.ParentParent; method: Descending")
 }
 
-func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndJoinIsSelected() {
+func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndAppearanceIsSelected() {
 	parentParent1 := &models.ParentParent{Name: "a"}
 	parent11 := &models.Parent1{ParentParent: *parentParent1}
 	parent12 := &models.Parent2{ParentParent: *parentParent1}
@@ -265,7 +265,7 @@ func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndJoinIsS
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-	).Ascending(conditions.ParentParent.Name, 0).Find()
+	).Ascending(conditions.ParentParent.Name.Appearance(0)).Find()
 	ts.Require().NoError(err)
 
 	ts.Len(children, 2)

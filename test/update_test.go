@@ -408,8 +408,8 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutJoinNumberReturnsErrorIfJo
 		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Value()),
 	)
 
-	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
-	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; method: Set")
+	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
+	ts.ErrorContains(err, "model: models.ParentParent; method: Set")
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateDynamicWithJoinNumber() {

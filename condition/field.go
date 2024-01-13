@@ -11,12 +11,15 @@ type IField interface {
 	fieldName() string
 	columnSQL(query *GormQuery, table Table) string
 	getModelType() reflect.Type
+	getAppearance() int
 }
 
 type Field[TModel model.Model, TAttribute any] struct {
-	column       string
-	name         string
-	columnPrefix string
+	column             string
+	name               string
+	columnPrefix       string
+	appearance         uint
+	appearanceSelected bool
 }
 
 // Is allows creating conditions that include the field and a static value
@@ -39,6 +42,27 @@ func (field Field[TModel, TAttribute]) IsUnsafe() UnsafeFieldIs[TModel, TAttribu
 // Value allows using the value of the field inside dynamic conditions.
 func (field Field[TModel, TAttribute]) Value() *FieldValue[TModel, TAttribute] {
 	return NewFieldValue(field)
+}
+
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (field Field[TModel, TAttribute]) Appearance(number uint) Field[TModel, TAttribute] {
+	newField := NewField[TModel, TAttribute](
+		field.name, field.column, field.columnPrefix,
+	)
+
+	newField.appearanceSelected = true
+	newField.appearance = number
+
+	return newField
+}
+
+func (field Field[TModel, TAttribute]) getAppearance() int {
+	if !field.appearanceSelected {
+		return undefinedAppearance
+	}
+
+	return int(field.appearance)
 }
 
 func (field Field[TModel, TAttribute]) getModelType() reflect.Type {

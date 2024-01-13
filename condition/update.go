@@ -47,22 +47,18 @@ func (update *Update[T]) unsafeSet(sets []ISet) (int64, error) {
 
 // Ascending specify an ascending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (update *Update[T]) Ascending(field IField, joinNumber ...uint) *Update[T] {
-	update.OrderLimitReturning.Ascending(field, joinNumber...)
+func (update *Update[T]) Ascending(field IField) *Update[T] {
+	update.OrderLimitReturning.Ascending(field)
 
 	return update
 }
 
 // Descending specify a descending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (update *Update[T]) Descending(field IField, joinNumber ...uint) *Update[T] {
-	update.OrderLimitReturning.Descending(field, joinNumber...)
+func (update *Update[T]) Descending(field IField) *Update[T] {
+	update.OrderLimitReturning.Descending(field)
 
 	return update
 }

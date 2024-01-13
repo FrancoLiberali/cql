@@ -25,10 +25,8 @@ type GormQuery struct {
 // Order specify order when retrieving models from database.
 //
 // if descending is true, the ordering is in descending direction.
-//
-// joinNumber can be used to select the join in case the field is joined more than once.
-func (query *GormQuery) Order(field IField, descending bool, joinNumber int) error {
-	table, err := query.GetModelTable(field, joinNumber)
+func (query *GormQuery) Order(field IField, descending bool) error {
+	table, err := query.GetModelTable(field, field.getAppearance())
 	if err != nil {
 		return err
 	}
@@ -168,9 +166,9 @@ func (query *GormQuery) GetTables(modelType reflect.Type) []Table {
 	return tableList
 }
 
-const UndefinedJoinNumber = -1
+const undefinedAppearance = -1
 
-func (query *GormQuery) GetModelTable(field IField, joinNumber int) (Table, error) {
+func (query *GormQuery) GetModelTable(field IField, appearance int) (Table, error) {
 	modelTables := query.GetTables(field.getModelType())
 	if modelTables == nil {
 		return Table{}, fieldModelNotConcernedError(field)
@@ -180,11 +178,11 @@ func (query *GormQuery) GetModelTable(field IField, joinNumber int) (Table, erro
 		return modelTables[0], nil
 	}
 
-	if joinNumber == UndefinedJoinNumber {
-		return Table{}, joinMustBeSelectedError(field)
+	if appearance == undefinedAppearance {
+		return Table{}, appearanceMustBeSelectedError(field)
 	}
 
-	return modelTables[joinNumber], nil
+	return modelTables[appearance], nil
 }
 
 func (query GormQuery) ColumnName(table Table, fieldName string) string {
@@ -443,7 +441,7 @@ func (query *GormQuery) Delete() (int64, error) {
 // from a list of uint, return the first or UndefinedJoinNumber in case the list is empty
 func GetJoinNumber(joinNumberList []uint) int {
 	if len(joinNumberList) == 0 {
-		return UndefinedJoinNumber
+		return undefinedAppearance
 	}
 
 	return int(joinNumberList[0])

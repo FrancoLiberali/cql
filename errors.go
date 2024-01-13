@@ -8,9 +8,9 @@ import (
 var (
 	// query
 
-	ErrFieldModelNotConcerned = condition.ErrFieldModelNotConcerned
-	ErrJoinMustBeSelected     = condition.ErrJoinMustBeSelected
-	ErrFieldIsRepeated        = condition.ErrFieldIsRepeated
+	ErrFieldModelNotConcerned   = condition.ErrFieldModelNotConcerned
+	ErrAppearanceMustBeSelected = condition.ErrAppearanceMustBeSelected
+	ErrFieldIsRepeated          = condition.ErrFieldIsRepeated
 
 	// crud
 
