@@ -10,19 +10,28 @@ import (
 
 var (
 	// query
+
 	ErrFieldModelNotConcerned = errors.New("field's model is not concerned by the query (not joined)")
 	ErrJoinMustBeSelected     = errors.New("field's model is joined more than once, select which one you want to use")
+	ErrFieldIsRepeated        = errors.New("field is repeated")
 
 	// conditions
-	ErrEmptyConditions     = errors.New("at least one condition is required")
-	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
+
+	ErrEmptyConditions = errors.New("at least one condition is required")
 
 	// crud
+
 	ErrMoreThanOneObjectFound = errors.New("found more that one object that meet the requested conditions")
 	ErrObjectNotFound         = errors.New("no object exists that meets the requested conditions")
 
+	// database
+
 	ErrUnsupportedByDatabase = errors.New("method not supported by database")
 	ErrOrderByMustBeCalled   = errors.New("order by must be called before limit in an update statement")
+
+	// preload
+
+	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
 )
 
 func methodError(err error, method string) error {
@@ -40,6 +49,14 @@ func joinMustBeSelectedError(field IField) error {
 	return fmt.Errorf("%w; joined multiple times model: %s",
 		ErrJoinMustBeSelected,
 		field.getModelType(),
+	)
+}
+
+func fieldIsRepeatedError(field IField) error {
+	return fmt.Errorf("%w; field: %s.%s",
+		ErrFieldIsRepeated,
+		field.getModelType(),
+		field.fieldName(),
 	)
 }
 

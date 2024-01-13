@@ -7,20 +7,23 @@ import (
 
 var (
 	// query
+
 	ErrFieldModelNotConcerned = condition.ErrFieldModelNotConcerned
 	ErrJoinMustBeSelected     = condition.ErrJoinMustBeSelected
-
-	// conditions
-	ErrOnlyPreloadsAllowed = condition.ErrOnlyPreloadsAllowed
+	ErrFieldIsRepeated        = condition.ErrFieldIsRepeated
 
 	// crud
+
 	ErrMoreThanOneObjectFound = condition.ErrMoreThanOneObjectFound
 	ErrObjectNotFound         = condition.ErrObjectNotFound
 
 	// database
+
 	ErrUnsupportedByDatabase = condition.ErrUnsupportedByDatabase
 	ErrOrderByMustBeCalled   = condition.ErrOrderByMustBeCalled
 
 	// preload
-	ErrRelationNotLoaded = preload.ErrRelationNotLoaded
+
+	ErrOnlyPreloadsAllowed = condition.ErrOnlyPreloadsAllowed
+	ErrRelationNotLoaded   = preload.ErrRelationNotLoaded
 )

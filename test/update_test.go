@@ -135,6 +135,19 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
 
+func (ts *UpdateIntTestSuite) TestUpdateSameFieldTwiceReturnsError() {
+	_, err := cql.Update[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(0),
+	).Set(
+		conditions.Product.Int.Set().Eq(1),
+		conditions.Product.Int.Set().Eq(2),
+	)
+	ts.ErrorIs(err, cql.ErrFieldIsRepeated)
+	ts.ErrorContains(err, "method: Set")
+	ts.ErrorContains(err, "field: models.Product.Int")
+}
+
 func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 	brand1 := ts.createBrand("google")
 	brand2 := ts.createBrand("apple")

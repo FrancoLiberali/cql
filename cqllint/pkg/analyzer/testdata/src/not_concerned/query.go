@@ -1,4 +1,4 @@
-package a
+package not_concerned
 
 import (
 	"gorm.io/gorm"

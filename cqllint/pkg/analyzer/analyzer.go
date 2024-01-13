@@ -21,15 +21,14 @@ var Analyzer = &analysis.Analyzer{
 	URL:      "compiledquerylenguage.readthedocs.io",
 	Run:      run,
 	Requires: []*analysis.Analyzer{inspect.Analyzer},
-	// Version:  cql.Version,
 }
 
 var (
 	cqlMethods     = []string{"Query", "Update", "Delete"}
 	cqlOrder       = []string{"Descending", "Ascending"}
 	cqlSetMultiple = "SetMultiple"
-	cqlSet         = "Set"
-	cqlSelectors   = append(cqlOrder, cqlSetMultiple, cqlSet)
+	cqlSets        = []string{cqlSetMultiple, "Set"}
+	cqlSelectors   = append(cqlOrder, cqlSets...)
 )
 
 type Model struct {
@@ -66,7 +65,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		if isSelector {
 			positionsToReport = findForSelector(callExpr, positionsToReport)
 		} else {
-			positionsToReport, _ = findForIndex(callExpr, positionsToReport)
+			positionsToReport, _ = findNotConcernedForIndex(callExpr, positionsToReport)
 		}
 	})
 
@@ -81,7 +80,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	return nil, nil //nolint:nilnil // is necessary
 }
 
-// Finds errors in selector functions: Descending, Ascending, SetMultiple, Set
+// Finds NotConcerned and Repeated errors in selector functions: Descending, Ascending, SetMultiple, Set
 func findForSelector(callExpr *ast.CallExpr, positionsToReport []Model) []Model {
 	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
 
@@ -89,7 +88,14 @@ func findForSelector(callExpr *ast.CallExpr, positionsToReport []Model) []Model 
 		return positionsToReport
 	}
 
-	_, models := findForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
+	findRepeatedFields(callExpr, selectorExpr)
+
+	return fieldNotConcerned(callExpr, selectorExpr, positionsToReport)
+}
+
+// Finds NotConcerned errors in selector functions: Descending, Ascending, SetMultiple, Set
+func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, positionsToReport []Model) []Model {
+	_, models := findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
 
 	for _, arg := range callExpr.Args {
 		var model Model
@@ -101,6 +107,7 @@ func findForSelector(callExpr *ast.CallExpr, positionsToReport []Model) []Model 
 			positionsToReport = addPositionsToReport(positionsToReport, models, model)
 		} else {
 			argCallExpr := arg.(*ast.CallExpr)
+
 			setFunction := argCallExpr.Fun.(*ast.SelectorExpr).Sel.Name
 
 			if setFunction == "Dynamic" {
@@ -118,8 +125,43 @@ func findForSelector(callExpr *ast.CallExpr, positionsToReport []Model) []Model 
 	return positionsToReport
 }
 
-// Finds errors in index functions: cql.Query, cql.Update, cql.Delete
-func findForIndex(callExpr *ast.CallExpr, positionsToReport []Model) ([]Model, []string) {
+func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
+	if !pie.Contains(cqlSets, selectorExpr.Sel.Name) {
+		return
+	}
+
+	fields := map[string][]token.Pos{}
+
+	for _, arg := range call.Args {
+		condition := arg.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
+		conditionModel := condition.X.(*ast.SelectorExpr)
+
+		fieldName := conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
+		fieldPos := condition.Sel.NamePos
+
+		_, isPresent := fields[fieldName]
+		if !isPresent {
+			fields[fieldName] = []token.Pos{fieldPos}
+		} else {
+			fields[fieldName] = append(fields[fieldName], fieldPos)
+		}
+	}
+
+	for fieldName, positions := range fields {
+		if len(positions) > 1 {
+			for _, pos := range positions {
+				passG.Reportf(
+					pos,
+					"%s is repeated",
+					fieldName,
+				)
+			}
+		}
+	}
+}
+
+// Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete
+func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Model) ([]Model, []string) {
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
 	if !isIndex {
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
@@ -127,7 +169,7 @@ func findForIndex(callExpr *ast.CallExpr, positionsToReport []Model) ([]Model, [
 		if isSelector {
 			internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 			if isCall {
-				return findForIndex(internalCallExpr, positionsToReport)
+				return findNotConcernedForIndex(internalCallExpr, positionsToReport)
 			}
 		}
 
