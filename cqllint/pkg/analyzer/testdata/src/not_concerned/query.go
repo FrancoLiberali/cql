@@ -179,12 +179,20 @@ func testNotJoinedWithAppearance() {
 	).Find()
 }
 
-func testJoinedWithAppearance() {
+func testNotJoinedWithFunction() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(0).Value()),
+			conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value().Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 		),
-		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Find()
+}
+
+func testNotJoinedWithTwoFunctions() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value().Concat("asd").Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		),
 	).Find()
 }

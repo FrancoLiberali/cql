@@ -30,11 +30,20 @@ var (
 	cqlSets        = []string{cqlSetMultiple, "Set"}
 	cqlSelectors   = append(cqlOrder, cqlSets...)
 	dynamicMethod  = "Dynamic"
+
+	notJoinedMessage              = "%s is not joined by the query"
+	appearanceNotNecessaryMessage = "Appearance call not necessary, %s appears only once"
+	appearanceMoreThanOnceMessage = "%s appears more than once, select which one you want to use with Appearance"
 )
 
 type Model struct {
 	Pos  token.Pos
 	Name string
+}
+
+type Report struct {
+	message string
+	model   Model
 }
 
 var passG *analysis.Pass
@@ -46,7 +55,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		(*ast.CallExpr)(nil),
 	}
 
-	positionsToReport := []Model{}
+	positionsToReport := []Report{}
 
 	inspector.Preorder(nodeFilter, func(node ast.Node) {
 		defer func() {
@@ -70,11 +79,11 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		}
 	})
 
-	for _, position := range positionsToReport {
+	for _, report := range positionsToReport {
 		pass.Reportf(
-			position.Pos,
-			"%s is not joined by the query",
-			position.Name,
+			report.model.Pos,
+			report.message,
+			report.model.Name,
 		)
 	}
 
@@ -82,7 +91,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 }
 
 // Finds NotConcerned and Repeated errors in selector functions: Descending, Ascending, SetMultiple, Set
-func findForSelector(callExpr *ast.CallExpr, positionsToReport []Model) []Model {
+func findForSelector(callExpr *ast.CallExpr, positionsToReport []Report) []Report {
 	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
 
 	if !pie.Contains(cqlSelectors, selectorExpr.Sel.Name) {
@@ -95,30 +104,36 @@ func findForSelector(callExpr *ast.CallExpr, positionsToReport []Model) []Model 
 }
 
 // Finds NotConcerned errors in selector functions: Descending, Ascending, SetMultiple, Set
-func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, positionsToReport []Model) []Model {
+func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, positionsToReport []Report) []Report {
 	_, models := findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
 
 	for _, arg := range callExpr.Args {
 		var model Model
+		var appearanceCalled bool
 
 		methodName := selectorExpr.Sel.Name
 
 		if pie.Contains(cqlOrder, methodName) {
-			model = getModel(arg.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
-			positionsToReport = addPositionsToReport(positionsToReport, models, model)
+			argCall, isCall := arg.(*ast.CallExpr)
+			if isCall {
+				model, appearanceCalled = getModelFromCall(argCall)
+			} else {
+				model = getModel(arg.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+			}
+			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearanceCalled)
 		} else {
 			argCallExpr := arg.(*ast.CallExpr)
 
 			setFunction := argCallExpr.Fun.(*ast.SelectorExpr).Sel.Name
 
 			if setFunction == dynamicMethod {
-				model = getModel(argCallExpr.Args[0].(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
-				positionsToReport = addPositionsToReport(positionsToReport, models, model)
+				model, appearanceCalled = getModelFromCall(argCallExpr.Args[0].(*ast.CallExpr))
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearanceCalled)
 			}
 
 			if methodName == cqlSetMultiple {
-				model = getModel(argCallExpr.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
-				positionsToReport = addPositionsToReport(positionsToReport, models, model)
+				model, appearanceCalled = getModelFromCall(argCallExpr.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearanceCalled)
 			}
 		}
 	}
@@ -149,7 +164,11 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 		}
 
 		if argSelector.Sel.Name == dynamicMethod && len(argCall.Args) == 1 {
-			comparedField := argCall.Args[0].(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
+			comparedField, isSelector := argCall.Args[0].(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
+			if !isSelector {
+				continue
+			}
+
 			comparedFieldName := getFieldName(comparedField)
 
 			if comparedFieldName == fieldName {
@@ -182,7 +201,7 @@ func getFieldName(condition *ast.SelectorExpr) string {
 }
 
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete
-func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Model) ([]Model, []string) {
+func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
 	if !isIndex {
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
@@ -220,7 +239,7 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Model)
 	return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 }
 
-func findErrorIsDynamic(positionsToReport []Model, models []string, conditions []ast.Expr) ([]Model, []string) {
+func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
 		conditionCall := condition.(*ast.CallExpr)
 		conditionSelector := conditionCall.Fun.(*ast.SelectorExpr)
@@ -258,24 +277,40 @@ func getFirstGenericType(parent *types.Named) string {
 }
 
 func findErrorIsDynamicWhereCondition(
-	positionsToReport []Model, models []string,
+	positionsToReport []Report, models []string,
 	conditionCall *ast.CallExpr,
 	conditionSelector *ast.SelectorExpr,
-) []Model {
+) []Report {
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
 	if isWhereCondition && getFieldIsMethodName(whereCondition) == "IsDynamic" {
-		isDynamicModel := getModelFromWhereCondition(conditionCall.Args[0].(*ast.CallExpr))
-		return addPositionsToReport(positionsToReport, models, isDynamicModel)
+		isDynamicModel, appearanceCalled := getModelFromCall(conditionCall.Args[0].(*ast.CallExpr))
+		return addPositionsToReport(positionsToReport, models, isDynamicModel, appearanceCalled)
 	}
 
 	return positionsToReport
 }
 
-func addPositionsToReport(positionsToReport []Model, models []string, model Model) []Model {
+func addPositionsToReport(positionsToReport []Report, models []string, model Model, appearanceCalled bool) []Report {
 	if !pie.Contains(models, model.Name) {
-		return append(positionsToReport, Model{
-			Pos:  model.Pos,
-			Name: model.Name,
+		return append(positionsToReport, Report{
+			model:   model,
+			message: notJoinedMessage,
+		})
+	}
+
+	joinedTimes := len(pie.Filter(models, func(modelName string) bool {
+		return modelName == model.Name
+	}))
+
+	if !appearanceCalled && joinedTimes > 1 {
+		return append(positionsToReport, Report{
+			model:   model,
+			message: appearanceMoreThanOnceMessage,
+		})
+	} else if appearanceCalled && joinedTimes == 1 {
+		return append(positionsToReport, Report{
+			model:   model,
+			message: appearanceNotNecessaryMessage,
 		})
 	}
 
@@ -286,17 +321,17 @@ func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
 	return whereCondition.Fun.(*ast.SelectorExpr).Sel.Name
 }
 
-// Returns model's package the model name
-func getModelFromWhereCondition(whereCondition *ast.CallExpr) Model {
-	fun := whereCondition.Fun.(*ast.SelectorExpr)
+// Returns model's package the model name and true if Appearance method is called
+func getModelFromCall(call *ast.CallExpr) (Model, bool) {
+	fun := call.Fun.(*ast.SelectorExpr)
 
 	funX, isXSelector := fun.X.(*ast.SelectorExpr)
 	if isXSelector {
-		return getModel(funX.X.(*ast.SelectorExpr))
+		return getModel(funX.X.(*ast.SelectorExpr)), fun.Sel.Name == "Appearance"
 	}
 
-	// x is not a selector, so Appearance method is called
-	return getModel(fun.X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+	// x is not a selector, so Appearance method or a function is called
+	return getModelFromCall(fun.X.(*ast.CallExpr))
 }
 
 // Returns model's package the model name

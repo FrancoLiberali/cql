@@ -12,7 +12,7 @@ var (
 	// query
 
 	ErrFieldModelNotConcerned   = errors.New("field's model is not concerned by the query (not joined)")
-	ErrAppearanceMustBeSelected = errors.New("field's model appears more than once, select which one you want to use")
+	ErrAppearanceMustBeSelected = errors.New("field's model appears more than once, select which one you want to use with Appearance")
 	ErrFieldIsRepeated          = errors.New("field is repeated")
 
 	// conditions
