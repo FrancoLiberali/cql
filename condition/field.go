@@ -283,10 +283,10 @@ func (field NullableNumericField[TModel, TAttribute]) Set() NullableFieldSet[TMo
 
 // Appearance allows to choose which number of appearance use
 // when field's model is joined more than once.
-func (numericField NullableNumericField[TModel, TAttribute]) Appearance(number uint) NullableNumericField[TModel, TAttribute] {
+func (field NullableNumericField[TModel, TAttribute]) Appearance(number uint) NullableNumericField[TModel, TAttribute] {
 	return NullableNumericField[TModel, TAttribute]{
 		NumericField: NumericField[TModel, TAttribute]{
-			UpdatableField: UpdatableField[TModel, TAttribute]{Field: numericField.Field.Appearance(number)},
+			UpdatableField: UpdatableField[TModel, TAttribute]{Field: field.Field.Appearance(number)},
 		},
 	}
 }
