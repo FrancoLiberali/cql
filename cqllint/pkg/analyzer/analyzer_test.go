@@ -17,3 +17,8 @@ func TestErrRepeated(t *testing.T) {
 	testdata := analysistest.TestData()
 	analysistest.Run(t, testdata, analyzer.Analyzer, "repeated")
 }
+
+func TestErrAppearance(t *testing.T) {
+	testdata := analysistest.TestData()
+	analysistest.Run(t, testdata, analyzer.Analyzer, "appearance")
+}

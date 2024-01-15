@@ -438,7 +438,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithJoinedInTheFutureMo
 	ts.ErrorContains(err, "not concerned model: models.Parent1; operator: Eq; model: models.Child, field: ID")
 }
 
-func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinReturnsError() {
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutAppearanceReturnsError() {
 	_, err := cql.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
@@ -449,11 +449,11 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		),
 		conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID.Value()),
 	).Find()
-	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
-	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
+	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
+	ts.ErrorContains(err, "model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
 }
 
-func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSelectJoin() {
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithAppearance() {
 	parentParent := &models.ParentParent{Name: "franco"}
 	parent1 := &models.Parent1{ParentParent: *parentParent}
 	parent2 := &models.Parent2{ParentParent: *parentParent}
@@ -469,14 +469,14 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithSel
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name.Value()).SelectJoin(0, 0),
+		conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name.Appearance(0).Value()),
 	).Find()
 	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Child{child}, entities)
 }
 
-func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutSelectJoinOnMultivalueOperatorReturnsError() {
+func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithoutAppearanceOnMultivalueOperatorReturnsError() {
 	_, err := cql.Query[models.Child](
 		ts.db,
 		conditions.Child.Parent1(
@@ -490,8 +490,8 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 			conditions.ParentParent.ID.Value(),
 		),
 	).Find()
-	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
-	ts.ErrorContains(err, "joined multiple times model: models.ParentParent; operator: Between; model: models.Child, field: ID")
+	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
+	ts.ErrorContains(err, "model: models.ParentParent; operator: Between; model: models.Child, field: ID")
 }
 
 func (ts *JoinConditionsIntTestSuite) TestCollectionAnyReturnsEmptyWhenNothingMatches() {

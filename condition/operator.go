@@ -11,13 +11,3 @@ type Operator[T any] interface {
 	// any other Operator[T2] would also be considered a Operator[T].
 	InterfaceVerificationMethod(t T)
 }
-
-type DynamicOperator[T any] interface {
-	Operator[T]
-
-	// Allows to choose which number of join use
-	// for the value in position "valueNumber"
-	// when the value is a field and its model is joined more than once.
-	// Does nothing if the valueNumber is bigger than the amount of values.
-	SelectJoin(valueNumber, joinNumber uint) DynamicOperator[T]
-}

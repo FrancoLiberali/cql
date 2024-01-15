@@ -128,3 +128,21 @@ func testSetMultipleNestedJoinedModel() {
 		conditions.ParentParent.Name.Set().Eq("asd"),
 	)
 }
+
+func testSetDynamicNotJoinedWithFunction() {
+	cql.Update[models.Brand](
+		db,
+		conditions.Brand.Name.Is().Eq("asd"),
+	).Set(conditions.Brand.Name.Set().Dynamic(
+		conditions.City.Name.Value().Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	))
+}
+
+func testSetDynamicNotJoinedWithTwoFunction() {
+	cql.Update[models.Brand](
+		db,
+		conditions.Brand.Name.Is().Eq("asd"),
+	).Set(conditions.Brand.Name.Set().Dynamic(
+		conditions.City.Name.Value().Concat("asd").Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	))
+}

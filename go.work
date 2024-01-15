@@ -8,4 +8,5 @@ use (
 	./cqllint/pkg/analyzer/testdata
 	./cqllint/pkg/analyzer/testdata/src/not_concerned
 	./cqllint/pkg/analyzer/testdata/src/repeated
+	./cqllint/pkg/analyzer/testdata/src/appearance
 )

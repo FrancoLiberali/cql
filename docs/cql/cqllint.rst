@@ -12,7 +12,8 @@ It also adds other detections that would not generate runtime errors but are pos
 
 .. note::
 
-    At the moment, only the errors cql.ErrFieldModelNotConcerned and cql.ErrFieldIsRepeated are detected.
+    At the moment, only the errors cql.ErrFieldModelNotConcerned, cql.ErrFieldIsRepeated, 
+    cql.ErrAppearanceMustBeSelected and cql.ErrAppearanceOutOfRange are detected.
 
 We recommend integrating cqllint into your CI so that the use of cql ensures 100% that your queries will be executed correctly.
 
@@ -79,8 +80,6 @@ Now, if we run cqllint we will see the following report:
     $ cqllint ./...
     example.go:3: models.City is not joined by the query
 
-In this way, we will be able to correct this error without having to execute the query.
-
 ErrFieldIsRepeated
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -114,7 +113,71 @@ Now, if we run cqllint we will see the following report:
     example.go:5: conditions.Brand.Name is repeated
     example.go:6: conditions.Brand.Name is repeated
 
-In this way, we will be able to correct this error without having to execute the query.
+ErrAppearanceMustBeSelected
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To generate this error we must join the same model more than once and not select the appearance number:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 9
+    :linenos:
+
+    _, err := cql.Query[models.Child](
+        db,
+        conditions.Child.Parent1(
+            conditions.Parent1.ParentParent(),
+        ),
+        conditions.Child.Parent2(
+            conditions.Parent2.ParentParent(),
+        ),
+        conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID.Value()),
+    ).Find()
+
+If we execute this query we will obtain an error of type `cql.ErrAppearanceMustBeSelected` with the following message:
+
+.. code-block:: none
+
+    field's model appears more than once, select which one you want to use with Appearance; model: models.ParentParent; operator: Eq; model: models.Child, field: ID
+
+Now, if we run cqllint we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:9: models.ParentParent appears more than once, select which one you want to use with Appearance
+
+ErrAppearanceOutOfRange
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+To generate this error we must use the Appearance method with a value greater than the number of appearances of a model:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 4
+    :linenos:
+
+    _, err := cql.Query[models.Phone](
+        db,
+        conditions.Phone.Brand(
+            conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(1).Value()),
+        ),
+    ).Find()
+
+If we execute this query we will obtain an error of type `cql.ErrAppearanceOutOfRange` with the following message:
+
+.. code-block:: none
+
+    selected appearance is bigger than field's model number of appearances; model: models.Phone; operator: Eq; model: models.Brand, field: Name
+
+Now, if we run cqllint we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:4: selected appearance is bigger than models.Phone's number of appearances
 
 Misuses
 -------------------------
@@ -145,3 +208,29 @@ If we run cqllint we will see the following report:
 
     $ cqllint ./...
     example.go:5: conditions.Brand.Name is set to itself
+
+Unnecessary Appearance selection
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+This is the case when the Appearance method is used without being necessary, 
+i.e. when the model appears only once:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 4
+    :linenos:
+
+    _, err := cql.Query[models.Phone](
+        db,
+        conditions.Phone.Brand(
+            conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(0).Value()),
+        ),
+    ).Find()
+
+If we run cqllint we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:4: Appearance call not necessary, models.Phone appears only once

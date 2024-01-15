@@ -74,3 +74,12 @@ func testSetDynamicSameValue() {
 		conditions.Product.Int.Set().Dynamic(conditions.Product.Int.Value()), // want "conditions.Product.Int is set to itself"
 	)
 }
+
+func testSetDynamicSameValueWithFunction() {
+	cql.Update[models.Product](
+		db,
+		conditions.Product.Int.Is().Eq(0),
+	).Set(
+		conditions.Product.Int.Set().Dynamic(conditions.Product.Int.Value().Plus(1)),
+	)
+}
