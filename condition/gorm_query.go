@@ -443,12 +443,3 @@ func (query *GormQuery) Delete() (int64, error) {
 
 	return deleteTx.RowsAffected, deleteTx.Error
 }
-
-// from a list of uint, return the first or UndefinedJoinNumber in case the list is empty
-func GetJoinNumber(joinNumberList []uint) int {
-	if len(joinNumberList) == 0 {
-		return undefinedAppearance
-	}
-
-	return int(joinNumberList[0])
-}
