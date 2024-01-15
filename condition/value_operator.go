@@ -19,7 +19,6 @@ type operation struct {
 	SQLOperator            sql.Operator
 	SQLOperatorByDialector map[sql.Dialector]sql.Operator
 	Value                  any
-	JoinNumber             int
 }
 
 func NewValueOperator[T any](sqlOperator sql.Operator, value any) *ValueOperator[T] {
@@ -29,22 +28,6 @@ func NewValueOperator[T any](sqlOperator sql.Operator, value any) *ValueOperator
 func (operator ValueOperator[T]) InterfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Operator[T]
-}
-
-// Allows to choose which number of join use
-// for the operation in position "operationNumber"
-// when the value is a field and its model is joined more than once.
-// Does nothing if the operationNumber is bigger than the amount of operations.
-func (operator *ValueOperator[T]) SelectJoin(operationNumber, joinNumber uint) DynamicOperator[T] {
-	if operationNumber >= uint(len(operator.Operations)) {
-		return operator
-	}
-
-	operationSaved := operator.Operations[operationNumber]
-	operationSaved.JoinNumber = int(joinNumber)
-	operator.Operations[operationNumber] = operationSaved
-
-	return operator
 }
 
 func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (string, []any, error) {
@@ -73,7 +56,9 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 			// verify that this field is concerned by the query
 			// (a join was performed with the model to which this field belongs)
 			// and get the alias of the table of this model.
-			modelTable, err := getModelTable(query, iValue.getField(), operation.JoinNumber, sqlOperator)
+			field := iValue.getField()
+
+			modelTable, err := getModelTable(query, field, sqlOperator)
 			if err != nil {
 				return "", nil, err
 			}
@@ -99,8 +84,8 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 	return operationString, values, nil
 }
 
-func getModelTable(query *GormQuery, field IField, joinNumber int, sqlOperator sql.Operator) (Table, error) {
-	table, err := query.GetModelTable(field, joinNumber)
+func getModelTable(query *GormQuery, field IField, sqlOperator sql.Operator) (Table, error) {
+	table, err := query.GetModelTable(field)
 	if err != nil {
 		return Table{}, operatorError(err, sqlOperator)
 	}
@@ -115,13 +100,11 @@ func (operator *ValueOperator[T]) AddOperation(sqlOperator any, value any) *Valu
 		newOperation = operation{
 			Value:       value,
 			SQLOperator: sqlOperatorTyped,
-			JoinNumber:  UndefinedJoinNumber,
 		}
 	case map[sql.Dialector]sql.Operator:
 		newOperation = operation{
 			Value:                  value,
 			SQLOperatorByDialector: sqlOperatorTyped,
-			JoinNumber:             UndefinedJoinNumber,
 		}
 	default:
 		return operator

@@ -12,22 +12,18 @@ type Delete[T model.Model] struct {
 
 // Ascending specify an ascending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (deleteS *Delete[T]) Ascending(field IField, joinNumber ...uint) *Delete[T] {
-	deleteS.OrderLimitReturning.Ascending(field, joinNumber...)
+func (deleteS *Delete[T]) Ascending(field IField) *Delete[T] {
+	deleteS.OrderLimitReturning.Ascending(field)
 
 	return deleteS
 }
 
 // Descending specify a descending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (deleteS *Delete[T]) Descending(field IField, joinNumber ...uint) *Delete[T] {
-	deleteS.OrderLimitReturning.Descending(field, joinNumber...)
+func (deleteS *Delete[T]) Descending(field IField) *Delete[T] {
+	deleteS.OrderLimitReturning.Descending(field)
 
 	return deleteS
 }

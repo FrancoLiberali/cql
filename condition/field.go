@@ -11,12 +11,15 @@ type IField interface {
 	fieldName() string
 	columnSQL(query *GormQuery, table Table) string
 	getModelType() reflect.Type
+	getAppearance() int
 }
 
 type Field[TModel model.Model, TAttribute any] struct {
-	column       string
-	name         string
-	columnPrefix string
+	column             string
+	name               string
+	columnPrefix       string
+	appearance         uint
+	appearanceSelected bool
 }
 
 // Is allows creating conditions that include the field and a static value
@@ -39,6 +42,27 @@ func (field Field[TModel, TAttribute]) IsUnsafe() UnsafeFieldIs[TModel, TAttribu
 // Value allows using the value of the field inside dynamic conditions.
 func (field Field[TModel, TAttribute]) Value() *FieldValue[TModel, TAttribute] {
 	return NewFieldValue(field)
+}
+
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (field Field[TModel, TAttribute]) Appearance(number uint) Field[TModel, TAttribute] {
+	newField := NewField[TModel, TAttribute](
+		field.name, field.column, field.columnPrefix,
+	)
+
+	newField.appearanceSelected = true
+	newField.appearance = number
+
+	return newField
+}
+
+func (field Field[TModel, TAttribute]) getAppearance() int {
+	if !field.appearanceSelected {
+		return undefinedAppearance
+	}
+
+	return int(field.appearance)
 }
 
 func (field Field[TModel, TAttribute]) getModelType() reflect.Type {
@@ -82,6 +106,12 @@ func (field UpdatableField[TModel, TAttribute]) Set() FieldSet[TModel, TAttribut
 	return FieldSet[TModel, TAttribute]{field: field}
 }
 
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (field UpdatableField[TModel, TAttribute]) Appearance(number uint) UpdatableField[TModel, TAttribute] {
+	return UpdatableField[TModel, TAttribute]{Field: field.Field.Appearance(number)}
+}
+
 func NewUpdatableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) UpdatableField[TModel, TAttribute] {
 	return UpdatableField[TModel, TAttribute]{
 		Field: NewField[TModel, TAttribute](name, column, columnPrefix),
@@ -94,6 +124,14 @@ type NullableField[TModel model.Model, TAttribute any] struct {
 
 func (field NullableField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
 	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: field.UpdatableField}}
+}
+
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (field NullableField[TModel, TAttribute]) Appearance(number uint) NullableField[TModel, TAttribute] {
+	return NullableField[TModel, TAttribute]{
+		UpdatableField: UpdatableField[TModel, TAttribute]{Field: field.Field.Appearance(number)},
+	}
 }
 
 func NewNullableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) NullableField[TModel, TAttribute] {
@@ -151,6 +189,14 @@ func (stringField StringField[TModel]) Value() *StringFieldValue[TModel] {
 	return &StringFieldValue[TModel]{FieldValue: *stringField.UpdatableField.Value()}
 }
 
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (stringField StringField[TModel]) Appearance(number uint) StringField[TModel] {
+	return StringField[TModel]{
+		UpdatableField: UpdatableField[TModel, string]{Field: stringField.Field.Appearance(number)},
+	}
+}
+
 func NewStringField[TModel model.Model](name, column, columnPrefix string) StringField[TModel] {
 	return StringField[TModel]{
 		UpdatableField: NewUpdatableField[TModel, string](name, column, columnPrefix),
@@ -172,6 +218,16 @@ func (stringField NullableStringField[TModel]) Is() StringFieldIs[TModel] {
 // Value allows using the value of the field inside dynamic conditions.
 func (stringField NullableStringField[TModel]) Value() *StringFieldValue[TModel] {
 	return &StringFieldValue[TModel]{FieldValue: *stringField.UpdatableField.Value()}
+}
+
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (stringField NullableStringField[TModel]) Appearance(number uint) NullableStringField[TModel] {
+	return NullableStringField[TModel]{
+		NullableField: NullableField[TModel, string]{
+			UpdatableField: UpdatableField[TModel, string]{Field: stringField.Field.Appearance(number)},
+		},
+	}
 }
 
 func NewNullableStringField[TModel model.Model](name, column, columnPrefix string) NullableStringField[TModel] {
@@ -206,6 +262,14 @@ func (numericField NumericField[TModel, TAttribute]) Set() NumericFieldSet[TMode
 	return NumericFieldSet[TModel, TAttribute]{field: numericField}
 }
 
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (numericField NumericField[TModel, TAttribute]) Appearance(number uint) NumericField[TModel, TAttribute] {
+	return NumericField[TModel, TAttribute]{
+		UpdatableField: UpdatableField[TModel, TAttribute]{Field: numericField.Field.Appearance(number)},
+	}
+}
+
 type NullableNumericField[
 	TModel model.Model,
 	TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64,
@@ -215,6 +279,16 @@ type NullableNumericField[
 
 func (field NullableNumericField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
 	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: field.UpdatableField}}
+}
+
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (field NullableNumericField[TModel, TAttribute]) Appearance(number uint) NullableNumericField[TModel, TAttribute] {
+	return NullableNumericField[TModel, TAttribute]{
+		NumericField: NumericField[TModel, TAttribute]{
+			UpdatableField: UpdatableField[TModel, TAttribute]{Field: field.Field.Appearance(number)},
+		},
+	}
 }
 
 func NewNullableNumericField[

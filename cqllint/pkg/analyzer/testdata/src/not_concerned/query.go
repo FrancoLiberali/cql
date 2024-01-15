@@ -26,6 +26,23 @@ func testNotJoinedInDifferentLines() {
 	).Find()
 }
 
+func testNotJoinedWithTrue() {
+	cql.Query[models.Brand](
+		db,
+		cql.True[models.Brand](),
+		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Find()
+}
+
+func testNotJoinedInsideConnector() {
+	cql.Query[models.Brand](
+		db,
+		cql.And(
+			conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		),
+	).Find()
+}
+
 func testNotJoinedInsideJoinCondition() {
 	cql.Query[models.Phone](
 		db,
@@ -167,5 +184,32 @@ func testJoinedWithDifferentRelationNameWithoutConditionsWithPreload() {
 		conditions.Bicycle.Owner().Preload(),
 		conditions.Bicycle.Name.IsDynamic().Eq(conditions.Person.Name.Value()),
 		conditions.Bicycle.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Find()
+}
+
+func testNotJoinedWithAppearance() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Appearance(0).Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		),
+	).Find()
+}
+
+func testNotJoinedWithFunction() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value().Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		),
+	).Find()
+}
+
+func testNotJoinedWithTwoFunctions() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value().Concat("asd").Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		),
 	).Find()
 }

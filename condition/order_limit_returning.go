@@ -12,30 +12,26 @@ type OrderLimitReturning[T model.Model] struct {
 
 // Ascending specify an ascending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (olr *OrderLimitReturning[T]) Ascending(field IField, joinNumber ...uint) {
+func (olr *OrderLimitReturning[T]) Ascending(field IField) {
 	if olr.query.gormQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Ascending"))
 	}
 
 	olr.orderByCalled = true
-	olr.query.order(field, false, joinNumber)
+	olr.query.order(field, false)
 }
 
 // Descending specify a descending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (olr *OrderLimitReturning[T]) Descending(field IField, joinNumber ...uint) {
+func (olr *OrderLimitReturning[T]) Descending(field IField) {
 	if olr.query.gormQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Descending"))
 	}
 
 	olr.orderByCalled = true
-	olr.query.order(field, true, joinNumber)
+	olr.query.order(field, true)
 }
 
 // Limit specify the number of models to be updated

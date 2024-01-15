@@ -18,28 +18,30 @@ func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
 		setsAsInterface = append(setsAsInterface, set)
 	}
 
-	return update.unsafeSet(setsAsInterface)
+	return update.unsafeSet(setsAsInterface, "Set")
 }
 
 // SetMultiple allows updating multiple tables in the same query.
 //
 // available for: mysql
 func (update *Update[T]) SetMultiple(sets ...ISet) (int64, error) {
+	methodName := "SetMultiple"
+
 	if update.query.gormQuery.Dialector() != sql.MySQL {
-		update.query.addError(methodError(ErrUnsupportedByDatabase, "SetMultiple"))
+		update.query.addError(methodError(ErrUnsupportedByDatabase, methodName))
 	}
 
-	return update.unsafeSet(sets)
+	return update.unsafeSet(sets, methodName)
 }
 
-func (update *Update[T]) unsafeSet(sets []ISet) (int64, error) {
+func (update *Update[T]) unsafeSet(sets []ISet, methodName string) (int64, error) {
 	if update.query.err != nil {
 		return 0, update.query.err
 	}
 
 	updated, err := update.query.gormQuery.Update(sets)
 	if err != nil {
-		return 0, methodError(err, "Set")
+		return 0, methodError(err, methodName)
 	}
 
 	return updated, nil
@@ -47,22 +49,18 @@ func (update *Update[T]) unsafeSet(sets []ISet) (int64, error) {
 
 // Ascending specify an ascending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (update *Update[T]) Ascending(field IField, joinNumber ...uint) *Update[T] {
-	update.OrderLimitReturning.Ascending(field, joinNumber...)
+func (update *Update[T]) Ascending(field IField) *Update[T] {
+	update.OrderLimitReturning.Ascending(field)
 
 	return update
 }
 
 // Descending specify a descending order when updating models
 //
-// joinNumber can be used to select the join in case the field is joined more than once
-//
 // available for: mysql
-func (update *Update[T]) Descending(field IField, joinNumber ...uint) *Update[T] {
-	update.OrderLimitReturning.Descending(field, joinNumber...)
+func (update *Update[T]) Descending(field IField) *Update[T] {
+	update.OrderLimitReturning.Descending(field)
 
 	return update
 }
@@ -111,13 +109,11 @@ func NewUpdate[T model.Model](tx *gorm.DB, conditions []Condition[T]) *Update[T]
 type ISet interface {
 	getField() IField
 	getValue() any
-	getJoinNumber() int
 }
 
 type Set[T model.Model] struct {
-	field      IField
-	value      any
-	joinNumber int
+	field IField
+	value any
 }
 
 func (set Set[T]) getField() IField {
@@ -126,10 +122,6 @@ func (set Set[T]) getField() IField {
 
 func (set Set[T]) getValue() any {
 	return set.value
-}
-
-func (set Set[T]) getJoinNumber() int {
-	return set.joinNumber
 }
 
 type FieldSet[TModel model.Model, TAttribute any] struct {
@@ -143,12 +135,10 @@ func (set FieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
 	}
 }
 
-// joinNumber can be used to select the join in case the field is joined more than once
-func (set FieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[TAttribute], joinNumber ...uint) *Set[TModel] {
+func (set FieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[TAttribute]) *Set[TModel] {
 	return &Set[TModel]{
-		field:      set.field,
-		value:      value,
-		joinNumber: GetJoinNumber(joinNumber),
+		field: set.field,
+		value: value,
 	}
 }
 
@@ -181,12 +171,10 @@ func (set NumericFieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel]
 	}
 }
 
-// joinNumber can be used to select the join in case the field is joined more than once
-func (set NumericFieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[numeric], joinNumber ...uint) *Set[TModel] {
+func (set NumericFieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[numeric]) *Set[TModel] {
 	return &Set[TModel]{
-		field:      set.field,
-		value:      value,
-		joinNumber: GetJoinNumber(joinNumber),
+		field: set.field,
+		value: value,
 	}
 }
 
