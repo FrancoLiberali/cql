@@ -26,6 +26,14 @@ func testNotJoinedInDifferentLines() {
 	).Find()
 }
 
+func testNotJoinedWithTrue() {
+	cql.Query[models.Brand](
+		db,
+		cql.True[models.Brand](),
+		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Find()
+}
+
 func testNotJoinedInsideJoinCondition() {
 	cql.Query[models.Phone](
 		db,

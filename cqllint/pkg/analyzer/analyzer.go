@@ -242,7 +242,11 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
 		conditionCall := condition.(*ast.CallExpr)
-		conditionSelector := conditionCall.Fun.(*ast.SelectorExpr)
+		conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr)
+
+		if !isSelector {
+			continue
+		}
 
 		if conditionSelector.Sel.Name == "Preload" {
 			conditionCall = conditionSelector.X.(*ast.CallExpr)
