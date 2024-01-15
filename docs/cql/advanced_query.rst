@@ -159,15 +159,16 @@ For example, if we seek to obtain the cities whose population represents at leas
     ).Find()
 
 
-Select join
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Appearance
+-------------------------
 
-In case the attribute to be used by the dynamic operator is present more 
-than once in the query, it will be necessary to select the join to be used, 
-to avoid getting the error cql.ErrJoinMustBeSelected. 
-To do this, you must use the SelectJoin method, as in the following example:
+In case the attribute to be used is present more 
+than once in the query, it will be necessary to select select its appearance number, 
+to avoid getting the error cql.ErrAppearanceMustBeSelected. 
+To do this, you must use the Appearance method of the field, as in the following example:
 
 .. code-block:: go
+    :caption: Example model
 
     type ParentParent struct {
         model.UUIDModel
@@ -197,6 +198,11 @@ To do this, you must use the SelectJoin method, as in the following example:
         Parent2ID model.UUID
     }
 
+.. code-block:: go
+    :caption: Query
+    :linenos:
+    :emphasize-lines: 10
+
     models, err := cql.Query[Child](
         gormDB,
         conditions.Child.Parent1(
@@ -205,9 +211,8 @@ To do this, you must use the SelectJoin method, as in the following example:
         conditions.Child.Parent2(
             conditions.Parent2.ParentParent(),
         ),
-        conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name.Value()).SelectJoin(
-            0, // for the parameter in position 0 of the operator (conditions.ParentParent.Name),
-            0, // choose the first (0) join (made by conditions.Child.Parent1())
+        conditions.Child.Name.IsDynamic().Eq(
+            conditions.ParentParent.Name.Appearance(0).Value(), // choose the first (0) appearance (made by conditions.Child.Parent1())
         ),
     ).Find()
 
