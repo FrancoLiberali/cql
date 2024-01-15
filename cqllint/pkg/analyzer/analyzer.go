@@ -288,7 +288,15 @@ func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
 
 // Returns model's package the model name
 func getModelFromWhereCondition(whereCondition *ast.CallExpr) Model {
-	return getModel(whereCondition.Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+	fun := whereCondition.Fun.(*ast.SelectorExpr)
+
+	funX, isXSelector := fun.X.(*ast.SelectorExpr)
+	if isXSelector {
+		return getModel(funX.X.(*ast.SelectorExpr))
+	}
+
+	// x is not a selector, so Appearance method is called
+	return getModel(fun.X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
 }
 
 // Returns model's package the model name

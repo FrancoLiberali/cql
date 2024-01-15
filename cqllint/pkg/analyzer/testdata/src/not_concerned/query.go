@@ -169,3 +169,22 @@ func testJoinedWithDifferentRelationNameWithoutConditionsWithPreload() {
 		conditions.Bicycle.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Find()
 }
+
+func testNotJoinedWithAppearance() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Appearance(0).Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		),
+	).Find()
+}
+
+func testJoinedWithAppearance() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(0).Value()),
+		),
+		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Find()
+}
