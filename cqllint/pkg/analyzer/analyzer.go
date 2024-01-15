@@ -116,37 +116,49 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 	_, models := findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
 
 	for _, arg := range callExpr.Args {
-		var model Model
-		appearance := Appearance{selected: false}
-
 		methodName := selectorExpr.Sel.Name
 
 		if pie.Contains(cqlOrder, methodName) {
-			argCall, isCall := arg.(*ast.CallExpr)
-			if isCall {
-				model, appearance = getModelFromCall(argCall)
-			} else {
-				model = getModel(arg.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
-			}
-			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+			positionsToReport = findForOrder(arg, positionsToReport, models)
 		} else {
-			argCallExpr := arg.(*ast.CallExpr)
-
-			setFunction := argCallExpr.Fun.(*ast.SelectorExpr).Sel.Name
-
-			if setFunction == dynamicMethod {
-				model, appearance = getModelFromCall(argCallExpr.Args[0].(*ast.CallExpr))
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-			}
-
-			if methodName == cqlSetMultiple {
-				model, appearance = getModelFromCall(argCallExpr.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-			}
+			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
 		}
 	}
 
 	return positionsToReport
+}
+
+func findForSet(set ast.Expr, positionsToReport []Report, models []string, methodName string) []Report {
+	setCall := set.(*ast.CallExpr)
+
+	setFunction := setCall.Fun.(*ast.SelectorExpr).Sel.Name
+
+	if setFunction == dynamicMethod {
+		model, appearance := getModelFromCall(setCall.Args[0].(*ast.CallExpr))
+		positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+	}
+
+	if methodName == cqlSetMultiple {
+		model, appearance := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+		positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+	}
+
+	return positionsToReport
+}
+
+func findForOrder(order ast.Expr, positionsToReport []Report, models []string) []Report {
+	var model Model
+
+	appearance := Appearance{selected: false}
+
+	orderCall, isCall := order.(*ast.CallExpr)
+	if isCall {
+		model, appearance = getModelFromCall(orderCall)
+	} else {
+		model = getModel(order.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+	}
+
+	return addPositionsToReport(positionsToReport, models, model, appearance)
 }
 
 func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
@@ -354,6 +366,7 @@ func getModelFromCall(call *ast.CallExpr) (Model, Appearance) {
 	funX, isXSelector := fun.X.(*ast.SelectorExpr)
 	if isXSelector {
 		model := getModel(funX.X.(*ast.SelectorExpr))
+
 		if fun.Sel.Name == "Appearance" {
 			appearanceNumber, err := strconv.Atoi(call.Args[0].(*ast.BasicLit).Value)
 			if err != nil {
