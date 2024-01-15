@@ -26,6 +26,7 @@ var Analyzer = &analysis.Analyzer{
 var (
 	cqlMethods     = []string{"Query", "Update", "Delete"}
 	cqlOrder       = []string{"Descending", "Ascending"}
+	cqlConnectors  = []string{"And", "Or", "Not"}
 	cqlSetMultiple = "SetMultiple"
 	cqlSets        = []string{cqlSetMultiple, "Set"}
 	cqlSelectors   = append(cqlOrder, cqlSets...)
@@ -245,7 +246,12 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 		conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr)
 
 		if !isSelector {
+			// cql.True
 			continue
+		}
+
+		if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
+			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
 		}
 
 		if conditionSelector.Sel.Name == "Preload" {
