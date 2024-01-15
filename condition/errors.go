@@ -13,6 +13,7 @@ var (
 
 	ErrFieldModelNotConcerned   = errors.New("field's model is not concerned by the query (not joined)")
 	ErrAppearanceMustBeSelected = errors.New("field's model appears more than once, select which one you want to use with Appearance")
+	ErrAppearanceOutOfRange     = errors.New("selected appearance is bigger than field's model number of appearances")
 	ErrFieldIsRepeated          = errors.New("field is repeated")
 
 	// conditions
@@ -45,11 +46,16 @@ func fieldModelNotConcernedError(field IField) error {
 	)
 }
 
+func fieldModelError(err error, field IField) error {
+	return fmt.Errorf("%w; model: %s", err, field.getModelType())
+}
+
 func appearanceMustBeSelectedError(field IField) error {
-	return fmt.Errorf("%w; model: %s",
-		ErrAppearanceMustBeSelected,
-		field.getModelType(),
-	)
+	return fieldModelError(ErrAppearanceMustBeSelected, field)
+}
+
+func appearanceOutOfRangeError(field IField) error {
+	return fieldModelError(ErrAppearanceOutOfRange, field)
 }
 
 func fieldIsRepeatedError(field IField) error {

@@ -10,6 +10,7 @@ var (
 
 	ErrFieldModelNotConcerned   = condition.ErrFieldModelNotConcerned
 	ErrAppearanceMustBeSelected = condition.ErrAppearanceMustBeSelected
+	ErrAppearanceOutOfRange     = condition.ErrAppearanceOutOfRange
 	ErrFieldIsRepeated          = condition.ErrFieldIsRepeated
 
 	// crud

@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"strconv"
 
 	"github.com/elliotchance/pie/v2"
 	"golang.org/x/tools/go/analysis"
@@ -35,6 +36,7 @@ var (
 	notJoinedMessage              = "%s is not joined by the query"
 	appearanceNotNecessaryMessage = "Appearance call not necessary, %s appears only once"
 	appearanceMoreThanOnceMessage = "%s appears more than once, select which one you want to use with Appearance"
+	appearanceOutOfRangeMessage   = "selected appearance is bigger than %s's number of appearances"
 )
 
 type Model struct {
@@ -45,6 +47,11 @@ type Model struct {
 type Report struct {
 	message string
 	model   Model
+}
+
+type Appearance struct {
+	selected bool
+	number   int
 }
 
 var passG *analysis.Pass
@@ -110,31 +117,31 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 
 	for _, arg := range callExpr.Args {
 		var model Model
-		var appearanceCalled bool
+		appearance := Appearance{selected: false}
 
 		methodName := selectorExpr.Sel.Name
 
 		if pie.Contains(cqlOrder, methodName) {
 			argCall, isCall := arg.(*ast.CallExpr)
 			if isCall {
-				model, appearanceCalled = getModelFromCall(argCall)
+				model, appearance = getModelFromCall(argCall)
 			} else {
 				model = getModel(arg.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
 			}
-			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearanceCalled)
+			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
 		} else {
 			argCallExpr := arg.(*ast.CallExpr)
 
 			setFunction := argCallExpr.Fun.(*ast.SelectorExpr).Sel.Name
 
 			if setFunction == dynamicMethod {
-				model, appearanceCalled = getModelFromCall(argCallExpr.Args[0].(*ast.CallExpr))
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearanceCalled)
+				model, appearance = getModelFromCall(argCallExpr.Args[0].(*ast.CallExpr))
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
 			}
 
 			if methodName == cqlSetMultiple {
-				model, appearanceCalled = getModelFromCall(argCallExpr.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearanceCalled)
+				model, appearance = getModelFromCall(argCallExpr.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
 			}
 		}
 	}
@@ -293,14 +300,14 @@ func findErrorIsDynamicWhereCondition(
 ) []Report {
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
 	if isWhereCondition && getFieldIsMethodName(whereCondition) == "IsDynamic" {
-		isDynamicModel, appearanceCalled := getModelFromCall(conditionCall.Args[0].(*ast.CallExpr))
-		return addPositionsToReport(positionsToReport, models, isDynamicModel, appearanceCalled)
+		isDynamicModel, appearance := getModelFromCall(conditionCall.Args[0].(*ast.CallExpr))
+		return addPositionsToReport(positionsToReport, models, isDynamicModel, appearance)
 	}
 
 	return positionsToReport
 }
 
-func addPositionsToReport(positionsToReport []Report, models []string, model Model, appearanceCalled bool) []Report {
+func addPositionsToReport(positionsToReport []Report, models []string, model Model, appearance Appearance) []Report {
 	if !pie.Contains(models, model.Name) {
 		return append(positionsToReport, Report{
 			model:   model,
@@ -312,15 +319,24 @@ func addPositionsToReport(positionsToReport []Report, models []string, model Mod
 		return modelName == model.Name
 	}))
 
-	if !appearanceCalled && joinedTimes > 1 {
+	if appearance.selected {
+		if joinedTimes == 1 {
+			return append(positionsToReport, Report{
+				model:   model,
+				message: appearanceNotNecessaryMessage,
+			})
+		}
+
+		if appearance.number > joinedTimes-1 {
+			return append(positionsToReport, Report{
+				model:   model,
+				message: appearanceOutOfRangeMessage,
+			})
+		}
+	} else if joinedTimes > 1 {
 		return append(positionsToReport, Report{
 			model:   model,
 			message: appearanceMoreThanOnceMessage,
-		})
-	} else if appearanceCalled && joinedTimes == 1 {
-		return append(positionsToReport, Report{
-			model:   model,
-			message: appearanceNotNecessaryMessage,
 		})
 	}
 
@@ -332,12 +348,22 @@ func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
 }
 
 // Returns model's package the model name and true if Appearance method is called
-func getModelFromCall(call *ast.CallExpr) (Model, bool) {
+func getModelFromCall(call *ast.CallExpr) (Model, Appearance) {
 	fun := call.Fun.(*ast.SelectorExpr)
 
 	funX, isXSelector := fun.X.(*ast.SelectorExpr)
 	if isXSelector {
-		return getModel(funX.X.(*ast.SelectorExpr)), fun.Sel.Name == "Appearance"
+		model := getModel(funX.X.(*ast.SelectorExpr))
+		if fun.Sel.Name == "Appearance" {
+			appearanceNumber, err := strconv.Atoi(call.Args[0].(*ast.BasicLit).Value)
+			if err != nil {
+				panic(err)
+			}
+
+			return model, Appearance{selected: true, number: appearanceNumber}
+		}
+
+		return model, Appearance{selected: false}
 	}
 
 	// x is not a selector, so Appearance method or a function is called

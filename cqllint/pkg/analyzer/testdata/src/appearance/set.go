@@ -65,3 +65,17 @@ func testSetNecessaryCalled() {
 		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Appearance(0).Value()),
 	)
 }
+
+func testSetOutOfRange() {
+	cql.Update[models.Child](
+		db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).Set(
+		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Appearance(2).Value()), // want "selected appearance is bigger than github.com/FrancoLiberali/cql/test/models.ParentParent's number of appearances"
+	)
+}

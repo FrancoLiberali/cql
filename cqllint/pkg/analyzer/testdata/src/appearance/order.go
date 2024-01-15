@@ -35,3 +35,15 @@ func testOrderNecessaryCalled() {
 		),
 	).Descending(conditions.ParentParent.ID.Appearance(0)).Find()
 }
+
+func testOrderOutOfRange() {
+	cql.Query[models.Child](
+		db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).Descending(conditions.ParentParent.ID.Appearance(2)).Find() // want "selected appearance is bigger than github.com/FrancoLiberali/cql/test/models.ParentParent's number of appearances"
+}

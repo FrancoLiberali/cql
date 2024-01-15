@@ -242,6 +242,20 @@ func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAnd
 	ts.ErrorContains(err, "model: models.ParentParent; method: Descending")
 }
 
+func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfAppearanceIfOutOfRange() {
+	_, err := cql.Query[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).Descending(conditions.ParentParent.ID.Appearance(3)).Find()
+	ts.ErrorIs(err, cql.ErrAppearanceOutOfRange)
+	ts.ErrorContains(err, "model: models.ParentParent; method: Descending")
+}
+
 func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndAppearanceIsSelected() {
 	parentParent1 := &models.ParentParent{Name: "a"}
 	parent11 := &models.Parent1{ParentParent: *parentParent1}

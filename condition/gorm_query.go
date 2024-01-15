@@ -184,6 +184,10 @@ func (query *GormQuery) GetModelTable(field IField) (Table, error) {
 		return Table{}, appearanceMustBeSelectedError(field)
 	}
 
+	if appearance > len(modelTables)-1 {
+		return Table{}, appearanceOutOfRangeError(field)
+	}
+
 	return modelTables[appearance], nil
 }
 
