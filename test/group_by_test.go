@@ -28,8 +28,20 @@ type ResultAlone struct {
 }
 
 type ResultInt struct {
-	Int         int
+	Int          int
+	Aggregation1 int
+	Aggregation2 int
+}
+
+type ResultName struct {
+	Name        string
 	Aggregation int
+}
+
+type ResultCode struct {
+	Code         int
+	Aggregation1 int
+	Aggregation2 int
 }
 
 type ResultIntPointer struct {
@@ -42,9 +54,21 @@ type ResultFloat struct {
 	Aggregation float64
 }
 
+type ResultString struct {
+	Int         int
+	Aggregation string
+}
+
 type ResultBool struct {
 	Int         int
 	Aggregation bool
+}
+
+type ResultIntAndFloat struct {
+	Int          int
+	Float        float64
+	Aggregation1 int
+	Aggregation2 float64
 }
 
 func (ts *GroupByIntTestSuite) TestGroupByNoSelect() {
@@ -60,6 +84,32 @@ func (ts *GroupByIntTestSuite) TestGroupByNoSelect() {
 
 	ts.Require().NoError(err)
 	EqualList(&ts.Suite, []ResultAlone{{Int: 1}, {Int: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByFieldNotPresentReturnsError() {
+	results := []ResultAlone{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(conditions.Sale.SellerID).Into(&results)
+
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
+	ts.ErrorContains(err, "field's model is not concerned by the query (not joined); not concerned model: models.Sale")
+}
+
+func (ts *GroupByIntTestSuite) TestGroupBySelectIntoStructWithMoreFieldsWork() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 0, false, nil)
+	ts.createProduct("3", 0, 0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(conditions.Product.Int).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1}, {Int: 0}}, results)
 }
 
 func (ts *GroupByIntTestSuite) TestGroupByWithConditionsNoSelect() {
@@ -78,6 +128,21 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsNoSelect() {
 	EqualList(&ts.Suite, []ResultAlone{{Int: 1}}, results)
 }
 
+func (ts *GroupByIntTestSuite) TestGroupBySelectFieldNotPresentReturnsError() {
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Sale.ID.Aggregate().Count(), "aggregation1",
+	).Into(&results)
+
+	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
+	ts.ErrorContains(err, "field's model is not concerned by the query (not joined); not concerned model: models.Sale")
+}
+
 func (ts *GroupByIntTestSuite) TestGroupBySelectSum() {
 	ts.createProduct("1", 1, 0, false, nil)
 	ts.createProduct("2", 1, 0, false, nil)
@@ -90,11 +155,87 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectSum() {
 	).GroupBy(
 		conditions.Product.Int,
 	).Select(
-		conditions.Product.Int.Aggregate().Sum(), "aggregation",
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 2}, {Int: 0, Aggregation: 0}}, results)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastIntToFloatWorks() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 0, false, nil)
+	ts.createProduct("3", 0, 0, false, nil)
+
+	results := []ResultFloat{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Count(), "aggregation",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultFloat{{Int: 1, Aggregation: 2}, {Int: 0, Aggregation: 1}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastIntToStringWorks() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 0, false, nil)
+	ts.createProduct("3", 0, 0, false, nil)
+
+	results := []ResultString{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Count(), "aggregation",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultString{{Int: 1, Aggregation: "2"}, {Int: 0, Aggregation: "1"}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastFloatToIntWorks() {
+	ts.createProduct("1", 1, 1, false, nil)
+	ts.createProduct("2", 1, 2, false, nil)
+	ts.createProduct("3", 0, 0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Average(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 1}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupBySelectIntoStructWithLessFieldsWork() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 0, false, nil)
+	ts.createProduct("3", 0, 0, false, nil)
+
+	results := []ResultAlone{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultAlone{{Int: 1}, {Int: 0}}, results)
 }
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectCount() {
@@ -109,11 +250,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCount() {
 	).GroupBy(
 		conditions.Product.Int,
 	).Select(
-		conditions.Product.Int.Aggregate().Count(), "aggregation",
+		conditions.Product.Int.Aggregate().Count(), "aggregation1",
 	).Into(&results)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 2}, {Int: 0, Aggregation: 1}}, results)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 1}}, results)
 }
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
@@ -130,11 +271,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
 	).GroupBy(
 		conditions.Product.Int,
 	).Select(
-		conditions.Product.IntPointer.Aggregate().Count(), "aggregation",
+		conditions.Product.IntPointer.Aggregate().Count(), "aggregation1",
 	).Into(&results)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 1}, {Int: 0, Aggregation: 0}}, results)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 1}, {Int: 0, Aggregation1: 0}}, results)
 }
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
@@ -151,11 +292,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
 	).GroupBy(
 		conditions.Product.Int,
 	).Select(
-		cql.CountAll(), "aggregation",
+		cql.CountAll(), "aggregation1",
 	).Into(&results)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 2}, {Int: 0, Aggregation: 1}}, results)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 1}}, results)
 }
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectAverage() {
@@ -299,11 +440,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 		).GroupBy(
 			conditions.Product.Int,
 		).Select(
-			conditions.Product.IntPointer.Aggregate().And(), "aggregation",
+			conditions.Product.IntPointer.Aggregate().And(), "aggregation1",
 		).Into(&results)
 
 		ts.Require().NoError(err)
-		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 1}, {Int: 2, Aggregation: 3}, {Int: 0, Aggregation: 0}, {Int: 3, Aggregation: 1}}, results)
+		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 1}, {Int: 2, Aggregation1: 3}, {Int: 0, Aggregation1: 0}, {Int: 3, Aggregation1: 1}}, results)
 	case sql.MySQL:
 		int1 := 1
 		int2 := 3
@@ -319,11 +460,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 		).GroupBy(
 			conditions.Product.Int,
 		).Select(
-			conditions.Product.IntPointer.Aggregate().And(), "aggregation",
+			conditions.Product.IntPointer.Aggregate().And(), "aggregation1",
 		).Into(&results)
 
 		ts.Require().NoError(err)
-		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 1}, {Int: 2, Aggregation: 3}, {Int: 3, Aggregation: 1}}, results)
+		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 1}, {Int: 2, Aggregation1: 3}, {Int: 3, Aggregation1: 1}}, results)
 	case sql.SQLite, sql.SQLServer:
 		err := cql.Query[models.Product](
 			ts.db,
@@ -360,11 +501,11 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 		).GroupBy(
 			conditions.Product.Int,
 		).Select(
-			conditions.Product.IntPointer.Aggregate().Or(), "aggregation",
+			conditions.Product.IntPointer.Aggregate().Or(), "aggregation1",
 		).Into(&results)
 
 		ts.Require().NoError(err)
-		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation: 3}, {Int: 2, Aggregation: 3}, {Int: 0, Aggregation: 0}, {Int: 3, Aggregation: 1}}, results)
+		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 3}, {Int: 2, Aggregation1: 3}, {Int: 0, Aggregation1: 0}, {Int: 3, Aggregation1: 1}}, results)
 	case sql.SQLite, sql.SQLServer:
 		err := cql.Query[models.Product](
 			ts.db,
@@ -380,4 +521,198 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 	}
 }
 
-// TODO multiple selects, joins (ver cuando tienen atributo que se llama igual deberia romperse lo que esta ahora), errores
+func (ts *GroupByIntTestSuite) TestGroupBySelectMoreThanOne() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 0, false, nil)
+	ts.createProduct("3", 0, 0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation2",
+	).Select(
+		conditions.Product.Int.Aggregate().Count(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2, Aggregation2: 2}, {Int: 0, Aggregation1: 1, Aggregation2: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByMoreThanOne() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("3", 1, 1.1, false, nil)
+	ts.createProduct("4", 1, 1.1, false, nil)
+	ts.createProduct("5", 0, 0, false, nil)
+
+	results := []ResultIntAndFloat{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+		conditions.Product.Float,
+	).Select(
+		conditions.Product.Int.Aggregate().Count(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultIntAndFloat{
+		{Int: 1, Float: 0, Aggregation1: 1},
+		{Int: 1, Float: 1, Aggregation1: 1},
+		{Int: 1, Float: 1.1, Aggregation1: 2},
+		{Int: 0, Float: 0, Aggregation1: 1},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByMoreThanOneSelectMoreThanOne() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("3", 1, 1.1, false, nil)
+	ts.createProduct("4", 1, 1.1, false, nil)
+	ts.createProduct("5", 0, 0, false, nil)
+
+	results := []ResultIntAndFloat{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int, conditions.Product.Float,
+	).Select(
+		conditions.Product.Int.Aggregate().Count(), "aggregation1",
+	).Select(
+		conditions.Product.Float.Aggregate().Sum(), "aggregation2",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultIntAndFloat{
+		{Int: 1, Float: 0, Aggregation1: 1, Aggregation2: 0},
+		{Int: 1, Float: 1, Aggregation1: 1, Aggregation2: 1},
+		{Int: 1, Float: 1.1, Aggregation1: 2, Aggregation2: 2.2},
+		{Int: 0, Float: 0, Aggregation1: 1, Aggregation2: 0},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByJoinedField() {
+	product1 := ts.createProduct("1", 2, 0, false, nil)
+	product2 := ts.createProduct("2", 3, 1, false, nil)
+
+	ts.createSale(1, product1, nil)
+	ts.createSale(1, product2, nil)
+	ts.createSale(2, product1, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Sale](
+		ts.db,
+		conditions.Sale.Product(),
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Sale.Code.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 2, Aggregation1: 3},
+		{Int: 3, Aggregation1: 1},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByWithJoinedFieldInSelect() {
+	product1 := ts.createProduct("1", 2, 0, false, nil)
+	product2 := ts.createProduct("2", 3, 1, false, nil)
+
+	ts.createSale(1, product1, nil)
+	ts.createSale(1, product2, nil)
+	ts.createSale(2, product1, nil)
+
+	results := []ResultCode{}
+
+	err := cql.Query[models.Sale](
+		ts.db,
+		conditions.Sale.Product(),
+	).GroupBy(
+		conditions.Sale.Code,
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultCode{
+		{Code: 1, Aggregation1: 5},
+		{Code: 2, Aggregation1: 2},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByJoinedFieldAndWithJoinedFieldInSelect() {
+	product1 := ts.createProduct("1", 2, 1, false, nil)
+	product2 := ts.createProduct("2", 3, 3, false, nil)
+
+	ts.createSale(1, product1, nil)
+	ts.createSale(1, product2, nil)
+	ts.createSale(2, product1, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Sale](
+		ts.db,
+		conditions.Sale.Product(),
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Float.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 2, Aggregation1: 2},
+		{Int: 3, Aggregation1: 3},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByFieldPresentInMultipleTables() {
+	company := ts.createCompany("name1")
+	ts.createSeller("name1", company)
+	ts.createSeller("name2", company)
+
+	results := []ResultName{}
+
+	err := cql.Query[models.Seller](
+		ts.db,
+		conditions.Seller.Company(),
+	).GroupBy(
+		conditions.Seller.Name,
+	).Select(
+		conditions.Company.Name.Aggregate().Count(), "aggregation",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultName{
+		{Name: "name1", Aggregation: 1},
+		{Name: "name2", Aggregation: 1},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByJoinedMultipleTimesFieldReturnsError() {
+	results := []ResultInt{}
+
+	err := cql.Query[models.Child](
+		ts.db,
+		conditions.Child.Parent1(
+			conditions.Parent1.ParentParent(),
+		),
+		conditions.Child.Parent2(
+			conditions.Parent2.ParentParent(),
+		),
+	).GroupBy(
+		conditions.ParentParent.Name,
+	).Into(&results)
+
+	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
+	ts.ErrorContains(err, "field's model is joined more than once, select which one you want to use; joined multiple times model: models.ParentParent")
+}
