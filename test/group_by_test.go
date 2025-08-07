@@ -713,6 +713,6 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedMultipleTimesFieldReturnsError()
 		conditions.ParentParent.Name,
 	).Into(&results)
 
-	ts.ErrorIs(err, cql.ErrJoinMustBeSelected)
-	ts.ErrorContains(err, "field's model is joined more than once, select which one you want to use; joined multiple times model: models.ParentParent")
+	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
+	ts.ErrorContains(err, "field's model appears more than once, select which one you want to use with Appearance; model: models.ParentParent")
 }

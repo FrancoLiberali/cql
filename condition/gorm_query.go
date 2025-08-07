@@ -83,7 +83,7 @@ func (query *GormQuery) GroupBy(fields []IField) error {
 	query.cleanSelects()
 
 	for _, field := range fields {
-		table, err := query.GetModelTable(field, UndefinedJoinNumber)
+		table, err := query.GetModelTable(field)
 		if err != nil {
 			return err
 		}
