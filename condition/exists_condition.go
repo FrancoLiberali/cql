@@ -29,18 +29,15 @@ func newExistsCondition[T1 model.Model, T2 model.Model](
 	}
 }
 
-//nolint:unused // is used
 func (condition existsCondition[T1, T2]) interfaceVerificationMethod(_ T1) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
 
-//nolint:unused // is used
 func (condition existsCondition[T1, T2]) applyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[T1](condition, query, table)
 }
 
-//nolint:unused // is used
 func (condition existsCondition[T1, T2]) getSQL(query *GormQuery, t1Table Table) (string, []any, error) {
 	connectionCondition := And(condition.Conditions...)
 
@@ -72,7 +69,6 @@ func (condition existsCondition[T1, T2]) getSQL(query *GormQuery, t1Table Table)
 	), values, nil
 }
 
-//nolint:unused // is used
 func (condition existsCondition[T1, T2]) affectsDeletedAt() bool {
 	return false
 }

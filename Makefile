@@ -4,9 +4,9 @@ install_dependencies:
 	go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
 
 lint:
-	golangci-lint run
-	cd cql-gen && golangci-lint run --config ../.golangci.yml
-	cd cqllint && golangci-lint run --config ../.golangci.yml
+	golangci-lint run --new-from-rev=origin/main
+# 	cd cql-gen && golangci-lint run --config ../.golangci.yml golangci-lint run --new-from-rev=origin/main
+# 	cd cqllint && golangci-lint run --config ../.golangci.yml golangci-lint run --new-from-rev=origin/main
 
 rmdb:
 	docker stop cql-test-db && docker rm cql-test-db

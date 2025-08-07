@@ -141,10 +141,7 @@ func (query *GormQuery) AddSelectField(table Table, fieldID IField, addAs bool) 
 	)
 
 	if addAs {
-		columnName += fmt.Sprintf(
-			" AS %s",
-			query.getSelectAlias(table, fieldID),
-		)
+		columnName += " AS " + query.getSelectAlias(table, fieldID)
 	}
 
 	query.AddSelect(columnName)

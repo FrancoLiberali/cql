@@ -73,7 +73,6 @@ func preloadsInReturningNotAllowed(dialector sql.Dialector) error {
 	)
 }
 
-//nolint:unused // is used
 func conditionOperatorError[TObject model.Model, TAtribute any](operatorErr error, condition fieldCondition[TObject, TAtribute]) error {
 	return fmt.Errorf(
 		"%w; model: %T, field: %s",
