@@ -98,7 +98,7 @@ jobs:
           name: ${{ matrix.db }} Tests Report  # Name of the check run which will be created
           path: tests-${{ matrix.db }}.xml     # Path to test results
           reporter: java-junit                 # Format of test results
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage
           path: coverage_${{ matrix.db }}.out
