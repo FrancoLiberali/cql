@@ -26,7 +26,7 @@ const (
 	username = "cql"
 	password = "cql_password2023"
 	host     = "localhost"
-	port     = 5000
+	port     = 5001
 	sslMode  = "disable"
 	dbName   = "cql_db"
 )
