@@ -57,7 +57,7 @@ func (query *Query[T]) Offset(offset int) *Query[T] {
 	return query
 }
 
-// TODO docs
+// GroupBy arrange identical data into groups
 func (query *Query[T]) GroupBy(fields ...IField) *QueryGroup {
 	query.addError(query.gormQuery.GroupBy(fields))
 

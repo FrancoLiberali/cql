@@ -78,12 +78,11 @@ func (query *GormQuery) Limit(limit int) {
 	query.GormDB = query.GormDB.Limit(limit)
 }
 
-// TODO docs
+// GroupBy arrange identical data into groups
 func (query *GormQuery) GroupBy(fields []IField) error {
 	query.cleanSelects()
 
 	for _, field := range fields {
-		// TODO que pasa con los joins
 		table, err := query.GetModelTable(field, UndefinedJoinNumber)
 		if err != nil {
 			return err
