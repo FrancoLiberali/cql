@@ -100,7 +100,7 @@ jobs:
           reporter: java-junit                 # Format of test results
       - uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage_${{ matrix.db }}
           path: coverage_${{ matrix.db }}.out
       - name: Stop containers
         if: ${{ matrix.db != 'sqlite' }}
