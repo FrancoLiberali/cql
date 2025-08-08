@@ -90,7 +90,7 @@ func (query *GormQuery) GroupBy(fields []IField) error {
 
 		query.AddSelectField(table, field, false)
 
-		query.GormDB.Group(table.Alias + "." + query.ColumnName(table, field.fieldName()))
+		query.GormDB.Group(table.SQLName() + "." + query.ColumnName(table, field.fieldName()))
 	}
 
 	return nil

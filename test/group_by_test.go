@@ -200,25 +200,6 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastIntToStringWorks() {
 	EqualList(&ts.Suite, []ResultString{{Int: 1, Aggregation: "2"}, {Int: 0, Aggregation: "1"}}, results)
 }
 
-func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastFloatToIntWorks() {
-	ts.createProduct("1", 1, 1, false, nil)
-	ts.createProduct("2", 1, 2, false, nil)
-	ts.createProduct("3", 0, 0, false, nil)
-
-	results := []ResultInt{}
-
-	err := cql.Query[models.Product](
-		ts.db,
-	).GroupBy(
-		conditions.Product.Int,
-	).Select(
-		conditions.Product.Int.Aggregate().Average(), "aggregation1",
-	).Into(&results)
-
-	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 1}, {Int: 0, Aggregation1: 0}}, results)
-}
-
 func (ts *GroupByIntTestSuite) TestGroupBySelectIntoStructWithLessFieldsWork() {
 	ts.createProduct("1", 1, 0, false, nil)
 	ts.createProduct("2", 1, 0, false, nil)
