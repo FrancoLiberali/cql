@@ -115,9 +115,9 @@ jobs:
         with:
           fetch-depth: 0
       - name: Download line coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v5
         with:
-          name: coverage
+          pattern: coverage_*
       - name: Download gen line coverage report
         id: download-gen-artifact
         uses: dawidd6/action-download-artifact@v3
