@@ -589,6 +589,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedField() {
 	results := []ResultInt{}
 
 	switch getDBDialector() {
+	// TODO group by joined field doesn't work for Postgres
 	case sql.MySQL, sql.SQLServer, sql.SQLite:
 		err := cql.Query[models.Sale](
 			ts.db,
@@ -604,8 +605,6 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedField() {
 			{Int: 2, Aggregation1: 3},
 			{Int: 3, Aggregation1: 1},
 		}, results)
-	case sql.Postgres:
-		// TODO group by joined field doesn't work for Postgres
 	}
 }
 
@@ -646,6 +645,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedFieldAndWithJoinedFieldInSelect(
 	results := []ResultInt{}
 
 	switch getDBDialector() {
+	// TODO group by joined field doesn't work for Postgres
 	case sql.MySQL, sql.SQLServer, sql.SQLite:
 		err := cql.Query[models.Sale](
 			ts.db,
@@ -661,8 +661,6 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedFieldAndWithJoinedFieldInSelect(
 			{Int: 2, Aggregation1: 2},
 			{Int: 3, Aggregation1: 3},
 		}, results)
-	case sql.Postgres:
-		// TODO group by joined field doesn't work for Postgres
 	}
 }
 
