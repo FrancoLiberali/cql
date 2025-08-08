@@ -9,6 +9,7 @@ import (
 	"github.com/FrancoLiberali/cql/cql-gen/cmd/log"
 )
 
+// force ci
 const (
 	// cql/condition
 	conditionPath           = cqlPath + "/condition"
