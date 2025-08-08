@@ -47,7 +47,7 @@ jobs:
         run: go mod download
       - name: Run tests
         run: go test ./cqllint/... -coverpkg=./cqllint/... -coverprofile=coverage_lint.out -v
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage_lint
           path: coverage_lint.out

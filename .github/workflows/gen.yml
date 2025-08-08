@@ -45,7 +45,7 @@ jobs:
           cache: true
       - name: Run tests
         run: go test ./cql-gen/tests -coverpkg=./cql-gen/... -coverprofile=coverage_gen.out -v
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage_gen
           path: coverage_gen.out
