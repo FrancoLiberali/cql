@@ -12,18 +12,15 @@ type containerCondition[T model.Model] struct {
 	Prefix              sql.Operator
 }
 
-//nolint:unused // is used
 func (condition containerCondition[T]) interfaceVerificationMethod(_ T) {
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T]
 }
 
-//nolint:unused // is used
 func (condition containerCondition[T]) applyTo(query *GormQuery, table Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }
 
-//nolint:unused // is used
 func (condition containerCondition[T]) getSQL(query *GormQuery, table Table) (string, []any, error) {
 	sqlString, values, err := condition.ConnectionCondition.getSQL(query, table)
 	if err != nil {
@@ -35,7 +32,6 @@ func (condition containerCondition[T]) getSQL(query *GormQuery, table Table) (st
 	return sqlString, values, nil
 }
 
-//nolint:unused // is used
 func (condition containerCondition[T]) affectsDeletedAt() bool {
 	return condition.ConnectionCondition.affectsDeletedAt()
 }

@@ -30,19 +30,21 @@ jobs:
     needs: [branch-naming-rules]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v3
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: '^1.18'
+          go-version: '1.23'
           cache: true
+          cache-dependency-path: go.sum
       - name: lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
+          only-new-issues: true
           skip-cache: true
-          skip-pkg-cache: true
-          skip-build-cache: true
+          skip-save-cache: true
 
   test:
     name: test
@@ -57,7 +59,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v3
         with:
-          go-version: '^1.18'
+          go-version: '1.23'
           cache: true
       - name: Install gotestsum
         run: go install gotest.tools/gotestsum@latest
@@ -96,9 +98,9 @@ jobs:
           name: ${{ matrix.db }} Tests Report  # Name of the check run which will be created
           path: tests-${{ matrix.db }}.xml     # Path to test results
           reporter: java-junit                 # Format of test results
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
-          name: coverage
+          name: coverage_${{ matrix.db }}.out
           path: coverage_${{ matrix.db }}.out
       - name: Stop containers
         if: ${{ matrix.db != 'sqlite' }}
@@ -113,9 +115,11 @@ jobs:
         with:
           fetch-depth: 0
       - name: Download line coverage reports
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v5
         with:
-          name: coverage
+          pattern: coverage_*
+          path: .
+          merge-multiple: true
       - name: Download gen line coverage report
         id: download-gen-artifact
         uses: dawidd6/action-download-artifact@v3

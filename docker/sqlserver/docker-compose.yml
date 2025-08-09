@@ -7,7 +7,7 @@ services:
     build: .
     image: cql/mssqlserver:latest
     ports:
-      - "5000:1433"
+      - "5001:1433"
     environment:
       MSSQL_SA_PASSWORD: "cql2023!"
       ACCEPT_EULA: "Y"

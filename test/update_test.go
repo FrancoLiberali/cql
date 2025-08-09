@@ -822,7 +822,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 
 	if getDBDialector() == cqlSQL.Postgres && err != nil {
 		// cockroachdb
-		ts.ErrorContains(err, "unsupported binary operator: <decimal> + <anyelement> (desired <int>) (SQLSTATE 22023); method: Set")
+		ts.ErrorContains(err, "unsupported binary operator: <decimal> + <anyelement> (returning <int>) (SQLSTATE 22023); method: Set")
 	} else {
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)

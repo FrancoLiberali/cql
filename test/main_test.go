@@ -26,7 +26,7 @@ const (
 	username = "cql"
 	password = "cql_password2023"
 	host     = "localhost"
-	port     = 5000
+	port     = 5001
 	sslMode  = "disable"
 	dbName   = "cql_db"
 )
@@ -49,6 +49,7 @@ func TestCQL(t *testing.T) {
 	suite.Run(t, NewOperatorsIntTestSuite(db))
 	suite.Run(t, NewUpdateIntTestSuite(db))
 	suite.Run(t, NewDeleteIntTestSuite(db))
+	suite.Run(t, NewGroupByIntTestSuite(db))
 }
 
 func NewDBConnection() (*gorm.DB, error) {
@@ -91,5 +92,10 @@ func NewDBConnection() (*gorm.DB, error) {
 }
 
 func getDBDialector() sql.Dialector {
-	return sql.Dialector(os.Getenv(dbTypeEnvKey))
+	dialector := os.Getenv(dbTypeEnvKey)
+	if dialector != "" {
+		return sql.Dialector(os.Getenv(dbTypeEnvKey))
+	}
+
+	return sql.SQLite
 }
