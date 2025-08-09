@@ -117,7 +117,9 @@ jobs:
       - name: Download line coverage reports
         uses: actions/download-artifact@v5
         with:
+          path: coverage
           pattern: coverage_*
+          merge-multiple: true
       - name: Download gen line coverage report
         id: download-gen-artifact
         uses: dawidd6/action-download-artifact@v3
