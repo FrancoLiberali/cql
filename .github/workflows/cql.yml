@@ -100,7 +100,7 @@ jobs:
           reporter: java-junit                 # Format of test results
       - uses: actions/upload-artifact@v4
         with:
-          name: coverage_${{ matrix.db }}
+          name: coverage_${{ matrix.db }}.out
           path: coverage_${{ matrix.db }}.out
       - name: Stop containers
         if: ${{ matrix.db != 'sqlite' }}
@@ -117,9 +117,7 @@ jobs:
       - name: Download line coverage reports
         uses: actions/download-artifact@v5
         with:
-          path: coverage
           pattern: coverage_*
-          merge-multiple: true
       - name: Download gen line coverage report
         id: download-gen-artifact
         uses: dawidd6/action-download-artifact@v3
