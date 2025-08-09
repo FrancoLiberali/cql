@@ -10,7 +10,7 @@ services:
     working_dir: /cockroach
     entrypoint: /cockroach/cockroach.sh start-single-node --insecure --log-config-file=files/logs.yaml
     ports:
-      - "5000:26257"
+      - "5001:26257"
       - "8080:8080" # Web based dashboard
     environment:
       - COCKROACH_USER=cql

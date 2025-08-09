@@ -13,21 +13,23 @@ jobs:
     name: Code style
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: actions/setup-go@v3
+      - name: Set up Go
+        uses: actions/setup-go@v5
         with:
-          go-version: '^1.18'
+          go-version: '1.23'
           cache: true
+          cache-dependency-path: go.sum
       - name: lint
-        uses: golangci/golangci-lint-action@v3
+        uses: golangci/golangci-lint-action@v6
         with:
+          only-new-issues: true
           working-directory: cqllint
           args: --config=../.golangci.yml
           skip-cache: true
-          skip-pkg-cache: true
-          skip-build-cache: true
+          skip-save-cache: true
 
   test:
     name: Test
@@ -39,13 +41,13 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v3
         with:
-          go-version: '^1.18'
+          go-version: '1.23'
           cache: true
       - name: Mod download
         run: go mod download
       - name: Run tests
         run: go test ./cqllint/... -coverpkg=./cqllint/... -coverprofile=coverage_lint.out -v
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: coverage_lint
           path: coverage_lint.out

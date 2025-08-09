@@ -7,13 +7,29 @@ type Function interface {
 }
 
 type FunctionFunction struct {
+	sqlPrefix   string
 	sqlFunction string
+	sqlSuffix   string
 }
 
 func (f FunctionFunction) ApplyTo(internalSQL string, values int) string {
-	placeholders := strings.Repeat(", ?", values)
+	finalSQL := f.sqlPrefix
 
-	return f.sqlFunction + "(" + internalSQL + placeholders + ")"
+	if f.sqlFunction != "" {
+		placeholders := strings.Repeat(", ?", values)
+
+		finalSQL += f.sqlFunction + "(" + internalSQL + placeholders
+
+		if !strings.Contains(f.sqlFunction, "(") {
+			finalSQL += ")"
+		}
+	}
+
+	if f.sqlSuffix != "" {
+		finalSQL += " " + f.sqlSuffix
+	}
+
+	return finalSQL
 }
 
 type OperatorFunction struct {
@@ -40,6 +56,8 @@ type FunctionByDialector struct {
 const all = "all"
 
 var (
+	// Numeric
+
 	Plus    = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "+"}}, Name: "Plus"}    //nolint:exhaustive // all present
 	Minus   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "-"}}, Name: "Minus"}   //nolint:exhaustive // all present
 	Times   = FunctionByDialector{functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: "*"}}, Name: "Times"}   //nolint:exhaustive // all present
@@ -74,12 +92,86 @@ var (
 		functions: map[Dialector]Function{all: OperatorFunction{sqlOperator: ">>"}}, //nolint:exhaustive // all present
 		Name:      "ShiftRight",
 	}
+
+	// String
+
 	Concat = FunctionByDialector{
 		functions: map[Dialector]Function{ //nolint:exhaustive // all present
 			Postgres: OperatorFunction{sqlOperator: "||"},
 			all:      FunctionFunction{sqlFunction: "CONCAT"},
 		},
 		Name: "Concat",
+	}
+
+	// Aggregators
+	// All
+
+	Count = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "COUNT"}}, //nolint:exhaustive // all present
+		Name:      "Count",
+	}
+	CountAll = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlPrefix: "COUNT(*)"}}, //nolint:exhaustive // all present
+		Name:      "CountAll",
+	}
+	Min = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "MIN"}}, //nolint:exhaustive // all present
+		Name:      "Min",
+	}
+	Max = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "MAX"}}, //nolint:exhaustive // all present
+		Name:      "Max",
+	}
+
+	// Numeric
+
+	Sum = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "SUM"}}, //nolint:exhaustive // all present
+		Name:      "Sum",
+	}
+	Average = FunctionByDialector{
+		functions: map[Dialector]Function{all: FunctionFunction{sqlFunction: "AVG"}}, //nolint:exhaustive // all present
+		Name:      "Average",
+	}
+	BitAndAggregation = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // supported
+			Postgres: FunctionFunction{sqlFunction: "BIT_AND"},
+			MySQL:    FunctionFunction{sqlFunction: "BIT_AND"},
+		},
+		Name: "And",
+	}
+	BitOrAggregation = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // supported
+			Postgres: FunctionFunction{sqlFunction: "BIT_OR"},
+			MySQL:    FunctionFunction{sqlFunction: "BIT_OR"},
+		},
+		Name: "Or",
+	}
+
+	// Bool
+	All = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+			Postgres:  FunctionFunction{sqlFunction: "EVERY"},
+			SQLServer: FunctionFunction{sqlFunction: "AVG(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) = 1 then 1 else 0 end"},
+			all:       FunctionFunction{sqlFunction: "AVG", sqlSuffix: "= 1"},
+		},
+		Name: "All",
+	}
+	Any = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+			Postgres:  FunctionFunction{sqlFunction: "BOOL_OR"},
+			SQLServer: FunctionFunction{sqlFunction: "SUM(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) > 0 then 1 else 0 end"},
+			all:       FunctionFunction{sqlFunction: "SUM", sqlSuffix: "> 0"},
+		},
+		Name: "Any",
+	}
+	None = FunctionByDialector{
+		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+			Postgres:  FunctionFunction{sqlFunction: "NOT BOOL_OR"},
+			SQLServer: FunctionFunction{sqlFunction: "SUM(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) = 0 then 1 else 0 end"},
+			all:       FunctionFunction{sqlFunction: "SUM", sqlSuffix: "= 0"},
+		},
+		Name: "None",
 	}
 )
 

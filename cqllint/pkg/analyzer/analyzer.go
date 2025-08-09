@@ -16,6 +16,7 @@ import (
 
 var doc = "v" + version.Version + "\nChecks that cql queries will not generate run-time errors."
 
+// force ci
 var Analyzer = &analysis.Analyzer{
 	Name:     "cqllint",
 	Doc:      doc,

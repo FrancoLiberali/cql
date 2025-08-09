@@ -57,6 +57,17 @@ func (query *Query[T]) Offset(offset int) *Query[T] {
 	return query
 }
 
+// GroupBy arrange identical data into groups
+func (query *Query[T]) GroupBy(fields ...IField) *QueryGroup {
+	query.addError(query.gormQuery.GroupBy(fields))
+
+	return &QueryGroup{
+		gormQuery: query.gormQuery,
+		err:       query.err,
+		fields:    fields,
+	}
+}
+
 // Finishing methods
 
 // Count returns the amount of models that fulfill the conditions
@@ -134,7 +145,7 @@ func (query *Query[T]) Find() ([]*T, error) {
 }
 
 func (query *Query[T]) addError(err error) {
-	if query.err == nil {
+	if err != nil && query.err == nil {
 		query.err = err
 	}
 }

@@ -58,7 +58,6 @@ func (value FieldValue[TModel, TAttribute]) toSQL(query *GormQuery, table Table)
 	return finalSQL, value.values, nil
 }
 
-//nolint:unused // necessary for ValueOfType[T any]
 func (value FieldValue[TModel, TAttribute]) getType() TAttribute {
 	return *new(TAttribute)
 }
@@ -69,7 +68,6 @@ type NumericFieldValue[TModel model.Model, TAttribute any] struct {
 
 type numeric struct{}
 
-//nolint:unused // necessary for ValueOfType[Numeric]
 func (value NumericFieldValue[TModel, TAttribute]) getType() numeric {
 	return numeric{}
 }
