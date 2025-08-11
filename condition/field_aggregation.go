@@ -185,8 +185,10 @@ func (aggregation commonAggregation) Eq(
 	}
 }
 
-type NumericOrNumericAggregation interface {
+type NumericAggregationComparable interface {
 	getValue() float64
+	getSQL() toSQLFunc
+	numericAggregationComparable()
 }
 
 type NumericResultAggregation struct {
@@ -197,13 +199,14 @@ func (aggregation NumericResultAggregation) getValue() float64 {
 	return 0
 }
 
-func (aggregation NumericResultAggregation) Eq(value NumericOrNumericAggregation) AggregationCondition {
-	otherAggregation, isAggregation := value.(NumericResultAggregation)
-	if isAggregation {
-		return aggregation.commonAggregation.Eq(otherAggregation.toSQL, nil)
-	}
+func (aggregation NumericResultAggregation) getSQL() toSQLFunc {
+	return aggregation.toSQL
+}
 
-	return aggregation.commonAggregation.Eq(nil, value.getValue())
+func (aggregation NumericResultAggregation) numericAggregationComparable() {}
+
+func (aggregation NumericResultAggregation) Eq(value NumericAggregationComparable) AggregationCondition {
+	return aggregation.commonAggregation.Eq(value.getSQL(), value.getValue())
 }
 
 type BoolOrBoolAggregation interface {
