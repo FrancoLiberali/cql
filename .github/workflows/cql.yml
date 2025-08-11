@@ -5,6 +5,10 @@ on:
       - main
   pull_request:
     types: [opened, synchronize, reopened]
+    paths-ignore:
+      - cql-gen/**
+      - cqllint/**
+      - docs/**
 
 permissions:
   id-token: write
