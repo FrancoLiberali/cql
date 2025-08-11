@@ -727,7 +727,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsBefore() {
 	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
 }
 
-func (ts *GroupByIntTestSuite) TestGroupByHaving() {
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithOneCondition() {
 	ts.createProduct("1", 1, 1.0, false, nil)
 	ts.createProduct("2", 1, 1.0, false, nil)
 	ts.createProduct("3", 0, 1.0, false, nil)
@@ -739,8 +739,16 @@ func (ts *GroupByIntTestSuite) TestGroupByHaving() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
+	).Having(
+		// TODO podria querer que sea mas complejo, tipo tener un or
+		// opcion: funcion que recibe la agregracion y le aplicas cosas
+
+		// TODO podrian querer sea dinamicas, como poner condiciones entre agregacione
+
+		// podrian querer ser distintas las que pongo en el select que el having, entonces hay que repetirlas
+		conditions.Product.Int.Aggregate().Sum().Eq(2),
 	).Select(
-		conditions.Product.Int.Aggregate().Sum().Eq(2), "aggregation1",
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
 	ts.Require().NoError(err)

@@ -108,10 +108,13 @@ type Aggregation struct {
 	havingValues []any
 }
 
-func (aggregation Aggregation) Eq(value int) Aggregation {
+func (aggregation Aggregation) Eq(value int) AggregationCondition {
 	// TODO ver si siempre es int, depende del resultado que devuelva la agregacion
-	aggregation.havingValues = []any{value}
-	return aggregation
+	return AggregationCondition{
+		aggregation: aggregation,
+		function:    "=",
+		values:      []any{value},
+	}
 }
 
 func (aggregation Aggregation) toSQL(query *GormQuery, table Table) (string, error) {
@@ -142,12 +145,17 @@ func (aggregation Aggregation) toSelectSQL(query *GormQuery, table Table, as str
 	), nil
 }
 
-func (aggregation Aggregation) toHavingSQL(query *GormQuery, table Table) (string, []any, error) {
-	functionSQL, err := aggregation.toSQL(query, table)
+type AggregationCondition struct {
+	aggregation Aggregation
+	function    string
+	values      []any
+}
+
+func (condition AggregationCondition) toSQL(query *GormQuery, table Table) (string, []any, error) {
+	functionSQL, err := condition.aggregation.toSQL(query, table)
 	if err != nil {
 		return "", nil, err
 	}
 
-	// TODO hardcodeado el =
-	return functionSQL + " = ?", aggregation.havingValues, nil
+	return functionSQL + " " + condition.function + " ?", condition.values, nil
 }
