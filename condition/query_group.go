@@ -6,20 +6,9 @@ type QueryGroup struct {
 	fields    []IField
 }
 
+// TODO docs
 func (query *QueryGroup) Having(condition AggregationCondition) *QueryGroup {
-	var table Table
-
-	if condition.aggregation.field != nil { // CountAll
-		var err error
-
-		table, err = query.gormQuery.GetModelTable(condition.aggregation.field)
-		if err != nil {
-			query.addError(methodError(err, "Having"))
-			return query
-		}
-	}
-
-	sql, args, err := condition.toSQL(query.gormQuery, table)
+	sql, args, err := condition.toSQL(query.gormQuery)
 	if err != nil {
 		query.addError(methodError(err, "Having"))
 		return query
@@ -30,20 +19,8 @@ func (query *QueryGroup) Having(condition AggregationCondition) *QueryGroup {
 	return query
 }
 
-func (query *QueryGroup) Select(aggregation Aggregation, as string) *QueryGroup {
-	var table Table
-
-	if aggregation.field != nil { // CountAll
-		var err error
-
-		table, err = query.gormQuery.GetModelTable(aggregation.field)
-		if err != nil {
-			query.addError(methodError(err, "Select"))
-			return query
-		}
-	}
-
-	selectSQL, err := aggregation.toSelectSQL(query.gormQuery, table, as)
+func (query *QueryGroup) Select(aggregation IAggregation, as string) *QueryGroup {
+	selectSQL, err := aggregation.toSelectSQL(query.gormQuery, as)
 	if err != nil {
 		query.addError(methodError(err, "Select"))
 		return query
