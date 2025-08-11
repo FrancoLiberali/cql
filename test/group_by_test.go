@@ -827,3 +827,28 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationOfA
 		{Code: 1, Aggregation1: 3},
 	}, results)
 }
+
+func (ts *GroupByIntTestSuite) TestGroupByMultipleHaving() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+		conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+// TODO funciones en havings, logicos en having

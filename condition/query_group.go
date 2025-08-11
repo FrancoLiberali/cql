@@ -7,14 +7,16 @@ type QueryGroup struct {
 }
 
 // TODO docs
-func (query *QueryGroup) Having(condition AggregationCondition) *QueryGroup {
-	sql, args, err := condition.toSQL(query.gormQuery)
-	if err != nil {
-		query.addError(methodError(err, "Having"))
-		return query
-	}
+func (query *QueryGroup) Having(conditions ...AggregationCondition) *QueryGroup {
+	for _, condition := range conditions {
+		sql, args, err := condition.toSQL(query.gormQuery)
+		if err != nil {
+			query.addError(methodError(err, "Having"))
+			return query
+		}
 
-	query.gormQuery.Having(sql, args...)
+		query.gormQuery.Having(sql, args...)
+	}
 
 	return query
 }
