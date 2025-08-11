@@ -19,7 +19,15 @@ func (query *QueryGroup) Select(aggregation Aggregation, as string) *QueryGroup 
 		}
 	}
 
-	selectSQL, err := aggregation.toSQL(query.gormQuery, table, as)
+	havingSQL, havingArgs, err := aggregation.toHavingSQL(query.gormQuery, table)
+	if err != nil {
+		query.addError(methodError(err, "Select"))
+		return query
+	}
+
+	query.gormQuery.Having(havingSQL, havingArgs...)
+
+	selectSQL, err := aggregation.toSelectSQL(query.gormQuery, table, as)
 	if err != nil {
 		query.addError(methodError(err, "Select"))
 		return query

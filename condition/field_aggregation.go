@@ -103,11 +103,18 @@ func (fieldAggregation BoolFieldAggregation) None() Aggregation {
 }
 
 type Aggregation struct {
-	field    IField
-	Function sql.FunctionByDialector
+	field        IField
+	Function     sql.FunctionByDialector
+	havingValues []any
 }
 
-func (aggregation Aggregation) toSQL(query *GormQuery, table Table, as string) (string, error) {
+func (aggregation Aggregation) Eq(value int) Aggregation {
+	// TODO ver si siempre es int, depende del resultado que devuelva la agregacion
+	aggregation.havingValues = []any{value}
+	return aggregation
+}
+
+func (aggregation Aggregation) toSQL(query *GormQuery, table Table) (string, error) {
 	function, isPresent := aggregation.Function.Get(query.Dialector())
 	if !isPresent {
 		return "", functionError(ErrUnsupportedByDatabase, aggregation.Function)
@@ -119,9 +126,28 @@ func (aggregation Aggregation) toSQL(query *GormQuery, table Table, as string) (
 		columnSQL = aggregation.field.columnSQL(query, table)
 	}
 
+	return function.ApplyTo(columnSQL, 0), nil
+}
+
+func (aggregation Aggregation) toSelectSQL(query *GormQuery, table Table, as string) (string, error) {
+	functionSQL, err := aggregation.toSQL(query, table)
+	if err != nil {
+		return "", err
+	}
+
 	return fmt.Sprintf(
 		"%s AS %s",
-		function.ApplyTo(columnSQL, 0),
+		functionSQL,
 		as,
 	), nil
+}
+
+func (aggregation Aggregation) toHavingSQL(query *GormQuery, table Table) (string, []any, error) {
+	functionSQL, err := aggregation.toSQL(query, table)
+	if err != nil {
+		return "", nil, err
+	}
+
+	// TODO hardcodeado el =
+	return functionSQL + " = ?", aggregation.havingValues, nil
 }

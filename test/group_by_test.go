@@ -705,3 +705,44 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedMultipleTimesFieldReturnsError()
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
 	ts.ErrorContains(err, "field's model appears more than once, select which one you want to use with Appearance; model: models.ParentParent")
 }
+
+func (ts *GroupByIntTestSuite) TestGroupByWithConditionsBefore() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Float.Is().Eq(1.0),
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHaving() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Sum().Eq(2), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
