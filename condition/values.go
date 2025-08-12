@@ -29,3 +29,9 @@ type BoolValue struct {
 func (boolValue BoolValue) getValue() bool {
 	return boolValue.Value
 }
+
+func (boolValue BoolValue) getSQL() toSQLFunc {
+	return nil
+}
+
+func (boolValue BoolValue) boolAggregationComparable() {}

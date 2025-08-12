@@ -134,6 +134,10 @@ type commonAggregation struct {
 	Function sql.FunctionByDialector
 }
 
+func (aggregation commonAggregation) getSQL() toSQLFunc {
+	return aggregation.toSQL
+}
+
 func (aggregation commonAggregation) getField() IField {
 	return aggregation.field
 }
@@ -199,28 +203,32 @@ func (aggregation NumericResultAggregation) getValue() float64 {
 	return 0
 }
 
-func (aggregation NumericResultAggregation) getSQL() toSQLFunc {
-	return aggregation.toSQL
-}
-
 func (aggregation NumericResultAggregation) numericAggregationComparable() {}
 
 func (aggregation NumericResultAggregation) Eq(value NumericAggregationComparable) AggregationCondition {
 	return aggregation.commonAggregation.Eq(value.getSQL(), value.getValue())
 }
 
-type BoolOrBoolAggregation interface {
+type BoolAggregationComparable interface {
 	getValue() bool
+
+	getSQL() toSQLFunc
+	boolAggregationComparable()
 }
 
 type BoolResultAggregation struct {
 	commonAggregation
 }
 
-func (aggregation BoolResultAggregation) Eq(value BoolOrBoolAggregation) AggregationCondition {
-	// TODO
-	return aggregation.commonAggregation.Eq(nil, value.getValue())
+func (aggregation BoolResultAggregation) Eq(value BoolAggregationComparable) AggregationCondition {
+	return aggregation.commonAggregation.Eq(value.getSQL(), value.getValue())
 }
+
+func (aggregation BoolResultAggregation) getValue() bool {
+	return false
+}
+
+func (aggregation BoolResultAggregation) boolAggregationComparable() {}
 
 type AggregationCondition struct {
 	aggregation        IAggregation

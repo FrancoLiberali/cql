@@ -776,7 +776,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentCondition() {
 	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
 }
 
-func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregation() {
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNumeric() {
 	ts.createProduct("1", 1, 1.0, false, nil)
 	ts.createProduct("2", 1, 1.0, false, nil)
 	ts.createProduct("3", 0, 1.0, false, nil)
@@ -963,4 +963,47 @@ func (ts *GroupByIntTestSuite) TestGroupByWithNotConnectionMultiple() {
 	}, results)
 }
 
-// TODO funciones en havings
+func (ts *GroupByIntTestSuite) TestGroupByHavingBoolean() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Bool.Aggregate().All().Eq(cql.Bool(true)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingBooleanCompareWithAnotherAggregation() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Bool.Aggregate().All().Eq(conditions.Product.Bool.Aggregate().Any()),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 2, Aggregation1: 2}}, results)
+}
