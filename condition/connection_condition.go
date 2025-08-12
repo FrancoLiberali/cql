@@ -42,14 +42,18 @@ func (condition connectionCondition[T]) getSQL(query *GormQuery, table Table) (s
 		}
 	}
 
+	return connectSQLs(sqlStrings, condition.Connector.String()), values, nil
+}
+
+func connectSQLs(sqlStrings []string, connector string) string {
 	if len(sqlStrings) > 0 {
 		return "(" + strings.Join(
 			sqlStrings,
-			" "+condition.Connector.String()+" ",
-		) + ")", values, nil
+			" "+connector+" ",
+		) + ")"
 	}
 
-	return "", values, nil
+	return ""
 }
 
 func (condition connectionCondition[T]) affectsDeletedAt() bool {

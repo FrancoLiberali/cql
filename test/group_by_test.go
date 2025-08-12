@@ -851,4 +851,116 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHaving() {
 	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
 }
 
-// TODO funciones en havings, logicos en having
+func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithAndConnection() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.AndHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithOrConnection() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("5", 2, 3.0, false, nil)
+	ts.createProduct("6", 3, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.OrHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(1)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 1, Aggregation1: 2},
+		{Int: 0, Aggregation1: 0},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByWithNotConnection() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("5", 2, 3.0, false, nil)
+	ts.createProduct("6", 3, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.NotHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0, Aggregation1: 0},
+		{Int: 2, Aggregation1: 2},
+		{Int: 3, Aggregation1: 3},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByWithNotConnectionMultiple() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("5", 0, 3.0, false, nil)
+	ts.createProduct("6", 3, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.NotHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0, Aggregation1: 0},
+		{Int: 3, Aggregation1: 3},
+	}, results)
+}
+
+// TODO funciones en havings

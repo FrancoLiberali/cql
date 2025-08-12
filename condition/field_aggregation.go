@@ -223,13 +223,47 @@ func (aggregation BoolResultAggregation) Eq(value BoolOrBoolAggregation) Aggrega
 }
 
 type AggregationCondition struct {
-	aggregation   IAggregation
-	function      string
-	sqlGeneration func(query *GormQuery) (string, error)
-	values        []any
+	aggregation        IAggregation
+	function           string
+	sqlGeneration      func(query *GormQuery) (string, error)
+	values             []any
+	conditions         []AggregationCondition
+	connectionOperator string
+	containerOperator  string
 }
 
 func (condition AggregationCondition) toSQL(query *GormQuery) (string, []any, error) {
+	if condition.connectionOperator != "" { // connector condition
+		sqlStrings := []string{}
+		values := []any{}
+
+		for _, internalCondition := range condition.conditions {
+			internalSQLString, internalValues, err := internalCondition.toSQL(query)
+			if err != nil {
+				return "", nil, err
+			}
+
+			if internalSQLString != "" {
+				sqlStrings = append(sqlStrings, internalSQLString)
+
+				values = append(values, internalValues...)
+			}
+		}
+
+		return connectSQLs(sqlStrings, condition.connectionOperator), values, nil
+	}
+
+	if condition.containerOperator != "" { // container condition
+		sqlString, values, err := ConnectionAggregationCondition(condition.conditions, sql.And).toSQL(query)
+		if err != nil {
+			return "", nil, err
+		}
+
+		sqlString = condition.containerOperator + " " + sqlString
+
+		return sqlString, values, nil
+	}
+
 	functionSQL, err := condition.aggregation.toSQL(query)
 	if err != nil {
 		return "", nil, err
@@ -245,4 +279,18 @@ func (condition AggregationCondition) toSQL(query *GormQuery) (string, []any, er
 	}
 
 	return functionSQL + " " + condition.function + " ?", condition.values, nil
+}
+
+func ConnectionAggregationCondition(conditions []AggregationCondition, operator sql.Operator) AggregationCondition {
+	return AggregationCondition{
+		conditions:         conditions,
+		connectionOperator: operator.String(),
+	}
+}
+
+func ContainerAggregationCondition(conditions []AggregationCondition, operator sql.Operator) AggregationCondition {
+	return AggregationCondition{
+		conditions:        conditions,
+		containerOperator: operator.String(),
+	}
 }
