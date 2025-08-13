@@ -20,8 +20,6 @@ func (numericValue NumericValue[T]) getValue() float64 {
 	return float64(numericValue.Value)
 }
 
-func (numericValue NumericValue[T]) numericAggregationComparable() {}
-
 type BoolValue struct {
 	Value bool
 }
@@ -33,8 +31,6 @@ func (boolValue BoolValue) getValue() bool {
 func (boolValue BoolValue) getSQL() toSQLFunc {
 	return nil
 }
-
-func (boolValue BoolValue) boolAggregationComparable() {}
 
 type Value[T any] struct {
 	Value T
