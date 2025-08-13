@@ -175,20 +175,87 @@ type AggregationComparable[T any] interface {
 	getSQL() toSQLFunc
 }
 
-func (aggregation AggregationResult[T]) Eq(value AggregationComparable[T]) AggregationCondition {
+func (aggregation AggregationResult[T]) applyOperator(value AggregationComparable[T], operator sql.Operator) AggregationCondition {
 	return AggregationCondition{
 		aggregation:   aggregation,
-		function:      "=",
+		operator:      operator,
 		sqlGeneration: value.getSQL(),
 		values:        []any{value.getValue()},
 	}
 }
 
-// TODO resto de comparadores
+// EqualTo
+func (aggregation AggregationResult[T]) Eq(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.applyOperator(value, sql.Eq)
+}
+
+// NotEqualTo
+func (aggregation AggregationResult[T]) NotEq(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.applyOperator(value, sql.NotEq)
+}
+
+// LessThan
+func (aggregation AggregationResult[T]) Lt(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.applyOperator(value, sql.Lt)
+}
+
+// LessThanOrEqualTo
+func (aggregation AggregationResult[T]) LtOrEq(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.applyOperator(value, sql.LtOrEq)
+}
+
+// GreaterThan
+func (aggregation AggregationResult[T]) Gt(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.applyOperator(value, sql.Gt)
+}
+
+// GreaterThanOrEqualTo
+func (aggregation AggregationResult[T]) GtOrEq(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.applyOperator(value, sql.GtOrEq)
+}
+
+func (aggregation AggregationResult[T]) applyListOperator(values []T, operator sql.Operator) AggregationCondition {
+	return AggregationCondition{
+		aggregation:   aggregation,
+		operator:      operator,
+		sqlGeneration: nil,
+		values:        []any{values},
+	}
+}
+
+func (aggregation AggregationResult[T]) In(values []T) AggregationCondition {
+	return aggregation.applyListOperator(values, sql.ArrayIn)
+}
+
+func (aggregation AggregationResult[T]) NotIn(values []T) AggregationCondition {
+	return aggregation.applyListOperator(values, sql.ArrayNotIn)
+}
+
+// Pattern in all databases:
+//   - An underscore (_) in pattern stands for (matches) any single character.
+//   - A percent sign (%) matches any sequence of zero or more characters.
+//
+// Additionally in SQLServer:
+//   - Square brackets ([ ]) matches any single character within the specified range ([a-f]) or set ([abcdef]).
+//   - [^] matches any single character not within the specified range ([^a-f]) or set ([^abcdef]).
+//
+// WARNINGS:
+//   - SQLite: LIKE is case-insensitive unless case_sensitive_like pragma (https://www.sqlite.org/pragma.html#pragma_case_sensitive_like) is true.
+//   - SQLServer, MySQL: the case-sensitivity depends on the collation used in compared column.
+//   - PostgreSQL: LIKE is always case-sensitive
+//
+// refs:
+//   - mysql: https://dev.mysql.com/doc/refman/8.0/en/string-comparison-functions.html#operator_like
+//   - postgresql: https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-LIKE
+//   - sqlserver: https://learn.microsoft.com/en-us/sql/t-sql/language-elements/like-transact-sql?view=sql-server-ver16
+//   - sqlite: https://www.sqlite.org/lang_expr.html#like
+func (aggregation AggregationResult[T]) Like(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.applyOperator(value, sql.Like)
+}
 
 type AggregationCondition struct {
 	aggregation        IAggregation
-	function           string
+	operator           sql.Operator
 	sqlGeneration      func(query *GormQuery) (string, error)
 	values             []any
 	conditions         []AggregationCondition
@@ -239,10 +306,10 @@ func (condition AggregationCondition) toSQL(query *GormQuery) (string, []any, er
 			return "", nil, err
 		}
 
-		return functionSQL + " " + condition.function + " " + sql, []any{}, nil
+		return functionSQL + " " + condition.operator.String() + " " + sql, []any{}, nil
 	}
 
-	return functionSQL + " " + condition.function + " ?", condition.values, nil
+	return functionSQL + " " + condition.operator.String() + " ?", condition.values, nil
 }
 
 func ConnectionAggregationCondition(conditions []AggregationCondition, operator sql.Operator) AggregationCondition {
