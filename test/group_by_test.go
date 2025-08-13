@@ -840,7 +840,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionFloat64() 
 	ts.internalTestGroupByHavingWithDifferentCondition(cql.Float64(2))
 }
 
-func (ts *GroupByIntTestSuite) internalTestGroupByHavingWithDifferentCondition(value condition.NumericAggregationComparable) {
+func (ts *GroupByIntTestSuite) internalTestGroupByHavingWithDifferentCondition(value condition.AggregationComparable[float64]) {
 	ts.createProduct("1", 1, 1.0, false, nil)
 	ts.createProduct("2", 1, 1.0, false, nil)
 	ts.createProduct("3", 0, 1.0, false, nil)
