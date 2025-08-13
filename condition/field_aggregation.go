@@ -6,49 +6,58 @@ import (
 	"github.com/FrancoLiberali/cql/sql"
 )
 
-type FieldAggregation struct {
+type FieldAggregation[T any] struct {
 	field IField
 }
 
 // Count returns the number of values that are not null
-func (fieldAggregation FieldAggregation) Count() NumericResultAggregation {
+func (fieldAggregation FieldAggregation[T]) Count() NumericResultAggregation {
 	return NumericResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[float64]{
 			field:    fieldAggregation.field,
 			Function: sql.Count,
 		},
 	}
 }
 
-// // Min returns the minimum value of all values
-// func (fieldAggregation FieldAggregation) Min() AnyResultAggregation {
-// 	// TODO ver que hacer aca
-// 	return AnyResultAggregation{
-// 		commonAggregation: commonAggregation{
-// 			field:    fieldAggregation.field,
-// 			Function: sql.Min,
-// 		},
-// 	}
-// }
+// Min returns the minimum value of all values
+func (fieldAggregation FieldAggregation[T]) Min() AggregationResult[T] {
+	return AggregationResult[T]{
+		field:    fieldAggregation.field,
+		Function: sql.Min,
+	}
+}
 
-// // Max returns the maximum value of all values
-// func (fieldAggregation FieldAggregation) Max() AnyResultAggregation {
-// 	return AnyResultAggregation{
-// 		commonAggregation: commonAggregation{
-// 			field:    fieldAggregation.field,
-// 			Function: sql.Max,
-// 		},
-// 	}
-// }
+// Max returns the maximum value of all values
+func (fieldAggregation FieldAggregation[T]) Max() AggregationResult[T] {
+	return AggregationResult[T]{
+		field:    fieldAggregation.field,
+		Function: sql.Max,
+	}
+}
 
 type NumericFieldAggregation struct {
-	FieldAggregation
+	FieldAggregation[float64]
+}
+
+// Min returns the minimum value of all values
+func (fieldAggregation NumericFieldAggregation) Min() NumericResultAggregation {
+	return NumericResultAggregation{
+		AggregationResult: fieldAggregation.FieldAggregation.Min(),
+	}
+}
+
+// Max returns the maximum value of all values
+func (fieldAggregation NumericFieldAggregation) Max() NumericResultAggregation {
+	return NumericResultAggregation{
+		AggregationResult: fieldAggregation.FieldAggregation.Max(),
+	}
 }
 
 // Sum calculates the summation of all values
 func (fieldAggregation NumericFieldAggregation) Sum() NumericResultAggregation {
 	return NumericResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[float64]{
 			field:    fieldAggregation.field,
 			Function: sql.Sum,
 		},
@@ -58,7 +67,7 @@ func (fieldAggregation NumericFieldAggregation) Sum() NumericResultAggregation {
 // Average calculates the average (arithmetic mean) of all values
 func (fieldAggregation NumericFieldAggregation) Average() NumericResultAggregation {
 	return NumericResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[float64]{
 			field:    fieldAggregation.field,
 			Function: sql.Average,
 		},
@@ -70,7 +79,7 @@ func (fieldAggregation NumericFieldAggregation) Average() NumericResultAggregati
 // Not available for: sqlite, sqlserver
 func (fieldAggregation NumericFieldAggregation) And() NumericResultAggregation {
 	return NumericResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[float64]{
 			field:    fieldAggregation.field,
 			Function: sql.BitAndAggregation,
 		},
@@ -82,7 +91,7 @@ func (fieldAggregation NumericFieldAggregation) And() NumericResultAggregation {
 // Not available for: sqlite, sqlserver
 func (fieldAggregation NumericFieldAggregation) Or() NumericResultAggregation {
 	return NumericResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[float64]{
 			field:    fieldAggregation.field,
 			Function: sql.BitOrAggregation,
 		},
@@ -90,13 +99,13 @@ func (fieldAggregation NumericFieldAggregation) Or() NumericResultAggregation {
 }
 
 type BoolFieldAggregation struct {
-	FieldAggregation
+	FieldAggregation[bool]
 }
 
 // All returns true if all the values are true
 func (fieldAggregation BoolFieldAggregation) All() BoolResultAggregation {
 	return BoolResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[bool]{
 			field:    fieldAggregation.field,
 			Function: sql.All,
 		},
@@ -106,7 +115,7 @@ func (fieldAggregation BoolFieldAggregation) All() BoolResultAggregation {
 // All returns true if at least one value is true
 func (fieldAggregation BoolFieldAggregation) Any() BoolResultAggregation {
 	return BoolResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[bool]{
 			field:    fieldAggregation.field,
 			Function: sql.Any,
 		},
@@ -116,7 +125,7 @@ func (fieldAggregation BoolFieldAggregation) Any() BoolResultAggregation {
 // None returns true if all values are false
 func (fieldAggregation BoolFieldAggregation) None() BoolResultAggregation {
 	return BoolResultAggregation{
-		commonAggregation: commonAggregation{
+		AggregationResult: AggregationResult[bool]{
 			field:    fieldAggregation.field,
 			Function: sql.None,
 		},
@@ -129,20 +138,24 @@ type IAggregation interface {
 	getField() IField
 }
 
-type commonAggregation struct {
+type AggregationResult[T any] struct {
 	field    IField
 	Function sql.FunctionByDialector
 }
 
-func (aggregation commonAggregation) getSQL() toSQLFunc {
+func (aggregation AggregationResult[T]) getSQL() toSQLFunc {
 	return aggregation.toSQL
 }
 
-func (aggregation commonAggregation) getField() IField {
+func (aggregation AggregationResult[T]) getField() IField {
 	return aggregation.field
 }
 
-func (aggregation commonAggregation) toSQL(query *GormQuery) (string, error) {
+func (aggregation AggregationResult[T]) getValue() T {
+	return *new(T)
+}
+
+func (aggregation AggregationResult[T]) toSQL(query *GormQuery) (string, error) {
 	columnSQL := ""
 
 	if aggregation.field != nil { // CountAll
@@ -164,7 +177,7 @@ func (aggregation commonAggregation) toSQL(query *GormQuery) (string, error) {
 	return function.ApplyTo(columnSQL, 0), nil
 }
 
-func (aggregation commonAggregation) toSelectSQL(query *GormQuery, as string) (string, error) {
+func (aggregation AggregationResult[T]) toSelectSQL(query *GormQuery, as string) (string, error) {
 	functionSQL, err := aggregation.toSQL(query)
 	if err != nil {
 		return "", err
@@ -177,7 +190,16 @@ func (aggregation commonAggregation) toSelectSQL(query *GormQuery, as string) (s
 	), nil
 }
 
-func (aggregation commonAggregation) Eq(
+type AggregationComparable[T any] interface {
+	getValue() T
+	getSQL() toSQLFunc
+}
+
+func (aggregation AggregationResult[T]) Eq(value AggregationComparable[T]) AggregationCondition {
+	return aggregation.getEq(value.getSQL(), value.getValue())
+}
+
+func (aggregation AggregationResult[T]) getEq(
 	sqlGeneration func(query *GormQuery) (string, error),
 	value any,
 ) AggregationCondition {
@@ -189,6 +211,8 @@ func (aggregation commonAggregation) Eq(
 	}
 }
 
+// TODO resto de comparadores
+
 type NumericAggregationComparable interface {
 	getValue() float64
 	getSQL() toSQLFunc
@@ -196,17 +220,13 @@ type NumericAggregationComparable interface {
 }
 
 type NumericResultAggregation struct {
-	commonAggregation
-}
-
-func (aggregation NumericResultAggregation) getValue() float64 {
-	return 0
+	AggregationResult[float64]
 }
 
 func (aggregation NumericResultAggregation) numericAggregationComparable() {}
 
 func (aggregation NumericResultAggregation) Eq(value NumericAggregationComparable) AggregationCondition {
-	return aggregation.commonAggregation.Eq(value.getSQL(), value.getValue())
+	return aggregation.AggregationResult.getEq(value.getSQL(), value.getValue())
 }
 
 type BoolAggregationComparable interface {
@@ -217,15 +237,11 @@ type BoolAggregationComparable interface {
 }
 
 type BoolResultAggregation struct {
-	commonAggregation
+	AggregationResult[bool]
 }
 
 func (aggregation BoolResultAggregation) Eq(value BoolAggregationComparable) AggregationCondition {
-	return aggregation.commonAggregation.Eq(value.getSQL(), value.getValue())
-}
-
-func (aggregation BoolResultAggregation) getValue() bool {
-	return false
+	return aggregation.AggregationResult.getEq(value.getSQL(), value.getValue())
 }
 
 func (aggregation BoolResultAggregation) boolAggregationComparable() {}

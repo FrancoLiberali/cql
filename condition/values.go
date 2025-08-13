@@ -35,3 +35,15 @@ func (boolValue BoolValue) getSQL() toSQLFunc {
 }
 
 func (boolValue BoolValue) boolAggregationComparable() {}
+
+type Value[T any] struct {
+	Value T
+}
+
+func (value Value[T]) getValue() T {
+	return value.Value
+}
+
+func (value Value[T]) getSQL() toSQLFunc {
+	return nil
+}
