@@ -1112,7 +1112,10 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingBooleanCompareWithAnotherAggrega
 	).Into(&results)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 2, Aggregation1: 2}}, results)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 1, Aggregation1: 2},
+		{Int: 2, Aggregation1: 2},
+	}, results)
 }
 
 func (ts *GroupByIntTestSuite) TestGroupByHavingOtherType() {
