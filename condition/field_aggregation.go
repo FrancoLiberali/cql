@@ -112,7 +112,7 @@ func (fieldAggregation BoolFieldAggregation) None() AggregationResult[bool] {
 	}
 }
 
-type IAggregation interface {
+type Aggregation interface {
 	toSQL(query *GormQuery) (string, error)
 	toSelectSQL(query *GormQuery, as string) (string, error)
 	getField() IField
@@ -254,7 +254,7 @@ func (aggregation AggregationResult[T]) Like(value AggregationComparable[T]) Agg
 }
 
 type AggregationCondition struct {
-	aggregation        IAggregation
+	aggregation        Aggregation
 	operator           sql.Operator
 	sqlGeneration      func(query *GormQuery) (string, error)
 	values             []any

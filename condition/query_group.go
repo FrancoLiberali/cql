@@ -21,7 +21,7 @@ func (query *QueryGroup) Having(conditions ...AggregationCondition) *QueryGroup 
 	return query
 }
 
-func (query *QueryGroup) Select(aggregation IAggregation, as string) *QueryGroup {
+func (query *QueryGroup) Select(aggregation Aggregation, as string) *QueryGroup {
 	selectSQL, err := aggregation.toSelectSQL(query.gormQuery, as)
 	if err != nil {
 		query.addError(methodError(err, "Select"))
