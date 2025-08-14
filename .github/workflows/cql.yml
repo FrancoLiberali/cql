@@ -126,14 +126,14 @@ jobs:
           merge-multiple: true
       - name: Download gen line coverage report
         id: download-gen-artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: gen.yml
           workflow_conclusion: success
           name: coverage_gen
       - name: Download lint line coverage report
         id: download-lint-artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: dawidd6/action-download-artifact@v6
         with:
           workflow: lint.yml
           workflow_conclusion: success
