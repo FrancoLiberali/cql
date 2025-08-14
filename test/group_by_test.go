@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -318,6 +319,25 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMin() {
 	EqualList(&ts.Suite, []ResultFloat{{Int: 1, Aggregation: 0.25}, {Int: 0, Aggregation: 1}}, results)
 }
 
+func (ts *GroupByIntTestSuite) TestGroupBySelectMinForNotNumericField() {
+	ts.createProduct("1", 1, 0.25, false, nil)
+	ts.createProduct("2", 1, 0.75, false, nil)
+	ts.createProduct("3", 0, 1, false, nil)
+
+	results := []ResultString{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.String.Aggregate().Min(), "aggregation",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultString{{Int: 1, Aggregation: "1"}, {Int: 0, Aggregation: "3"}}, results)
+}
+
 func (ts *GroupByIntTestSuite) TestGroupBySelectMax() {
 	ts.createProduct("1", 1, 0.25, false, nil)
 	ts.createProduct("2", 1, 0.75, false, nil)
@@ -335,6 +355,25 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMax() {
 
 	ts.Require().NoError(err)
 	EqualList(&ts.Suite, []ResultFloat{{Int: 1, Aggregation: 0.75}, {Int: 0, Aggregation: 1}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupBySelectMaxForNotNumericField() {
+	ts.createProduct("1", 1, 0.25, false, nil)
+	ts.createProduct("2", 1, 0.75, false, nil)
+	ts.createProduct("3", 0, 1, false, nil)
+
+	results := []ResultString{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.String.Aggregate().Max(), "aggregation",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultString{{Int: 1, Aggregation: "2"}, {Int: 0, Aggregation: "3"}}, results)
 }
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectAll() {
@@ -704,4 +743,607 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedMultipleTimesFieldReturnsError()
 
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
 	ts.ErrorContains(err, "field's model appears more than once, select which one you want to use with Appearance; model: models.ParentParent")
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByWithConditionsBefore() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Float.Is().Eq(1.0),
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithSameCondition() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Int.Aggregate().Sum().Eq(cql.Int(2)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentCondition() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.Int(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionInt8() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.Int8(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionInt16() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.Int16(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionInt32() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.Int32(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionInt64() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.Int64(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUInt() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.UInt(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUInt8() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.UInt8(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUInt16() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.UInt16(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUInt32() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.UInt32(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUInt64() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.UInt64(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUIntPTR() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.UIntPTR(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionFloat32() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.Float32(2))
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionFloat64() {
+	ts.internalTestGroupByHavingWithDifferentCondition(cql.Float64(2))
+}
+
+func (ts *GroupByIntTestSuite) internalTestGroupByHavingWithDifferentCondition(value condition.AggregationComparable[float64]) {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Int.Aggregate().Count().Eq(value),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNumeric() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Int.Aggregate().Count().Eq(conditions.Product.Int.Aggregate().Sum()),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNumericOtherType() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Int.Aggregate().Sum().Eq(conditions.Product.Float.Aggregate().Sum()),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationOfAnotherTable() {
+	product0 := ts.createProduct("1", 2, 0, false, nil)
+	product1 := ts.createProduct("1", 2, 1, false, nil)
+	product2 := ts.createProduct("2", 3, 2, false, nil)
+
+	ts.createSale(1, product0, nil)
+	ts.createSale(1, product1, nil)
+	ts.createSale(1, product2, nil)
+	ts.createSale(2, product1, nil)
+	ts.createSale(2, product2, nil)
+
+	results := []ResultCode{}
+
+	err := cql.Query[models.Sale](
+		ts.db,
+		conditions.Sale.Product(),
+	).GroupBy(
+		conditions.Sale.Code,
+	).Having(
+		conditions.Product.Float.Aggregate().Sum().Eq(conditions.Sale.ID.Aggregate().Count()),
+	).Select(
+		conditions.Product.Float.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultCode{
+		{Code: 1, Aggregation1: 3},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByMultipleHaving() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+		conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithAndConnection() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.AndHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithOrConnection() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("5", 2, 3.0, false, nil)
+	ts.createProduct("6", 3, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.OrHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(1)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 1, Aggregation1: 2},
+		{Int: 0, Aggregation1: 0},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByWithNotConnection() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("5", 2, 3.0, false, nil)
+	ts.createProduct("6", 3, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.NotHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0, Aggregation1: 0},
+		{Int: 2, Aggregation1: 2},
+		{Int: 3, Aggregation1: 3},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByWithNotConnectionMultiple() {
+	ts.createProduct("1", 1, 1.0, false, nil)
+	ts.createProduct("2", 1, 1.0, false, nil)
+	ts.createProduct("3", 0, 1.0, false, nil)
+	ts.createProduct("5", 0, 3.0, false, nil)
+	ts.createProduct("6", 3, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		cql.NotHaving(
+			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
+			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
+		),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0, Aggregation1: 0},
+		{Int: 3, Aggregation1: 3},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingBoolean() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Bool.Aggregate().All().Eq(cql.Bool(true)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingBooleanCompareWithAnotherAggregation() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Bool.Aggregate().All().Eq(conditions.Product.Bool.Aggregate().Any()),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 1, Aggregation1: 2},
+		{Int: 2, Aggregation1: 2},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingOtherType() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.String.Aggregate().Max().Eq(cql.String("4")),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 2, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingOtherTypeCompareWithAnotherAggregation() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 2.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.String.Aggregate().Max().Eq(conditions.Product.String.Aggregate().Min()),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 2, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingNotEq() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Float.Aggregate().Max().NotEq(cql.Float64(2.0)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 2, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingLt() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Float.Aggregate().Max().Lt(cql.Float64(2.0)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingLtOrEq() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Float.Aggregate().Max().LtOrEq(cql.Float64(2.0)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingGt() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Float.Aggregate().Max().Gt(cql.Float64(2.0)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 2, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingGtOrEq() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Float.Aggregate().Max().GtOrEq(cql.Float64(2.0)),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 2, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingIn() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Float.Aggregate().Max().In([]float64{2.0, 3.0}),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 2, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingNotIn() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("3", 0, 1.0, true, nil)
+	ts.createProduct("4", 0, 2.0, false, nil)
+	ts.createProduct("4", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Float.Aggregate().Max().NotIn([]float64{2.0, 3.0}),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByHavingLike() {
+	ts.createProduct("1", 1, 1.0, true, nil)
+	ts.createProduct("2", 1, 1.0, true, nil)
+	ts.createProduct("03", 0, 1.0, true, nil)
+	ts.createProduct("24", 0, 2.0, false, nil)
+	ts.createProduct("14", 2, 3.0, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.String.Aggregate().Max().Like(cql.String("_4")),
+	).Select(
+		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 2, Aggregation1: 2}, {Int: 0, Aggregation1: 0}}, results)
 }

@@ -66,8 +66,8 @@ func (field Field[TModel, TAttribute]) getAppearance() int {
 }
 
 // Aggregate allows applying aggregation functions to the field inside a group by
-func (field Field[TModel, TAttribute]) Aggregate() FieldAggregation {
-	return FieldAggregation{field: field}
+func (field Field[TModel, TAttribute]) Aggregate() FieldAggregation[TAttribute] {
+	return FieldAggregation[TAttribute]{field: field}
 }
 
 func (field Field[TModel, TAttribute]) getModelType() reflect.Type {
@@ -282,7 +282,7 @@ func (numericField NumericField[TModel, TAttribute]) Appearance(number uint) Num
 
 // Aggregate allows applying aggregation functions to the field inside a group by
 func (numericField NumericField[TModel, TAttribute]) Aggregate() NumericFieldAggregation {
-	return NumericFieldAggregation{FieldAggregation: numericField.Field.Aggregate()}
+	return NumericFieldAggregation{FieldAggregation: FieldAggregation[float64]{field: numericField}}
 }
 
 type NullableNumericField[

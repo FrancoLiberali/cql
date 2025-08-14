@@ -96,6 +96,11 @@ func (query *GormQuery) GroupBy(fields []IField) error {
 	return nil
 }
 
+// Having allows filter groups of rows based on conditions involving aggregate functions
+func (query *GormQuery) Having(sql string, args ...any) {
+	query.GormDB.Having(sql, args...)
+}
+
 // Count returns the amount of models that fulfill the conditions
 func (query *GormQuery) Count() (int64, error) {
 	query.cleanSelects()

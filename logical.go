@@ -5,6 +5,7 @@ import (
 
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/unsafe"
 )
 
@@ -49,4 +50,32 @@ func Not[T model.Model](firstCondition condition.WhereCondition[T], conditions .
 // In general, it should not be used. It can only be useful in case you want to perform an operation on all models in a table.
 func True[T model.Model]() condition.Condition[T] {
 	return unsafe.NewCondition[T]("1 = 1")
+}
+
+// Logical Operators for having
+
+// AndHaving allows the connection of multiple conditions by the AND logical connector.
+//
+// Its use is optional as it is the default connector.
+func AndHaving(firstCondition condition.AggregationCondition, conditions ...condition.AggregationCondition) condition.AggregationCondition {
+	return condition.ConnectionAggregationCondition(
+		pie.Unshift(conditions, firstCondition),
+		sql.And,
+	)
+}
+
+// OrHaving allows the connection of multiple conditions by the OR logical connector.
+func OrHaving(firstCondition condition.AggregationCondition, conditions ...condition.AggregationCondition) condition.AggregationCondition {
+	return condition.ConnectionAggregationCondition(
+		pie.Unshift(conditions, firstCondition),
+		sql.Or,
+	)
+}
+
+// NotHaving allows the negation of the conditions within it. Multiple conditions are connected by an AND by default.
+func NotHaving(firstCondition condition.AggregationCondition, conditions ...condition.AggregationCondition) condition.AggregationCondition {
+	return condition.ContainerAggregationCondition(
+		pie.Unshift(conditions, firstCondition),
+		sql.Not,
+	)
 }

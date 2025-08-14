@@ -150,26 +150,29 @@ var (
 
 	// Bool
 	All = FunctionByDialector{
-		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+		functions: map[Dialector]Function{
 			Postgres:  FunctionFunction{sqlFunction: "EVERY"},
 			SQLServer: FunctionFunction{sqlFunction: "AVG(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) = 1 then 1 else 0 end"},
-			all:       FunctionFunction{sqlFunction: "AVG", sqlSuffix: "= 1"},
+			SQLite:    FunctionFunction{sqlFunction: "AVG", sqlSuffix: "= 1"},
+			MySQL:     FunctionFunction{sqlFunction: "(AVG", sqlSuffix: ") = 1)"},
 		},
 		Name: "All",
 	}
 	Any = FunctionByDialector{
-		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+		functions: map[Dialector]Function{
 			Postgres:  FunctionFunction{sqlFunction: "BOOL_OR"},
 			SQLServer: FunctionFunction{sqlFunction: "SUM(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) > 0 then 1 else 0 end"},
-			all:       FunctionFunction{sqlFunction: "SUM", sqlSuffix: "> 0"},
+			SQLite:    FunctionFunction{sqlFunction: "SUM", sqlSuffix: "> 0"},
+			MySQL:     FunctionFunction{sqlFunction: "(SUM", sqlSuffix: " ) > 0)"},
 		},
 		Name: "Any",
 	}
 	None = FunctionByDialector{
-		functions: map[Dialector]Function{ //nolint:exhaustive // all present
+		functions: map[Dialector]Function{
 			Postgres:  FunctionFunction{sqlFunction: "NOT BOOL_OR"},
 			SQLServer: FunctionFunction{sqlFunction: "SUM(CAST", sqlPrefix: "case when ", sqlSuffix: "AS INT)) = 0 then 1 else 0 end"},
-			all:       FunctionFunction{sqlFunction: "SUM", sqlSuffix: "= 0"},
+			SQLite:    FunctionFunction{sqlFunction: "SUM", sqlSuffix: "= 0"},
+			MySQL:     FunctionFunction{sqlFunction: "(SUM", sqlSuffix: " ) = 0)"},
 		},
 		Name: "None",
 	}
