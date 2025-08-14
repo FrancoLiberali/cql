@@ -54,13 +54,9 @@ func True[T model.Model]() condition.Condition[T] {
 
 // Logical Operators for having
 
-// And allows the connection of multiple conditions by the AND logical connector.
+// AndHaving allows the connection of multiple conditions by the AND logical connector.
 //
 // Its use is optional as it is the default connector.
-//
-// Example:
-//
-// cql.And(conditions.City.Name.Is().Eq("Paris"), conditions.City.ZipCode.Is().Eq("75000"))
 func AndHaving(firstCondition condition.AggregationCondition, conditions ...condition.AggregationCondition) condition.AggregationCondition {
 	return condition.ConnectionAggregationCondition(
 		pie.Unshift(conditions, firstCondition),
@@ -68,11 +64,7 @@ func AndHaving(firstCondition condition.AggregationCondition, conditions ...cond
 	)
 }
 
-// Or allows the connection of multiple conditions by the OR logical connector.
-//
-// Example:
-//
-// cql.Or(conditions.City.Name.Is().Eq("Paris"), conditions.City.Name.Is().Eq("Buenos Aires"))
+// OrHaving allows the connection of multiple conditions by the OR logical connector.
 func OrHaving(firstCondition condition.AggregationCondition, conditions ...condition.AggregationCondition) condition.AggregationCondition {
 	return condition.ConnectionAggregationCondition(
 		pie.Unshift(conditions, firstCondition),
@@ -80,16 +72,7 @@ func OrHaving(firstCondition condition.AggregationCondition, conditions ...condi
 	)
 }
 
-// Not allows the negation of the conditions within it. Multiple conditions are connected by an AND by default.
-//
-// Example:
-//
-// cql.Not(conditions.City.Name.Is().Eq("Paris"), conditions.City.Name.Is().Eq("Buenos Aires"))
-//
-// translates as
-//
-// NOT (name = "Paris" AND name = "Buenos Aires")
-// TODO docs
+// NotHaving allows the negation of the conditions within it. Multiple conditions are connected by an AND by default.
 func NotHaving(firstCondition condition.AggregationCondition, conditions ...condition.AggregationCondition) condition.AggregationCondition {
 	return condition.ContainerAggregationCondition(
 		pie.Unshift(conditions, firstCondition),

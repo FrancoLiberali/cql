@@ -6,7 +6,7 @@ type QueryGroup struct {
 	fields    []IField
 }
 
-// TODO docs
+// Having allows filter groups of rows based on conditions involving aggregate functions
 func (query *QueryGroup) Having(conditions ...AggregationCondition) *QueryGroup {
 	for _, condition := range conditions {
 		sql, args, err := condition.toSQL(query.gormQuery)
