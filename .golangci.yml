@@ -28,6 +28,7 @@ linters:
     - thelper # [not the expected result by us] detects golang test helpers without t.Helper() call and checks the consistency of test helpers
     - varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope
     - tenv # [deprecated] (since v1.64.0) due to: Duplicate feature in another linter. Replaced by usetesting.
+    - recvcheck # [too strict] checks for receiver type consistency.
   # deprecated
   # can be util in the future for better errors
     - wrapcheck # [too strict] checks that errors returned from external packages are wrapped
@@ -199,15 +200,15 @@ issues:
         - gomnd
         - exhaustive
         - dupl
-        - goerr113
+        - err113
     - path: ^cmd/|^cql-gen/cmd/
       linters:
-        - goerr113
+        - err113
     - path: ^pkg/analyzer/|^cqllint/pkg/analyzer/
       linters:
         - errcheck
         - forcetypeassert
-        - goerr113
+        - err113
     # We need to use the deprecated module since the jsonpb replacement is not backwards compatible.
     - linters:
         - staticcheck

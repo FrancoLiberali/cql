@@ -81,7 +81,7 @@ func NewDBConnection() (*gorm.DB, error) {
 			),
 		)
 	default:
-		dialector = sqlite.Open(fmt.Sprintf("sqlite:%s", host))
+		dialector = sqlite.Open("sqlite:" + host)
 	}
 
 	return OpenWithRetry(

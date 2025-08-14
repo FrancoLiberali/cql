@@ -77,6 +77,7 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 			values = append(values, valueValues...)
 		} else {
 			operationString += " " + sqlOperator.String() + " ?"
+
 			values = append(values, operation.Value)
 		}
 	}

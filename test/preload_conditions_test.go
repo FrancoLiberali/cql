@@ -122,6 +122,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadNullableAtSecondLevel() {
 		}
 
 		sellerCompany, err := saleSeller.GetCompany()
+
 		return err == nil && saleSeller.Name == "with" && sellerCompany != nil && sellerCompany.Equal(*company)
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
@@ -131,6 +132,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadNullableAtSecondLevel() {
 		}
 
 		sellerCompany, err := saleSeller.GetCompany()
+
 		return err == nil && saleSeller.Name == "without" && sellerCompany == nil
 	}))
 }
@@ -163,6 +165,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadAtSecondLevelWorksWithManual
 		}
 
 		sellerCompany, err := saleSeller.GetCompany()
+
 		return err == nil && saleSeller.Name == "with" && sellerCompany != nil && sellerCompany.Equal(*company)
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
@@ -172,6 +175,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadAtSecondLevelWorksWithManual
 		}
 
 		sellerCompany, err := saleSeller.GetCompany()
+
 		return err == nil && saleSeller.Name == "without" && sellerCompany == nil
 	}))
 }
@@ -203,6 +207,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 		// the not null one is not loaded
 		sellerCompany, err := saleSeller.GetCompany()
+
 		return errors.Is(err, cql.ErrRelationNotLoaded) && sellerCompany == nil
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
@@ -213,6 +218,7 @@ func (ts *PreloadConditionsIntTestSuite) TestNoPreloadNullableAtSecondLevel() {
 
 		// we can be sure the null one is null
 		sellerCompany, err := saleSeller.GetCompany()
+
 		return err == nil && sellerCompany == nil
 	}))
 }

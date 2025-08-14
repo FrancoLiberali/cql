@@ -11,7 +11,7 @@ type IField interface {
 	fieldName() string
 	columnSQL(query *GormQuery, table Table) string
 	getModelType() reflect.Type
-	getAppearance() int
+	getAppearance() (uint, bool)
 }
 
 type Field[TModel model.Model, TAttribute any] struct {
@@ -57,12 +57,12 @@ func (field Field[TModel, TAttribute]) Appearance(number uint) Field[TModel, TAt
 	return newField
 }
 
-func (field Field[TModel, TAttribute]) getAppearance() int {
+func (field Field[TModel, TAttribute]) getAppearance() (uint, bool) {
 	if !field.appearanceSelected {
-		return undefinedAppearance
+		return 0, false
 	}
 
-	return int(field.appearance)
+	return field.appearance, true
 }
 
 // Aggregate allows applying aggregation functions to the field inside a group by

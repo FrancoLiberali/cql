@@ -27,7 +27,7 @@ func (s *MultiString) Scan(src interface{}) error {
 
 func (s MultiString) Value() (driver.Value, error) {
 	if len(s) == 0 {
-		return nil, nil
+		return nil, nil //nolint:nilnil // is necessary
 	}
 
 	return strings.Join(s, ","), nil

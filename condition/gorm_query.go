@@ -199,8 +199,6 @@ func (query *GormQuery) GetTables(modelType reflect.Type) []Table {
 	return tableList
 }
 
-const undefinedAppearance = -1
-
 func (query *GormQuery) GetModelTable(field IField) (Table, error) {
 	modelTables := query.GetTables(field.getModelType())
 	if modelTables == nil {
@@ -211,13 +209,13 @@ func (query *GormQuery) GetModelTable(field IField) (Table, error) {
 		return modelTables[0], nil
 	}
 
-	appearance := field.getAppearance()
+	appearance, isPresent := field.getAppearance()
 
-	if appearance == undefinedAppearance {
+	if !isPresent {
 		return Table{}, appearanceMustBeSelectedError(field)
 	}
 
-	if appearance > len(modelTables)-1 {
+	if appearance > uint(len(modelTables))-1 {
 		return Table{}, appearanceOutOfRangeError(field)
 	}
 
