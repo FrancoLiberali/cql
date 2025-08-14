@@ -260,26 +260,26 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
 	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 1}, {Int: 0, Aggregation1: 0}}, results)
 }
 
-// func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
-// 	int1 := 1
+func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
+	int1 := 1
 
-// 	ts.createProduct("1", 1, 0, false, nil)
-// 	ts.createProduct("2", 1, 0, false, &int1)
-// 	ts.createProduct("3", 0, 0, false, nil)
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 0, false, &int1)
+	ts.createProduct("3", 0, 0, false, nil)
 
-// 	results := []ResultInt{}
+	results := []ResultInt{}
 
-// 	err := cql.Query[models.Product](
-// 		ts.db,
-// 	).GroupBy(
-// 		conditions.Product.Int,
-// 	).Select(
-// 		cql.CountAll(), "aggregation1",
-// 	).Into(&results)
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		cql.CountAll(), "aggregation1",
+	).Into(&results)
 
-// 	ts.Require().NoError(err)
-// 	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 1}}, results)
-// }
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 2}, {Int: 0, Aggregation1: 1}}, results)
+}
 
 func (ts *GroupByIntTestSuite) TestGroupBySelectAverage() {
 	ts.createProduct("1", 1, 0.25, false, nil)
