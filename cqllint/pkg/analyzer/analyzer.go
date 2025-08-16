@@ -370,27 +370,30 @@ func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
 	return whereCondition.Fun.(*ast.SelectorExpr).Sel.Name
 }
 
+// getAppearance returns the Appearance from a model
+func getAppearance(call *ast.CallExpr, fun *ast.SelectorExpr) Appearance {
+	if fun.Sel.Name == "Appearance" {
+		appearanceNumber, err := strconv.Atoi(call.Args[0].(*ast.BasicLit).Value)
+		if err != nil {
+			panic(err)
+		}
+
+		return Appearance{selected: true, number: appearanceNumber}
+	}
+
+	return Appearance{selected: false}
+}
+
 // Returns model's package the model name and true if Appearance method is called
 func getModelFromCall(call *ast.CallExpr) (Model, Appearance, bool) {
 	if fun, isFun := call.Fun.(*ast.SelectorExpr); isFun {
-		funX, isXSelector := fun.X.(*ast.SelectorExpr)
-		if isXSelector {
-			model := getModel(funX.X.(*ast.SelectorExpr))
-
-			if fun.Sel.Name == "Appearance" {
-				appearanceNumber, err := strconv.Atoi(call.Args[0].(*ast.BasicLit).Value)
-				if err != nil {
-					panic(err)
-				}
-
-				return model, Appearance{selected: true, number: appearanceNumber}, true
-			}
-
-			return model, Appearance{selected: false}, true
+		if funX, isXSelector := fun.X.(*ast.SelectorExpr); isXSelector {
+			return getModel(funX.X.(*ast.SelectorExpr)),
+				getAppearance(call, fun),
+				true
 		}
 
-		xCall, isCall := fun.X.(*ast.CallExpr)
-		if isCall {
+		if xCall, isCall := fun.X.(*ast.CallExpr); isCall {
 			// x is not a selector, so Appearance method or a function is called
 			return getModelFromCall(xCall)
 		}
