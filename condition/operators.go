@@ -13,33 +13,33 @@ import (
 
 // EqualTo
 // IsNotDistinct must be used in cases where value can be NULL
-func Eq[T any](value any) Operator[T] {
+func Eq[T any](value IValue) Operator[T] {
 	return NewValueOperator[T](sql.Eq, value)
 }
 
 // NotEqualTo
 // IsDistinct must be used in cases where value can be NULL
-func NotEq[T any](value any) Operator[T] {
+func NotEq[T any](value IValue) Operator[T] {
 	return NewValueOperator[T](sql.NotEq, value)
 }
 
 // LessThan
-func Lt[T any](value any) Operator[T] {
+func Lt[T any](value IValue) Operator[T] {
 	return NewValueOperator[T](sql.Lt, value)
 }
 
 // LessThanOrEqualTo
-func LtOrEq[T any](value any) Operator[T] {
+func LtOrEq[T any](value IValue) Operator[T] {
 	return NewValueOperator[T](sql.LtOrEq, value)
 }
 
 // GreaterThan
-func Gt[T any](value any) Operator[T] {
+func Gt[T any](value IValue) Operator[T] {
 	return NewValueOperator[T](sql.Gt, value)
 }
 
 // GreaterThanOrEqualTo
-func GtOrEq[T any](value any) Operator[T] {
+func GtOrEq[T any](value IValue) Operator[T] {
 	return NewValueOperator[T](sql.GtOrEq, value)
 }
 
@@ -51,16 +51,16 @@ func GtOrEq[T any](value any) Operator[T] {
 // - SQLite: https://www.sqlite.org/lang_expr.html
 
 // Equivalent to v1 < value < v2
-func Between[T any](v1, v2 any) Operator[T] {
+func Between[T any](v1, v2 IValue) Operator[T] {
 	return newBetweenOperator[T](sql.Between, v1, v2)
 }
 
 // Equivalent to NOT (v1 < value < v2)
-func NotBetween[T any](v1, v2 any) Operator[T] {
+func NotBetween[T any](v1, v2 IValue) Operator[T] {
 	return newBetweenOperator[T](sql.NotBetween, v1, v2)
 }
 
-func newBetweenOperator[T any](sqlOperator sql.Operator, v1, v2 any) Operator[T] {
+func newBetweenOperator[T any](sqlOperator sql.Operator, v1, v2 IValue) Operator[T] {
 	operator := NewValueOperator[T](sqlOperator, v1)
 	return operator.AddOperation(sql.And, v2)
 }
@@ -73,7 +73,7 @@ func IsNotNull[T any]() Operator[T] {
 	return NewPredicateOperator[T]("IS NOT NULL")
 }
 
-func IsDistinct[T any](value any) Operator[T] {
+func IsDistinct[T any](value IValue) Operator[T] {
 	isNotDistinct := new(ValueOperator[T]).AddOperation(
 		map[sql.Dialector]sql.Operator{
 			sql.Postgres:  sql.IsDistinct,
@@ -90,7 +90,7 @@ func IsDistinct[T any](value any) Operator[T] {
 	return isNotDistinct
 }
 
-func IsNotDistinct[T any](value any) Operator[T] {
+func IsNotDistinct[T any](value IValue) Operator[T] {
 	return new(ValueOperator[T]).AddOperation(
 		map[sql.Dialector]sql.Operator{
 			sql.Postgres:  sql.IsNotDistinct,
@@ -104,11 +104,22 @@ func IsNotDistinct[T any](value any) Operator[T] {
 
 // Row and Array Comparisons
 
-func In[T any](values []T) Operator[T] {
+type IValueList[T any] []ValueOfType[T]
+
+func (values IValueList[T]) ToSQL(_ *GormQuery) (string, []any, error) {
+	valuesAny := make([]any, 0, len(values))
+	for _, value := range values {
+		valuesAny = append(valuesAny, value.GetValue())
+	}
+
+	return "", valuesAny, nil
+}
+
+func In[T any](values IValueList[T]) Operator[T] {
 	return NewValueOperator[T](sql.ArrayIn, values)
 }
 
-func NotIn[T any](values []T) Operator[T] {
+func NotIn[T any](values IValueList[T]) Operator[T] {
 	return NewValueOperator[T](sql.ArrayNotIn, values)
 }
 
@@ -120,12 +131,12 @@ type LikeOperator struct {
 
 func NewLikeOperator(sqlOperator sql.Operator, pattern string) LikeOperator {
 	return LikeOperator{
-		ValueOperator: *NewValueOperator[string](sqlOperator, pattern),
+		ValueOperator: *NewValueOperator[string](sqlOperator, String(pattern)),
 	}
 }
 
 func (operator LikeOperator) Escape(escape rune) ValueOperator[string] {
-	return *operator.AddOperation(sql.Escape, string(escape))
+	return *operator.AddOperation(sql.Escape, String(string(escape)))
 }
 
 // Pattern in all databases:

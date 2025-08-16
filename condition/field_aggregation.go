@@ -131,7 +131,7 @@ func (aggregation AggregationResult[T]) getField() IField {
 	return aggregation.field
 }
 
-func (aggregation AggregationResult[T]) getValue() T {
+func (aggregation AggregationResult[T]) GetValue() T {
 	return *new(T)
 }
 
@@ -171,7 +171,7 @@ func (aggregation AggregationResult[T]) toSelectSQL(query *GormQuery, as string)
 }
 
 type AggregationComparable[T any] interface {
-	getValue() T
+	GetValue() T
 	getSQL() toSQLFunc
 }
 
@@ -180,7 +180,7 @@ func (aggregation AggregationResult[T]) applyOperator(value AggregationComparabl
 		aggregation:   aggregation,
 		operator:      operator,
 		sqlGeneration: value.getSQL(),
-		values:        []any{value.getValue()},
+		values:        []any{value.GetValue()},
 	}
 }
 

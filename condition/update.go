@@ -108,19 +108,19 @@ func NewUpdate[T model.Model](tx *gorm.DB, conditions []Condition[T]) *Update[T]
 
 type ISet interface {
 	getField() IField
-	getValue() any
+	getValue() IValue
 }
 
 type Set[T model.Model] struct {
 	field IField
-	value any
+	value IValue
 }
 
 func (set Set[T]) getField() IField {
 	return set.field
 }
 
-func (set Set[T]) getValue() any {
+func (set Set[T]) getValue() IValue {
 	return set.value
 }
 
@@ -128,24 +128,17 @@ type FieldSet[TModel model.Model, TAttribute any] struct {
 	field UpdatableField[TModel, TAttribute]
 }
 
-func (set FieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
+func (set FieldSet[TModel, TAttribute]) Eq(value ValueOfType[TAttribute]) *Set[TModel] {
 	return &Set[TModel]{
 		field: set.field,
 		value: value,
 	}
 }
 
-func (set FieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[TAttribute]) *Set[TModel] {
+func (set FieldSet[TModel, TAttribute]) Unsafe(value IValue) *Set[TModel] {
 	return &Set[TModel]{
 		field: set.field,
-		value: value,
-	}
-}
-
-func (set FieldSet[TModel, TAttribute]) Unsafe(value any) *Set[TModel] {
-	return &Set[TModel]{
-		field: set.field,
-		value: value,
+		value: unsafeValue{Value: value},
 	}
 }
 
@@ -164,23 +157,16 @@ type NumericFieldSet[TModel model.Model, TAttribute int | int8 | int16 | int32 |
 	field NumericField[TModel, TAttribute]
 }
 
-func (set NumericFieldSet[TModel, TAttribute]) Eq(value TAttribute) *Set[TModel] {
+func (set NumericFieldSet[TModel, TAttribute]) Eq(value ValueOfType[float64]) *Set[TModel] {
 	return &Set[TModel]{
 		field: set.field,
 		value: value,
 	}
 }
 
-func (set NumericFieldSet[TModel, TAttribute]) Dynamic(value ValueOfType[numeric]) *Set[TModel] {
+func (set NumericFieldSet[TModel, TAttribute]) Unsafe(value IValue) *Set[TModel] {
 	return &Set[TModel]{
 		field: set.field,
-		value: value,
-	}
-}
-
-func (set NumericFieldSet[TModel, TAttribute]) Unsafe(value any) *Set[TModel] {
-	return &Set[TModel]{
-		field: set.field,
-		value: value,
+		value: unsafeValue{Value: value},
 	}
 }

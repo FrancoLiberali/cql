@@ -34,14 +34,14 @@ func (ts *UpdateIntTestSuite) TestUpdateWithTrue() {
 		ts.db,
 		cql.True[models.Product](),
 	).Set(
-		conditions.Product.Int.Set().Eq(2),
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(2), updated)
 
 	productsReturned, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(2),
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
 	).Find()
 	ts.Require().NoError(err)
 	ts.Len(productsReturned, 2)
@@ -52,9 +52,9 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
 
 	updated, err := cql.Update[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Set(
-		conditions.Product.Int.Set().Eq(0),
+		conditions.Product.Int.Set().Eq(cql.Int(0)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(0), updated)
@@ -65,16 +65,16 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 
 	updated, err := cql.Update[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(1),
+		conditions.Product.Int.Set().Eq(cql.Int(1)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -91,14 +91,14 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Set(
-		conditions.Product.Int.Set().Eq(1),
+		conditions.Product.Int.Set().Eq(cql.Int(1)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(2), updated)
 
 	products, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -114,17 +114,17 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 
 	updated, err := cql.Update[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(1),
-		conditions.Product.Bool.Set().Eq(true),
+		conditions.Product.Int.Set().Eq(cql.Int(1)),
+		conditions.Product.Bool.Set().Eq(cql.Bool(true)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 		conditions.Product.Bool.Is().True(),
 	).FindOne()
 	ts.Require().NoError(err)
@@ -138,10 +138,10 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 func (ts *UpdateIntTestSuite) TestUpdateSameFieldTwiceReturnsError() {
 	_, err := cql.Update[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(1),
-		conditions.Product.Int.Set().Eq(2),
+		conditions.Product.Int.Set().Eq(cql.Int(1)),
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	)
 	ts.ErrorIs(err, cql.ErrFieldIsRepeated)
 	ts.ErrorContains(err, "method: Set")
@@ -158,17 +158,17 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
 	updated, err := cql.Update[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("google"),
+			conditions.Brand.Name.Is().Eq(cql.String("google")),
 		),
 	).Set(
-		conditions.Phone.Name.Set().Eq("pixel 7"),
+		conditions.Phone.Name.Set().Eq(cql.String("pixel 7")),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	pixel7, err := cql.Query[models.Phone](
 		ts.db,
-		conditions.Phone.Name.Is().Eq("pixel 7"),
+		conditions.Phone.Name.Is().Eq(cql.String("pixel 7")),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -192,20 +192,20 @@ func (ts *UpdateIntTestSuite) TestUpdateWithJoinDifferentEntitiesInConditions() 
 	updated, err := cql.Update[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		),
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		),
 	).Set(
-		conditions.Sale.Code.Set().Eq(1),
+		conditions.Sale.Code.Set().Eq(cql.Int(1)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	sale, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.Code.Is().Eq(1),
+		conditions.Sale.Code.Is().Eq(cql.Int(1)),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -230,20 +230,20 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 	updated, err := cql.Update[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 			conditions.Seller.Company(
-				conditions.Company.Name.Is().Eq("ditrit"),
+				conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 			),
 		),
 	).Set(
-		conditions.Sale.Code.Set().Eq(1),
+		conditions.Sale.Code.Set().Eq(cql.Int(1)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	sale, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.Code.Is().Eq(1),
+		conditions.Sale.Code.Is().Eq(cql.Int(1)),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -260,7 +260,7 @@ func (ts *UpdateIntTestSuite) TestUpdateSetNull() {
 
 	updated, err := cql.Update[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
 		conditions.Product.NullFloat.Set().Null(),
 	)
@@ -285,7 +285,7 @@ func (ts *UpdateIntTestSuite) TestUpdateSetNullForBool() {
 
 	updated, err := cql.Update[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
 		conditions.Product.NullBool.Set().Null(),
 	)
@@ -309,9 +309,9 @@ func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNewValue() {
 
 	updated, err := cql.Update[models.Seller](
 		ts.db,
-		conditions.Seller.Name.Is().Eq("franco"),
+		conditions.Seller.Name.Is().Eq(cql.String("franco")),
 	).Set(
-		conditions.Seller.CompanyID.Set().Eq(company2.ID),
+		conditions.Seller.CompanyID.Set().Eq(cql.UUID(company2.ID)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
@@ -319,7 +319,7 @@ func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNewValue() {
 	sellerReturned, err := cql.Query[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
-			conditions.Company.Name.Is().Eq("burger king"),
+			conditions.Company.Name.Is().Eq(cql.String("burger king")),
 		),
 	).FindOne()
 	ts.Require().NoError(err)
@@ -334,7 +334,7 @@ func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNull() {
 
 	updated, err := cql.Update[models.Seller](
 		ts.db,
-		conditions.Seller.Name.Is().Eq("franco"),
+		conditions.Seller.Name.Is().Eq(cql.String("franco")),
 	).Set(
 		conditions.Seller.CompanyID.Set().Null(),
 	)
@@ -361,10 +361,10 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 	updated, err := cql.Update[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("google"),
+			conditions.Brand.Name.Is().Eq(cql.String("google")),
 		),
 	).Set(
-		conditions.Phone.Name.Set().Dynamic(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.Set().Eq(conditions.Brand.Name.Value()),
 	)
 
 	ts.Require().NoError(err)
@@ -372,7 +372,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 
 	phoneReturned, err := cql.Query[models.Phone](
 		ts.db,
-		conditions.Phone.Name.Is().Eq("google"),
+		conditions.Phone.Name.Is().Eq(cql.String("google")),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -385,10 +385,10 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicNotJoinedReturnsError() {
 	_, err := cql.Update[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("google"),
+			conditions.Brand.Name.Is().Eq(cql.String("google")),
 		),
 	).Set(
-		conditions.Phone.Name.Set().Dynamic(conditions.City.Name.Value()),
+		conditions.Phone.Name.Set().Eq(conditions.City.Name.Value()),
 	)
 
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
@@ -405,7 +405,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutAppearanceReturnsErrorIfJo
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Value()),
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Value()),
 	)
 
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
@@ -429,14 +429,14 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithAppearance() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Dynamic(conditions.ParentParent.Name.Appearance(0).Value()),
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Appearance(0).Value()),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	childReturned, err := cql.Query[models.Child](
 		ts.db,
-		conditions.Child.Name.Is().Eq("franco"),
+		conditions.Child.Name.Is().Eq(cql.String("franco")),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -450,16 +450,16 @@ func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
 
 	updated, err := cql.Update[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Unsafe("1"),
+		conditions.Product.Int.Set().Unsafe(cql.String("1")),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
 
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -474,7 +474,7 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 	case cqlSQL.MySQL:
 		_, err := cql.Update[models.Phone](
 			ts.db,
-			conditions.Phone.Name.Is().Eq("asd"),
+			conditions.Phone.Name.Is().Eq(cql.String("asd")),
 		).Returning(nil).Set()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
@@ -484,9 +484,9 @@ func (ts *UpdateIntTestSuite) TestUpdateReturning() {
 		productsReturned := []models.Product{}
 		updated, err := cql.Update[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(0),
+			conditions.Product.Int.Is().Eq(cql.Int(0)),
 		).Returning(&productsReturned).Set(
-			conditions.Product.Int.Set().Eq(1),
+			conditions.Product.Int.Set().Eq(cql.Int(1)),
 		)
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
@@ -506,10 +506,10 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		salesReturned := []models.Sale{}
 		_, err := cql.Update[models.Sale](
 			ts.db,
-			conditions.Sale.Code.Is().Eq(0),
+			conditions.Sale.Code.Is().Eq(cql.Int(0)),
 			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Set(
-			conditions.Sale.Code.Set().Eq(2),
+			conditions.Sale.Code.Set().Eq(cql.Int(2)),
 		)
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "preloads in returning are not allowed for database")
@@ -524,10 +524,10 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreload() {
 		salesReturned := []models.Sale{}
 		updated, err := cql.Update[models.Sale](
 			ts.db,
-			conditions.Sale.Code.Is().Eq(0),
+			conditions.Sale.Code.Is().Eq(cql.Int(0)),
 			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Set(
-			conditions.Sale.Code.Set().Eq(2),
+			conditions.Sale.Code.Set().Eq(cql.Int(2)),
 		)
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
@@ -563,12 +563,12 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadAtSecondLevel() {
 	salesReturned := []models.Sale{}
 	updated, err := cql.Update[models.Sale](
 		ts.db,
-		conditions.Sale.Code.Is().Eq(0),
+		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 		conditions.Sale.Seller(
 			conditions.Seller.Company().Preload(),
 		),
 	).Returning(&salesReturned).Set(
-		conditions.Sale.Code.Set().Eq(2),
+		conditions.Sale.Code.Set().Eq(cql.Int(2)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
@@ -597,10 +597,10 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 		companiesReturned := []models.Company{}
 		updated, err := cql.Update[models.Company](
 			ts.db,
-			conditions.Company.Name.Is().Eq("ditrit"),
+			conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 			conditions.Company.Sellers.Preload(),
 		).Returning(&companiesReturned).Set(
-			conditions.Company.Name.Set().Eq("orness"),
+			conditions.Company.Name.Set().Eq(cql.String("orness")),
 		)
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
@@ -621,7 +621,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	if getDBDialector() != cqlSQL.MySQL {
 		_, err := cql.Update[models.Phone](
 			ts.db,
-			conditions.Phone.Name.Is().Eq("asd"),
+			conditions.Phone.Name.Is().Eq(cql.String("asd")),
 		).SetMultiple()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: SetMultiple")
@@ -635,18 +635,18 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 		updated, err := cql.Update[models.Phone](
 			ts.db,
 			conditions.Phone.Brand(
-				conditions.Brand.Name.Is().Eq("google"),
+				conditions.Brand.Name.Is().Eq(cql.String("google")),
 			),
 		).SetMultiple(
-			conditions.Phone.Name.Set().Eq("7"),
-			conditions.Brand.Name.Set().Eq("google pixel"),
+			conditions.Phone.Name.Set().Eq(cql.String("7")),
+			conditions.Brand.Name.Set().Eq(cql.String("google pixel")),
 		)
 		ts.Require().NoError(err)
 		ts.Equal(int64(2), updated)
 
 		pixel7, err := cql.Query[models.Phone](
 			ts.db,
-			conditions.Phone.Name.Is().Eq("7"),
+			conditions.Phone.Name.Is().Eq(cql.String("7")),
 		).FindOne()
 		ts.Require().NoError(err)
 
@@ -656,7 +656,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 
 		googlePixel, err := cql.Query[models.Brand](
 			ts.db,
-			conditions.Brand.Name.Is().Eq("google pixel"),
+			conditions.Brand.Name.Is().Eq(cql.String("google pixel")),
 		).FindOne()
 		ts.Require().NoError(err)
 
@@ -674,10 +674,10 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableNotJoin
 
 	_, err := cql.Update[models.Phone](
 		ts.db,
-		conditions.Phone.Name.Is().Eq("asd"),
+		conditions.Phone.Name.Is().Eq(cql.String("asd")),
 	).SetMultiple(
-		conditions.Phone.Name.Set().Eq("7"),
-		conditions.Brand.Name.Set().Eq("google pixel"),
+		conditions.Phone.Name.Set().Eq(cql.String("7")),
+		conditions.Brand.Name.Set().Eq(cql.String("google pixel")),
 	)
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.Brand; method: Set")
@@ -698,7 +698,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableJoinedM
 			conditions.Parent2.ParentParent(),
 		),
 	).SetMultiple(
-		conditions.ParentParent.Name.Set().Dynamic(conditions.Child.Name.Value()),
+		conditions.ParentParent.Name.Set().Eq(conditions.Child.Name.Value()),
 	)
 
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
@@ -731,7 +731,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesTableJoinedMultipleTimesAn
 			conditions.Parent2.ParentParent(),
 		),
 	).SetMultiple(
-		conditions.ParentParent.Name.Appearance(1).Set().Dynamic(conditions.Child.Name.Value()),
+		conditions.ParentParent.Name.Appearance(1).Set().Eq(conditions.Child.Name.Value()),
 	)
 
 	ts.Require().NoError(err)
@@ -739,7 +739,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesTableJoinedMultipleTimesAn
 
 	parentParentReturned, err := cql.Query[models.ParentParent](
 		ts.db,
-		conditions.ParentParent.Name.Is().Eq("not_franco"),
+		conditions.ParentParent.Name.Is().Eq(cql.String("not_franco")),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -756,7 +756,7 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 		).Ascending(
 			conditions.Product.String,
 		).Limit(1).Set(
-			conditions.Product.Int.Set().Eq(1),
+			conditions.Product.Int.Set().Eq(cql.Int(1)),
 		)
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Ascending")
@@ -770,14 +770,14 @@ func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {
 		).Ascending(
 			conditions.Product.String,
 		).Limit(1).Set(
-			conditions.Product.Int.Set().Eq(1),
+			conditions.Product.Int.Set().Eq(cql.Int(1)),
 		)
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), updated)
 
 		productReturned, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).FindOne()
 		ts.Require().NoError(err)
 
@@ -794,7 +794,7 @@ func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Set(
-			conditions.Product.Int.Set().Eq(1),
+			conditions.Product.Int.Set().Eq(cql.Int(1)),
 		)
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Limit")
@@ -803,7 +803,7 @@ func (ts *UpdateIntTestSuite) TestUpdateLimitWithoutOrderByReturnsError() {
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Set(
-			conditions.Product.Int.Set().Eq(1),
+			conditions.Product.Int.Set().Eq(cql.Int(1)),
 		)
 		ts.ErrorIs(err, cql.ErrOrderByMustBeCalled)
 		ts.ErrorContains(err, "method: Limit")
@@ -817,7 +817,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Set(
-		conditions.Product.Int.Set().Dynamic(conditions.Product.Float.Value().Plus(1)),
+		conditions.Product.Int.Set().Eq(conditions.Product.Float.Value().Plus(1)),
 	)
 
 	if getDBDialector() == cqlSQL.Postgres && err != nil {
@@ -829,7 +829,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 
 		productReturned, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(2),
+			conditions.Product.Int.Is().Eq(cql.Int(2)),
 		).FindOne()
 
 		ts.Require().NoError(err)

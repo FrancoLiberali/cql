@@ -122,7 +122,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsNoSelect() {
 
 	err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).GroupBy(conditions.Product.Int).Into(&results)
 
 	ts.Require().NoError(err)
@@ -755,7 +755,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsBefore() {
 
 	err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Float.Is().Eq(1.0),
+		conditions.Product.Float.Is().Eq(cql.Float64(1.0)),
 	).GroupBy(
 		conditions.Product.Int,
 	).Select(

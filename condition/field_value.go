@@ -6,13 +6,15 @@ import (
 )
 
 type IValue interface {
-	getField() IField
-	toSQL(query *GormQuery, table Table) (string, []any, error)
+	// TODO cambiar el nombre y exportar esto para que los custom types lo puedan implementar
+	// TODO agregar seccion a la doc de como trabajar con custom types: agregar GetValue y ToSQL
+	ToSQL(query *GormQuery) (string, []any, error)
 }
 
 type ValueOfType[T any] interface {
 	IValue
-	getType() T
+
+	GetValue() T
 }
 
 type functionAndValues struct {
@@ -34,16 +36,19 @@ func NewFieldValue[TModel model.Model, TAttribute any](field Field[TModel, TAttr
 	}
 }
 
-func (value FieldValue[TModel, TAttribute]) getField() IField {
-	return value.field
-}
-
 func (value *FieldValue[TModel, TAttribute]) addFunction(function sql.FunctionByDialector, others ...any) {
 	value.functions = append(value.functions, functionAndValues{function: function, values: len(others)})
 	value.values = append(value.values, others...)
 }
 
-func (value FieldValue[TModel, TAttribute]) toSQL(query *GormQuery, table Table) (string, []any, error) {
+func (value FieldValue[TModel, TAttribute]) ToSQL(query *GormQuery) (string, []any, error) {
+	field := value.field
+
+	table, err := getModelTable(query, field)
+	if err != nil {
+		return "", nil, err
+	}
+
 	finalSQL := value.field.columnSQL(query, table)
 
 	for _, functionAndValues := range value.functions {
@@ -58,7 +63,7 @@ func (value FieldValue[TModel, TAttribute]) toSQL(query *GormQuery, table Table)
 	return finalSQL, value.values, nil
 }
 
-func (value FieldValue[TModel, TAttribute]) getType() TAttribute {
+func (value FieldValue[TModel, TAttribute]) GetValue() TAttribute {
 	return *new(TAttribute)
 }
 
@@ -66,10 +71,8 @@ type NumericFieldValue[TModel model.Model, TAttribute any] struct {
 	FieldValue[TModel, TAttribute]
 }
 
-type numeric struct{}
-
-func (value NumericFieldValue[TModel, TAttribute]) getType() numeric {
-	return numeric{}
+func (value NumericFieldValue[TModel, TAttribute]) GetValue() float64 {
+	return 0
 }
 
 // Plus sums other to value

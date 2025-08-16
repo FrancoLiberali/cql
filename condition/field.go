@@ -27,11 +27,6 @@ func (field Field[TModel, TAttribute]) Is() FieldIs[TModel, TAttribute] {
 	return FieldIs[TModel, TAttribute]{field: field}
 }
 
-// IsDynamic allows creating conditions that include the field and other fields
-func (field Field[TModel, TAttribute]) IsDynamic() DynamicFieldIs[TModel, TAttribute] {
-	return DynamicFieldIs[TModel, TAttribute]{field: field}
-}
-
 // Should not be used.
 //
 // IsUnsafe allows creating conditions that include the field and are not verified in compilation time.
@@ -259,8 +254,12 @@ func NewNumericField[
 	}
 }
 
-func (numericField NumericField[TModel, TAttribute]) IsDynamic() NumericDynamicFieldIs[TModel, TAttribute] {
-	return NumericDynamicFieldIs[TModel, TAttribute]{field: numericField.Field}
+func (numericField NumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel] {
+	return NumericFieldIs[TModel]{
+		FieldIs: FieldIs[TModel, float64]{
+			field: numericField.Field,
+		},
+	}
 }
 
 // Value allows using the value of the field inside dynamic conditions.

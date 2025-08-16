@@ -18,10 +18,10 @@ type ValueOperator[T any] struct {
 type operation struct {
 	SQLOperator            sql.Operator
 	SQLOperatorByDialector map[sql.Dialector]sql.Operator
-	Value                  any
+	Value                  IValue
 }
 
-func NewValueOperator[T any](sqlOperator sql.Operator, value any) *ValueOperator[T] {
+func NewValueOperator[T any](sqlOperator sql.Operator, value IValue) *ValueOperator[T] {
 	return new(ValueOperator[T]).AddOperation(sqlOperator, value)
 }
 
@@ -50,24 +50,16 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 			return "", nil, operatorError(ErrUnsupportedByDatabase, sqlOperator)
 		}
 
-		iValue, isIValue := operation.Value.(IValue)
-		if isIValue {
+		valueSQL, valueValues, err := operation.Value.ToSQL(query)
+		if err != nil {
+			return "", nil, operatorError(err, sqlOperator)
+		}
+
+		if valueSQL != "" {
 			// if the value of the operation is a field,
 			// verify that this field is concerned by the query
 			// (a join was performed with the model to which this field belongs)
 			// and get the alias of the table of this model.
-			field := iValue.getField()
-
-			modelTable, err := getModelTable(query, field, sqlOperator)
-			if err != nil {
-				return "", nil, err
-			}
-
-			valueSQL, valueValues, err := iValue.toSQL(query, modelTable)
-			if err != nil {
-				return "", nil, err
-			}
-
 			operationString += fmt.Sprintf(
 				" %s %s",
 				sqlOperator,
@@ -78,23 +70,23 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 		} else {
 			operationString += " " + sqlOperator.String() + " ?"
 
-			values = append(values, operation.Value)
+			values = append(values, valueValues)
 		}
 	}
 
 	return operationString, values, nil
 }
 
-func getModelTable(query *GormQuery, field IField, sqlOperator sql.Operator) (Table, error) {
+func getModelTable(query *GormQuery, field IField) (Table, error) {
 	table, err := query.GetModelTable(field)
 	if err != nil {
-		return Table{}, operatorError(err, sqlOperator)
+		return Table{}, err
 	}
 
 	return table, nil
 }
 
-func (operator *ValueOperator[T]) AddOperation(sqlOperator any, value any) *ValueOperator[T] {
+func (operator *ValueOperator[T]) AddOperation(sqlOperator any, value IValue) *ValueOperator[T] {
 	var newOperation operation
 	switch sqlOperatorTyped := sqlOperator.(type) {
 	case sql.Operator:

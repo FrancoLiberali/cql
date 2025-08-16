@@ -412,23 +412,20 @@ func getUpdateTablesAndValues(query *GormQuery, sets []ISet) (map[IField]TableAn
 }
 
 func getUpdateValue(query *GormQuery, set ISet) (any, error) {
-	value := set.getValue()
-
-	if iValue, isIValue := value.(IValue); isIValue {
-		table, err := query.GetModelTable(iValue.getField())
+	if value := set.getValue(); value != nil {
+		valueSQL, valueValues, err := set.getValue().ToSQL(query)
 		if err != nil {
 			return nil, err
 		}
 
-		valueSQL, valueValues, err := iValue.toSQL(query, table)
-		if err != nil {
-			return nil, err
+		if valueSQL != "" {
+			return gorm.Expr(valueSQL, valueValues...), nil
 		}
 
-		return gorm.Expr(valueSQL, valueValues...), nil
+		return valueValues[0], nil
 	}
 
-	return value, nil
+	return nil, nil //nolint:nilnil // is necessary
 }
 
 // Splits a JOIN statement into the table name, table alias and ON statement

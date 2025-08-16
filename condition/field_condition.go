@@ -9,7 +9,7 @@ const deletedAtField = "DeletedAt"
 // Condition that verifies the value of a field,
 // using the Operator
 type fieldCondition[TObject model.Model, TAtribute any] struct {
-	FieldIdentifier Field[TObject, TAtribute]
+	FieldIdentifier IField
 	Operator        Operator[TAtribute]
 }
 
@@ -43,7 +43,7 @@ func (condition fieldCondition[TObject, TAtribute]) getSQL(query *GormQuery, tab
 }
 
 func NewFieldCondition[TObject model.Model, TAttribute any](
-	fieldIdentifier Field[TObject, TAttribute],
+	fieldIdentifier IField,
 	operator Operator[TAttribute],
 ) WhereCondition[TObject] {
 	return &fieldCondition[TObject, TAttribute]{

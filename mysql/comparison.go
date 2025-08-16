@@ -13,10 +13,10 @@ func Like[T string |
 	uint | uint8 | uint16 | uint32 | uint64 |
 	float32 | float64](pattern string,
 ) condition.Operator[T] {
-	return condition.NewValueOperator[T](sql.Like, pattern)
+	return condition.NewValueOperator[T](sql.Like, condition.String(pattern))
 }
 
 // ref: https://dev.mysql.com/doc/refman/8.0/en/regexp.html#operator_regexp
 func Regexp(pattern string) condition.Operator[string] {
-	return condition.NewValueOperator[string](sql.MySQLRegexp, pattern)
+	return condition.NewValueOperator[string](sql.MySQLRegexp, condition.String(pattern))
 }
