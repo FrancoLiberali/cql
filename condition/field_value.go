@@ -42,9 +42,7 @@ func (value *FieldValue[TModel, TAttribute]) addFunction(function sql.FunctionBy
 }
 
 func (value FieldValue[TModel, TAttribute]) ToSQL(query *GormQuery) (string, []any, error) {
-	field := value.field
-
-	table, err := getModelTable(query, field)
+	table, err := getModelTable(query, value.field)
 	if err != nil {
 		return "", nil, err
 	}
