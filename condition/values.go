@@ -20,7 +20,7 @@ func (numericValue NumericValue[T]) GetValue() float64 {
 	return float64(numericValue.Value)
 }
 
-func (numericValue NumericValue[T]) ToSQL(query *GormQuery) (string, []any, error) {
+func (numericValue NumericValue[T]) ToSQL(_ *GormQuery) (string, []any, error) {
 	return "", []any{numericValue.Value}, nil
 }
 
@@ -36,7 +36,7 @@ func (boolValue BoolValue) getSQL() toSQLFunc {
 	return nil
 }
 
-func (boolValue BoolValue) ToSQL(query *GormQuery) (string, []any, error) {
+func (boolValue BoolValue) ToSQL(_ *GormQuery) (string, []any, error) {
 	return "", []any{boolValue.Value}, nil
 }
 
@@ -53,7 +53,7 @@ func (value Value[T]) getSQL() toSQLFunc {
 	return nil
 }
 
-func (value Value[T]) ToSQL(query *GormQuery) (string, []any, error) {
+func (value Value[T]) ToSQL(_ *GormQuery) (string, []any, error) {
 	return "", []any{value.Value}, nil
 }
 

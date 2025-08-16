@@ -62,12 +62,12 @@ func (MultiString) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
 	}
 }
 
-func (ms MultiString) GetValue() MultiString {
-	return ms
+func (s MultiString) GetValue() MultiString {
+	return s
 }
 
-func (ms MultiString) ToSQL(query *condition.GormQuery) (string, []any, error) {
-	return "", []any{ms}, nil
+func (s MultiString) ToSQL(_ *condition.GormQuery) (string, []any, error) {
+	return "", []any{s}, nil
 }
 
 type ToBeEmbedded struct {
