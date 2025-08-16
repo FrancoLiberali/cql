@@ -9,15 +9,15 @@ import (
 func testSetDynamicNotJoinedInSameLine() {
 	cql.Update[models.Brand](
 		db,
-		conditions.Brand.Name.Is().Eq("asd"),
-	).Set(conditions.Brand.Name.Set().Dynamic(conditions.City.Name.Value())) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Is().Eq(cql.String("asd")),
+	).Set(conditions.Brand.Name.Set().Eq(conditions.City.Name.Value())) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 }
 
 func testSetDynamicNotJoinedInDifferentLines() {
 	cql.Update[models.Brand](
 		db,
-		conditions.Brand.Name.Is().Eq("asd"),
-	).Set(conditions.Brand.Name.Set().Dynamic(
+		conditions.Brand.Name.Is().Eq(cql.String("asd")),
+	).Set(conditions.Brand.Name.Set().Eq(
 		conditions.City.Name.Value(), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }
@@ -27,7 +27,7 @@ func testSetDynamicMainModel() {
 		db,
 		conditions.Product.String.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		conditions.Product.Int.Set().Dynamic(
+		conditions.Product.Int.Set().Eq(
 			conditions.Product.IntPointer.Value(),
 		),
 	)
@@ -38,10 +38,10 @@ func testSetDynamicMainModelMultipleTimes() {
 		db,
 		conditions.Product.String.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		conditions.Product.String.Set().Dynamic(
+		conditions.Product.String.Set().Eq(
 			conditions.Product.String2.Value(),
 		),
-		conditions.Product.Int.Set().Dynamic(
+		conditions.Product.Int.Set().Eq(
 			conditions.Product.IntPointer.Value(),
 		),
 	)
@@ -53,7 +53,7 @@ func testSetDynamicJoinedModel() {
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		conditions.Phone.Name.Set().Dynamic(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.Set().Eq(conditions.Brand.Name.Value()),
 	)
 }
 
@@ -65,24 +65,24 @@ func testSetDynamicNestedJoinedModel() {
 		),
 		conditions.Child.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		conditions.Child.Name.Set().Dynamic(conditions.Parent1.Name.Value()),
-		conditions.Child.Number.Set().Dynamic(conditions.ParentParent.Number.Value()),
+		conditions.Child.Name.Set().Eq(conditions.Parent1.Name.Value()),
+		conditions.Child.Number.Set().Eq(conditions.ParentParent.Number.Value()),
 	)
 }
 
 func testSetMultipleNotJoinedInSameLine() {
 	cql.Update[models.Brand](
 		db,
-		conditions.Brand.Name.Is().Eq("asd"),
-	).SetMultiple(conditions.City.Name.Set().Eq("asd")) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Is().Eq(cql.String("asd")),
+	).SetMultiple(conditions.City.Name.Set().Eq(cql.String("asd"))) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 }
 
 func testSetMultipleNotJoinedInDifferentLines() {
 	cql.Update[models.Brand](
 		db,
-		conditions.Brand.Name.Is().Eq("asd"),
+		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).SetMultiple(
-		conditions.City.Name.Set().Eq("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Set().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -91,7 +91,7 @@ func testSetMultipleMainModel() {
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
-		conditions.Brand.Name.Set().Eq("asd"),
+		conditions.Brand.Name.Set().Eq(cql.String("asd")),
 	)
 }
 
@@ -100,8 +100,8 @@ func testSetMultipleMainModelMultipleTimes() {
 		db,
 		conditions.Product.String.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
-		conditions.Product.String.Set().Eq("asd"),
-		conditions.Product.Int.Set().Eq(1),
+		conditions.Product.String.Set().Eq(cql.String("asd")),
+		conditions.Product.Int.Set().Eq(cql.Int(1)),
 	)
 }
 
@@ -111,8 +111,8 @@ func testSetMultipleJoinedModel() {
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
-		conditions.Phone.Name.Set().Eq("asd"),
-		conditions.Brand.Name.Set().Eq("asd"),
+		conditions.Phone.Name.Set().Eq(cql.String("asd")),
+		conditions.Brand.Name.Set().Eq(cql.String("asd")),
 	)
 }
 
@@ -124,16 +124,16 @@ func testSetMultipleNestedJoinedModel() {
 		),
 		conditions.Child.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
-		conditions.Parent1.Name.Set().Eq("asd"),
-		conditions.ParentParent.Name.Set().Eq("asd"),
+		conditions.Parent1.Name.Set().Eq(cql.String("asd")),
+		conditions.ParentParent.Name.Set().Eq(cql.String("asd")),
 	)
 }
 
 func testSetDynamicNotJoinedWithFunction() {
 	cql.Update[models.Brand](
 		db,
-		conditions.Brand.Name.Is().Eq("asd"),
-	).Set(conditions.Brand.Name.Set().Dynamic(
+		conditions.Brand.Name.Is().Eq(cql.String("asd")),
+	).Set(conditions.Brand.Name.Set().Eq(
 		conditions.City.Name.Value().Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }
@@ -141,8 +141,8 @@ func testSetDynamicNotJoinedWithFunction() {
 func testSetDynamicNotJoinedWithTwoFunction() {
 	cql.Update[models.Brand](
 		db,
-		conditions.Brand.Name.Is().Eq("asd"),
-	).Set(conditions.Brand.Name.Set().Dynamic(
+		conditions.Brand.Name.Is().Eq(cql.String("asd")),
+	).Set(conditions.Brand.Name.Set().Eq(
 		conditions.City.Name.Value().Concat("asd").Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }

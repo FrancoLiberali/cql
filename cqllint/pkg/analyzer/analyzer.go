@@ -32,7 +32,6 @@ var (
 	cqlSetMultiple = "SetMultiple"
 	cqlSets        = []string{cqlSetMultiple, "Set"}
 	cqlSelectors   = append(cqlOrder, cqlSets...)
-	dynamicMethod  = "Dynamic"
 
 	notJoinedMessage              = "%s is not joined by the query"
 	appearanceNotNecessaryMessage = "Appearance call not necessary, %s appears only once"
@@ -132,34 +131,35 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 func findForSet(set ast.Expr, positionsToReport []Report, models []string, methodName string) []Report {
 	setCall := set.(*ast.CallExpr)
 
-	setFunction := setCall.Fun.(*ast.SelectorExpr).Sel.Name
-
-	if setFunction == dynamicMethod {
-		model, appearance := getModelFromCall(setCall.Args[0].(*ast.CallExpr))
+	model, appearance, isModel := getModelFromCall(setCall.Args[0].(*ast.CallExpr))
+	if isModel {
 		positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
 	}
 
 	if methodName == cqlSetMultiple {
-		model, appearance := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
-		positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+		model, appearance, isModel := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+		if isModel {
+			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+		}
 	}
 
 	return positionsToReport
 }
 
 func findForOrder(order ast.Expr, positionsToReport []Report, models []string) []Report {
-	var model Model
-
-	appearance := Appearance{selected: false}
-
 	orderCall, isCall := order.(*ast.CallExpr)
 	if isCall {
-		model, appearance = getModelFromCall(orderCall)
+		model, appearance, isModel := getModelFromCall(orderCall)
+		if isModel {
+			return addPositionsToReport(positionsToReport, models, model, appearance)
+		}
 	} else {
-		model = getModel(order.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+		model := getModel(order.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+
+		return addPositionsToReport(positionsToReport, models, model, Appearance{selected: false})
 	}
 
-	return addPositionsToReport(positionsToReport, models, model, appearance)
+	return positionsToReport
 }
 
 func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
@@ -184,7 +184,7 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 			fields[fieldName] = append(fields[fieldName], fieldPos)
 		}
 
-		if argSelector.Sel.Name == dynamicMethod && len(argCall.Args) == 1 {
+		if len(argCall.Args) == 1 {
 			comparedField, isSelector := argCall.Args[0].(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
 			if !isSelector {
 				continue
@@ -312,9 +312,19 @@ func findErrorIsDynamicWhereCondition(
 	conditionSelector *ast.SelectorExpr,
 ) []Report {
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
-	if isWhereCondition && getFieldIsMethodName(whereCondition) == "IsDynamic" {
-		isDynamicModel, appearance := getModelFromCall(conditionCall.Args[0].(*ast.CallExpr))
-		return addPositionsToReport(positionsToReport, models, isDynamicModel, appearance)
+	if isWhereCondition && getFieldIsMethodName(whereCondition) == "Is" {
+		for _, arg := range conditionCall.Args {
+			argCall, isCall := arg.(*ast.CallExpr)
+			if !isCall {
+				continue
+			}
+
+			model, appearance, isModel := getModelFromCall(argCall)
+
+			if isModel {
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+			}
+		}
 	}
 
 	return positionsToReport
@@ -361,27 +371,32 @@ func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
 }
 
 // Returns model's package the model name and true if Appearance method is called
-func getModelFromCall(call *ast.CallExpr) (Model, Appearance) {
-	fun := call.Fun.(*ast.SelectorExpr)
+func getModelFromCall(call *ast.CallExpr) (Model, Appearance, bool) {
+	if fun, isFun := call.Fun.(*ast.SelectorExpr); isFun {
+		funX, isXSelector := fun.X.(*ast.SelectorExpr)
+		if isXSelector {
+			model := getModel(funX.X.(*ast.SelectorExpr))
 
-	funX, isXSelector := fun.X.(*ast.SelectorExpr)
-	if isXSelector {
-		model := getModel(funX.X.(*ast.SelectorExpr))
+			if fun.Sel.Name == "Appearance" {
+				appearanceNumber, err := strconv.Atoi(call.Args[0].(*ast.BasicLit).Value)
+				if err != nil {
+					panic(err)
+				}
 
-		if fun.Sel.Name == "Appearance" {
-			appearanceNumber, err := strconv.Atoi(call.Args[0].(*ast.BasicLit).Value)
-			if err != nil {
-				panic(err)
+				return model, Appearance{selected: true, number: appearanceNumber}, true
 			}
 
-			return model, Appearance{selected: true, number: appearanceNumber}
+			return model, Appearance{selected: false}, true
 		}
 
-		return model, Appearance{selected: false}
+		xCall, isCall := fun.X.(*ast.CallExpr)
+		if isCall {
+			// x is not a selector, so Appearance method or a function is called
+			return getModelFromCall(xCall)
+		}
 	}
 
-	// x is not a selector, so Appearance method or a function is called
-	return getModelFromCall(fun.X.(*ast.CallExpr))
+	return Model{}, Appearance{}, false
 }
 
 // Returns model's package the model name

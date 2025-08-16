@@ -43,7 +43,7 @@ func testOrderJoinedModelWithConditions() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("asd"),
+			conditions.Brand.Name.Is().Eq(cql.String("asd")),
 		),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
@@ -65,7 +65,7 @@ func testOrderJoinedModelWithConditionsWithPreload() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("asd"),
+			conditions.Brand.Name.Is().Eq(cql.String("asd")),
 		).Preload(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(

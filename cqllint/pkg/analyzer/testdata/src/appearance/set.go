@@ -9,7 +9,7 @@ import (
 func testSetNotNecessary() {
 	cql.Update[models.Phone](
 		db,
-		conditions.Phone.Name.Is().Eq("asd"),
+		conditions.Phone.Name.Is().Eq(cql.String("asd")),
 	).Set(
 		conditions.Phone.Name.Set().Eq(conditions.Phone.Name.Appearance(0).Value()), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
 	)
@@ -18,7 +18,7 @@ func testSetNotNecessary() {
 func testSetNotNecessaryWithFunction() {
 	cql.Update[models.Phone](
 		db,
-		conditions.Phone.Name.Is().Eq("asd"),
+		conditions.Phone.Name.Is().Eq(cql.String("asd")),
 	).Set(
 		conditions.Phone.Name.Set().Eq(conditions.Phone.Name.Appearance(0).Value().Concat("asd")), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
 	)
