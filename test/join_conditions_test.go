@@ -33,7 +33,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsUintBelongsTo() {
 	entities, err := cql.Query[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("google"),
+			conditions.Brand.Name.Is().Eq(cql.String("google")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -51,7 +51,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsBelongsTo() {
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -72,9 +72,9 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAndFiltersTheMainEnt
 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.Code.Is().Eq(1),
+		conditions.Sale.Code.Is().Eq(cql.Int(1)),
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -95,7 +95,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneOptional() {
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -117,7 +117,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsHasOneSelfReferentia
 	entities, err := cql.Query[models.Employee](
 		ts.db,
 		conditions.Employee.Boss(
-			conditions.Employee.Name.Is().Eq("Xavier"),
+			conditions.Employee.Name.Is().Eq(cql.String("Xavier")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -139,7 +139,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOne() {
 	entities, err := cql.Query[models.City](
 		ts.db,
 		conditions.City.Country(
-			conditions.Country.Name.Is().Eq("Argentina"),
+			conditions.Country.Name.Is().Eq(cql.String("Argentina")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -161,7 +161,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOneToOneReversed() {
 	entities, err := cql.Query[models.Country](
 		ts.db,
 		conditions.Country.Capital(
-			conditions.City.Name.Is().Eq("Buenos Aires"),
+			conditions.City.Name.Is().Eq(cql.String("Buenos Aires")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -183,7 +183,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsWithEntityThatDefine
 	entities, err := cql.Query[models.Bicycle](
 		ts.db,
 		conditions.Bicycle.Owner(
-			conditions.Person.Name.Is().Eq("franco"),
+			conditions.Person.Name.Is().Eq(cql.String("franco")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -201,7 +201,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnHasMany() {
 	entities, err := cql.Query[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
-			conditions.Company.Name.Is().Eq("ditrit"),
+			conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -222,8 +222,8 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDifferentAttribute
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
-			conditions.Product.String.Is().Eq("match"),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+			conditions.Product.String.Is().Eq(cql.String("match")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -246,7 +246,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAddsDeletedAtAutomat
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.String.Is().Eq("match"),
+			conditions.Product.String.Is().Eq(cql.String("match")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -269,7 +269,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDeletedAt() {
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.DeletedAt.Is().Eq(product1.DeletedAt.Time),
+			conditions.Product.DeletedAt.Is().Eq(cql.Time(product1.DeletedAt.Time)),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -311,10 +311,10 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsDifferentEntities() 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		),
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -338,9 +338,9 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsMultipleTimes() {
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 			conditions.Seller.Company(
-				conditions.Company.Name.Is().Eq("ditrit"),
+				conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 			),
 		),
 	).Find()
@@ -385,7 +385,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2Tables() {
 	entities, err := cql.Query[models.Seller](
 		ts.db,
 		conditions.Seller.Company(
-			conditions.Company.Name.IsDynamic().Eq(conditions.Seller.Name.Value()),
+			conditions.Company.Name.Is().Eq(conditions.Seller.Name.Value()),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -410,7 +410,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Company(
-				conditions.Company.Name.IsDynamic().Eq(conditions.Seller.Name.Value()),
+				conditions.Company.Name.Is().Eq(conditions.Seller.Name.Value()),
 			),
 		),
 	).Find()
@@ -422,7 +422,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorOver2TablesAtMoreLevel(
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelReturnsError() {
 	_, err := cql.Query[models.Child](
 		ts.db,
-		conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID.Value()),
+		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID.Value()),
 	).Find()
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
@@ -431,7 +431,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithNotJoinedModelRetur
 func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorWithJoinedInTheFutureModelReturnsError() {
 	_, err := cql.Query[models.Child](
 		ts.db,
-		conditions.Child.ID.IsDynamic().Eq(conditions.Parent1.ID.Value()),
+		conditions.Child.ID.Is().Eq(conditions.Parent1.ID.Value()),
 		conditions.Child.Parent1(),
 	).Find()
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
@@ -447,7 +447,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID.Value()),
+		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID.Value()),
 	).Find()
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
 	ts.ErrorContains(err, "model: models.ParentParent; operator: Eq; model: models.Child, field: ID")
@@ -469,7 +469,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithApp
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.Name.IsDynamic().Eq(conditions.ParentParent.Name.Appearance(0).Value()),
+		conditions.Child.Name.Is().Eq(conditions.ParentParent.Name.Appearance(0).Value()),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -485,7 +485,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithout
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.ID.IsDynamic().Between(
+		conditions.Child.ID.Is().Between(
 			conditions.ParentParent.ID.Value(),
 			conditions.ParentParent.ID.Value(),
 		),
@@ -504,7 +504,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionAnyReturnsEmptyWhenNothingMa
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.Any(
-			conditions.Seller.Name.Is().Eq("not"),
+			conditions.Seller.Name.Is().Eq(cql.String("not")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -522,7 +522,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionAnyReturnsIfOneMatches() {
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.Any(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -541,8 +541,8 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionAnyReturnsIfMoreThanOneMatch
 		ts.db,
 		conditions.Company.Sellers.Any(
 			cql.Or(
-				conditions.Seller.Name.Is().Eq("franco"),
-				conditions.Seller.Name.Is().Eq("agustin"),
+				conditions.Seller.Name.Is().Eq(cql.String("franco")),
+				conditions.Seller.Name.Is().Eq(cql.String("agustin")),
 			),
 		),
 	).Find()
@@ -557,7 +557,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionNoneReturnsWhenIsEmpty() {
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.None(
-			conditions.Seller.Name.Is().Eq("not"),
+			conditions.Seller.Name.Is().Eq(cql.String("not")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -574,7 +574,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionNoneReturnsWhenNothingMatche
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.None(
-			conditions.Seller.Name.Is().Eq("not"),
+			conditions.Seller.Name.Is().Eq(cql.String("not")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -591,7 +591,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionNoneReturnsEmptyIfOneMatches
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.None(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -609,8 +609,8 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionNoneReturnsEmptyIfMoreThanOn
 		ts.db,
 		conditions.Company.Sellers.None(
 			cql.Or(
-				conditions.Seller.Name.Is().Eq("franco"),
-				conditions.Seller.Name.Is().Eq("agustin"),
+				conditions.Seller.Name.Is().Eq(cql.String("franco")),
+				conditions.Seller.Name.Is().Eq(cql.String("agustin")),
 			),
 		),
 	).Find()
@@ -625,7 +625,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionAllReturnsWhenIsEmpty() {
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.All(
-			conditions.Seller.Name.Is().Eq("not"),
+			conditions.Seller.Name.Is().Eq(cql.String("not")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -642,7 +642,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionAllReturnsEmptyWhenNothingMa
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.All(
-			conditions.Seller.Name.Is().Eq("not"),
+			conditions.Seller.Name.Is().Eq(cql.String("not")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -659,7 +659,7 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionReturnsEmptyIfOneMatches() {
 	entities, err := cql.Query[models.Company](
 		ts.db,
 		conditions.Company.Sellers.All(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -677,8 +677,8 @@ func (ts *JoinConditionsIntTestSuite) TestCollectionAllReturnsIfAllMatch() {
 		ts.db,
 		conditions.Company.Sellers.All(
 			cql.Or(
-				conditions.Seller.Name.Is().Eq("franco"),
-				conditions.Seller.Name.Is().Eq("agustin"),
+				conditions.Seller.Name.Is().Eq(cql.String("franco")),
+				conditions.Seller.Name.Is().Eq(cql.String("agustin")),
 			),
 		),
 	).Find()

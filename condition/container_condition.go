@@ -17,11 +17,11 @@ func (condition containerCondition[T]) interfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (condition containerCondition[T]) applyTo(query *GormQuery, table Table) error {
+func (condition containerCondition[T]) applyTo(query *CQLQuery, table Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }
 
-func (condition containerCondition[T]) getSQL(query *GormQuery, table Table) (string, []any, error) {
+func (condition containerCondition[T]) getSQL(query *CQLQuery, table Table) (string, []any, error) {
 	sqlString, values, err := condition.ConnectionCondition.getSQL(query, table)
 	if err != nil {
 		return "", nil, err

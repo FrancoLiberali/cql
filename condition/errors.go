@@ -78,7 +78,7 @@ func conditionOperatorError[TObject model.Model, TAtribute any](operatorErr erro
 		"%w; model: %T, field: %s",
 		operatorErr,
 		*new(TObject),
-		condition.FieldIdentifier.name,
+		condition.FieldIdentifier.fieldName(),
 	)
 }
 

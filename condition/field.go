@@ -7,9 +7,9 @@ import (
 )
 
 type IField interface {
-	columnName(query *GormQuery, table Table) string
+	columnName(query *CQLQuery, table Table) string
 	fieldName() string
-	columnSQL(query *GormQuery, table Table) string
+	columnSQL(query *CQLQuery, table Table) string
 	getModelType() reflect.Type
 	getAppearance() (uint, bool)
 }
@@ -25,11 +25,6 @@ type Field[TModel model.Model, TAttribute any] struct {
 // Is allows creating conditions that include the field and a static value
 func (field Field[TModel, TAttribute]) Is() FieldIs[TModel, TAttribute] {
 	return FieldIs[TModel, TAttribute]{field: field}
-}
-
-// IsDynamic allows creating conditions that include the field and other fields
-func (field Field[TModel, TAttribute]) IsDynamic() DynamicFieldIs[TModel, TAttribute] {
-	return DynamicFieldIs[TModel, TAttribute]{field: field}
 }
 
 // Should not be used.
@@ -80,7 +75,7 @@ func (field Field[TModel, TAttribute]) fieldName() string {
 }
 
 // Returns the name of the column in which the field is saved in the table
-func (field Field[TModel, TAttribute]) columnName(query *GormQuery, table Table) string {
+func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) string {
 	columnName := field.column
 	if columnName == "" {
 		columnName = query.ColumnName(table, field.name)
@@ -91,7 +86,7 @@ func (field Field[TModel, TAttribute]) columnName(query *GormQuery, table Table)
 }
 
 // Returns the SQL to get the value of the field in the table
-func (field Field[TModel, TAttribute]) columnSQL(query *GormQuery, table Table) string {
+func (field Field[TModel, TAttribute]) columnSQL(query *CQLQuery, table Table) string {
 	return table.Alias + "." + field.columnName(query, table)
 }
 
@@ -259,8 +254,12 @@ func NewNumericField[
 	}
 }
 
-func (numericField NumericField[TModel, TAttribute]) IsDynamic() NumericDynamicFieldIs[TModel, TAttribute] {
-	return NumericDynamicFieldIs[TModel, TAttribute]{field: numericField.Field}
+func (numericField NumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel] {
+	return NumericFieldIs[TModel]{
+		FieldIs: FieldIs[TModel, float64]{
+			field: numericField.Field,
+		},
+	}
 }
 
 // Value allows using the value of the field inside dynamic conditions.

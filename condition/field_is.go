@@ -5,7 +5,7 @@ import (
 )
 
 type FieldIs[TObject model.Model, TAttribute any] struct {
-	field Field[TObject, TAttribute]
+	field IField
 }
 
 type BoolFieldIs[TObject model.Model] struct {
@@ -16,94 +16,98 @@ type StringFieldIs[TObject model.Model] struct {
 	FieldIs[TObject, string]
 }
 
+type NumericFieldIs[TObject model.Model] struct {
+	FieldIs[TObject, float64]
+}
+
 // EqualTo
 // NotDistinct must be used in cases where value can be NULL
-func (is FieldIs[TObject, TAttribute]) Eq(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, Eq[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) Eq(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, Eq[TAttribute](value))
 }
 
 // NotEqualTo
 // Distinct must be used in cases where value can be NULL
-func (is FieldIs[TObject, TAttribute]) NotEq(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, NotEq[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) NotEq(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, NotEq[TAttribute](value))
 }
 
 // LessThan
-func (is FieldIs[TObject, TAttribute]) Lt(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, Lt[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) Lt(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, Lt[TAttribute](value))
 }
 
 // LessThanOrEqualTo
-func (is FieldIs[TObject, TAttribute]) LtOrEq(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, LtOrEq[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) LtOrEq(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, LtOrEq[TAttribute](value))
 }
 
 // GreaterThan
-func (is FieldIs[TObject, TAttribute]) Gt(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, Gt[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) Gt(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, Gt[TAttribute](value))
 }
 
 // GreaterThanOrEqualTo
-func (is FieldIs[TObject, TAttribute]) GtOrEq(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, GtOrEq[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) GtOrEq(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, GtOrEq[TAttribute](value))
 }
 
 // Equivalent to v1 < value < v2
-func (is FieldIs[TObject, TAttribute]) Between(v1, v2 TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, Between[TAttribute](v1, v2))
+func (is FieldIs[TObject, TAttribute]) Between(v1, v2 ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, Between[TAttribute](v1, v2))
 }
 
 // Equivalent to NOT (v1 < value < v2)
-func (is FieldIs[TObject, TAttribute]) NotBetween(v1, v2 TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, NotBetween[TAttribute](v1, v2))
+func (is FieldIs[TObject, TAttribute]) NotBetween(v1, v2 ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, NotBetween[TAttribute](v1, v2))
 }
 
 func (is FieldIs[TObject, TAttribute]) Null() WhereCondition[TObject] {
-	return NewFieldCondition(is.field, IsNull[TAttribute]())
+	return NewFieldCondition[TObject](is.field, IsNull[TAttribute]())
 }
 
 func (is FieldIs[TObject, TAttribute]) NotNull() WhereCondition[TObject] {
-	return NewFieldCondition(is.field, IsNotNull[TAttribute]())
+	return NewFieldCondition[TObject](is.field, IsNotNull[TAttribute]())
 }
 
 func (is BoolFieldIs[TObject]) True() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.field, Eq[bool](true))
+	return NewFieldCondition[TObject, bool](is.field, Eq[bool](Bool(true)))
 }
 
 func (is BoolFieldIs[TObject]) NotTrue() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.field, IsDistinct[bool](true))
+	return NewFieldCondition[TObject](is.field, IsDistinct[bool](Bool(true)))
 }
 
 func (is BoolFieldIs[TObject]) False() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.field, Eq[bool](false))
+	return NewFieldCondition[TObject](is.field, Eq[bool](Bool(false)))
 }
 
 func (is BoolFieldIs[TObject]) NotFalse() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.field, IsDistinct[bool](false))
+	return NewFieldCondition[TObject](is.field, IsDistinct[bool](Bool(false)))
 }
 
 func (is BoolFieldIs[TObject]) Unknown() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.field, IsNull[bool]())
+	return NewFieldCondition[TObject](is.field, IsNull[bool]())
 }
 
 func (is BoolFieldIs[TObject]) NotUnknown() WhereCondition[TObject] {
-	return NewFieldCondition[TObject, bool](is.field, IsNotNull[bool]())
+	return NewFieldCondition[TObject](is.field, IsNotNull[bool]())
 }
 
-func (is FieldIs[TObject, TAttribute]) Distinct(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, IsDistinct[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) Distinct(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, IsDistinct[TAttribute](value))
 }
 
-func (is FieldIs[TObject, TAttribute]) NotDistinct(value TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, IsNotDistinct[TAttribute](value))
+func (is FieldIs[TObject, TAttribute]) NotDistinct(value ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, IsNotDistinct[TAttribute](value))
 }
 
-func (is FieldIs[TObject, TAttribute]) In(values ...TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, In(values))
+func (is FieldIs[TObject, TAttribute]) In(values ...ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, In(values))
 }
 
-func (is FieldIs[TObject, TAttribute]) NotIn(values ...TAttribute) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, NotIn(values))
+func (is FieldIs[TObject, TAttribute]) NotIn(values ...ValueOfType[TAttribute]) WhereCondition[TObject] {
+	return NewFieldCondition[TObject](is.field, NotIn(values))
 }
 
 // Pattern in all databases:
@@ -130,5 +134,5 @@ func (is StringFieldIs[TObject]) Like(pattern string) WhereCondition[TObject] {
 
 // Custom can be used to use other Operators, like database specific operators
 func (is FieldIs[TObject, TAttribute]) Custom(op Operator[TAttribute]) WhereCondition[TObject] {
-	return NewFieldCondition(is.field, op)
+	return NewFieldCondition[TObject, TAttribute](is.field, op)
 }

@@ -113,8 +113,8 @@ func (fieldAggregation BoolFieldAggregation) None() AggregationResult[bool] {
 }
 
 type Aggregation interface {
-	toSQL(query *GormQuery) (string, error)
-	toSelectSQL(query *GormQuery, as string) (string, error)
+	ToSQL(query *CQLQuery) (string, []any, error)
+	toSelectSQL(query *CQLQuery, as string) (string, error)
 	getField() IField
 }
 
@@ -123,19 +123,15 @@ type AggregationResult[T any] struct {
 	Function sql.FunctionByDialector
 }
 
-func (aggregation AggregationResult[T]) getSQL() toSQLFunc {
-	return aggregation.toSQL
-}
-
 func (aggregation AggregationResult[T]) getField() IField {
 	return aggregation.field
 }
 
-func (aggregation AggregationResult[T]) getValue() T {
+func (aggregation AggregationResult[T]) GetValue() T {
 	return *new(T)
 }
 
-func (aggregation AggregationResult[T]) toSQL(query *GormQuery) (string, error) {
+func (aggregation AggregationResult[T]) ToSQL(query *CQLQuery) (string, []any, error) {
 	columnSQL := ""
 
 	if aggregation.field != nil { // CountAll
@@ -143,7 +139,7 @@ func (aggregation AggregationResult[T]) toSQL(query *GormQuery) (string, error) 
 
 		table, err := query.GetModelTable(aggregation.field)
 		if err != nil {
-			return "", err
+			return "", nil, err
 		}
 
 		columnSQL = aggregation.field.columnSQL(query, table)
@@ -151,14 +147,14 @@ func (aggregation AggregationResult[T]) toSQL(query *GormQuery) (string, error) 
 
 	function, isPresent := aggregation.Function.Get(query.Dialector())
 	if !isPresent {
-		return "", functionError(ErrUnsupportedByDatabase, aggregation.Function)
+		return "", nil, functionError(ErrUnsupportedByDatabase, aggregation.Function)
 	}
 
-	return function.ApplyTo(columnSQL, 0), nil
+	return function.ApplyTo(columnSQL, 0), nil, nil
 }
 
-func (aggregation AggregationResult[T]) toSelectSQL(query *GormQuery, as string) (string, error) {
-	functionSQL, err := aggregation.toSQL(query)
+func (aggregation AggregationResult[T]) toSelectSQL(query *CQLQuery, as string) (string, error) {
+	functionSQL, _, err := aggregation.ToSQL(query)
 	if err != nil {
 		return "", err
 	}
@@ -170,56 +166,51 @@ func (aggregation AggregationResult[T]) toSelectSQL(query *GormQuery, as string)
 	), nil
 }
 
-type AggregationComparable[T any] interface {
-	getValue() T
-	getSQL() toSQLFunc
-}
-
-func (aggregation AggregationResult[T]) applyOperator(value AggregationComparable[T], operator sql.Operator) AggregationCondition {
+func (aggregation AggregationResult[T]) applyOperator(value ValueOfType[T], operator sql.Operator) AggregationCondition {
 	return AggregationCondition{
-		aggregation:   aggregation,
-		operator:      operator,
-		sqlGeneration: value.getSQL(),
-		values:        []any{value.getValue()},
+		aggregation:        aggregation,
+		operator:           operator,
+		valueSQLGeneration: value.ToSQL,
 	}
 }
 
 // EqualTo
-func (aggregation AggregationResult[T]) Eq(value AggregationComparable[T]) AggregationCondition {
+func (aggregation AggregationResult[T]) Eq(value ValueOfType[T]) AggregationCondition {
 	return aggregation.applyOperator(value, sql.Eq)
 }
 
 // NotEqualTo
-func (aggregation AggregationResult[T]) NotEq(value AggregationComparable[T]) AggregationCondition {
+func (aggregation AggregationResult[T]) NotEq(value ValueOfType[T]) AggregationCondition {
 	return aggregation.applyOperator(value, sql.NotEq)
 }
 
 // LessThan
-func (aggregation AggregationResult[T]) Lt(value AggregationComparable[T]) AggregationCondition {
+func (aggregation AggregationResult[T]) Lt(value ValueOfType[T]) AggregationCondition {
 	return aggregation.applyOperator(value, sql.Lt)
 }
 
 // LessThanOrEqualTo
-func (aggregation AggregationResult[T]) LtOrEq(value AggregationComparable[T]) AggregationCondition {
+func (aggregation AggregationResult[T]) LtOrEq(value ValueOfType[T]) AggregationCondition {
 	return aggregation.applyOperator(value, sql.LtOrEq)
 }
 
 // GreaterThan
-func (aggregation AggregationResult[T]) Gt(value AggregationComparable[T]) AggregationCondition {
+func (aggregation AggregationResult[T]) Gt(value ValueOfType[T]) AggregationCondition {
 	return aggregation.applyOperator(value, sql.Gt)
 }
 
 // GreaterThanOrEqualTo
-func (aggregation AggregationResult[T]) GtOrEq(value AggregationComparable[T]) AggregationCondition {
+func (aggregation AggregationResult[T]) GtOrEq(value ValueOfType[T]) AggregationCondition {
 	return aggregation.applyOperator(value, sql.GtOrEq)
 }
 
 func (aggregation AggregationResult[T]) applyListOperator(values []T, operator sql.Operator) AggregationCondition {
 	return AggregationCondition{
-		aggregation:   aggregation,
-		operator:      operator,
-		sqlGeneration: nil,
-		values:        []any{values},
+		aggregation: aggregation,
+		operator:    operator,
+		valueSQLGeneration: func(*CQLQuery) (string, []any, error) {
+			return "", []any{values}, nil
+		},
 	}
 }
 
@@ -249,21 +240,26 @@ func (aggregation AggregationResult[T]) NotIn(values []T) AggregationCondition {
 //   - postgresql: https://www.postgresql.org/docs/current/functions-matching.html#FUNCTIONS-LIKE
 //   - sqlserver: https://learn.microsoft.com/en-us/sql/t-sql/language-elements/like-transact-sql?view=sql-server-ver16
 //   - sqlite: https://www.sqlite.org/lang_expr.html#like
-func (aggregation AggregationResult[T]) Like(value AggregationComparable[T]) AggregationCondition {
-	return aggregation.applyOperator(value, sql.Like)
+func (aggregation AggregationResult[T]) Like(value string) AggregationCondition {
+	return AggregationCondition{
+		aggregation: aggregation,
+		operator:    sql.Like,
+		valueSQLGeneration: func(*CQLQuery) (string, []any, error) {
+			return "", []any{value}, nil
+		},
+	}
 }
 
 type AggregationCondition struct {
 	aggregation        Aggregation
 	operator           sql.Operator
-	sqlGeneration      func(query *GormQuery) (string, error)
-	values             []any
+	valueSQLGeneration func(*CQLQuery) (string, []any, error)
 	conditions         []AggregationCondition
 	connectionOperator string
 	containerOperator  string
 }
 
-func (condition AggregationCondition) toSQL(query *GormQuery) (string, []any, error) {
+func (condition AggregationCondition) toSQL(query *CQLQuery) (string, []any, error) {
 	if condition.connectionOperator != "" { // connector condition
 		sqlStrings := []string{}
 		values := []any{}
@@ -295,21 +291,21 @@ func (condition AggregationCondition) toSQL(query *GormQuery) (string, []any, er
 		return sqlString, values, nil
 	}
 
-	functionSQL, err := condition.aggregation.toSQL(query)
+	functionSQL, _, err := condition.aggregation.ToSQL(query)
 	if err != nil {
 		return "", nil, err
 	}
 
-	if condition.sqlGeneration != nil {
-		sql, err := condition.sqlGeneration(query)
-		if err != nil {
-			return "", nil, err
-		}
+	sql, values, err := condition.valueSQLGeneration(query)
+	if err != nil {
+		return "", nil, err
+	}
 
+	if sql != "" {
 		return functionSQL + " " + condition.operator.String() + " " + sql, []any{}, nil
 	}
 
-	return functionSQL + " " + condition.operator.String() + " ?", condition.values, nil
+	return functionSQL + " " + condition.operator.String() + " ?", values, nil
 }
 
 func ConnectionAggregationCondition(conditions []AggregationCondition, operator sql.Operator) AggregationCondition {

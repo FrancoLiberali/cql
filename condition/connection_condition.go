@@ -21,11 +21,11 @@ func (condition connectionCondition[T]) interfaceVerificationMethod(_ T) {
 	// that an object is of type Condition[T]
 }
 
-func (condition connectionCondition[T]) applyTo(query *GormQuery, table Table) error {
+func (condition connectionCondition[T]) applyTo(query *CQLQuery, table Table) error {
 	return ApplyWhereCondition[T](condition, query, table)
 }
 
-func (condition connectionCondition[T]) getSQL(query *GormQuery, table Table) (string, []any, error) {
+func (condition connectionCondition[T]) getSQL(query *CQLQuery, table Table) (string, []any, error) {
 	sqlStrings := []string{}
 	values := []any{}
 

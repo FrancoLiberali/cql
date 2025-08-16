@@ -10,7 +10,7 @@ type Condition[T model.Model] interface {
 	// Applies the condition to the "query"
 	// using the table holding
 	// the data for object of type T
-	applyTo(query *GormQuery, table Table) error
+	applyTo(query *CQLQuery, table Table) error
 
 	// This method is necessary to get the compiler to verify
 	// that an object is of type Condition[T],
@@ -20,7 +20,7 @@ type Condition[T model.Model] interface {
 }
 
 // Create a GormQuery to which the conditions are applied
-func ApplyConditions[T model.Model](db *gorm.DB, conditions []Condition[T]) (*GormQuery, error) {
+func ApplyConditions[T model.Model](db *gorm.DB, conditions []Condition[T]) (*CQLQuery, error) {
 	model := *new(T)
 
 	initialTable, err := NewTable(db, model)

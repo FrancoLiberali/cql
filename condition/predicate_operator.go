@@ -15,7 +15,7 @@ func (operator PredicateOperator[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Operator[T]
 }
 
-func (operator PredicateOperator[T]) ToSQL(_ *GormQuery, columnName string) (string, []any, error) {
+func (operator PredicateOperator[T]) ToSQL(_ *CQLQuery, columnName string) (string, []any, error) {
 	return fmt.Sprintf("%s %s", columnName, operator.SQLOperator), []any{}, nil
 }
 

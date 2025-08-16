@@ -18,7 +18,7 @@ func (condition collectionPreloadCondition[T1, T2]) interfaceVerificationMethod(
 	// that an object is of type Condition[T1]
 }
 
-func (condition collectionPreloadCondition[T1, T2]) applyTo(query *GormQuery, _ Table) error {
+func (condition collectionPreloadCondition[T1, T2]) applyTo(query *CQLQuery, _ Table) error {
 	if len(condition.NestedPreloads) == 0 {
 		query.Preload(condition.CollectionField)
 		return nil
@@ -40,7 +40,7 @@ func (condition collectionPreloadCondition[T1, T2]) applyTo(query *GormQuery, _ 
 				return db
 			}
 
-			return preloadQuery.GormDB
+			return preloadQuery.gormDB
 		},
 	)
 

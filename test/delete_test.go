@@ -47,7 +47,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenNothingMatchConditions() {
 
 	deleted, err := cql.Delete[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(0), deleted)
@@ -58,14 +58,14 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenAModelMatchConditions() {
 
 	deleted, err := cql.Delete[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), deleted)
 
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
 	ts.Require().NoError(err)
 	ts.Len(productReturned, 0)
@@ -100,7 +100,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinInConditions() {
 	deleted, err := cql.Delete[models.Phone](
 		ts.db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("google"),
+			conditions.Brand.Name.Is().Eq(cql.String("google")),
 		),
 	).Exec()
 	ts.Require().NoError(err)
@@ -108,7 +108,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinInConditions() {
 
 	phones, err := cql.Query[models.Phone](
 		ts.db,
-		conditions.Phone.Name.Is().Eq("pixel"),
+		conditions.Phone.Name.Is().Eq(cql.String("pixel")),
 	).Find()
 	ts.Require().NoError(err)
 	ts.Len(phones, 0)
@@ -129,10 +129,10 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinDifferentEntitiesInConditions() 
 	deleted, err := cql.Delete[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		),
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		),
 	).Exec()
 	ts.Require().NoError(err)
@@ -140,7 +140,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinDifferentEntitiesInConditions() 
 
 	sales, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.Code.Is().Eq(0),
+		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 	).Find()
 	ts.Require().NoError(err)
 	ts.Len(sales, 0)
@@ -162,9 +162,9 @@ func (ts *DeleteIntTestSuite) TestDeleteWithMultilevelJoinInConditions() {
 	deleted, err := cql.Delete[models.Sale](
 		ts.db,
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 			conditions.Seller.Company(
-				conditions.Company.Name.Is().Eq("ditrit"),
+				conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 			),
 		),
 	).Exec()
@@ -173,7 +173,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithMultilevelJoinInConditions() {
 
 	sales, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.Code.Is().Eq(0),
+		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 	).Find()
 	ts.Require().NoError(err)
 	ts.Len(sales, 0)
@@ -185,7 +185,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 	case sql.MySQL:
 		_, err := cql.Delete[models.Phone](
 			ts.db,
-			conditions.Phone.Name.Is().Eq("asd"),
+			conditions.Phone.Name.Is().Eq(cql.String("asd")),
 		).Returning(nil).Exec()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Returning")
@@ -195,7 +195,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 		productsReturned := []models.Product{}
 		deleted, err := cql.Delete[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(0),
+			conditions.Product.Int.Is().Eq(cql.Int(0)),
 		).Returning(&productsReturned).Exec()
 		ts.Require().NoError(err)
 		ts.Equal(int64(1), deleted)
@@ -206,7 +206,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 
 		products, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(0),
+			conditions.Product.Int.Is().Eq(cql.Int(0)),
 		).Find()
 		ts.Require().NoError(err)
 		ts.Len(products, 0)
@@ -220,7 +220,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 		salesReturned := []models.Sale{}
 		_, err := cql.Delete[models.Sale](
 			ts.db,
-			conditions.Sale.Code.Is().Eq(0),
+			conditions.Sale.Code.Is().Eq(cql.Int(0)),
 			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Exec()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
@@ -236,7 +236,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 		salesReturned := []models.Sale{}
 		deleted, err := cql.Delete[models.Sale](
 			ts.db,
-			conditions.Sale.Code.Is().Eq(0),
+			conditions.Sale.Code.Is().Eq(cql.Int(0)),
 			conditions.Sale.Product().Preload(),
 		).Returning(&salesReturned).Exec()
 		ts.Require().NoError(err)
@@ -271,7 +271,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadAtSecondLevel() {
 	salesReturned := []models.Sale{}
 	deleted, err := cql.Delete[models.Sale](
 		ts.db,
-		conditions.Sale.Code.Is().Eq(0),
+		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 		conditions.Sale.Seller(
 			conditions.Seller.Company().Preload(),
 		),
@@ -301,7 +301,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
 		companiesReturned := []models.Company{}
 		deleted, err := cql.Delete[models.Company](
 			ts.db,
-			conditions.Company.Name.Is().Eq("ditrit"),
+			conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 			conditions.Company.Sellers.Preload(),
 		).Returning(&companiesReturned).Exec()
 		ts.Require().NoError(err)
@@ -342,7 +342,7 @@ func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
 
 		productReturned, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(0),
+			conditions.Product.Int.Is().Eq(cql.Int(0)),
 		).FindOne()
 		ts.Require().NoError(err)
 
