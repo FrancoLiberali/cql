@@ -6,7 +6,6 @@ import (
 )
 
 type IValue interface {
-	// TODO agregar seccion a la doc de como trabajar con custom types: agregar GetValue y ToSQL
 	ToSQL(query *CQLQuery) (string, []any, error)
 }
 

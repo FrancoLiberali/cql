@@ -1362,7 +1362,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithField() {
 	).GroupBy(
 		conditions.Product.Int,
 	).Having(
-		// TODO aca te deja poner cualquier field, cuando solo el del group by anda
+		// TODO only fields from group by should be allowed
 		conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int.Value()),
 	).Select(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
