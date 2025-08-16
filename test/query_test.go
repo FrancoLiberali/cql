@@ -40,7 +40,7 @@ func (ts *QueryIntTestSuite) TestCountReturns0IfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	count, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Count()
 
 	ts.Require().NoError(err)
@@ -51,7 +51,7 @@ func (ts *QueryIntTestSuite) TestCountReturns1IfConditionsMatch() {
 	ts.createProduct("", 1, 0, false, nil)
 	count, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Count()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), count)
@@ -62,7 +62,7 @@ func (ts *QueryIntTestSuite) TestReturnsNIfMoreThanOneMatchConditions() {
 	ts.createProduct("", 0, 0, false, nil)
 	count, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Count()
 	ts.Require().NoError(err)
 	ts.Equal(int64(2), count)
@@ -74,7 +74,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).FindOne()
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
@@ -83,7 +83,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsEntityIfConditionsMatch() {
 	product := ts.createProduct("", 1, 0, false, nil)
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).FindOne()
 	ts.Require().NoError(err)
 
@@ -95,7 +95,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfMoreThanOneMatchConditions
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(0),
+		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).FindOne()
 	ts.Error(err, cql.ErrMoreThanOneObjectFound)
 }
@@ -106,7 +106,7 @@ func (ts *QueryIntTestSuite) TestFirstReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).First()
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
@@ -117,7 +117,7 @@ func (ts *QueryIntTestSuite) TestFirstReturnsFirstEntityIfConditionsMatch() {
 
 	brandReturned, err := cql.Query[models.Brand](
 		ts.db,
-		conditions.Brand.Name.Is().Eq("a"),
+		conditions.Brand.Name.Is().Eq(cql.String("a")),
 	).First()
 	ts.Require().NoError(err)
 
@@ -130,7 +130,7 @@ func (ts *QueryIntTestSuite) TestLastReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Last()
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
@@ -141,7 +141,7 @@ func (ts *QueryIntTestSuite) TestLastReturnsLastEntityIfConditionsMatch() {
 
 	brandReturned, err := cql.Query[models.Brand](
 		ts.db,
-		conditions.Brand.Name.Is().Eq("a"),
+		conditions.Brand.Name.Is().Eq(cql.String("a")),
 	).Last()
 	ts.Require().NoError(err)
 
@@ -154,7 +154,7 @@ func (ts *QueryIntTestSuite) TestTakeReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Take()
 	ts.Error(err, gorm.ErrRecordNotFound)
 }
@@ -164,7 +164,7 @@ func (ts *QueryIntTestSuite) TestTakeReturnsFirstCreatedEntityIfConditionsMatch(
 	product2 := ts.createProduct("", 1, 0, false, nil)
 	productReturned, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Take()
 	ts.Require().NoError(err)
 
@@ -178,7 +178,7 @@ func (ts *QueryIntTestSuite) TestAscendingReturnsResultsInAscendingOrder() {
 	product2 := ts.createProduct("", 1, 2.0, false, nil)
 	products, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Ascending(conditions.Product.Float).Find()
 	ts.Require().NoError(err)
 
@@ -192,7 +192,7 @@ func (ts *QueryIntTestSuite) TestDescendingReturnsResultsInDescendingOrder() {
 	product2 := ts.createProduct("", 1, 2.0, false, nil)
 	products, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Descending(conditions.Product.Float).Find()
 	ts.Require().NoError(err)
 
@@ -222,7 +222,7 @@ func (ts *QueryIntTestSuite) TestOrderByFieldThatIsJoined() {
 func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsNotConcerned() {
 	_, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Descending(conditions.Seller.ID).Find()
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "not concerned model: models.Seller; method: Descending")
@@ -294,7 +294,7 @@ func (ts *QueryIntTestSuite) TestLimitLimitsTheAmountOfModelsReturned() {
 	product2 := ts.createProduct("", 1, 0, false, nil)
 	products, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Limit(1).Find()
 	ts.Require().NoError(err)
 
@@ -307,7 +307,7 @@ func (ts *QueryIntTestSuite) TestLimitCanBeCanceled() {
 	product2 := ts.createProduct("", 1, 0, false, nil)
 	products, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Limit(1).Limit(-1).Find()
 	ts.Require().NoError(err)
 
@@ -324,7 +324,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite:
 		products, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Ascending(conditions.Product.Float).Offset(1).Find()
 		ts.Require().NoError(err)
 
@@ -332,7 +332,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 	case sql.MySQL:
 		products, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Ascending(conditions.Product.Float).Offset(1).Limit(10).Find()
 		ts.Require().NoError(err)
 
@@ -348,7 +348,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite:
 		products, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Offset(2).Find()
 		ts.Require().NoError(err)
 
@@ -356,7 +356,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 	case sql.MySQL:
 		products, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Offset(2).Limit(10).Find()
 		ts.Require().NoError(err)
 
@@ -370,7 +370,7 @@ func (ts *QueryIntTestSuite) TestOffsetAndLimitWorkTogether() {
 	ts.createProduct("", 1, 3, false, nil)
 	products, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Ascending(conditions.Product.Float).Offset(1).Limit(1).Find()
 	ts.Require().NoError(err)
 

@@ -23,7 +23,7 @@ func testOrderNotJoinedInDifferentLines() {
 func testOrderMainModel() {
 	cql.Query[models.Brand](
 		db,
-		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
 		conditions.Brand.Name,
 	).Find()
@@ -33,7 +33,7 @@ func testOrderJoinedModelWithoutConditions() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(),
-		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
 		conditions.Brand.Name,
 	).Find()
@@ -43,9 +43,9 @@ func testOrderJoinedModelWithConditions() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("asd"),
+			conditions.Brand.Name.Is().Eq(cql.String("asd")),
 		),
-		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
 		conditions.Brand.Name,
 	).Find()
@@ -55,7 +55,7 @@ func testOrderJoinedModelWithoutConditionsWithPreload() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand().Preload(),
-		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
 		conditions.Brand.Name,
 	).Find()
@@ -65,9 +65,9 @@ func testOrderJoinedModelWithConditionsWithPreload() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq("asd"),
+			conditions.Brand.Name.Is().Eq(cql.String("asd")),
 		).Preload(),
-		conditions.Phone.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
 		conditions.Brand.Name,
 	).Find()
@@ -79,7 +79,7 @@ func testOrderNestedJoinedModel() {
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
 		),
-		conditions.Child.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Child.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
 		conditions.ParentParent.Name,
 	).Find()
@@ -96,7 +96,7 @@ func testOrderMainModelWithoutConditions() {
 func testOrderMainModelWithLimitAfter() {
 	cql.Query[models.Brand](
 		db,
-		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
 		conditions.Brand.Name,
 	).Limit(1).Find()
@@ -105,7 +105,7 @@ func testOrderMainModelWithLimitAfter() {
 func testOrderMainModelWithLimitBefore() {
 	cql.Query[models.Brand](
 		db,
-		conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Limit(1).Descending(
 		conditions.Brand.Name,
 	).Find()

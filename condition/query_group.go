@@ -1,7 +1,7 @@
 package condition
 
 type QueryGroup struct {
-	gormQuery *GormQuery
+	gormQuery *CQLQuery
 	err       error
 	fields    []IField
 }

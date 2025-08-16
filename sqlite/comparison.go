@@ -7,5 +7,5 @@ import (
 
 // ref: https://www.sqlie.org/lang_expr.html#like
 func Glob(pattern string) condition.Operator[string] {
-	return condition.NewValueOperator[string](sql.SQLiteGlob, pattern)
+	return condition.NewValueOperator[string](sql.SQLiteGlob, condition.String(pattern))
 }

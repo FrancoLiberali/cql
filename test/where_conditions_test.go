@@ -57,7 +57,7 @@ func (ts *WhereConditionsIntTestSuite) TestQueryReturnsTheListWhenMultipleCreate
 func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsEmptyIfNotEntitiesCreated() {
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq("not_created"),
+		conditions.Product.String.Is().Eq(cql.String("not_created")),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -69,7 +69,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsEmptyIfNothingMatch(
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq("not_match"),
+		conditions.Product.String.Is().Eq(cql.String("not_match")),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -82,7 +82,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsOneIfOnlyOneMatch() 
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq("match"),
+		conditions.Product.String.Is().Eq(cql.String("match")),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -96,7 +96,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsReturnsMultipleIfMultipleMa
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq("match"),
+		conditions.Product.String.Is().Eq(cql.String("match")),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -109,7 +109,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfIntType() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -122,7 +122,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfFloatType() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Float.Is().Eq(1.1),
+		conditions.Product.Float.Is().Eq(cql.Float64(1.1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -151,8 +151,8 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsOfDifferentTypesWor
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq("match"),
-		conditions.Product.Int.Is().Eq(1),
+		conditions.Product.String.Is().Eq(cql.String("match")),
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
 		conditions.Product.Bool.Is().True(),
 	).Find()
 	ts.Require().NoError(err)
@@ -166,7 +166,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfID() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.ID.Is().Eq(match.ID),
+		conditions.Product.ID.Is().Eq(cql.UUID(match.ID)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -179,7 +179,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfCreatedAt() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.CreatedAt.Is().Eq(match.CreatedAt),
+		conditions.Product.CreatedAt.Is().Eq(cql.Time(match.CreatedAt)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -206,7 +206,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfDeletedAt() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.DeletedAt.Is().Eq(match.DeletedAt.Time),
+		conditions.Product.DeletedAt.Is().Eq(cql.Time(match.DeletedAt.Time)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -224,7 +224,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfEmbedded() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.ToBeEmbeddedEmbeddedInt.Is().Eq(1),
+		conditions.Product.ToBeEmbeddedEmbeddedInt.Is().Eq(cql.Int(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -242,7 +242,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfGormEmbedded() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.GormEmbeddedInt.Is().Eq(1),
+		conditions.Product.GormEmbeddedInt.Is().Eq(cql.Int(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -258,7 +258,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfPointerTypeWithValue() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.IntPointer.Is().Eq(1),
+		conditions.Product.IntPointer.Is().Eq(cql.Int(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -281,7 +281,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfByteArrayWithContent() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.ByteArray.Is().Eq([]byte{1, 2}),
+		conditions.Product.ByteArray.Is().Eq(cql.ByteArray([]byte{1, 2})),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -304,7 +304,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfByteArrayEmpty() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.ByteArray.Is().Eq([]byte{}),
+		conditions.Product.ByteArray.Is().Eq(cql.ByteArray([]byte{})),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -346,7 +346,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationType() {
 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.ProductID.Is().Eq(product1.ID),
+		conditions.Sale.ProductID.Is().Eq(cql.UUID(product1.ID)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -365,7 +365,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfRelationTypeOptionalWithVa
 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
-		conditions.Sale.SellerID.Is().Eq(seller1.ID),
+		conditions.Sale.SellerID.Is().Eq(cql.UUID(seller1.ID)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -396,7 +396,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionsOnUIntModel() {
 
 	entities, err := cql.Query[models.Brand](
 		ts.db,
-		conditions.Brand.Name.Is().Eq("match"),
+		conditions.Brand.Name.Is().Eq(cql.String("match")),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -411,9 +411,9 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsAreConnectedByAnd()
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().GtOrEq(3),
-		conditions.Product.Int.Is().LtOrEq(4),
-		conditions.Product.String.Is().Eq("match"),
+		conditions.Product.Int.Is().GtOrEq(cql.Int(3)),
+		conditions.Product.Int.Is().LtOrEq(cql.Int(4)),
+		conditions.Product.String.Is().Eq(cql.String("match")),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -429,7 +429,7 @@ func (ts *WhereConditionsIntTestSuite) TestNot() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		cql.Not(conditions.Product.Int.Is().Eq(2)),
+		cql.Not(conditions.Product.Int.Is().Eq(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -446,8 +446,8 @@ func (ts *WhereConditionsIntTestSuite) TestNotWithMultipleConditionsAreConnected
 	entities, err := cql.Query[models.Product](
 		ts.db,
 		cql.Not(
-			conditions.Product.Int.Is().Gt(1),
-			conditions.Product.Int.Is().Lt(4),
+			conditions.Product.Int.Is().Gt(cql.Int(1)),
+			conditions.Product.Int.Is().Lt(cql.Int(4)),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -466,9 +466,9 @@ func (ts *WhereConditionsIntTestSuite) TestOr() {
 	entities, err := cql.Query[models.Product](
 		ts.db,
 		cql.Or(
-			conditions.Product.Int.Is().Eq(2),
-			conditions.Product.Int.Is().Eq(3),
-			conditions.Product.String.Is().Eq("match_3"),
+			conditions.Product.Int.Is().Eq(cql.Int(2)),
+			conditions.Product.Int.Is().Eq(cql.Int(3)),
+			conditions.Product.String.Is().Eq(cql.String("match_3")),
 		),
 	).Find()
 	ts.Require().NoError(err)
@@ -488,8 +488,8 @@ func (ts *WhereConditionsIntTestSuite) TestNotOr() {
 		ts.db,
 		cql.Not[models.Product](
 			cql.Or(
-				conditions.Product.Int.Is().Eq(2),
-				conditions.Product.String.Is().Eq("not_match_string"),
+				conditions.Product.Int.Is().Eq(cql.Int(2)),
+				conditions.Product.String.Is().Eq(cql.String("not_match_string")),
 			),
 		),
 	).Find()
@@ -512,8 +512,8 @@ func (ts *WhereConditionsIntTestSuite) TestXor() {
 		entities, err := cql.Query[models.Product](
 			ts.db,
 			mysql.Xor(
-				conditions.Product.Int.Is().Lt(6),
-				conditions.Product.Int.Is().Gt(3),
+				conditions.Product.Int.Is().Lt(cql.Int(6)),
+				conditions.Product.Int.Is().Gt(cql.Int(3)),
 			),
 		).Find()
 		ts.Require().NoError(err)
@@ -531,8 +531,8 @@ func (ts *WhereConditionsIntTestSuite) TestMultipleConditionsDifferentOperators(
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq("match"),
-		conditions.Product.Int.Is().Lt(2),
+		conditions.Product.String.Is().Eq(cql.String("match")),
+		conditions.Product.Int.Is().Lt(cql.Int(2)),
 		conditions.Product.Bool.Is().True(),
 	).Find()
 	ts.Require().NoError(err)

@@ -298,7 +298,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithWhereConditionFilters() 
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Preload(),
 	).Find()
 	ts.Require().NoError(err)
@@ -456,7 +456,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadSelfReferentialAtSecondLevel
 		conditions.Employee.Boss(
 			conditions.Employee.Boss().Preload(),
 		),
-		conditions.Employee.Name.Is().Eq("franco"),
+		conditions.Employee.Name.Is().Eq(cql.String("franco")),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -486,10 +486,10 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadDifferentEntitiesWithConditi
 	entities, err := cql.Query[models.Sale](
 		ts.db,
 		conditions.Sale.Product(
-			conditions.Product.Int.Is().Eq(1),
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Preload(),
 		conditions.Sale.Seller(
-			conditions.Seller.Name.Is().Eq("franco"),
+			conditions.Seller.Name.Is().Eq(cql.String("franco")),
 		).Preload(),
 	).Find()
 	ts.Require().NoError(err)
@@ -612,7 +612,7 @@ func (ts *PreloadConditionsIntTestSuite) TestJoinMultipleTimesAndPreloadWithCond
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(
-				conditions.ParentParent.Name.Is().Eq("parentParent1"),
+				conditions.ParentParent.Name.Is().Eq(cql.String("parentParent1")),
 			).Preload(),
 		).Preload(),
 	).Find()
@@ -832,7 +832,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadListAndNestedAttributesWithF
 		ts.db,
 		conditions.Company.Sellers.Preload(
 			conditions.Seller.University(
-				conditions.University.ID.Is().Eq(model.NilUUID),
+				conditions.University.ID.Is().Eq(cql.UUID(model.NilUUID)),
 			).Preload(),
 		),
 	).Find()

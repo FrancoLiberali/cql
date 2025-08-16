@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
 
+	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
 )
 
@@ -59,6 +60,14 @@ func (MultiString) GormDBDataType(db *gorm.DB, _ *schema.Field) string {
 	default:
 		return "text"
 	}
+}
+
+func (s MultiString) GetValue() MultiString {
+	return s
+}
+
+func (s MultiString) ToSQL(_ *condition.CQLQuery) (string, []any, error) {
+	return "", []any{s}, nil
 }
 
 type ToBeEmbedded struct {

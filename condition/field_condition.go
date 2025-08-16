@@ -9,7 +9,7 @@ const deletedAtField = "DeletedAt"
 // Condition that verifies the value of a field,
 // using the Operator
 type fieldCondition[TObject model.Model, TAtribute any] struct {
-	FieldIdentifier Field[TObject, TAtribute]
+	FieldIdentifier IField
 	Operator        Operator[TAtribute]
 }
 
@@ -22,7 +22,7 @@ func (condition fieldCondition[TObject, TAtribute]) interfaceVerificationMethod(
 // to filter that the Field as a value of Value
 //
 
-func (condition fieldCondition[TObject, TAtribute]) applyTo(query *GormQuery, table Table) error {
+func (condition fieldCondition[TObject, TAtribute]) applyTo(query *CQLQuery, table Table) error {
 	return ApplyWhereCondition[TObject](condition, query, table)
 }
 
@@ -30,7 +30,7 @@ func (condition fieldCondition[TObject, TAtribute]) affectsDeletedAt() bool {
 	return condition.FieldIdentifier.fieldName() == deletedAtField
 }
 
-func (condition fieldCondition[TObject, TAtribute]) getSQL(query *GormQuery, table Table) (string, []any, error) {
+func (condition fieldCondition[TObject, TAtribute]) getSQL(query *CQLQuery, table Table) (string, []any, error) {
 	sqlString, values, err := condition.Operator.ToSQL(
 		query,
 		condition.FieldIdentifier.columnSQL(query, table),
@@ -43,7 +43,7 @@ func (condition fieldCondition[TObject, TAtribute]) getSQL(query *GormQuery, tab
 }
 
 func NewFieldCondition[TObject model.Model, TAttribute any](
-	fieldIdentifier Field[TObject, TAttribute],
+	fieldIdentifier IField,
 	operator Operator[TAttribute],
 ) WhereCondition[TObject] {
 	return &fieldCondition[TObject, TAttribute]{

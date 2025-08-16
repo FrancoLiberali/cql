@@ -34,11 +34,11 @@ func (condition existsCondition[T1, T2]) interfaceVerificationMethod(_ T1) {
 	// that an object is of type Condition[T]
 }
 
-func (condition existsCondition[T1, T2]) applyTo(query *GormQuery, table Table) error {
+func (condition existsCondition[T1, T2]) applyTo(query *CQLQuery, table Table) error {
 	return ApplyWhereCondition[T1](condition, query, table)
 }
 
-func (condition existsCondition[T1, T2]) getSQL(query *GormQuery, t1Table Table) (string, []any, error) {
+func (condition existsCondition[T1, T2]) getSQL(query *CQLQuery, t1Table Table) (string, []any, error) {
 	connectionCondition := And(condition.Conditions...)
 
 	t2Table, err := t1Table.DeliverTable(query, *new(T2), condition.RelationField)
