@@ -106,7 +106,7 @@ func IsNotDistinct[T any](value IValue) Operator[T] {
 
 type IValueList[T any] []ValueOfType[T]
 
-func (values IValueList[T]) ToSQL(_ *GormQuery) (string, []any, error) {
+func (values IValueList[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
 	valuesAny := make([]any, 0, len(values))
 	for _, value := range values {
 		valuesAny = append(valuesAny, value.GetValue())

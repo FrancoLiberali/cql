@@ -7,9 +7,9 @@ import (
 )
 
 type IField interface {
-	columnName(query *GormQuery, table Table) string
+	columnName(query *CQLQuery, table Table) string
 	fieldName() string
-	columnSQL(query *GormQuery, table Table) string
+	columnSQL(query *CQLQuery, table Table) string
 	getModelType() reflect.Type
 	getAppearance() (uint, bool)
 }
@@ -75,7 +75,7 @@ func (field Field[TModel, TAttribute]) fieldName() string {
 }
 
 // Returns the name of the column in which the field is saved in the table
-func (field Field[TModel, TAttribute]) columnName(query *GormQuery, table Table) string {
+func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) string {
 	columnName := field.column
 	if columnName == "" {
 		columnName = query.ColumnName(table, field.name)
@@ -86,7 +86,7 @@ func (field Field[TModel, TAttribute]) columnName(query *GormQuery, table Table)
 }
 
 // Returns the SQL to get the value of the field in the table
-func (field Field[TModel, TAttribute]) columnSQL(query *GormQuery, table Table) string {
+func (field Field[TModel, TAttribute]) columnSQL(query *CQLQuery, table Table) string {
 	return table.Alias + "." + field.columnName(query, table)
 }
 

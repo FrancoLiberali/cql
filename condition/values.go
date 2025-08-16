@@ -14,7 +14,7 @@ func (numericValue NumericValue[T]) GetValue() float64 {
 	return float64(numericValue.Value)
 }
 
-func (numericValue NumericValue[T]) ToSQL(_ *GormQuery) (string, []any, error) {
+func (numericValue NumericValue[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
 	return "", []any{numericValue.GetValue()}, nil
 }
 
@@ -26,7 +26,7 @@ func (boolValue BoolValue) GetValue() bool {
 	return boolValue.Value
 }
 
-func (boolValue BoolValue) ToSQL(_ *GormQuery) (string, []any, error) {
+func (boolValue BoolValue) ToSQL(_ *CQLQuery) (string, []any, error) {
 	return "", []any{boolValue.GetValue()}, nil
 }
 
@@ -38,7 +38,7 @@ func (value Value[T]) GetValue() T {
 	return value.Value
 }
 
-func (value Value[T]) ToSQL(_ *GormQuery) (string, []any, error) {
+func (value Value[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
 	return "", []any{value.GetValue()}, nil
 }
 
@@ -46,6 +46,6 @@ type unsafeValue struct {
 	Value IValue
 }
 
-func (unsafeValue unsafeValue) ToSQL(query *GormQuery) (string, []any, error) {
+func (unsafeValue unsafeValue) ToSQL(query *CQLQuery) (string, []any, error) {
 	return unsafeValue.Value.ToSQL(query)
 }

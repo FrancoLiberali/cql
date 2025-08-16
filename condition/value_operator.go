@@ -30,7 +30,7 @@ func (operator ValueOperator[T]) InterfaceVerificationMethod(_ T) {
 	// that an object is of type Operator[T]
 }
 
-func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (string, []any, error) {
+func (operator ValueOperator[T]) ToSQL(query *CQLQuery, columnName string) (string, []any, error) {
 	operationString := columnName
 
 	if modifier, isPresent := operator.Modifier[query.Dialector()]; isPresent {
@@ -77,7 +77,7 @@ func (operator ValueOperator[T]) ToSQL(query *GormQuery, columnName string) (str
 	return operationString, values, nil
 }
 
-func getModelTable(query *GormQuery, field IField) (Table, error) {
+func getModelTable(query *CQLQuery, field IField) (Table, error) {
 	table, err := query.GetModelTable(field)
 	if err != nil {
 		return Table{}, err

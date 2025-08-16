@@ -6,9 +6,8 @@ import (
 )
 
 type IValue interface {
-	// TODO cambiar el nombre y exportar esto para que los custom types lo puedan implementar
 	// TODO agregar seccion a la doc de como trabajar con custom types: agregar GetValue y ToSQL
-	ToSQL(query *GormQuery) (string, []any, error)
+	ToSQL(query *CQLQuery) (string, []any, error)
 }
 
 type ValueOfType[T any] interface {
@@ -41,7 +40,7 @@ func (value *FieldValue[TModel, TAttribute]) addFunction(function sql.FunctionBy
 	value.values = append(value.values, others...)
 }
 
-func (value FieldValue[TModel, TAttribute]) ToSQL(query *GormQuery) (string, []any, error) {
+func (value FieldValue[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, error) {
 	table, err := getModelTable(query, value.field)
 	if err != nil {
 		return "", nil, err

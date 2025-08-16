@@ -113,8 +113,8 @@ func (fieldAggregation BoolFieldAggregation) None() AggregationResult[bool] {
 }
 
 type Aggregation interface {
-	ToSQL(query *GormQuery) (string, []any, error)
-	toSelectSQL(query *GormQuery, as string) (string, error)
+	ToSQL(query *CQLQuery) (string, []any, error)
+	toSelectSQL(query *CQLQuery, as string) (string, error)
 	getField() IField
 }
 
@@ -131,7 +131,7 @@ func (aggregation AggregationResult[T]) GetValue() T {
 	return *new(T)
 }
 
-func (aggregation AggregationResult[T]) ToSQL(query *GormQuery) (string, []any, error) {
+func (aggregation AggregationResult[T]) ToSQL(query *CQLQuery) (string, []any, error) {
 	columnSQL := ""
 
 	if aggregation.field != nil { // CountAll
@@ -153,7 +153,7 @@ func (aggregation AggregationResult[T]) ToSQL(query *GormQuery) (string, []any, 
 	return function.ApplyTo(columnSQL, 0), nil, nil
 }
 
-func (aggregation AggregationResult[T]) toSelectSQL(query *GormQuery, as string) (string, error) {
+func (aggregation AggregationResult[T]) toSelectSQL(query *CQLQuery, as string) (string, error) {
 	functionSQL, _, err := aggregation.ToSQL(query)
 	if err != nil {
 		return "", err
@@ -208,7 +208,7 @@ func (aggregation AggregationResult[T]) applyListOperator(values []T, operator s
 	return AggregationCondition{
 		aggregation: aggregation,
 		operator:    operator,
-		valueSQLGeneration: func(*GormQuery) (string, []any, error) {
+		valueSQLGeneration: func(*CQLQuery) (string, []any, error) {
 			return "", []any{values}, nil
 		},
 	}
@@ -244,7 +244,7 @@ func (aggregation AggregationResult[T]) Like(value string) AggregationCondition 
 	return AggregationCondition{
 		aggregation: aggregation,
 		operator:    sql.Like,
-		valueSQLGeneration: func(*GormQuery) (string, []any, error) {
+		valueSQLGeneration: func(*CQLQuery) (string, []any, error) {
 			return "", []any{value}, nil
 		},
 	}
@@ -253,13 +253,13 @@ func (aggregation AggregationResult[T]) Like(value string) AggregationCondition 
 type AggregationCondition struct {
 	aggregation        Aggregation
 	operator           sql.Operator
-	valueSQLGeneration func(*GormQuery) (string, []any, error)
+	valueSQLGeneration func(*CQLQuery) (string, []any, error)
 	conditions         []AggregationCondition
 	connectionOperator string
 	containerOperator  string
 }
 
-func (condition AggregationCondition) toSQL(query *GormQuery) (string, []any, error) {
+func (condition AggregationCondition) toSQL(query *CQLQuery) (string, []any, error) {
 	if condition.connectionOperator != "" { // connector condition
 		sqlStrings := []string{}
 		values := []any{}

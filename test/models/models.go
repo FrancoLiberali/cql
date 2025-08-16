@@ -66,7 +66,7 @@ func (s MultiString) GetValue() MultiString {
 	return s
 }
 
-func (s MultiString) ToSQL(_ *condition.GormQuery) (string, []any, error) {
+func (s MultiString) ToSQL(_ *condition.CQLQuery) (string, []any, error) {
 	return "", []any{s}, nil
 }
 

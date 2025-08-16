@@ -7,7 +7,7 @@ import (
 )
 
 type Query[T model.Model] struct {
-	gormQuery *GormQuery
+	gormQuery *CQLQuery
 	err       error
 }
 
