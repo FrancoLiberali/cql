@@ -158,7 +158,7 @@ In this case, the type of the two attributes being compared must be the same:
     _, err := cql.Query[models.City](
         db,
         conditions.City.Country(
-            conditions.Country.Name.IsDynamic().Eq(conditions.City.Name.Value()),
+            conditions.Country.Name.IsDynamic().Eq(conditions.City.Name),
         ),
     ).Find()
 
@@ -171,7 +171,7 @@ In this case, the type of the two attributes being compared must be the same:
     _, err := cql.Query[models.City](
         db,
         conditions.City.Country(
-            conditions.Country.Name.IsDynamic().Eq(conditions.City.Population.Value()),
+            conditions.Country.Name.IsDynamic().Eq(conditions.City.Population),
         ),
     ).Find()
 

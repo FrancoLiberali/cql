@@ -1362,7 +1362,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithField() {
 	).GroupBy(
 		conditions.Product.Int,
 	).Having(
-		conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int.Value()),
+		conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int),
 	).Select(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
@@ -1386,7 +1386,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithField() {
 		conditions.Product.Int,
 		conditions.Product.Float,
 	).Having(
-		conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int.Value()),
+		conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int),
 	).Select(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)

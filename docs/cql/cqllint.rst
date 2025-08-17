@@ -64,7 +64,7 @@ with an attribute of a model that is not joined by the query:
 
     _, err := cql.Query[models.Brand](
         db,
-        conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name.Value()),
+        conditions.Brand.Name.IsDynamic().Eq(conditions.City.Name),
     ).Find()
 
 If we execute this query we will obtain an error of type `cql.ErrFieldModelNotConcerned` with the following message:
@@ -132,7 +132,7 @@ To generate this error we must join the same model more than once and not select
         conditions.Child.Parent2(
             conditions.Parent2.ParentParent(),
         ),
-        conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID.Value()),
+        conditions.Child.ID.IsDynamic().Eq(conditions.ParentParent.ID),
     ).Find()
 
 If we execute this query we will obtain an error of type `cql.ErrAppearanceMustBeSelected` with the following message:
@@ -162,7 +162,7 @@ To generate this error we must use the Appearance method with a value greater th
     _, err := cql.Query[models.Phone](
         db,
         conditions.Phone.Brand(
-            conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(1).Value()),
+            conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(1)),
         ),
     ).Find()
 
@@ -199,7 +199,7 @@ This case occurs when making a Set of exactly the same value:
         db,
         conditions.Brand.Name.Is().Eq("nike"),
     ).Set(
-        conditions.Brand.Name.Set().Dynamic(conditions.Brand.Name.Value()),
+        conditions.Brand.Name.Set().Dynamic(conditions.Brand.Name),
     )
 
 If we run cqllint we will see the following report:
@@ -224,7 +224,7 @@ i.e. when the model appears only once:
     _, err := cql.Query[models.Phone](
         db,
         conditions.Phone.Brand(
-            conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(0).Value()),
+            conditions.Brand.Name.IsDynamic().Eq(conditions.Phone.Name.Appearance(0)),
         ),
     ).Find()
 

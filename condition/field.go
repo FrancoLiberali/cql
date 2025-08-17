@@ -4,6 +4,7 @@ import (
 	"reflect"
 
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/FrancoLiberali/cql/sql"
 )
 
 type IField interface {
@@ -14,12 +15,19 @@ type IField interface {
 	getAppearance() (uint, bool)
 }
 
+type functionAndValues struct {
+	function sql.FunctionByDialector
+	values   int
+}
+
 type Field[TModel model.Model, TAttribute any] struct {
 	column             string
 	name               string
 	columnPrefix       string
 	appearance         uint
 	appearanceSelected bool
+	values             []any
+	functions          []functionAndValues
 }
 
 // Is allows creating conditions that include the field and a static value
@@ -32,11 +40,6 @@ func (field Field[TModel, TAttribute]) Is() FieldIs[TModel, TAttribute] {
 // IsUnsafe allows creating conditions that include the field and are not verified in compilation time.
 func (field Field[TModel, TAttribute]) IsUnsafe() UnsafeFieldIs[TModel, TAttribute] {
 	return UnsafeFieldIs[TModel, TAttribute]{field: field}
-}
-
-// Value allows using the value of the field inside dynamic conditions.
-func (field Field[TModel, TAttribute]) Value() *FieldValue[TModel, TAttribute] {
-	return NewFieldValue(field)
 }
 
 // Appearance allows to choose which number of appearance use
@@ -88,6 +91,35 @@ func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) 
 // Returns the SQL to get the value of the field in the table
 func (field Field[TModel, TAttribute]) columnSQL(query *CQLQuery, table Table) string {
 	return table.Alias + "." + field.columnName(query, table)
+}
+
+func (field *Field[TModel, TAttribute]) addFunction(function sql.FunctionByDialector, others ...any) {
+	field.functions = append(field.functions, functionAndValues{function: function, values: len(others)})
+	field.values = append(field.values, others...)
+}
+
+func (field Field[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, error) {
+	table, err := getModelTable(query, field)
+	if err != nil {
+		return "", nil, err
+	}
+
+	finalSQL := field.columnSQL(query, table)
+
+	for _, functionAndValues := range field.functions {
+		function, isPresent := functionAndValues.function.Get(query.Dialector())
+		if !isPresent {
+			return "", nil, functionError(ErrUnsupportedByDatabase, functionAndValues.function)
+		}
+
+		finalSQL = function.ApplyTo(finalSQL, functionAndValues.values)
+	}
+
+	return finalSQL, field.values, nil
+}
+
+func (field Field[TModel, TAttribute]) GetValue() TAttribute {
+	return *new(TAttribute)
 }
 
 func NewField[TModel model.Model, TAttribute any](name, column, columnPrefix string) Field[TModel, TAttribute] {
@@ -189,9 +221,10 @@ func (stringField StringField[TModel]) Is() StringFieldIs[TModel] {
 	}
 }
 
-// Value allows using the value of the field inside dynamic conditions.
-func (stringField StringField[TModel]) Value() *StringFieldValue[TModel] {
-	return &StringFieldValue[TModel]{FieldValue: *stringField.UpdatableField.Value()}
+// Concat concatenates other to value
+func (stringField StringField[TModel]) Concat(other string) StringField[TModel] {
+	stringField.addFunction(sql.Concat, other)
+	return stringField
 }
 
 // Appearance allows to choose which number of appearance use
@@ -218,11 +251,6 @@ func (stringField NullableStringField[TModel]) Is() StringFieldIs[TModel] {
 			field: stringField.Field,
 		},
 	}
-}
-
-// Value allows using the value of the field inside dynamic conditions.
-func (stringField NullableStringField[TModel]) Value() *StringFieldValue[TModel] {
-	return &StringFieldValue[TModel]{FieldValue: *stringField.UpdatableField.Value()}
 }
 
 // Appearance allows to choose which number of appearance use
@@ -262,11 +290,6 @@ func (numericField NumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel]
 	}
 }
 
-// Value allows using the value of the field inside dynamic conditions.
-func (numericField NumericField[TModel, TAttribute]) Value() *NumericFieldValue[TModel, TAttribute] {
-	return &NumericFieldValue[TModel, TAttribute]{FieldValue: *numericField.UpdatableField.Value()}
-}
-
 func (numericField NumericField[TModel, TAttribute]) Set() NumericFieldSet[TModel, TAttribute] {
 	return NumericFieldSet[TModel, TAttribute]{field: numericField}
 }
@@ -282,6 +305,100 @@ func (numericField NumericField[TModel, TAttribute]) Appearance(number uint) Num
 // Aggregate allows applying aggregation functions to the field inside a group by
 func (numericField NumericField[TModel, TAttribute]) Aggregate() NumericFieldAggregation {
 	return NumericFieldAggregation{FieldAggregation: FieldAggregation[float64]{field: numericField}}
+}
+
+func (numericField NumericField[TModel, TAttribute]) GetValue() float64 {
+	return 0
+}
+
+// Plus sums other to value
+func (numericField NumericField[TModel, TAttribute]) Plus(other float64) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.Plus, other)
+	return numericField
+}
+
+// Minus subtracts other from the value
+func (numericField NumericField[TModel, TAttribute]) Minus(other float64) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.Minus, other)
+	return numericField
+}
+
+// Times multiplies value by other
+func (numericField NumericField[TModel, TAttribute]) Times(other float64) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.Times, other)
+	return numericField
+}
+
+// Divided divides value by other
+func (numericField NumericField[TModel, TAttribute]) Divided(other float64) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.Divided, other)
+	return numericField
+}
+
+// Modulo returns the remainder of the entire division
+func (numericField NumericField[TModel, TAttribute]) Modulo(other int) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.Modulo, other)
+	return numericField
+}
+
+// Power elevates value to other
+//
+// Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: POWER" will be returned
+func (numericField NumericField[TModel, TAttribute]) Power(other float64) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.Power, other)
+	return numericField
+}
+
+// SquareRoot calculates the square root of the value
+//
+// Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: SQRT" will be returned
+func (numericField NumericField[TModel, TAttribute]) SquareRoot() NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.SquareRoot)
+	return numericField
+}
+
+// Absolute calculates the absolute value of the value
+func (numericField NumericField[TModel, TAttribute]) Absolute() NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.Absolute)
+	return numericField
+}
+
+// And calculates the bitwise AND between value and other
+func (numericField NumericField[TModel, TAttribute]) And(other int) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.BitAnd, other)
+	return numericField
+}
+
+// Or calculates the bitwise OR between value and other
+func (numericField NumericField[TModel, TAttribute]) Or(other int) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.BitOr, other)
+	return numericField
+}
+
+// Xor calculates the bitwise XOR (exclusive OR) between value and other
+//
+// Available for: postgres, mysql, sqlserver
+func (numericField NumericField[TModel, TAttribute]) Xor(other int) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.BitXor, other)
+	return numericField
+}
+
+// Not calculates the bitwise NOT of value
+func (numericField NumericField[TModel, TAttribute]) Not() NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.BitNot)
+	return numericField
+}
+
+// ShiftLeft shifts value amount bits to the left
+func (numericField NumericField[TModel, TAttribute]) ShiftLeft(amount int) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.BitShiftLeft, amount)
+	return numericField
+}
+
+// ShiftRight shifts value amount bits to the right
+func (numericField NumericField[TModel, TAttribute]) ShiftRight(amount int) NumericField[TModel, TAttribute] {
+	numericField.addFunction(sql.BitShiftRight, amount)
+	return numericField
 }
 
 type NullableNumericField[

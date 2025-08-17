@@ -2,6 +2,16 @@ package condition
 
 import "golang.org/x/exp/constraints"
 
+type IValue interface {
+	ToSQL(query *CQLQuery) (string, []any, error)
+}
+
+type ValueOfType[T any] interface {
+	IValue
+
+	GetValue() T
+}
+
 type Numeric interface {
 	constraints.Integer | constraints.Float
 }

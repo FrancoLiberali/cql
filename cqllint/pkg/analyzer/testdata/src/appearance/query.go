@@ -14,7 +14,7 @@ func testQueryNotNecessary() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0).Value()), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0)), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
 		),
 	).Find()
 }
@@ -23,7 +23,7 @@ func testQueryNotNecessaryWithFunction() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0).Value().Concat("asd")), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0).Concat("asd")), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
 		),
 	).Find()
 }
@@ -37,7 +37,7 @@ func testQueryNecessaryNotCalled() {
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID.Value()), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
+		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
 	).Find()
 }
 
@@ -50,7 +50,7 @@ func testQueryNecessaryNotCalledWithFunction() {
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.Number.Is().Eq(conditions.ParentParent.Number.Value().Plus(1)), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
+		conditions.Child.Number.Is().Eq(conditions.ParentParent.Number.Plus(1)), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
 	).Find()
 }
 
@@ -63,7 +63,7 @@ func testQueryNecessaryCalled() {
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID.Appearance(0).Value()),
+		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID.Appearance(0)),
 	).Find()
 }
 
@@ -76,6 +76,6 @@ func testQueryOutOfRange() {
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID.Appearance(2).Value()), // want "selected appearance is bigger than github.com/FrancoLiberali/cql/test/models.ParentParent's number of appearances"
+		conditions.Child.ID.Is().Eq(conditions.ParentParent.ID.Appearance(2)), // want "selected appearance is bigger than github.com/FrancoLiberali/cql/test/models.ParentParent's number of appearances"
 	).Find()
 }

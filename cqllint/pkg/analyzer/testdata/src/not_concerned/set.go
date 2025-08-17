@@ -10,7 +10,7 @@ func testSetDynamicNotJoinedInSameLine() {
 	cql.Update[models.Brand](
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
-	).Set(conditions.Brand.Name.Set().Eq(conditions.City.Name.Value())) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Set(conditions.Brand.Name.Set().Eq(conditions.City.Name)) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 }
 
 func testSetDynamicNotJoinedInDifferentLines() {
@@ -18,17 +18,17 @@ func testSetDynamicNotJoinedInDifferentLines() {
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
-		conditions.City.Name.Value(), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }
 
 func testSetDynamicMainModel() {
 	cql.Update[models.Product](
 		db,
-		conditions.Product.String.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
 		conditions.Product.Int.Set().Eq(
-			conditions.Product.IntPointer.Value(),
+			conditions.Product.IntPointer,
 		),
 	)
 }
@@ -36,13 +36,13 @@ func testSetDynamicMainModel() {
 func testSetDynamicMainModelMultipleTimes() {
 	cql.Update[models.Product](
 		db,
-		conditions.Product.String.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
 		conditions.Product.String.Set().Eq(
-			conditions.Product.String2.Value(),
+			conditions.Product.String2,
 		),
 		conditions.Product.Int.Set().Eq(
-			conditions.Product.IntPointer.Value(),
+			conditions.Product.IntPointer,
 		),
 	)
 }
@@ -51,9 +51,9 @@ func testSetDynamicJoinedModel() {
 	cql.Update[models.Phone](
 		db,
 		conditions.Phone.Brand(),
-		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		conditions.Phone.Name.Set().Eq(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.Set().Eq(conditions.Brand.Name),
 	)
 }
 
@@ -63,10 +63,10 @@ func testSetDynamicNestedJoinedModel() {
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
 		),
-		conditions.Child.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Child.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
-		conditions.Child.Name.Set().Eq(conditions.Parent1.Name.Value()),
-		conditions.Child.Number.Set().Eq(conditions.ParentParent.Number.Value()),
+		conditions.Child.Name.Set().Eq(conditions.Parent1.Name),
+		conditions.Child.Number.Set().Eq(conditions.ParentParent.Number),
 	)
 }
 
@@ -86,10 +86,19 @@ func testSetMultipleNotJoinedInDifferentLines() {
 	)
 }
 
+func testSetMultipleDynamicNotJoined() {
+	cql.Update[models.Brand](
+		db,
+		conditions.Brand.Name.Is().Eq(cql.String("asd")),
+	).SetMultiple(
+		conditions.Brand.Name.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+}
+
 func testSetMultipleMainModel() {
 	cql.Update[models.Brand](
 		db,
-		conditions.Brand.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
 		conditions.Brand.Name.Set().Eq(cql.String("asd")),
 	)
@@ -98,7 +107,7 @@ func testSetMultipleMainModel() {
 func testSetMultipleMainModelMultipleTimes() {
 	cql.Update[models.Product](
 		db,
-		conditions.Product.String.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
 		conditions.Product.String.Set().Eq(cql.String("asd")),
 		conditions.Product.Int.Set().Eq(cql.Int(1)),
@@ -109,7 +118,7 @@ func testSetMultipleJoinedModel() {
 	cql.Update[models.Phone](
 		db,
 		conditions.Phone.Brand(),
-		conditions.Phone.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
 		conditions.Phone.Name.Set().Eq(cql.String("asd")),
 		conditions.Brand.Name.Set().Eq(cql.String("asd")),
@@ -122,7 +131,7 @@ func testSetMultipleNestedJoinedModel() {
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
 		),
-		conditions.Child.Name.Is().Eq(conditions.City.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Child.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
 		conditions.Parent1.Name.Set().Eq(cql.String("asd")),
 		conditions.ParentParent.Name.Set().Eq(cql.String("asd")),
@@ -134,7 +143,7 @@ func testSetDynamicNotJoinedWithFunction() {
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
-		conditions.City.Name.Value().Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }
 
@@ -143,6 +152,6 @@ func testSetDynamicNotJoinedWithTwoFunction() {
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
-		conditions.City.Name.Value().Concat("asd").Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat("asd").Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }

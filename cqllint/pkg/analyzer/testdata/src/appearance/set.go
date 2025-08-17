@@ -11,7 +11,7 @@ func testSetNotNecessary() {
 		db,
 		conditions.Phone.Name.Is().Eq(cql.String("asd")),
 	).Set(
-		conditions.Phone.Name.Set().Eq(conditions.Phone.Name.Appearance(0).Value()), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
+		conditions.Phone.Name.Set().Eq(conditions.Phone.Name.Appearance(0)), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
 	)
 }
 
@@ -20,7 +20,7 @@ func testSetNotNecessaryWithFunction() {
 		db,
 		conditions.Phone.Name.Is().Eq(cql.String("asd")),
 	).Set(
-		conditions.Phone.Name.Set().Eq(conditions.Phone.Name.Appearance(0).Value().Concat("asd")), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
+		conditions.Phone.Name.Set().Eq(conditions.Phone.Name.Appearance(0).Concat("asd")), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
 	)
 }
 
@@ -34,7 +34,7 @@ func testSetNecessaryNotCalled() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Value()), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
 	)
 }
 
@@ -48,7 +48,7 @@ func testSetNecessaryNotCalledWithFunction() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Value().Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
 	)
 }
 
@@ -62,7 +62,7 @@ func testSetNecessaryCalled() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Appearance(0).Value()),
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Appearance(0)),
 	)
 }
 
@@ -76,6 +76,6 @@ func testSetOutOfRange() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Appearance(2).Value()), // want "selected appearance is bigger than github.com/FrancoLiberali/cql/test/models.ParentParent's number of appearances"
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Appearance(2)), // want "selected appearance is bigger than github.com/FrancoLiberali/cql/test/models.ParentParent's number of appearances"
 	)
 }

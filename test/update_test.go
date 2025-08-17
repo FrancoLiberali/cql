@@ -135,17 +135,29 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleFieldsAtTheSameTime() {
 	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
 
-func (ts *UpdateIntTestSuite) TestUpdateSameFieldTwiceReturnsError() {
-	_, err := cql.Update[models.Product](
+func (ts *UpdateIntTestSuite) TestUpdateSameFieldTwiceWorks() {
+	product := ts.createProduct("", 0, 0, false, nil)
+
+	updated, err := cql.Update[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(1)),
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	)
-	ts.ErrorIs(err, cql.ErrFieldIsRepeated)
-	ts.ErrorContains(err, "method: Set")
-	ts.ErrorContains(err, "field: models.Product.Int")
+
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	productReturned, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).FindOne()
+	ts.Require().NoError(err)
+
+	ts.Equal(product.ID, productReturned.ID)
+	ts.Equal(2, productReturned.Int)
+	ts.NotEqual(product.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateWithJoinInConditions() {
@@ -364,7 +376,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
 			conditions.Brand.Name.Is().Eq(cql.String("google")),
 		),
 	).Set(
-		conditions.Phone.Name.Set().Eq(conditions.Brand.Name.Value()),
+		conditions.Phone.Name.Set().Eq(conditions.Brand.Name),
 	)
 
 	ts.Require().NoError(err)
@@ -388,7 +400,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicNotJoinedReturnsError() {
 			conditions.Brand.Name.Is().Eq(cql.String("google")),
 		),
 	).Set(
-		conditions.Phone.Name.Set().Eq(conditions.City.Name.Value()),
+		conditions.Phone.Name.Set().Eq(conditions.City.Name),
 	)
 
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
@@ -405,7 +417,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithoutAppearanceReturnsErrorIfJo
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Value()),
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name),
 	)
 
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
@@ -429,7 +441,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithAppearance() {
 			conditions.Parent2.ParentParent(),
 		),
 	).Set(
-		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Appearance(0).Value()),
+		conditions.Child.Name.Set().Eq(conditions.ParentParent.Name.Appearance(0)),
 	)
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), updated)
@@ -698,7 +710,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesReturnsErrorIfTableJoinedM
 			conditions.Parent2.ParentParent(),
 		),
 	).SetMultiple(
-		conditions.ParentParent.Name.Set().Eq(conditions.Child.Name.Value()),
+		conditions.ParentParent.Name.Set().Eq(conditions.Child.Name),
 	)
 
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
@@ -731,7 +743,7 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesTableJoinedMultipleTimesAn
 			conditions.Parent2.ParentParent(),
 		),
 	).SetMultiple(
-		conditions.ParentParent.Name.Appearance(1).Set().Eq(conditions.Child.Name.Value()),
+		conditions.ParentParent.Name.Appearance(1).Set().Eq(conditions.Child.Name),
 	)
 
 	ts.Require().NoError(err)
@@ -817,7 +829,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Set(
-		conditions.Product.Int.Set().Eq(conditions.Product.Float.Value().Plus(1)),
+		conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(1)),
 	)
 
 	if getDBDialector() == cqlSQL.Postgres && err != nil {

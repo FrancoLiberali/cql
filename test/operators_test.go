@@ -645,7 +645,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericTypeWithSameType()
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value()),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -660,7 +660,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericTypeWithDifferentT
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.Float.Value()),
+		conditions.Product.Int.Is().Eq(conditions.Product.Float),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -678,7 +678,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForCustomType() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.MultiString.Is().Eq(conditions.Product.MultiString.Value()),
+		conditions.Product.MultiString.Is().Eq(conditions.Product.MultiString),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -690,7 +690,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForBaseModelAttribute() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.CreatedAt.Is().Eq(conditions.Product.CreatedAt.Value()),
+		conditions.Product.CreatedAt.Is().Eq(conditions.Product.CreatedAt),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -707,7 +707,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNotNullTypeCanBeComparedW
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Float.Is().Eq(conditions.Product.NullFloat.Value()),
+		conditions.Product.Float.Is().Eq(conditions.Product.NullFloat),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -786,7 +786,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String.Value()),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -800,7 +800,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String.Value()),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -812,7 +812,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String.Value()),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -823,14 +823,14 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorInCaseFieldWithTypesNotMatch(
 
 		_, err = cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String.Value()),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 		ts.ErrorContains(err, "mssql: Error converting data type nvarchar to float.")
 	case cqlSQL.Postgres:
 		// returns an error
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String.Value()),
+			conditions.Product.Float.IsUnsafe().Eq(conditions.Product.String),
 		).Find()
 
 		ts.True(
@@ -860,7 +860,7 @@ func (ts *OperatorsIntTestSuite) TestUnsafeOperatorCanCompareFieldsThatMapToTheS
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.IsUnsafe().Eq(conditions.Product.MultiString.Value()),
+		conditions.Product.String.IsUnsafe().Eq(conditions.Product.MultiString),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -875,7 +875,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPlus() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Plus(1)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -890,7 +890,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithMinus() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Minus(1)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Minus(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -905,7 +905,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithTimes() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Times(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Times(2)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -920,7 +920,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithDivided() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Divided(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Divided(2)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -935,7 +935,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithModulo() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Modulo(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Modulo(2)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -947,7 +947,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPower() {
 	case cqlSQL.SQLite:
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Power(2)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Power(2)),
 		).Find()
 		ts.ErrorContains(err, "no such function: POWER")
 	default:
@@ -958,7 +958,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPower() {
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Power(2)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Power(2)),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -971,7 +971,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithSquareRoot() {
 	case cqlSQL.SQLite:
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().SquareRoot()),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.SquareRoot()),
 		).Find()
 		ts.ErrorContains(err, "no such function: SQRT")
 	default:
@@ -982,7 +982,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithSquareRoot() {
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().SquareRoot()),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.SquareRoot()),
 		).Find()
 
 		if getDBDialector() == cqlSQL.Postgres && err != nil {
@@ -1003,7 +1003,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithAbsolute() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Absolute()),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Absolute()),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1018,7 +1018,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithAnd() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().And(1)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.And(1)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1033,7 +1033,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithOr() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Or(3)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Or(3)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1045,7 +1045,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithXor() {
 	case cqlSQL.SQLite:
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Xor(3)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Xor(3)),
 		).Find()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "function: Xor")
@@ -1057,7 +1057,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithXor() {
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Xor(3)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Xor(3)),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -1073,7 +1073,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithNot() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Not().And(5)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Not().And(5)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1088,7 +1088,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithShiftLeft() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().ShiftLeft(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.ShiftLeft(2)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1103,7 +1103,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithShiftRight() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().ShiftRight(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.ShiftRight(2)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1118,7 +1118,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithMultipleFuncti
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Plus(1).Times(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(1).Times(2)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1133,7 +1133,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithFunctionOfDiff
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Value().Times(1.5)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Times(1.5)),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1161,7 +1161,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForStringWithConcat() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq(conditions.Product.String2.Value().Concat("123")),
+		conditions.Product.String.Is().Eq(conditions.Product.String2.Concat("123")),
 	).Find()
 	ts.Require().NoError(err)
 
