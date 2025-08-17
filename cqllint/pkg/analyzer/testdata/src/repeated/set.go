@@ -33,8 +33,8 @@ func testSetDynamicRepeated() {
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(conditions.Product.IntPointer.Value()), // want "conditions.Product.Int is repeated"
-		conditions.Product.Int.Set().Eq(conditions.Product.IntPointer.Value()), // want "conditions.Product.Int is repeated"
+		conditions.Product.Int.Set().Eq(conditions.Product.IntPointer), // want "conditions.Product.Int is repeated"
+		conditions.Product.Int.Set().Eq(conditions.Product.IntPointer), // want "conditions.Product.Int is repeated"
 	)
 }
 
@@ -43,7 +43,7 @@ func testSetDynamicNotRepeated() {
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(conditions.Product.IntPointer.Value()),
+		conditions.Product.Int.Set().Eq(conditions.Product.IntPointer),
 	)
 }
 
@@ -71,7 +71,7 @@ func testSetDynamicSameValue() {
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(conditions.Product.Int.Value()), // want "conditions.Product.Int is set to itself"
+		conditions.Product.Int.Set().Eq(conditions.Product.Int), // want "conditions.Product.Int is set to itself"
 	)
 }
 
@@ -80,6 +80,6 @@ func testSetDynamicSameValueWithFunction() {
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(conditions.Product.Int.Value().Plus(1)),
+		conditions.Product.Int.Set().Eq(conditions.Product.Int.Plus(1)),
 	)
 }

@@ -153,7 +153,7 @@ func (set NullableFieldSet[TModel, TAttribute]) Null() *Set[TModel] {
 	}
 }
 
-type NumericFieldSet[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64] struct {
+type NumericFieldSet[TModel model.Model, TAttribute Numeric] struct {
 	field NumericField[TModel, TAttribute]
 }
 
@@ -168,5 +168,26 @@ func (set NumericFieldSet[TModel, TAttribute]) Unsafe(value IValue) *Set[TModel]
 	return &Set[TModel]{
 		field: set.field,
 		value: unsafeValue{Value: value},
+	}
+}
+
+type NullableNumericFieldSet[TModel model.Model, TAttribute Numeric] struct {
+	NumericFieldSet[TModel, TAttribute]
+}
+
+func newNullableNumericFieldSet[TModel model.Model, TAttribute Numeric](
+	field NumericField[TModel, TAttribute],
+) NullableNumericFieldSet[TModel, TAttribute] {
+	return NullableNumericFieldSet[TModel, TAttribute]{
+		NumericFieldSet: NumericFieldSet[TModel, TAttribute]{
+			field: field,
+		},
+	}
+}
+
+func (set NullableNumericFieldSet[TModel, TAttribute]) Null() *Set[TModel] {
+	return &Set[TModel]{
+		field: set.field,
+		value: nil,
 	}
 }

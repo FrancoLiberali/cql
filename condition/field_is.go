@@ -12,12 +12,34 @@ type BoolFieldIs[TObject model.Model] struct {
 	field Field[TObject, bool]
 }
 
+func newBoolFieldIs[TObject model.Model](field Field[TObject, bool]) BoolFieldIs[TObject] {
+	return BoolFieldIs[TObject]{
+		field: field,
+	}
+}
+
 type StringFieldIs[TObject model.Model] struct {
 	FieldIs[TObject, string]
 }
 
+func newStringFieldIs[TObject model.Model](field Field[TObject, string]) StringFieldIs[TObject] {
+	return StringFieldIs[TObject]{
+		FieldIs: FieldIs[TObject, string]{
+			field: field,
+		},
+	}
+}
+
 type NumericFieldIs[TObject model.Model] struct {
 	FieldIs[TObject, float64]
+}
+
+func newNumericFieldIs[TObject model.Model, TAttribute any](field Field[TObject, TAttribute]) NumericFieldIs[TObject] {
+	return NumericFieldIs[TObject]{
+		FieldIs: FieldIs[TObject, float64]{
+			field: field,
+		},
+	}
 }
 
 // EqualTo

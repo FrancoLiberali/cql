@@ -293,19 +293,26 @@ func (query *CQLQuery) cleanSelects() {
 
 // Find finds all models matching given conditions
 func (query *CQLQuery) Update(sets []ISet) (int64, error) {
-	tablesAndValues, err := getUpdateTablesAndValues(query, sets)
-	if err != nil {
-		return 0, err
-	}
-
 	updateMap := map[string]any{}
 
 	query.cleanSelects()
 
 	switch query.Dialector() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
-		for field, tableAndValue := range tablesAndValues {
-			updateMap[field.columnName(query, tableAndValue.table)] = tableAndValue.value
+		for _, set := range sets {
+			field := set.getField()
+
+			updateValue, err := getUpdateValue(query, set)
+			if err != nil {
+				return 0, err
+			}
+
+			table, err := query.GetModelTable(field)
+			if err != nil {
+				return 0, err
+			}
+
+			updateMap[field.columnName(query, table)] = updateValue
 		}
 
 		query.joinsToFrom()
@@ -316,24 +323,36 @@ func (query *CQLQuery) Update(sets []ISet) (int64, error) {
 			query.gormDB.AllowGlobalUpdate = true
 		}
 
-		sets := clause.Set{}
+		setClause := clause.Set{}
 		updatedTables := []Table{}
 
-		for field, tableAndValue := range tablesAndValues {
-			sets = append(sets, clause.Assignment{
+		for _, set := range sets {
+			field := set.getField()
+
+			updateValue, err := getUpdateValue(query, set)
+			if err != nil {
+				return 0, err
+			}
+
+			table, err := query.GetModelTable(field)
+			if err != nil {
+				return 0, err
+			}
+
+			setClause = append(setClause, clause.Assignment{
 				Column: clause.Column{
-					Name:  field.columnName(query, tableAndValue.table),
-					Table: tableAndValue.table.SQLName(),
+					Name:  field.columnName(query, table),
+					Table: table.SQLName(),
 				},
-				Value: tableAndValue.value,
+				Value: updateValue,
 			})
 
-			updatedTables = append(updatedTables, tableAndValue.table)
+			updatedTables = append(updatedTables, table)
 		}
 
 		now := time.Now()
 		for _, table := range pie.Unique(updatedTables) {
-			sets = append(sets, clause.Assignment{
+			setClause = append(setClause, clause.Assignment{
 				Column: clause.Column{
 					Name:  "updated_at",
 					Table: table.SQLName(),
@@ -342,7 +361,7 @@ func (query *CQLQuery) Update(sets []ISet) (int64, error) {
 			})
 		}
 
-		query.gormDB.Clauses(sets)
+		query.gormDB.Clauses(setClause)
 	}
 
 	update := query.gormDB.Updates(updateMap)
@@ -374,41 +393,6 @@ func (query *CQLQuery) joinsToFrom() {
 	}
 
 	query.gormDB.Statement.Joins = nil
-}
-
-type TableAndValue struct {
-	table Table
-	value any
-}
-
-func getUpdateTablesAndValues(query *CQLQuery, sets []ISet) (map[IField]TableAndValue, error) {
-	tables := map[IField]TableAndValue{}
-
-	for _, set := range sets {
-		field := set.getField()
-
-		table, err := query.GetModelTable(field)
-		if err != nil {
-			return nil, err
-		}
-
-		updateValue, err := getUpdateValue(query, set)
-		if err != nil {
-			return nil, err
-		}
-
-		_, fieldAlreadyPresent := tables[field]
-		if fieldAlreadyPresent {
-			return nil, fieldIsRepeatedError(field)
-		}
-
-		tables[field] = TableAndValue{
-			table: table,
-			value: updateValue,
-		}
-	}
-
-	return tables, nil
 }
 
 func getUpdateValue(query *CQLQuery, set ISet) (any, error) {

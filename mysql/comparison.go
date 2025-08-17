@@ -8,10 +8,7 @@ import (
 // Pattern Matching
 
 // As an extension to standard SQL, MySQL permits LIKE on numeric expressions.
-func Like[T string |
-	int | int8 | int16 | int32 | int64 |
-	uint | uint8 | uint16 | uint32 | uint64 |
-	float32 | float64](pattern string,
+func Like[T string | condition.Numeric](pattern string,
 ) condition.Operator[T] {
 	return condition.NewValueOperator[T](sql.Like, condition.String(pattern))
 }

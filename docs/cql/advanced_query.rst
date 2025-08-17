@@ -81,7 +81,7 @@ its related MyOtherModel's Name attribute.
     myModels, err := cql.Query[MyModel](
         gormDB,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.IsDynamic().Eq(conditions.MyModel.Name.Value()),
+            conditions.MyOtherModel.Name.IsDynamic().Eq(conditions.MyModel.Name),
         ),
     ).Find()
 
@@ -112,7 +112,7 @@ For example:
 
     myModels, err := cql.Query[MyModel](
         gormDB,
-        conditions.MyModel.Name.IsDynamic().Eq(conditions.MyOtherModel.Name.Value()),
+        conditions.MyModel.Name.IsDynamic().Eq(conditions.MyOtherModel.Name),
     ).Find()
 
 will respond cql.ErrFieldModelNotConcerned in err.
@@ -153,7 +153,7 @@ For example, if we seek to obtain the cities whose population represents at leas
         gormDB,
         conditions.City.Country(
             conditions.Country.Population.IsDynamic().Lt(
-                conditions.City.Population.Value().Times(2),
+                conditions.City.Population.Times(2),
             ),
         ),
     ).Find()
@@ -212,7 +212,7 @@ To do this, you must use the Appearance method of the field, as in the following
             conditions.Parent2.ParentParent(),
         ),
         conditions.Child.Name.IsDynamic().Eq(
-            conditions.ParentParent.Name.Appearance(0).Value(), // choose the first (0) appearance (made by conditions.Child.Parent1())
+            conditions.ParentParent.Name.Appearance(0), // choose the first (0) appearance (made by conditions.Child.Parent1())
         ),
     ).Find()
 
