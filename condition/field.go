@@ -93,9 +93,11 @@ func (field Field[TModel, TAttribute]) columnSQL(query *CQLQuery, table Table) s
 	return table.Alias + "." + field.columnName(query, table)
 }
 
-func (field *Field[TModel, TAttribute]) addFunction(function sql.FunctionByDialector, others ...any) {
+func (field Field[TModel, TAttribute]) addFunction(function sql.FunctionByDialector, others ...any) Field[TModel, TAttribute] {
 	field.functions = append(field.functions, functionAndValues{function: function, values: len(others)})
 	field.values = append(field.values, others...)
+
+	return field
 }
 
 func (field Field[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, error) {
@@ -177,14 +179,20 @@ type BoolField[TModel model.Model] struct {
 }
 
 func (boolField BoolField[TModel]) Is() BoolFieldIs[TModel] {
-	return BoolFieldIs[TModel]{
-		field: boolField.Field,
-	}
+	return newBoolFieldIs(boolField.Field)
 }
 
 // Aggregate allows applying aggregation functions to the field inside a group by
 func (boolField BoolField[TModel]) Aggregate() BoolFieldAggregation {
 	return BoolFieldAggregation{FieldAggregation: boolField.Field.Aggregate()}
+}
+
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (boolField BoolField[TModel]) Appearance(number uint) BoolField[TModel] {
+	return BoolField[TModel]{
+		UpdatableField: boolField.UpdatableField.Appearance(number),
+	}
 }
 
 func NewBoolField[TModel model.Model](name, column, columnPrefix string) BoolField[TModel] {
@@ -194,19 +202,39 @@ func NewBoolField[TModel model.Model](name, column, columnPrefix string) BoolFie
 }
 
 type NullableBoolField[TModel model.Model] struct {
-	NullableField[TModel, bool]
+	BoolField[TModel]
 }
 
-func (boolField NullableBoolField[TModel]) Is() BoolFieldIs[TModel] {
-	return BoolFieldIs[TModel]{
-		field: boolField.Field,
+func (boolField NullableBoolField[TModel]) Set() NullableFieldSet[TModel, bool] {
+	return NullableFieldSet[TModel, bool]{FieldSet[TModel, bool]{field: boolField.UpdatableField}}
+}
+
+// Appearance allows to choose which number of appearance use
+// when field's model is joined more than once.
+func (boolField NullableBoolField[TModel]) Appearance(number uint) NullableBoolField[TModel] {
+	return NullableBoolField[TModel]{
+		BoolField: boolField.BoolField.Appearance(number),
 	}
 }
 
 func NewNullableBoolField[TModel model.Model](name, column, columnPrefix string) NullableBoolField[TModel] {
 	return NullableBoolField[TModel]{
-		NullableField: NewNullableField[TModel, bool](name, column, columnPrefix),
+		BoolField: NewBoolField[TModel](name, column, columnPrefix),
 	}
+}
+
+type NotUpdatableStringField[TModel model.Model] struct {
+	Field[TModel, string]
+}
+
+func (stringField NotUpdatableStringField[TModel]) Is() StringFieldIs[TModel] {
+	return newStringFieldIs(stringField.Field)
+}
+
+func (stringField NotUpdatableStringField[TModel]) addFunction(function sql.FunctionByDialector, others ...any) NotUpdatableStringField[TModel] {
+	stringField.Field = stringField.Field.addFunction(function, others...)
+
+	return stringField
 }
 
 type StringField[TModel model.Model] struct {
@@ -214,24 +242,25 @@ type StringField[TModel model.Model] struct {
 }
 
 func (stringField StringField[TModel]) Is() StringFieldIs[TModel] {
-	return StringFieldIs[TModel]{
-		FieldIs: FieldIs[TModel, string]{
-			field: stringField.Field,
-		},
-	}
+	return newStringFieldIs(stringField.Field)
+}
+
+func (stringField StringField[TModel]) addFunction(function sql.FunctionByDialector, others ...any) NotUpdatableStringField[TModel] {
+	return NotUpdatableStringField[TModel]{
+		Field: stringField.Field,
+	}.addFunction(function, others)
 }
 
 // Concat concatenates other to value
-func (stringField StringField[TModel]) Concat(other string) StringField[TModel] {
-	stringField.addFunction(sql.Concat, other)
-	return stringField
+func (stringField StringField[TModel]) Concat(other string) NotUpdatableStringField[TModel] {
+	return stringField.addFunction(sql.Concat, other)
 }
 
 // Appearance allows to choose which number of appearance use
 // when field's model is joined more than once.
 func (stringField StringField[TModel]) Appearance(number uint) StringField[TModel] {
 	return StringField[TModel]{
-		UpdatableField: UpdatableField[TModel, string]{Field: stringField.Field.Appearance(number)},
+		UpdatableField: stringField.UpdatableField.Appearance(number),
 	}
 }
 
@@ -242,40 +271,130 @@ func NewStringField[TModel model.Model](name, column, columnPrefix string) Strin
 }
 
 type NullableStringField[TModel model.Model] struct {
-	NullableField[TModel, string]
+	StringField[TModel]
 }
 
-func (stringField NullableStringField[TModel]) Is() StringFieldIs[TModel] {
-	return StringFieldIs[TModel]{
-		FieldIs: FieldIs[TModel, string]{
-			field: stringField.Field,
-		},
-	}
+func (stringField NullableStringField[TModel]) Set() NullableFieldSet[TModel, string] {
+	return NullableFieldSet[TModel, string]{FieldSet[TModel, string]{field: stringField.UpdatableField}}
 }
 
 // Appearance allows to choose which number of appearance use
 // when field's model is joined more than once.
 func (stringField NullableStringField[TModel]) Appearance(number uint) NullableStringField[TModel] {
 	return NullableStringField[TModel]{
-		NullableField: NullableField[TModel, string]{
-			UpdatableField: UpdatableField[TModel, string]{Field: stringField.Field.Appearance(number)},
-		},
+		StringField: stringField.StringField.Appearance(number),
 	}
 }
 
 func NewNullableStringField[TModel model.Model](name, column, columnPrefix string) NullableStringField[TModel] {
 	return NullableStringField[TModel]{
-		NullableField: NewNullableField[TModel, string](name, column, columnPrefix),
+		StringField: NewStringField[TModel](name, column, columnPrefix),
 	}
 }
 
-type NumericField[TModel model.Model, TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64] struct {
+type NotUpdatableNumericField[TModel model.Model, TAttribute Numeric] struct {
+	Field[TModel, TAttribute]
+}
+
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) GetValue() float64 {
+	return 0
+}
+
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel] {
+	return newNumericFieldIs(numericField.Field)
+}
+
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) addFunction(
+	function sql.FunctionByDialector, others ...any,
+) NotUpdatableNumericField[TModel, TAttribute] {
+	numericField.Field = numericField.Field.addFunction(function, others...)
+
+	return numericField
+}
+
+// Plus sums other to value
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Plus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Plus, other)
+}
+
+// Minus subtracts other from the value
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Minus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Minus, other)
+}
+
+// Times multiplies value by other
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Times(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Times, other)
+}
+
+// Divided divides value by other
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Divided(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Divided, other)
+}
+
+// Modulo returns the remainder of the entire division
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Modulo(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Modulo, other)
+}
+
+// Power elevates value to other
+//
+// Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: POWER" will be returned
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Power(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Power, other)
+}
+
+// SquareRoot calculates the square root of the value
+//
+// Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: SQRT" will be returned
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) SquareRoot() NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.SquareRoot)
+}
+
+// Absolute calculates the absolute value of the value
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Absolute() NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Absolute)
+}
+
+// And calculates the bitwise AND between value and other
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) And(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitAnd, other)
+}
+
+// Or calculates the bitwise OR between value and other
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Or(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitOr, other)
+}
+
+// Xor calculates the bitwise XOR (exclusive OR) between value and other
+//
+// Available for: postgres, mysql, sqlserver
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Xor(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitXor, other)
+}
+
+// Not calculates the bitwise NOT of value
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Not() NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitNot)
+}
+
+// ShiftLeft shifts value amount bits to the left
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftLeft(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitShiftLeft, amount)
+}
+
+// ShiftRight shifts value amount bits to the right
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftRight(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitShiftRight, amount)
+}
+
+type NumericField[TModel model.Model, TAttribute Numeric] struct {
 	UpdatableField[TModel, TAttribute]
 }
 
 func NewNumericField[
 	TModel model.Model,
-	TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64,
+	TAttribute Numeric,
 ](name, column, columnPrefix string) NumericField[TModel, TAttribute] {
 	return NumericField[TModel, TAttribute]{
 		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix),
@@ -283,11 +402,7 @@ func NewNumericField[
 }
 
 func (numericField NumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel] {
-	return NumericFieldIs[TModel]{
-		FieldIs: FieldIs[TModel, float64]{
-			field: numericField.Field,
-		},
-	}
+	return newNumericFieldIs(numericField.Field)
 }
 
 func (numericField NumericField[TModel, TAttribute]) Set() NumericFieldSet[TModel, TAttribute] {
@@ -298,7 +413,7 @@ func (numericField NumericField[TModel, TAttribute]) Set() NumericFieldSet[TMode
 // when field's model is joined more than once.
 func (numericField NumericField[TModel, TAttribute]) Appearance(number uint) NumericField[TModel, TAttribute] {
 	return NumericField[TModel, TAttribute]{
-		UpdatableField: UpdatableField[TModel, TAttribute]{Field: numericField.Field.Appearance(number)},
+		UpdatableField: numericField.UpdatableField.Appearance(number),
 	}
 }
 
@@ -311,120 +426,110 @@ func (numericField NumericField[TModel, TAttribute]) GetValue() float64 {
 	return 0
 }
 
+func (numericField NumericField[TModel, TAttribute]) addFunction(function sql.FunctionByDialector, others ...any) NotUpdatableNumericField[TModel, TAttribute] {
+	return NotUpdatableNumericField[TModel, TAttribute]{
+		Field: numericField.Field,
+	}.addFunction(function, others...)
+}
+
 // Plus sums other to value
-func (numericField NumericField[TModel, TAttribute]) Plus(other float64) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.Plus, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Plus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Plus, other)
 }
 
 // Minus subtracts other from the value
-func (numericField NumericField[TModel, TAttribute]) Minus(other float64) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.Minus, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Minus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Minus, other)
 }
 
 // Times multiplies value by other
-func (numericField NumericField[TModel, TAttribute]) Times(other float64) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.Times, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Times(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Times, other)
 }
 
 // Divided divides value by other
-func (numericField NumericField[TModel, TAttribute]) Divided(other float64) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.Divided, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Divided(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Divided, other)
 }
 
 // Modulo returns the remainder of the entire division
-func (numericField NumericField[TModel, TAttribute]) Modulo(other int) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.Modulo, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Modulo(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Modulo, other)
 }
 
 // Power elevates value to other
 //
 // Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: POWER" will be returned
-func (numericField NumericField[TModel, TAttribute]) Power(other float64) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.Power, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Power(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Power, other)
 }
 
 // SquareRoot calculates the square root of the value
 //
 // Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: SQRT" will be returned
-func (numericField NumericField[TModel, TAttribute]) SquareRoot() NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.SquareRoot)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) SquareRoot() NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.SquareRoot)
 }
 
 // Absolute calculates the absolute value of the value
-func (numericField NumericField[TModel, TAttribute]) Absolute() NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.Absolute)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Absolute() NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.Absolute)
 }
 
 // And calculates the bitwise AND between value and other
-func (numericField NumericField[TModel, TAttribute]) And(other int) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.BitAnd, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) And(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitAnd, other)
 }
 
 // Or calculates the bitwise OR between value and other
-func (numericField NumericField[TModel, TAttribute]) Or(other int) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.BitOr, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Or(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitOr, other)
 }
 
 // Xor calculates the bitwise XOR (exclusive OR) between value and other
 //
 // Available for: postgres, mysql, sqlserver
-func (numericField NumericField[TModel, TAttribute]) Xor(other int) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.BitXor, other)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Xor(other int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitXor, other)
 }
 
 // Not calculates the bitwise NOT of value
-func (numericField NumericField[TModel, TAttribute]) Not() NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.BitNot)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) Not() NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitNot)
 }
 
 // ShiftLeft shifts value amount bits to the left
-func (numericField NumericField[TModel, TAttribute]) ShiftLeft(amount int) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.BitShiftLeft, amount)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) ShiftLeft(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitShiftLeft, amount)
 }
 
 // ShiftRight shifts value amount bits to the right
-func (numericField NumericField[TModel, TAttribute]) ShiftRight(amount int) NumericField[TModel, TAttribute] {
-	numericField.addFunction(sql.BitShiftRight, amount)
-	return numericField
+func (numericField NumericField[TModel, TAttribute]) ShiftRight(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+	return numericField.addFunction(sql.BitShiftRight, amount)
 }
 
 type NullableNumericField[
 	TModel model.Model,
-	TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64,
+	TAttribute Numeric,
 ] struct {
 	NumericField[TModel, TAttribute]
 }
 
-func (field NullableNumericField[TModel, TAttribute]) Set() NullableFieldSet[TModel, TAttribute] {
-	return NullableFieldSet[TModel, TAttribute]{FieldSet[TModel, TAttribute]{field: field.UpdatableField}}
+func (field NullableNumericField[TModel, TAttribute]) Set() NullableNumericFieldSet[TModel, TAttribute] {
+	return newNullableNumericFieldSet(field.NumericField)
 }
 
 // Appearance allows to choose which number of appearance use
 // when field's model is joined more than once.
 func (field NullableNumericField[TModel, TAttribute]) Appearance(number uint) NullableNumericField[TModel, TAttribute] {
 	return NullableNumericField[TModel, TAttribute]{
-		NumericField: NumericField[TModel, TAttribute]{
-			UpdatableField: UpdatableField[TModel, TAttribute]{Field: field.Field.Appearance(number)},
-		},
+		NumericField: field.NumericField.Appearance(number),
 	}
 }
 
 func NewNullableNumericField[
 	TModel model.Model,
-	TAttribute int | int8 | int16 | int32 | int64 | uint | uint8 | uint16 | uint32 | uint64 | float32 | float64,
+	TAttribute Numeric,
 ](name, column, columnPrefix string) NullableNumericField[TModel, TAttribute] {
 	return NullableNumericField[TModel, TAttribute]{
 		NumericField: NewNumericField[TModel, TAttribute](name, column, columnPrefix),
