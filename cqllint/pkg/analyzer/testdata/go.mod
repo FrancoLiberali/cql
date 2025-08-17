@@ -1,6 +1,6 @@
 module github.com/FrancoLiberali/cql/cqllint/pkg/analyzer/testdata
 
-go 1.18
+go 1.22
 
 require (
 	not_concerned v0.0.1

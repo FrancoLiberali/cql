@@ -1,6 +1,6 @@
 module github.com/FrancoLiberali/cql/cqllint
 
-go 1.18
+go 1.22
 
 require (
 	github.com/elliotchance/pie/v2 v2.8.0

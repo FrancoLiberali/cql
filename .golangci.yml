@@ -190,6 +190,9 @@ issues:
     - composite literal uses unkeyed fields
   exclude-rules:
     # Exclude some linters from running on test files.
+    - path: compilation_test\.go$
+      linters:
+        - lll
     - path: _test\.go$|^test/
       linters:
         - errcheck
