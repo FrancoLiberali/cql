@@ -1,8 +1,10 @@
 package test
 
 import (
+	"fmt"
 	"os"
 	"os/exec"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -12,6 +14,8 @@ import (
 func TestQueryCompilationErrors(t *testing.T) {
 	t.Parallel()
 
+	queryMethods := []string{"cql.Query", "cql.Delete", "cql.Update"}
+
 	tests := []struct {
 		Name  string
 		Code  string
@@ -20,7 +24,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "wrong name of condition",
 			Code: `
-	_ = cql.Query[models.Product](
+	_ = %s[models.Product](
 		db,
 		conditions.ProductNotExists.Int.Is().Eq(cql.Int(1)),
 	)`,
@@ -29,7 +33,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "wrong name of property",
 			Code: `
-	_ = cql.Query[models.Product](
+	_ = %s[models.Product](
 		db,
 		conditions.Product.IntNotExists.Is().Eq(cql.Int(1)),
 	)`,
@@ -38,7 +42,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "basic wrong type in value",
 			Code: `
-	_ = cql.Query[models.Product](
+	_ = %s[models.Product](
 		db,
 		conditions.Product.Int.Is().Eq("1"),
 	)`,
@@ -47,7 +51,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use wrong type in value",
 			Code: `
-	_ = cql.Query[models.Product](
+	_ = %s[models.Product](
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int("1")),
 	)`,
@@ -56,7 +60,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Compare with wrong type",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().Eq(cql.String("1")),
 		)`,
@@ -65,7 +69,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Compare with wrong type for multiple values operator",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().Between(
 				cql.Int(1),
@@ -77,7 +81,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Compare with wrong type for list of values operator",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().In(
 				cql.Int(1),
@@ -89,16 +93,16 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use condition of another model",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Sale.Code.Is().Eq(cql.Int(1)),
 		)`,
-			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to cql.Query[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to %s[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use condition of another model inside join",
 			Code: `
-		_ = cql.Query[models.Sale](
+		_ = %s[models.Sale](
 			db,
 			conditions.Sale.Seller(
 				conditions.Sale.Code.Is().Eq(cql.Int(1)),
@@ -109,16 +113,16 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use condition of another model inside logical operator",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))),
 		)`,
-			Error: `cannot use cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to cql.Query[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
+			Error: `cannot use cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to %s[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use condition of another model inside logical operator multiple",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			cql.Or[models.Product](
 				conditions.Product.Int.Is().Eq(cql.Int(1)),
@@ -130,7 +134,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use condition of another model inside slice operator",
 			Code: `
-		_ = cql.Query[models.Company](
+		_ = %s[models.Company](
 			db,
 			conditions.Company.Sellers.Any(
 				conditions.Sale.Code.Is().Eq(cql.Int(1)),
@@ -141,7 +145,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Condition with field of another type",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().Eq(conditions.Product.ID),
 		)`,
@@ -150,7 +154,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use operator not present for field type",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().True(),
 		)`,
@@ -159,18 +163,18 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use custom operator not present for field type",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().Custom(
-				condition.Like("_a!_%").Escape('!'),
+				condition.Like("_a!_").Escape('!'),
 			),
 		)`,
-			Error: `cannot use condition.Like("_a!_%").Escape('!') (value of type condition.ValueOperator[string]) as condition.Operator[float64] value in argument to conditions.Product.Int.Is().Custom: condition.ValueOperator[string] does not implement condition.Operator[float64] (wrong type for method InterfaceVerificationMethod)`,
+			Error: `cannot use condition.Like("_a!_").Escape('!') (value of type condition.ValueOperator[string]) as condition.Operator[float64] value in argument to conditions.Product.Int.Is().Custom: condition.ValueOperator[string] does not implement condition.Operator[float64] (wrong type for method InterfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use function not present for field type",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Concat("asd").Is().Eq(cql.Int(1)),
 		)`,
@@ -179,7 +183,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use function with incorrect value type",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Plus("asd").Is().Eq(cql.Int(1)),
 		)`,
@@ -188,7 +192,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use function not present for field type inside comparison",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().Eq(conditions.Product.Int.Concat("asd")),
 		)`,
@@ -197,21 +201,20 @@ func TestQueryCompilationErrors(t *testing.T) {
 		{
 			Name: "Use function with incorrect value type inside comparison",
 			Code: `
-		_ = cql.Query[models.Product](
+		_ = %s[models.Product](
 			db,
 			conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus("asd")),
 		)`,
 			Error: `cannot use "asd" (untyped string constant) as float64 value in argument to conditions.Product.Int.Plus`,
 		},
 
-		// delete: mismos tests que para query en el sistema de condiciones
+		// delete:
 		// mas que necesita al menos una condicion
 
 		// group by aggregaciones que no existen para el tipo de dato
 		// having tests de que el tipo es el correcto (constante y otra agregacion)
 
 		// update
-		// mismos tests que para query en el sistema de condiciones
 		// set de algo que nada que ver
 		// set luego de funcion (lo hice hace poco)
 		// set null para tipos no nullables
@@ -221,10 +224,16 @@ func TestQueryCompilationErrors(t *testing.T) {
 	}
 
 	for _, testCase := range tests {
-		t.Run(testCase.Name, func(t *testing.T) {
-			t.Parallel()
+		for _, method := range queryMethods {
+			t.Run(testCase.Name, func(t *testing.T) {
+				t.Parallel()
 
-			code := `
+				query := fmt.Sprintf(testCase.Code, method)
+				if method != "cql.Query" {
+					query = "_, " + query
+				}
+
+				code := `
 package main
 
 import (
@@ -238,25 +247,30 @@ import (
 var db *gorm.DB
 
 func main() {
-` + testCase.Code + `
+` + query + `
 }
 `
 
-			tempDir := t.TempDir()
+				tempDir := t.TempDir()
 
-			f, err := os.CreateTemp(tempDir, "cql-test-*.go")
-			require.NoError(t, err)
+				f, err := os.CreateTemp(tempDir, "cql-test-*.go")
+				require.NoError(t, err)
 
-			// Write data to the temporary file
-			_, err = f.WriteString(code)
-			require.NoError(t, err)
+				// Write data to the temporary file
+				_, err = f.WriteString(code)
+				require.NoError(t, err)
 
-			cmd := exec.Command("go", "build", "-o", f.Name()+".exe", f.Name()) //nolint:gosec // necessary for the test
+				cmd := exec.Command("go", "build", "-o", f.Name()+".exe", f.Name()) //nolint:gosec // necessary for the test
 
-			output, err := cmd.CombinedOutput()
-			require.Error(t, err)
+				output, err := cmd.CombinedOutput()
+				require.Error(t, err)
 
-			assert.Contains(t, string(output), testCase.Error)
-		})
+				if strings.Contains(testCase.Error, "%s") {
+					assert.Contains(t, string(output), fmt.Sprintf(testCase.Error, method))
+				} else {
+					assert.Contains(t, string(output), testCase.Error)
+				}
+			})
+		}
 	}
 }
