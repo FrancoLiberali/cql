@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestCompilationErrors(t *testing.T) {
+func TestQueryCompilationErrors(t *testing.T) {
 	t.Parallel()
 
 	tests := []struct {
@@ -18,6 +18,33 @@ func TestCompilationErrors(t *testing.T) {
 		Error string
 	}{
 		{
+			Name: "wrong name of condition",
+			Code: `
+	_ = cql.Query[models.Product](
+		db,
+		conditions.ProductNotExists.Int.Is().Eq(cql.Int(1)),
+	)`,
+			Error: `undefined: conditions.ProductNotExists`,
+		},
+		{
+			Name: "wrong name of property",
+			Code: `
+	_ = cql.Query[models.Product](
+		db,
+		conditions.Product.IntNotExists.Is().Eq(cql.Int(1)),
+	)`,
+			Error: `conditions.Product.IntNotExists undefined (type conditions.productConditions has no field or method IntNotExists)`,
+		},
+		{
+			Name: "basic wrong type in value",
+			Code: `
+	_ = cql.Query[models.Product](
+		db,
+		conditions.Product.Int.Is().Eq("1"),
+	)`,
+			Error: `cannot use "1" (constant of type string) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Eq: string does not implement condition.ValueOfType[float64] (missing method GetValue)`,
+		},
+		{
 			Name: "Use wrong type in value",
 			Code: `
 	_ = cql.Query[models.Product](
@@ -25,6 +52,39 @@ func TestCompilationErrors(t *testing.T) {
 		conditions.Product.Int.Is().Eq(cql.Int("1")),
 	)`,
 			Error: `cannot use "1" (untyped string constant) as int value in argument to cql.Int`,
+		},
+		{
+			Name: "Compare with wrong type",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().Eq(cql.String("1")),
+		)`,
+			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "Compare with wrong type for multiple values operator",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().Between(
+				cql.Int(1),
+				cql.String("1"),
+			),
+		)`,
+			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Between: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "Compare with wrong type for list of values operator",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().In(
+				cql.Int(1),
+				cql.String("1"),
+			),
+		)`,
+			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().In: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use condition of another model",
@@ -36,14 +96,128 @@ func TestCompilationErrors(t *testing.T) {
 			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to cql.Query[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
-			Name: "Compare with wrong type",
+			Name: "Use condition of another model inside join",
+			Code: `
+		_ = cql.Query[models.Sale](
+			db,
+			conditions.Sale.Seller(
+				conditions.Sale.Code.Is().Eq(cql.Int(1)),
+			),
+		)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Seller] value in argument to conditions.Sale.Seller: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Seller] (wrong type for method interfaceVerificationMethod)`,
+		},
+		{
+			Name: "Use condition of another model inside logical operator",
 			Code: `
 		_ = cql.Query[models.Product](
 			db,
-			conditions.Sale.Code.Is().Eq(cql.String("1")),
+			cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))),
 		)`,
-			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Sale.Code.Is().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to cql.Query[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
 		},
+		{
+			Name: "Use condition of another model inside logical operator multiple",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			cql.Or[models.Product](
+				conditions.Product.Int.Is().Eq(cql.Int(1)),
+				conditions.Sale.Code.Is().Eq(cql.Int(1)),
+			),
+		)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.WhereCondition[models.Product] value in argument to cql.Or[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.WhereCondition[models.Product] (wrong type for method interfaceVerificationMethod)`,
+		},
+		{
+			Name: "Use condition of another model inside slice operator",
+			Code: `
+		_ = cql.Query[models.Company](
+			db,
+			conditions.Company.Sellers.Any(
+				conditions.Sale.Code.Is().Eq(cql.Int(1)),
+			),
+		)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.WhereCondition[models.Seller] value in argument to conditions.Company.Sellers.Any: condition.WhereCondition[models.Sale] does not implement condition.WhereCondition[models.Seller] (wrong type for method interfaceVerificationMethod)`,
+		},
+		{
+			Name: "Condition with field of another type",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().Eq(conditions.Product.ID),
+		)`,
+			Error: `cannot use conditions.Product.ID (variable of type condition.Field[models.Product, model.UUID]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Eq: condition.Field[models.Product, model.UUID] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "Use operator not present for field type",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().True(),
+		)`,
+			Error: `conditions.Product.Int.Is().True undefined (type condition.NumericFieldIs[models.Product] has no field or method True)`,
+		},
+		{
+			Name: "Use custom operator not present for field type",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().Custom(
+				condition.Like("_a!_%").Escape('!'),
+			),
+		)`,
+			Error: `cannot use condition.Like("_a!_%").Escape('!') (value of type condition.ValueOperator[string]) as condition.Operator[float64] value in argument to conditions.Product.Int.Is().Custom: condition.ValueOperator[string] does not implement condition.Operator[float64] (wrong type for method InterfaceVerificationMethod)`,
+		},
+		{
+			Name: "Use function not present for field type",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Concat("asd").Is().Eq(cql.Int(1)),
+		)`,
+			Error: `conditions.Product.Int.Concat undefined (type condition.NumericField[models.Product, int] has no field or method Concat)`,
+		},
+		{
+			Name: "Use function with incorrect value type",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Plus("asd").Is().Eq(cql.Int(1)),
+		)`,
+			Error: `cannot use "asd" (untyped string constant) as float64 value in argument to conditions.Product.Int.Plus`,
+		},
+		{
+			Name: "Use function not present for field type inside comparison",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().Eq(conditions.Product.Int.Concat("asd")),
+		)`,
+			Error: `conditions.Product.Int.Concat undefined (type condition.NumericField[models.Product, int] has no field or method Concat)`,
+		},
+		{
+			Name: "Use function with incorrect value type inside comparison",
+			Code: `
+		_ = cql.Query[models.Product](
+			db,
+			conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus("asd")),
+		)`,
+			Error: `cannot use "asd" (untyped string constant) as float64 value in argument to conditions.Product.Int.Plus`,
+		},
+
+		// delete: mismos tests que para query en el sistema de condiciones
+		// mas que necesita al menos una condicion
+
+		// group by aggregaciones que no existen para el tipo de dato
+		// having tests de que el tipo es el correcto (constante y otra agregacion)
+
+		// update
+		// mismos tests que para query en el sistema de condiciones
+		// set de algo que nada que ver
+		// set luego de funcion (lo hice hace poco)
+		// set null para tipos no nullables
+		// tambien ver en mas de uno
+		// returning solo del tipo de query
+		// funciones en el eq de set
 	}
 
 	for _, testCase := range tests {
@@ -56,6 +230,7 @@ package main
 import (
 	"gorm.io/gorm"
 	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/models"
 	"github.com/FrancoLiberali/cql/test/conditions"
 )
