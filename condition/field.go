@@ -8,6 +8,7 @@ import (
 )
 
 type IField interface {
+	ToSQL(query *CQLQuery) (string, []any, error)
 	columnName(query *CQLQuery, table Table) string
 	fieldName() string
 	columnSQL(query *CQLQuery, table Table) string
@@ -305,6 +306,11 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) GetValue() floa
 
 func (numericField NotUpdatableNumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel] {
 	return newNumericFieldIs(numericField.Field)
+}
+
+// Aggregate allows applying aggregation functions to the field inside a group by
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Aggregate() NumericFieldAggregation {
+	return NumericFieldAggregation{FieldAggregation: FieldAggregation[float64]{field: numericField}}
 }
 
 func (numericField NotUpdatableNumericField[TModel, TAttribute]) addFunction(

@@ -131,10 +131,15 @@ func (query *CQLQuery) Find(dest any) error {
 }
 
 // Select specify fields that you want when querying, creating, updating
-func (query *CQLQuery) AddSelect(value string) {
+func (query *CQLQuery) AddSelect(value string, values []any) {
 	query.gormDB.Statement.Selects = append(
 		query.gormDB.Statement.Selects,
 		value,
+	)
+
+	query.gormDB.Statement.Vars = append(
+		query.gormDB.Statement.Vars,
+		values...,
 	)
 }
 
@@ -149,7 +154,7 @@ func (query *CQLQuery) AddSelectField(table Table, fieldID IField, addAs bool) {
 		columnName += " AS " + query.getSelectAlias(table, fieldID)
 	}
 
-	query.AddSelect(columnName)
+	query.AddSelect(columnName, nil)
 }
 
 func (query *CQLQuery) getSelectAlias(table Table, fieldID IField) string {

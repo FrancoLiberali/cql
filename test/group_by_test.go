@@ -1397,3 +1397,48 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithField() {
 		{Int: 0, Float: 0, Aggregation1: 0},
 	}, results)
 }
+
+func (ts *GroupByIntTestSuite) TestGroupByAggregateAfterFunction() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("5", 0, 2, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Select(
+		conditions.Product.Int.Plus(123).Aggregate().Max(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 1, Aggregation1: 124},
+		{Int: 0, Aggregation1: 123},
+	}, results)
+}
+
+func (ts *GroupByIntTestSuite) TestGroupByAggregateHavingAfterFunction() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("5", 0, 2, false, nil)
+
+	results := []ResultInt{}
+
+	err := cql.Query[models.Product](
+		ts.db,
+	).GroupBy(
+		conditions.Product.Int,
+	).Having(
+		conditions.Product.Int.Plus(12).Aggregate().Max().Eq(cql.Int(13)),
+	).Select(
+		conditions.Product.Int.Plus(123).Aggregate().Max(), "aggregation1",
+	).Into(&results)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 1, Aggregation1: 124},
+	}, results)
+}
