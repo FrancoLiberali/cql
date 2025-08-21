@@ -349,7 +349,89 @@ func TestGroupByCompilationErrors(t *testing.T) {
 func TestUpdateCompilationErrors(t *testing.T) {
 	t.Parallel()
 
-	tests := []testCase{}
+	tests := []testCase{
+		{
+			Name: "set value of wrong type",
+			Code: `
+		_, _ = cql.Update[models.Product](
+			db,
+			conditions.Product.Bool.Is().False(),
+		).Set(
+			conditions.Product.Int.Set().Eq(cql.String("1")),
+		)`,
+			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "set field of wrong type",
+			Code: `
+		_, _ = cql.Update[models.Product](
+			db,
+			conditions.Product.Bool.Is().False(),
+		).Set(
+			conditions.Product.Int.Set().Eq(conditions.Product.String),
+		)`,
+			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "set multiple value of wrong type",
+			Code: `
+		_, _ = cql.Update[models.Product](
+			db,
+			conditions.Product.Bool.Is().False(),
+		).SetMultiple(
+			conditions.Product.Int.Set().Eq(cql.String("1")),
+		)`,
+			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "set field of wrong type",
+			Code: `
+		_, _ = cql.Update[models.Product](
+			db,
+			conditions.Product.Bool.Is().False(),
+		).SetMultiple(
+			conditions.Product.Int.Set().Eq(conditions.Product.String),
+		)`,
+			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "set can not be used after a function",
+			Code: `
+		_, _ = cql.Update[models.Product](
+			db,
+			conditions.Product.Bool.Is().False(),
+		).Set(
+			conditions.Product.Int.Plus(1).Set().Eq(cql.Int(1)),
+		)`,
+			Error: `conditions.Product.Int.Plus(1).Set undefined (type condition.NotUpdatableNumericField[models.Product, int] has no field or method Set)`,
+		},
+		{
+			Name: "set null can not be used for not nullable types",
+			Code: `
+		_, _ = cql.Update[models.Product](
+			db,
+			conditions.Product.Bool.Is().False(),
+		).Set(
+			conditions.Product.Int.Set().Null(),
+		)`,
+			Error: `conditions.Product.Int.Set().Null undefined (type condition.NumericFieldSet[models.Product, int] has no field or method Null)`,
+		},
+		{
+			Name: "returning model must be the same as query",
+			Code: `
+		productsReturned := []models.Seller{}
+
+		_, _ = cql.Update[models.Product](
+			db,
+			conditions.Product.Bool.Is().False(),
+		).Returning(
+			&productsReturned,
+		).Set(
+			conditions.Product.Int.Set().Eq(cql.Int(1)),
+		)`,
+			Error: `cannot use &productsReturned (value of type *[]models.Seller) as *[]models.Product value in argument to cql.Update[models.Product](db, conditions.Product.Bool.Is().False()).Returning`,
+		},
+	}
 
 	for _, testCase := range tests {
 		t.Run(testCase.Name, func(t *testing.T) {
@@ -358,12 +440,4 @@ func TestUpdateCompilationErrors(t *testing.T) {
 			executeTest(t, testCase)
 		})
 	}
-
-	// update
-	// set de algo que nada que ver
-	// set luego de funcion (lo hice hace poco)
-	// set null para tipos no nullables
-	// tambien ver en mas de uno
-	// returning solo del tipo de query
-	// funciones en el eq de set
 }
