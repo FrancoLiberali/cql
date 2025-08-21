@@ -20,6 +20,7 @@ type CQLQuery struct {
 	gormDB          *gorm.DB
 	concernedModels map[reflect.Type][]Table
 	initialTable    Table
+	selectClause    clause.Expr
 }
 
 // Order specify order when retrieving models from database.
@@ -83,14 +84,14 @@ func (query *CQLQuery) GroupBy(fields []IField) error {
 	query.cleanSelects()
 
 	for _, field := range fields {
-		table, err := query.GetModelTable(field)
+		fieldSQL, _, err := field.ToSQL(query)
 		if err != nil {
 			return err
 		}
 
-		query.AddSelectField(table, field, false)
+		query.AddSelectForAggregation(fieldSQL, nil)
 
-		query.gormDB.Group(table.SQLName() + "." + query.ColumnName(table, field.fieldName()))
+		query.gormDB.Group(fieldSQL)
 	}
 
 	return nil
@@ -130,31 +131,41 @@ func (query *CQLQuery) Find(dest any) error {
 	return query.gormDB.Find(dest).Error
 }
 
+// Select specify fields that you want when doing group bys
+func (query *CQLQuery) AddSelectForAggregation(sql string, values []any) {
+	newSQL := query.selectClause.SQL
+	if newSQL != "" {
+		newSQL = query.selectClause.SQL + "," + sql
+	} else {
+		newSQL = sql
+	}
+
+	query.selectClause = clause.Expr{
+		SQL:  newSQL,
+		Vars: append(query.selectClause.Vars, values...),
+	}
+
+	query.gormDB.Statement.AddClause(clause.Select{
+		Expression: query.selectClause,
+	})
+}
+
 // Select specify fields that you want when querying, creating, updating
-func (query *CQLQuery) AddSelect(value string, values []any) {
+func (query *CQLQuery) AddSelect(sql string) {
 	query.gormDB.Statement.Selects = append(
 		query.gormDB.Statement.Selects,
-		value,
-	)
-
-	query.gormDB.Statement.Vars = append(
-		query.gormDB.Statement.Vars,
-		values...,
+		sql,
 	)
 }
 
 func (query *CQLQuery) AddSelectField(table Table, fieldID IField, addAs bool) {
-	columnName := fmt.Sprintf(
-		"%s.%s",
-		table.Alias,
-		fieldID.columnName(query, table),
-	)
+	columnName := fieldID.columnSQL(query, table)
 
 	if addAs {
 		columnName += " AS " + query.getSelectAlias(table, fieldID)
 	}
 
-	query.AddSelect(columnName, nil)
+	query.AddSelect(columnName)
 }
 
 func (query *CQLQuery) getSelectAlias(table Table, fieldID IField) string {

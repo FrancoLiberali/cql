@@ -28,7 +28,7 @@ func (query *QueryGroup) Select(aggregation Aggregation, as string) *QueryGroup 
 		return query
 	}
 
-	query.gormQuery.AddSelect(selectSQL, values)
+	query.gormQuery.AddSelectForAggregation(selectSQL, values)
 
 	return query
 }
