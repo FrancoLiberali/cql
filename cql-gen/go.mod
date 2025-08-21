@@ -1,6 +1,6 @@
 module github.com/FrancoLiberali/cql/cql-gen
 
-go 1.18
+go 1.22
 
 require (
 	github.com/dave/jennifer v1.7.0

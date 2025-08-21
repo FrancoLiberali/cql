@@ -1,4 +1,4 @@
-go 1.18
+go 1.22
 
 use (
 	.
@@ -6,7 +6,7 @@ use (
 	./cql-gen/tests
 	./cqllint
 	./cqllint/pkg/analyzer/testdata
+	./cqllint/pkg/analyzer/testdata/src/appearance
 	./cqllint/pkg/analyzer/testdata/src/not_concerned
 	./cqllint/pkg/analyzer/testdata/src/repeated
-	./cqllint/pkg/analyzer/testdata/src/appearance
 )

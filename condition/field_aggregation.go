@@ -114,7 +114,7 @@ func (fieldAggregation BoolFieldAggregation) None() AggregationResult[bool] {
 
 type Aggregation interface {
 	ToSQL(query *CQLQuery) (string, []any, error)
-	toSelectSQL(query *CQLQuery, as string) (string, error)
+	toSelectSQL(query *CQLQuery, as string) (string, []any, error)
 	getField() IField
 }
 
@@ -134,15 +134,15 @@ func (aggregation AggregationResult[T]) GetValue() T {
 func (aggregation AggregationResult[T]) ToSQL(query *CQLQuery) (string, []any, error) {
 	columnSQL := ""
 
+	var columnValues []any
+
 	if aggregation.field != nil { // CountAll
 		var err error
 
-		table, err := query.GetModelTable(aggregation.field)
+		columnSQL, columnValues, err = aggregation.field.ToSQL(query)
 		if err != nil {
 			return "", nil, err
 		}
-
-		columnSQL = aggregation.field.columnSQL(query, table)
 	}
 
 	function, isPresent := aggregation.Function.Get(query.Dialector())
@@ -150,20 +150,20 @@ func (aggregation AggregationResult[T]) ToSQL(query *CQLQuery) (string, []any, e
 		return "", nil, functionError(ErrUnsupportedByDatabase, aggregation.Function)
 	}
 
-	return function.ApplyTo(columnSQL, 0), nil, nil
+	return function.ApplyTo(columnSQL, 0), columnValues, nil
 }
 
-func (aggregation AggregationResult[T]) toSelectSQL(query *CQLQuery, as string) (string, error) {
-	functionSQL, _, err := aggregation.ToSQL(query)
+func (aggregation AggregationResult[T]) toSelectSQL(query *CQLQuery, as string) (string, []any, error) {
+	functionSQL, values, err := aggregation.ToSQL(query)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	return fmt.Sprintf(
 		"%s AS %s",
 		functionSQL,
 		as,
-	), nil
+	), values, nil
 }
 
 func (aggregation AggregationResult[T]) applyOperator(value ValueOfType[T], operator sql.Operator) AggregationCondition {
@@ -291,7 +291,7 @@ func (condition AggregationCondition) toSQL(query *CQLQuery) (string, []any, err
 		return sqlString, values, nil
 	}
 
-	functionSQL, _, err := condition.aggregation.ToSQL(query)
+	aggregationSQL, aggregationValues, err := condition.aggregation.ToSQL(query)
 	if err != nil {
 		return "", nil, err
 	}
@@ -301,11 +301,13 @@ func (condition AggregationCondition) toSQL(query *CQLQuery) (string, []any, err
 		return "", nil, err
 	}
 
+	aggregationValues = append(aggregationValues, values...)
+
 	if sql != "" {
-		return functionSQL + " " + condition.operator.String() + " " + sql, []any{}, nil
+		return aggregationSQL + " " + condition.operator.String() + " " + sql, aggregationValues, nil
 	}
 
-	return functionSQL + " " + condition.operator.String() + " ?", values, nil
+	return aggregationSQL + " " + condition.operator.String() + " ?", aggregationValues, nil
 }
 
 func ConnectionAggregationCondition(conditions []AggregationCondition, operator sql.Operator) AggregationCondition {

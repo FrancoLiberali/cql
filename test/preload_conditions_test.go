@@ -253,7 +253,7 @@ func (ts *PreloadConditionsIntTestSuite) TestPreloadWithoutWhereConditionDoesNot
 	}))
 	ts.True(pie.Any(entities, func(sale *models.Sale) bool {
 		// in this case sale.Seller will also be nil
-		// but we can now it's really null in the db because err is nil
+		// but we can know it's really null in the db because err is nil
 		saleSeller, err := sale.GetSeller()
 		return err == nil && saleSeller == nil
 	}))

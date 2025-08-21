@@ -22,13 +22,13 @@ func (query *QueryGroup) Having(conditions ...AggregationCondition) *QueryGroup 
 }
 
 func (query *QueryGroup) Select(aggregation Aggregation, as string) *QueryGroup {
-	selectSQL, err := aggregation.toSelectSQL(query.gormQuery, as)
+	selectSQL, values, err := aggregation.toSelectSQL(query.gormQuery, as)
 	if err != nil {
 		query.addError(methodError(err, "Select"))
 		return query
 	}
 
-	query.gormQuery.AddSelect(selectSQL)
+	query.gormQuery.AddSelectForAggregation(selectSQL, values)
 
 	return query
 }
