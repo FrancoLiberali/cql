@@ -394,7 +394,17 @@ func getModelFromExpr(expr ast.Expr) (Model, Appearance, bool) {
 		return getModelFromCall(argCall)
 	}
 
+	argVar, isVar := expr.(*ast.Ident)
+	if isVar {
+		return getModelFromVar(argVar)
+	}
+
 	return Model{}, Appearance{}, false
+}
+
+// Returns model's package the model name and true if Appearance method is called
+func getModelFromVar(variable *ast.Ident) (Model, Appearance, bool) {
+	return getModel(variable), Appearance{}, true
 }
 
 // Returns model's package the model name and true if Appearance method is called
@@ -413,6 +423,10 @@ func getModelFromCall(call *ast.CallExpr) (Model, Appearance, bool) {
 			// x is not a selector, so Appearance method or a function is called
 			return getModelFromCall(xCall)
 		}
+
+		if argVar, isVar := funSelector.X.(*ast.Ident); isVar && argVar.Name != "cql" {
+			return getModelFromVar(argVar)
+		}
 	}
 
 	return Model{}, Appearance{}, false
@@ -428,9 +442,9 @@ func getModelFromSelector(selector *ast.SelectorExpr) (Model, bool) {
 }
 
 // Returns model's package the model name
-func getModel(selExpr *ast.SelectorExpr) Model {
+func getModel(e ast.Expr) Model {
 	return Model{
-		Name: passG.TypesInfo.Types[selExpr].Type.Underlying().(*types.Struct).Field(0).Type().(*types.Named).TypeArgs().At(0).(*types.Named).String(),
-		Pos:  selExpr.Pos(),
+		Name: passG.TypesInfo.TypeOf(e).Underlying().(*types.Struct).Field(0).Type().(*types.Named).TypeArgs().At(0).(*types.Named).String(),
+		Pos:  e.Pos(),
 	}
 }
