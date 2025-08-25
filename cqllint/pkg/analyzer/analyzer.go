@@ -269,46 +269,59 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
 		if conditionCall, isCall := condition.(*ast.CallExpr); isCall {
-			conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr)
+			if conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr); isSelector {
+				if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
+					positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
 
-			if !isSelector {
-				// cql.True
+					continue
+				}
+
+				if conditionSelector.Sel.Name == "Preload" {
+					conditionCall = conditionSelector.X.(*ast.CallExpr)
+					conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
+				}
+
+				if _, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr); isJoinCondition {
+					models = append(models, getModelFromJoinCondition(conditionSelector))
+
+					positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+
+					continue
+				}
+
+				positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+
 				continue
 			}
 
-			if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
-				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+			if ident, isIdent := conditionCall.Fun.(*ast.Ident); isIdent && ident.Name == "append" {
+				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args[1:]) // first argument is the base list
+
+				continue
 			}
 
-			if conditionSelector.Sel.Name == "Preload" {
-				conditionCall = conditionSelector.X.(*ast.CallExpr)
-				conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
-			}
+			// cql.True
+			continue
+		}
 
-			_, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr)
-
-			if isJoinCondition {
-				models = append(models, getModelFromJoinCondition(conditionSelector))
-
-				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
-			} else {
-				positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
-			}
-		} else if variable, isVar := condition.(*ast.Ident); isVar {
-			varPos := passG.Fset.Position(passG.TypesInfo.ObjectOf(variable).Pos())
-
+		if variable, isVar := condition.(*ast.Ident); isVar {
 			cursor, found := inspectorG.Root().FindByPos(passG.TypesInfo.ObjectOf(variable).Parent().Pos(), passG.TypesInfo.ObjectOf(variable).Parent().End())
 			if found {
-				cursor.Inspector().Preorder([]ast.Node{
-					(*ast.AssignStmt)(nil),
-				}, func(node ast.Node) {
-					if passG.Fset.Position(node.Pos()).Line == varPos.Line {
-						positionsToReport, models = findErrorIsDynamic(positionsToReport, models, node.(*ast.AssignStmt).Rhs)
+				for cursor := range cursor.Preorder((*ast.AssignStmt)(nil)) {
+					assign := cursor.Node().(*ast.AssignStmt)
+					if assign.Lhs[0].(*ast.Ident).Name == variable.Name {
+						positionsToReport, models = findErrorIsDynamic(positionsToReport, models, assign.Rhs)
 					}
-				})
+				}
 			}
-		} else if composite, isComposite := condition.(*ast.CompositeLit); isComposite {
+
+			continue
+		}
+
+		if composite, isComposite := condition.(*ast.CompositeLit); isComposite {
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, composite.Elts)
+
+			continue
 		}
 	}
 

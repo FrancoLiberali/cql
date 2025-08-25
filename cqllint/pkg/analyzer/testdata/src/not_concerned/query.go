@@ -451,3 +451,65 @@ func testNotJoinedConditionInList() {
 		values...,
 	).Find()
 }
+
+func testJoinedConditionInListWithAppend() {
+	values := []condition.Condition[models.Phone]{}
+
+	values = append(
+		values,
+		conditions.Phone.Name.Is().Eq(conditions.Phone.Name),
+	)
+
+	cql.Query[models.Phone](
+		db,
+		values...,
+	).Find()
+}
+
+func testNotJoinedConditionInListWithAppend() {
+	values := []condition.Condition[models.Phone]{}
+
+	values = append(
+		values,
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Query[models.Phone](
+		db,
+		values...,
+	).Find()
+}
+
+func testNotJoinedConditionInListWithAppendSecond() {
+	values := []condition.Condition[models.Phone]{}
+
+	values = append(
+		values,
+		conditions.Phone.Name.Is().Eq(conditions.Phone.Name),
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Query[models.Phone](
+		db,
+		values...,
+	).Find()
+}
+
+func testNotJoinedConditionInListWithAppendMultiple() {
+	values := []condition.Condition[models.Phone]{}
+
+	values = append(
+		values,
+		conditions.Phone.Name.Is().Eq(conditions.Phone.Name),
+	)
+
+	values = append(
+		values,
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Query[models.Phone](
+		db,
+		values...,
+	).Find()
+}
