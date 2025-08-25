@@ -54,18 +54,21 @@ type Appearance struct {
 	number   int
 }
 
-var passG *analysis.Pass
+var (
+	passG      *analysis.Pass
+	inspectorG *inspector.Inspector
+)
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	passG = pass
-	inspector := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	inspectorG = pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
 		(*ast.CallExpr)(nil),
 	}
 
 	positionsToReport := []Report{}
 
-	inspector.Preorder(nodeFilter, func(node ast.Node) {
+	inspectorG.Preorder(nodeFilter, func(node ast.Node) {
 		defer func() {
 			if r := recover(); r != nil {
 				return
@@ -265,31 +268,45 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
-		conditionCall := condition.(*ast.CallExpr)
-		conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr)
+		if conditionCall, isCall := condition.(*ast.CallExpr); isCall {
+			conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr)
 
-		if !isSelector {
-			// cql.True
-			continue
-		}
+			if !isSelector {
+				// cql.True
+				continue
+			}
 
-		if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
-			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
-		}
+			if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
+				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+			}
 
-		if conditionSelector.Sel.Name == "Preload" {
-			conditionCall = conditionSelector.X.(*ast.CallExpr)
-			conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
-		}
+			if conditionSelector.Sel.Name == "Preload" {
+				conditionCall = conditionSelector.X.(*ast.CallExpr)
+				conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
+			}
 
-		_, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr)
+			_, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr)
 
-		if isJoinCondition {
-			models = append(models, getModelFromJoinCondition(conditionSelector))
+			if isJoinCondition {
+				models = append(models, getModelFromJoinCondition(conditionSelector))
 
-			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
-		} else {
-			positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+			} else {
+				positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+			}
+		} else if variable, isVar := condition.(*ast.Ident); isVar {
+			varPos := passG.Fset.Position(passG.TypesInfo.ObjectOf(variable).Pos())
+
+			cursor, found := inspectorG.Root().FindByPos(passG.TypesInfo.ObjectOf(variable).Parent().Pos(), passG.TypesInfo.ObjectOf(variable).Parent().End())
+			if found {
+				cursor.Inspector().Preorder([]ast.Node{
+					(*ast.AssignStmt)(nil),
+				}, func(node ast.Node) {
+					if passG.Fset.Position(node.Pos()).Line == varPos.Line {
+						positionsToReport, models = findErrorIsDynamic(positionsToReport, models, node.(*ast.AssignStmt).Rhs)
+					}
+				})
+			}
 		}
 	}
 

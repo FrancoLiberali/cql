@@ -410,3 +410,21 @@ func testMultipleArgumentsSecondNotJoinedWithVariable() {
 		),
 	).Find()
 }
+
+func testJoinedConditionInVariable() {
+	value := conditions.Phone.Name.Is().Eq(conditions.Phone.Name)
+
+	cql.Query[models.Phone](
+		db,
+		value,
+	).Find()
+}
+
+func testNotJoinedConditionInVariable() {
+	value := conditions.Phone.Name.Is().Eq(conditions.City.Name) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+
+	cql.Query[models.Phone](
+		db,
+		value,
+	).Find()
+}
