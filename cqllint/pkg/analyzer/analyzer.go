@@ -307,6 +307,8 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 					}
 				})
 			}
+		} else if composite, isComposite := condition.(*ast.CompositeLit); isComposite {
+			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, composite.Elts)
 		}
 	}
 

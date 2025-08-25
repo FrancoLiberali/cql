@@ -4,6 +4,7 @@ import (
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -426,5 +427,27 @@ func testNotJoinedConditionInVariable() {
 	cql.Query[models.Phone](
 		db,
 		value,
+	).Find()
+}
+
+func testJoinedConditionInList() {
+	values := []condition.Condition[models.Phone]{
+		conditions.Phone.Name.Is().Eq(conditions.Phone.Name),
+	}
+
+	cql.Query[models.Phone](
+		db,
+		values...,
+	).Find()
+}
+
+func testNotJoinedConditionInList() {
+	values := []condition.Condition[models.Phone]{
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	}
+
+	cql.Query[models.Phone](
+		db,
+		values...,
 	).Find()
 }
