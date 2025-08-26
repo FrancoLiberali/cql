@@ -50,8 +50,9 @@ type Report struct {
 }
 
 type Appearance struct {
-	selected bool
-	number   int
+	selected    bool
+	number      int
+	bypassCheck bool // bypassCheck allows to bypass the Appearance call check
 }
 
 var (
@@ -413,6 +414,10 @@ func addPositionsToReport(positionsToReport []Report, models []string, model Mod
 		return modelName == model.Name
 	}))
 
+	if appearance.bypassCheck {
+		return positionsToReport
+	}
+
 	if appearance.selected {
 		if joinedTimes == 1 {
 			return append(positionsToReport, Report{
@@ -478,7 +483,9 @@ func getModelFromExpr(expr ast.Expr) (Model, Appearance, bool) {
 
 // Returns model's package the model name and true if Appearance method is called
 func getModelFromVar(variable *ast.Ident) (Model, Appearance, bool) {
-	return getModel(variable), Appearance{}, true
+	return getModel(variable),
+		Appearance{bypassCheck: true}, // Appearance for variables not implemented
+		true
 }
 
 // Returns model's package the model name and true if Appearance method is called

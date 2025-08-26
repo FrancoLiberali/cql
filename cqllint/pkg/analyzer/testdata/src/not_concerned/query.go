@@ -11,8 +11,6 @@ import (
 
 var db *gorm.DB
 
-// TODO agregar test de cuando si esta bien que no marca cosas raras
-// TODO se podria intentar correr sobre los tests de cql y no deberia dar nada
 func testSameModel() {
 	cql.Query[models.Brand](
 		db,
@@ -253,17 +251,16 @@ func testJoinedWithAppearance() {
 	).Find()
 }
 
-// TODO no funciona
-// func testJoinedWithAppearanceVarible() {
-// 	value := conditions.Brand.Name.Appearance(0)
+func testJoinedWithAppearanceVariable() {
+	value := conditions.Brand.Name.Appearance(0)
 
-// 	cql.Query[models.Phone](
-// 		db,
-// 		conditions.Phone.Brand(),
-// 		conditions.Phone.Brand(),
-// 		conditions.Phone.Name.Is().Eq(value),
-// 	).Find()
-// }
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+		conditions.Phone.Brand(),
+		conditions.Phone.Name.Is().Eq(value),
+	).Find()
+}
 
 func testNotJoinedWithAppearance() {
 	cql.Query[models.Phone](
