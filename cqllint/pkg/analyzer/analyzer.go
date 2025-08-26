@@ -183,16 +183,26 @@ func findForSet(set ast.Expr, positionsToReport []Report, models []string, metho
 }
 
 func findForOrder(order ast.Expr, positionsToReport []Report, models []string) []Report {
-	orderCall, isCall := order.(*ast.CallExpr)
-	if isCall {
+	if orderCall, isCall := order.(*ast.CallExpr); isCall {
 		model, appearance, isModel := getModelFromCall(orderCall)
 		if isModel {
 			return addPositionsToReport(positionsToReport, models, model, appearance)
 		}
-	} else {
-		model := getModel(order.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+
+		return positionsToReport
+	}
+
+	if orderSelector, isSelector := order.(*ast.SelectorExpr); isSelector {
+		model := getModel(orderSelector.X.(*ast.SelectorExpr))
 
 		return addPositionsToReport(positionsToReport, models, model, Appearance{selected: false})
+	}
+
+	if variable, isVar := order.(*ast.Ident); isVar {
+		assignments := findVariableAssignments(variable)
+		for _, assign := range assignments {
+			positionsToReport = findForOrder(assign.Rhs[0], positionsToReport, models)
+		}
 	}
 
 	return positionsToReport
