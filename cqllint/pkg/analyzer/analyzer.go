@@ -131,8 +131,24 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 	return positionsToReport
 }
 
+func isAppendCall(call *ast.CallExpr) bool {
+	if ident, isIdent := call.Fun.(*ast.Ident); isIdent && ident.Name == "append" {
+		return true
+	}
+
+	return false
+}
+
 func findForSet(set ast.Expr, positionsToReport []Report, models []string, methodName string) []Report {
 	if setCall, isCall := set.(*ast.CallExpr); isCall {
+		if isAppendCall(setCall) {
+			for _, arg := range setCall.Args[1:] { // first argument is the base list
+				positionsToReport = findForSet(arg, positionsToReport, models, methodName)
+			}
+
+			return positionsToReport
+		}
+
 		model, appearance, isModel := getModelFromExpr(setCall.Args[0])
 		if isModel {
 			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
@@ -309,7 +325,7 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 				continue
 			}
 
-			if ident, isIdent := conditionCall.Fun.(*ast.Ident); isIdent && ident.Name == "append" {
+			if isAppendCall(conditionCall) {
 				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args[1:]) // first argument is the base list
 
 				continue

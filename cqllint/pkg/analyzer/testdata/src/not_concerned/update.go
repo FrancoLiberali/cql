@@ -98,6 +98,20 @@ func testSetDynamicNotJoinedInList() {
 	).Set(sets...)
 }
 
+func testSetDynamicNotJoinedInListWithAppend() {
+	sets := []*condition.Set[models.Phone]{}
+
+	sets = append(
+		sets,
+		conditions.Phone.Name.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).Set(sets...)
+}
+
 func testSetDynamicNotJoinedInListMultiple() {
 	sets := []*condition.Set[models.Phone]{
 		conditions.Phone.Name.Set().Eq(conditions.Brand.Name),
