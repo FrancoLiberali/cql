@@ -30,6 +30,24 @@ func testSetDynamicNotJoinedInDifferentLines() {
 }
 
 func testSetDynamicJoinedFromVariable() {
+	set := conditions.Brand.Name
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).Set(conditions.Phone.Name.Set().Eq(set))
+}
+
+func testSetDynamicNotJoinedFromVariable() {
+	set := conditions.City.Name
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).Set(conditions.Phone.Name.Set().Eq(set)) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+}
+
+func testSetDynamicJoinedInVariable() {
 	set := conditions.Phone.Name.Set().Eq(conditions.Brand.Name)
 
 	cql.Update[models.Phone](
@@ -38,7 +56,7 @@ func testSetDynamicJoinedFromVariable() {
 	).Set(set)
 }
 
-func testSetDynamicNotJoinedFromVariable() {
+func testSetDynamicNotJoinedInVariable() {
 	set := conditions.Phone.Name.Set().Eq(conditions.City.Name) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Update[models.Phone](
