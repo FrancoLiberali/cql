@@ -142,28 +142,7 @@ func isAppendCall(call *ast.CallExpr) bool {
 
 func findForSet(set ast.Expr, positionsToReport []Report, models []string, methodName string) []Report {
 	if setCall, isCall := set.(*ast.CallExpr); isCall {
-		if isAppendCall(setCall) {
-			for _, arg := range setCall.Args[1:] { // first argument is the base list
-				positionsToReport = findForSet(arg, positionsToReport, models, methodName)
-			}
-
-			return positionsToReport
-		}
-
-		model, appearance, isModel := getModelFromExpr(setCall.Args[0])
-		if isModel {
-			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-		}
-
-		if methodName == cqlSetMultiple {
-			// set multiple needs more verifications as the model to be set is not compiled
-			model, appearance, isModel := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
-			if isModel {
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-			}
-		}
-
-		return positionsToReport
+		return findForSetCall(setCall, positionsToReport, models, methodName)
 	}
 
 	if variable, isVar := set.(*ast.Ident); isVar {
@@ -176,6 +155,31 @@ func findForSet(set ast.Expr, positionsToReport []Report, models []string, metho
 	if composite, isComposite := set.(*ast.CompositeLit); isComposite {
 		for _, expr := range composite.Elts {
 			positionsToReport = findForSet(expr, positionsToReport, models, methodName)
+		}
+	}
+
+	return positionsToReport
+}
+
+func findForSetCall(setCall *ast.CallExpr, positionsToReport []Report, models []string, methodName string) []Report {
+	if isAppendCall(setCall) {
+		for _, arg := range setCall.Args[1:] { // first argument is the base list
+			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
+		}
+
+		return positionsToReport
+	}
+
+	model, appearance, isModel := getModelFromExpr(setCall.Args[0])
+	if isModel {
+		positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+	}
+
+	if methodName == cqlSetMultiple {
+		// set multiple needs more verifications as the model to be set is not compiled
+		model, appearance, isModel := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+		if isModel {
+			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
 		}
 	}
 
@@ -311,38 +315,8 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
 		if conditionCall, isCall := condition.(*ast.CallExpr); isCall {
-			if conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr); isSelector {
-				if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
-					positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+			positionsToReport, models = findErrorIsDynamicForCall(positionsToReport, models, conditionCall)
 
-					continue
-				}
-
-				if conditionSelector.Sel.Name == "Preload" {
-					conditionCall = conditionSelector.X.(*ast.CallExpr)
-					conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
-				}
-
-				if _, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr); isJoinCondition {
-					models = append(models, getModelFromJoinCondition(conditionSelector))
-
-					positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
-
-					continue
-				}
-
-				positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
-
-				continue
-			}
-
-			if isAppendCall(conditionCall) {
-				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args[1:]) // first argument is the base list
-
-				continue
-			}
-
-			// cql.True
 			continue
 		}
 
@@ -362,6 +336,42 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 		}
 	}
 
+	return positionsToReport, models
+}
+
+func findErrorIsDynamicForCall(positionsToReport []Report, models []string, conditionCall *ast.CallExpr) ([]Report, []string) {
+	if conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr); isSelector {
+		if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
+			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+
+			return positionsToReport, models
+		}
+
+		if conditionSelector.Sel.Name == "Preload" {
+			conditionCall = conditionSelector.X.(*ast.CallExpr)
+			conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
+		}
+
+		if _, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr); isJoinCondition {
+			models = append(models, getModelFromJoinCondition(conditionSelector))
+
+			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+
+			return positionsToReport, models
+		}
+
+		positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+
+		return positionsToReport, models
+	}
+
+	if isAppendCall(conditionCall) {
+		positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args[1:]) // first argument is the base list
+
+		return positionsToReport, models
+	}
+
+	// cql.True
 	return positionsToReport, models
 }
 
