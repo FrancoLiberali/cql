@@ -205,36 +205,36 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 	fields := map[string][]token.Pos{}
 
 	for _, arg := range call.Args {
-		argCall := arg.(*ast.CallExpr)
-		argSelector := argCall.Fun.(*ast.SelectorExpr)
-		condition := argSelector.X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
+		if argCall, isCall := arg.(*ast.CallExpr); isCall {
+			condition := argCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
 
-		fieldName := getFieldName(condition)
-		fieldPos := condition.Sel.NamePos
+			fieldName := getFieldName(condition)
+			fieldPos := condition.Sel.NamePos
 
-		_, isPresent := fields[fieldName]
-		if !isPresent {
-			fields[fieldName] = []token.Pos{fieldPos}
-		} else {
-			fields[fieldName] = append(fields[fieldName], fieldPos)
-		}
-
-		for _, internalArg := range argCall.Args {
-			comparedField, isSelector := internalArg.(*ast.SelectorExpr)
-			if !isSelector {
-				// only for selectors, as they are the field.
-				// if not selector, it means function is applied to the field so it is not the same value
-				continue
+			_, isPresent := fields[fieldName]
+			if !isPresent {
+				fields[fieldName] = []token.Pos{fieldPos}
+			} else {
+				fields[fieldName] = append(fields[fieldName], fieldPos)
 			}
 
-			comparedFieldName := getFieldName(comparedField)
+			for _, internalArg := range argCall.Args {
+				comparedField, isSelector := internalArg.(*ast.SelectorExpr)
+				if !isSelector {
+					// only for selectors, as they are the field.
+					// if not selector, it means function is applied to the field so it is not the same value
+					continue
+				}
 
-			if comparedFieldName == fieldName {
-				passG.Reportf(
-					comparedField.Sel.NamePos,
-					"%s is set to itself",
-					comparedFieldName,
-				)
+				comparedFieldName := getFieldName(comparedField)
+
+				if comparedFieldName == fieldName {
+					passG.Reportf(
+						comparedField.Sel.NamePos,
+						"%s is set to itself",
+						comparedFieldName,
+					)
+				}
 			}
 		}
 	}

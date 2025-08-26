@@ -31,12 +31,12 @@ func testSetDynamicNotJoinedInDifferentLines() {
 }
 
 func testSetDynamicNotJoinedInMultiple() {
-	cql.Update[models.Phone](
+	cql.Update[models.Bicycle](
 		db,
-		conditions.Phone.Brand(),
+		conditions.Bicycle.Owner(),
 	).Set(
-		conditions.Phone.Name.Set().Eq(conditions.Brand.Name),
-		conditions.Phone.Name.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Bicycle.Name.Set().Eq(conditions.Person.Name),
+		conditions.Bicycle.OwnerName.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
