@@ -124,22 +124,6 @@ func testSetDynamicNotJoinedInListMultiple() {
 	).Set(sets...)
 }
 
-func testUpdateJoined() {
-	cql.Update[models.Phone](
-		db,
-		conditions.Phone.Brand(),
-		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
-	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
-}
-
-func testUpdateNotJoined() {
-	cql.Update[models.Phone](
-		db,
-		conditions.Phone.Brand(),
-		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
-	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
-}
-
 func testSetDynamicSameModel() {
 	cql.Update[models.Product](
 		db,
@@ -272,4 +256,80 @@ func testSetDynamicNotJoinedWithTwoFunction() {
 	).Set(conditions.Brand.Name.Set().Eq(
 		conditions.City.Name.Concat("asd").Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
+}
+
+func testUpdateJoined() {
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
+	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
+}
+
+func testUpdateNotJoined() {
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
+}
+
+func testUpdateJoinedInVariable() {
+	condition := conditions.Phone.Name.Is().Eq(conditions.Phone.Name)
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+		condition,
+	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
+}
+
+func testUpdateNotJoinedInVariable() {
+	condition := conditions.Phone.Name.Is().Eq(conditions.City.Name) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+		condition,
+	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
+}
+
+func testUpdateJoinedInList() {
+	conditionList := []condition.Condition[models.Phone]{
+		conditions.Phone.Brand(),
+		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
+	}
+
+	cql.Update[models.Phone](
+		db,
+		conditionList...,
+	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
+}
+
+func testUpdateNotJoinedInList() {
+	conditionList := []condition.Condition[models.Phone]{
+		conditions.Phone.Brand(),
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	}
+
+	cql.Update[models.Phone](
+		db,
+		conditionList...,
+	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
+}
+
+func testUpdateNotJoinedInListWithAppend() {
+	conditionList := []condition.Condition[models.Phone]{
+		conditions.Phone.Brand(),
+	}
+
+	conditionList = append(
+		conditionList,
+		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Update[models.Phone](
+		db,
+		conditionList...,
+	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
 }
