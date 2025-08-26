@@ -132,18 +132,27 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 }
 
 func findForSet(set ast.Expr, positionsToReport []Report, models []string, methodName string) []Report {
-	setCall := set.(*ast.CallExpr)
-
-	model, appearance, isModel := getModelFromExpr(setCall.Args[0])
-	if isModel {
-		positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-	}
-
-	if methodName == cqlSetMultiple {
-		// set multiple needs more verifications as the model to be set is not compiled
-		model, appearance, isModel := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+	if setCall, isCall := set.(*ast.CallExpr); isCall {
+		model, appearance, isModel := getModelFromExpr(setCall.Args[0])
 		if isModel {
 			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+		}
+
+		if methodName == cqlSetMultiple {
+			// set multiple needs more verifications as the model to be set is not compiled
+			model, appearance, isModel := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+			if isModel {
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+			}
+		}
+
+		return positionsToReport
+	}
+
+	if variable, isVar := set.(*ast.Ident); isVar {
+		assignments := findVariableAssignments(variable)
+		for _, assign := range assignments {
+			positionsToReport = findForSet(assign.Rhs[0], positionsToReport, models, methodName)
 		}
 	}
 
@@ -305,14 +314,9 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 		}
 
 		if variable, isVar := condition.(*ast.Ident); isVar {
-			cursor, found := inspectorG.Root().FindByPos(passG.TypesInfo.ObjectOf(variable).Parent().Pos(), passG.TypesInfo.ObjectOf(variable).Parent().End())
-			if found {
-				for cursor := range cursor.Preorder((*ast.AssignStmt)(nil)) {
-					assign := cursor.Node().(*ast.AssignStmt)
-					if assign.Lhs[0].(*ast.Ident).Name == variable.Name {
-						positionsToReport, models = findErrorIsDynamic(positionsToReport, models, assign.Rhs)
-					}
-				}
+			assignments := findVariableAssignments(variable)
+			for _, assign := range assignments {
+				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, assign.Rhs)
 			}
 
 			continue
@@ -326,6 +330,22 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 	}
 
 	return positionsToReport, models
+}
+
+func findVariableAssignments(variable *ast.Ident) []*ast.AssignStmt {
+	assignments := []*ast.AssignStmt{}
+
+	cursor, found := inspectorG.Root().FindByPos(passG.TypesInfo.ObjectOf(variable).Parent().Pos(), passG.TypesInfo.ObjectOf(variable).Parent().End())
+	if found {
+		for cursor := range cursor.Preorder((*ast.AssignStmt)(nil)) {
+			assign := cursor.Node().(*ast.AssignStmt)
+			if assign.Lhs[0].(*ast.Ident).Name == variable.Name {
+				assignments = append(assignments, assign)
+			}
+		}
+	}
+
+	return assignments
 }
 
 // conditions.Phone.Brand -> Brand (or its correct type if not the same)
