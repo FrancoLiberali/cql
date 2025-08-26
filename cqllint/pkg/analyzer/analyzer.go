@@ -156,6 +156,12 @@ func findForSet(set ast.Expr, positionsToReport []Report, models []string, metho
 		}
 	}
 
+	if composite, isComposite := set.(*ast.CompositeLit); isComposite {
+		for _, expr := range composite.Elts {
+			positionsToReport = findForSet(expr, positionsToReport, models, methodName)
+		}
+	}
+
 	return positionsToReport
 }
 

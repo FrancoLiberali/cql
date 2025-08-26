@@ -2,6 +2,7 @@ package not_concerned
 
 import (
 	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -27,6 +28,16 @@ func testSetDynamicNotJoinedInDifferentLines() {
 	).Set(conditions.Brand.Name.Set().Eq(
 		conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
+}
+
+func testSetDynamicNotJoinedInMultiple() {
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).Set(
+		conditions.Phone.Name.Set().Eq(conditions.Brand.Name),
+		conditions.Phone.Name.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
 }
 
 func testSetDynamicJoinedFromVariable() {
@@ -63,6 +74,40 @@ func testSetDynamicNotJoinedInVariable() {
 		db,
 		conditions.Phone.Brand(),
 	).Set(set)
+}
+
+func testSetDynamicJoinedInList() {
+	sets := []*condition.Set[models.Phone]{
+		conditions.Phone.Name.Set().Eq(conditions.Brand.Name),
+	}
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).Set(sets...)
+}
+
+func testSetDynamicNotJoinedInList() {
+	sets := []*condition.Set[models.Phone]{
+		conditions.Phone.Name.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	}
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).Set(sets...)
+}
+
+func testSetDynamicNotJoinedInListMultiple() {
+	sets := []*condition.Set[models.Phone]{
+		conditions.Phone.Name.Set().Eq(conditions.Brand.Name),
+		conditions.Phone.Name.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	}
+
+	cql.Update[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).Set(sets...)
 }
 
 func testUpdateJoined() {
