@@ -29,6 +29,28 @@ func testOrderMainModel() {
 	).Find()
 }
 
+func testOrderJoinedInVariable() {
+	value := conditions.Brand.Name
+
+	cql.Query[models.Brand](
+		db,
+		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
+	).Descending(
+		value,
+	).Find()
+}
+
+func testOrderNotJoinedInVariable() {
+	value := conditions.City.Name // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+
+	cql.Query[models.Brand](
+		db,
+		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
+	).Descending(
+		value,
+	).Find()
+}
+
 func testOrderJoinedModelWithoutConditions() {
 	cql.Query[models.Phone](
 		db,

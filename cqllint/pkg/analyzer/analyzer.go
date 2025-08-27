@@ -50,22 +50,26 @@ type Report struct {
 }
 
 type Appearance struct {
-	selected bool
-	number   int
+	selected    bool
+	number      int
+	bypassCheck bool // bypassCheck allows to bypass the Appearance call check
 }
 
-var passG *analysis.Pass
+var (
+	passG      *analysis.Pass
+	inspectorG *inspector.Inspector
+)
 
 func run(pass *analysis.Pass) (interface{}, error) {
 	passG = pass
-	inspector := pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
+	inspectorG = pass.ResultOf[inspect.Analyzer].(*inspector.Inspector)
 	nodeFilter := []ast.Node{
 		(*ast.CallExpr)(nil),
 	}
 
 	positionsToReport := []Report{}
 
-	inspector.Preorder(nodeFilter, func(node ast.Node) {
+	inspectorG.Preorder(nodeFilter, func(node ast.Node) {
 		defer func() {
 			if r := recover(); r != nil {
 				return
@@ -128,8 +132,43 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 	return positionsToReport
 }
 
+func isAppendCall(call *ast.CallExpr) bool {
+	if ident, isIdent := call.Fun.(*ast.Ident); isIdent && ident.Name == "append" {
+		return true
+	}
+
+	return false
+}
+
 func findForSet(set ast.Expr, positionsToReport []Report, models []string, methodName string) []Report {
-	setCall := set.(*ast.CallExpr)
+	if setCall, isCall := set.(*ast.CallExpr); isCall {
+		return findForSetCall(setCall, positionsToReport, models, methodName)
+	}
+
+	if variable, isVar := set.(*ast.Ident); isVar {
+		assignments := findVariableAssignments(variable)
+		for _, assign := range assignments {
+			positionsToReport = findForSet(assign.Rhs[0], positionsToReport, models, methodName)
+		}
+	}
+
+	if composite, isComposite := set.(*ast.CompositeLit); isComposite {
+		for _, expr := range composite.Elts {
+			positionsToReport = findForSet(expr, positionsToReport, models, methodName)
+		}
+	}
+
+	return positionsToReport
+}
+
+func findForSetCall(setCall *ast.CallExpr, positionsToReport []Report, models []string, methodName string) []Report {
+	if isAppendCall(setCall) {
+		for _, arg := range setCall.Args[1:] { // first argument is the base list
+			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
+		}
+
+		return positionsToReport
+	}
 
 	model, appearance, isModel := getModelFromExpr(setCall.Args[0])
 	if isModel {
@@ -148,16 +187,26 @@ func findForSet(set ast.Expr, positionsToReport []Report, models []string, metho
 }
 
 func findForOrder(order ast.Expr, positionsToReport []Report, models []string) []Report {
-	orderCall, isCall := order.(*ast.CallExpr)
-	if isCall {
+	if orderCall, isCall := order.(*ast.CallExpr); isCall {
 		model, appearance, isModel := getModelFromCall(orderCall)
 		if isModel {
 			return addPositionsToReport(positionsToReport, models, model, appearance)
 		}
-	} else {
-		model := getModel(order.(*ast.SelectorExpr).X.(*ast.SelectorExpr))
+
+		return positionsToReport
+	}
+
+	if orderSelector, isSelector := order.(*ast.SelectorExpr); isSelector {
+		model := getModel(orderSelector.X.(*ast.SelectorExpr))
 
 		return addPositionsToReport(positionsToReport, models, model, Appearance{selected: false})
+	}
+
+	if variable, isVar := order.(*ast.Ident); isVar {
+		assignments := findVariableAssignments(variable)
+		for _, assign := range assignments {
+			positionsToReport = findForOrder(assign.Rhs[0], positionsToReport, models)
+		}
 	}
 
 	return positionsToReport
@@ -171,36 +220,36 @@ func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 	fields := map[string][]token.Pos{}
 
 	for _, arg := range call.Args {
-		argCall := arg.(*ast.CallExpr)
-		argSelector := argCall.Fun.(*ast.SelectorExpr)
-		condition := argSelector.X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
+		if argCall, isCall := arg.(*ast.CallExpr); isCall {
+			condition := argCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr).Fun.(*ast.SelectorExpr).X.(*ast.SelectorExpr)
 
-		fieldName := getFieldName(condition)
-		fieldPos := condition.Sel.NamePos
+			fieldName := getFieldName(condition)
+			fieldPos := condition.Sel.NamePos
 
-		_, isPresent := fields[fieldName]
-		if !isPresent {
-			fields[fieldName] = []token.Pos{fieldPos}
-		} else {
-			fields[fieldName] = append(fields[fieldName], fieldPos)
-		}
-
-		for _, internalArg := range argCall.Args {
-			comparedField, isSelector := internalArg.(*ast.SelectorExpr)
-			if !isSelector {
-				// only for selectors, as they are the field.
-				// if not selector, it means function is applied to the field so it is not the same value
-				continue
+			_, isPresent := fields[fieldName]
+			if !isPresent {
+				fields[fieldName] = []token.Pos{fieldPos}
+			} else {
+				fields[fieldName] = append(fields[fieldName], fieldPos)
 			}
 
-			comparedFieldName := getFieldName(comparedField)
+			for _, internalArg := range argCall.Args {
+				comparedField, isSelector := internalArg.(*ast.SelectorExpr)
+				if !isSelector {
+					// only for selectors, as they are the field.
+					// if not selector, it means function is applied to the field so it is not the same value
+					continue
+				}
 
-			if comparedFieldName == fieldName {
-				passG.Reportf(
-					comparedField.Sel.NamePos,
-					"%s is set to itself",
-					comparedFieldName,
-				)
+				comparedFieldName := getFieldName(comparedField)
+
+				if comparedFieldName == fieldName {
+					passG.Reportf(
+						comparedField.Sel.NamePos,
+						"%s is set to itself",
+						comparedFieldName,
+					)
+				}
 			}
 		}
 	}
@@ -265,16 +314,37 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
-		conditionCall := condition.(*ast.CallExpr)
-		conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr)
+		if conditionCall, isCall := condition.(*ast.CallExpr); isCall {
+			positionsToReport, models = findErrorIsDynamicForCall(positionsToReport, models, conditionCall)
 
-		if !isSelector {
-			// cql.True
 			continue
 		}
 
+		if variable, isVar := condition.(*ast.Ident); isVar {
+			assignments := findVariableAssignments(variable)
+			for _, assign := range assignments {
+				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, assign.Rhs)
+			}
+
+			continue
+		}
+
+		if composite, isComposite := condition.(*ast.CompositeLit); isComposite {
+			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, composite.Elts)
+
+			continue
+		}
+	}
+
+	return positionsToReport, models
+}
+
+func findErrorIsDynamicForCall(positionsToReport []Report, models []string, conditionCall *ast.CallExpr) ([]Report, []string) {
+	if conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr); isSelector {
 		if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+
+			return positionsToReport, models
 		}
 
 		if conditionSelector.Sel.Name == "Preload" {
@@ -282,18 +352,43 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 			conditionSelector = conditionCall.Fun.(*ast.SelectorExpr)
 		}
 
-		_, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr)
-
-		if isJoinCondition {
+		if _, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr); isJoinCondition {
 			models = append(models, getModelFromJoinCondition(conditionSelector))
 
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
-		} else {
-			positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+
+			return positionsToReport, models
+		}
+
+		positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+
+		return positionsToReport, models
+	}
+
+	if isAppendCall(conditionCall) {
+		positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args[1:]) // first argument is the base list
+
+		return positionsToReport, models
+	}
+
+	// cql.True
+	return positionsToReport, models
+}
+
+func findVariableAssignments(variable *ast.Ident) []*ast.AssignStmt {
+	assignments := []*ast.AssignStmt{}
+
+	cursor, found := inspectorG.Root().FindByPos(passG.TypesInfo.ObjectOf(variable).Parent().Pos(), passG.TypesInfo.ObjectOf(variable).Parent().End())
+	if found {
+		for cursor := range cursor.Preorder((*ast.AssignStmt)(nil)) {
+			assign := cursor.Node().(*ast.AssignStmt)
+			if assign.Lhs[0].(*ast.Ident).Name == variable.Name {
+				assignments = append(assignments, assign)
+			}
 		}
 	}
 
-	return positionsToReport, models
+	return assignments
 }
 
 // conditions.Phone.Brand -> Brand (or its correct type if not the same)
@@ -338,6 +433,10 @@ func addPositionsToReport(positionsToReport []Report, models []string, model Mod
 	joinedTimes := len(pie.Filter(models, func(modelName string) bool {
 		return modelName == model.Name
 	}))
+
+	if appearance.bypassCheck {
+		return positionsToReport
+	}
 
 	if appearance.selected {
 		if joinedTimes == 1 {
@@ -394,7 +493,19 @@ func getModelFromExpr(expr ast.Expr) (Model, Appearance, bool) {
 		return getModelFromCall(argCall)
 	}
 
+	argVar, isVar := expr.(*ast.Ident)
+	if isVar {
+		return getModelFromVar(argVar)
+	}
+
 	return Model{}, Appearance{}, false
+}
+
+// Returns model's package the model name and true if Appearance method is called
+func getModelFromVar(variable *ast.Ident) (Model, Appearance, bool) {
+	return getModel(variable),
+		Appearance{bypassCheck: true}, // Appearance for variables not implemented
+		true
 }
 
 // Returns model's package the model name and true if Appearance method is called
@@ -413,6 +524,10 @@ func getModelFromCall(call *ast.CallExpr) (Model, Appearance, bool) {
 			// x is not a selector, so Appearance method or a function is called
 			return getModelFromCall(xCall)
 		}
+
+		if argVar, isVar := funSelector.X.(*ast.Ident); isVar && argVar.Name != "cql" {
+			return getModelFromVar(argVar)
+		}
 	}
 
 	return Model{}, Appearance{}, false
@@ -428,9 +543,9 @@ func getModelFromSelector(selector *ast.SelectorExpr) (Model, bool) {
 }
 
 // Returns model's package the model name
-func getModel(selExpr *ast.SelectorExpr) Model {
+func getModel(e ast.Expr) Model {
 	return Model{
-		Name: passG.TypesInfo.Types[selExpr].Type.Underlying().(*types.Struct).Field(0).Type().(*types.Named).TypeArgs().At(0).(*types.Named).String(),
-		Pos:  selExpr.Pos(),
+		Name: passG.TypesInfo.TypeOf(e).Underlying().(*types.Struct).Field(0).Type().(*types.Named).TypeArgs().At(0).(*types.Named).String(),
+		Pos:  e.Pos(),
 	}
 }
