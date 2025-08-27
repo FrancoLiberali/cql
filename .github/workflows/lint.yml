@@ -44,6 +44,15 @@ jobs:
           go-version: '1.25'
       - name: Mod download
         run: go mod download
+      - name: Mod download cqllint
+        run: go mod download
+        working-directory: cqllint
+      - name: Mod download testdata
+        run: go mod download
+        working-directory: cqllint/pgk/analyzer/testdata
+      - name: Mod download testdata/src/appearance
+        run: go mod download
+        working-directory: cqllint/pgk/analyzer/testdata/src/appearance
       - name: Run tests
         run: GOPROXY=direct go test ./cqllint/... -coverpkg=./cqllint/... -coverprofile=coverage_lint.out -v
       - uses: actions/upload-artifact@v4
