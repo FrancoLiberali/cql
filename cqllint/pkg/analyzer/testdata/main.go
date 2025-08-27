@@ -7,6 +7,7 @@ package main
 // 	_ "repeated"
 
 // 	_ "github.com/FrancoLiberali/cql"
+// 	_ "gorm.io/gorm"
 // )
 
 func main() {}

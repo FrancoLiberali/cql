@@ -1,6 +1,6 @@
 module github.com/FrancoLiberali/cql/cqllint/pkg/analyzer/testdata/src/repeated
 
-go 1.22
+go 1.23
 
 require (
 	github.com/FrancoLiberali/cql v0.0.1
