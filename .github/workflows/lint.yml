@@ -51,7 +51,7 @@ jobs:
         run: go mod download
         working-directory: cqllint/pkg/analyzer/testdata
       - name: Run tests
-        run: GOPROXY=direct go test ./cqllint/... -coverpkg=./cqllint/... -coverprofile=coverage_lint.out -v
+        run: go test ./cqllint/... -coverpkg=./cqllint/... -coverprofile=coverage_lint.out -v
       - uses: actions/upload-artifact@v4
         with:
           name: coverage_lint
