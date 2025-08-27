@@ -268,29 +268,6 @@ func main() {
 	assert.Contains(t, string(output), testCase.Error)
 }
 
-func TestDeleteCompilationErrors(t *testing.T) {
-	t.Parallel()
-
-	tests := []testCase{
-		{
-			Name: "without any condition",
-			Code: `
-	_ = cql.Delete[models.Product](
-		db,
-	)`,
-			Error: `not enough arguments in call to cql.Delete[models.Product]`,
-		},
-	}
-
-	for _, testCase := range tests {
-		t.Run(testCase.Name, func(t *testing.T) {
-			t.Parallel()
-
-			executeTest(t, testCase)
-		})
-	}
-}
-
 func TestGroupByCompilationErrors(t *testing.T) {
 	t.Parallel()
 

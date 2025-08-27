@@ -1,7 +1,6 @@
 package cql
 
 import (
-	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql/condition"
@@ -14,9 +13,9 @@ import (
 // In case this is the desired behavior, use cql.True.
 //
 // For details see https://compiledquerylenguage.readthedocs.io/en/latest/cql/delete.html
-func Delete[T model.Model](tx *gorm.DB, firstCondition condition.Condition[T], conditions ...condition.Condition[T]) *condition.Delete[T] {
+func Delete[T model.Model](tx *gorm.DB, conditions ...condition.Condition[T]) *condition.Delete[T] {
 	return condition.NewDelete(
 		tx,
-		pie.Unshift(conditions, firstCondition),
+		conditions,
 	)
 }
