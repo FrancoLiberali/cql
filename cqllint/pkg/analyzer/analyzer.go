@@ -29,9 +29,10 @@ var (
 	cqlMethods     = []string{"Query", "Update", "Delete"}
 	cqlOrder       = []string{"Descending", "Ascending"}
 	cqlConnectors  = []string{"And", "Or", "Not"}
+	cqlGroupBy     = "GroupBy"
 	cqlSetMultiple = "SetMultiple"
 	cqlSets        = []string{cqlSetMultiple, "Set"}
-	cqlSelectors   = append(cqlOrder, cqlSets...)
+	cqlSelectors   = append(append(cqlOrder, cqlSets...), cqlGroupBy)
 
 	notJoinedMessage              = "%s is not joined by the query"
 	appearanceNotNecessaryMessage = "Appearance call not necessary, %s appears only once"
@@ -122,8 +123,8 @@ func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, p
 	for _, arg := range callExpr.Args {
 		methodName := selectorExpr.Sel.Name
 
-		if pie.Contains(cqlOrder, methodName) {
-			positionsToReport = findForOrder(arg, positionsToReport, models)
+		if pie.Contains(cqlOrder, methodName) || methodName == cqlGroupBy {
+			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
 		} else {
 			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
 		}
@@ -186,7 +187,7 @@ func findForSetCall(setCall *ast.CallExpr, positionsToReport []Report, models []
 	return positionsToReport
 }
 
-func findForOrder(order ast.Expr, positionsToReport []Report, models []string) []Report {
+func findForOrderOrGroupBy(order ast.Expr, positionsToReport []Report, models []string) []Report {
 	if orderCall, isCall := order.(*ast.CallExpr); isCall {
 		model, appearance, isModel := getModelFromCall(orderCall)
 		if isModel {
@@ -205,7 +206,7 @@ func findForOrder(order ast.Expr, positionsToReport []Report, models []string) [
 	if variable, isVar := order.(*ast.Ident); isVar {
 		assignments := findVariableAssignments(variable)
 		for _, assign := range assignments {
-			positionsToReport = findForOrder(assign.Rhs[0], positionsToReport, models)
+			positionsToReport = findForOrderOrGroupBy(assign.Rhs[0], positionsToReport, models)
 		}
 	}
 
