@@ -1,0 +1,8 @@
+go 1.23.0
+
+use (
+	.
+	./src/appearance
+	./src/not_concerned
+	./src/repeated
+)
