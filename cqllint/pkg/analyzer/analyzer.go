@@ -27,7 +27,7 @@ var Analyzer = &analysis.Analyzer{
 
 var (
 	cqlMethods        = []string{"Query", "Update", "Delete"}
-	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy"}
+	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "Select"}
 	cqlConnectors     = []string{"And", "Or", "Not"}
 	cqlSetMultiple    = "SetMultiple"
 	cqlSets           = []string{cqlSetMultiple, "Set"}
