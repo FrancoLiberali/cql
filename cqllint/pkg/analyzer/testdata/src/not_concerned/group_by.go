@@ -7,10 +7,8 @@ import (
 	"github.com/FrancoLiberali/cql/test/models"
 )
 
-// GroupBy
-// Select
 // Having
-// Verificar que tenga los campos seleccionados? seria otro tipo de test, que esta bueno pero complicado
+// TODO Verificar que tenga los campos seleccionados? seria otro tipo de test, que esta bueno pero complicado
 // TODO groupby repetidos
 
 var results = []struct{}{}
@@ -212,7 +210,7 @@ func testSelectJoinedModel() {
 	).GroupBy(
 		conditions.Phone.Name,
 	).Select(
-		conditions.City.Name.Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Aggregate().Max(), "aggregation1",
 	)
 }
 
@@ -337,3 +335,258 @@ func testSelectNotJoinedWithTwoFunctions() {
 		conditions.City.Name.Concat("asd").Concat("asd").Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
+
+func testHavingSameModel() {
+	cql.Query[models.Brand](
+		db,
+		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		conditions.Brand.Name.Aggregate().Max().Eq(cql.String("asd")),
+	)
+}
+
+func testHavingJoinedModel() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Phone.Name,
+	).Having(
+		conditions.Brand.Name.Aggregate().Max().Eq(cql.String("asd")),
+	)
+}
+
+func testHavingNotJoined() {
+	cql.Query[models.Brand](
+		db,
+		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		conditions.City.Name.Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+}
+
+func testHavingJoinedModelInVariable() {
+	value := conditions.Brand.Name.Aggregate().Max().Eq(cql.String("asd"))
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		value,
+	)
+}
+
+func testHavingNotJoinedInVariable() {
+	value := conditions.City.Name.Aggregate().Max().Eq(cql.String("asd")) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		value,
+	)
+}
+
+func testHavingJoinedWithFunction() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		conditions.Brand.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd")),
+	)
+}
+
+func testHavingJoinedWithFunctionVariable() {
+	value := conditions.Brand.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd"))
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		value,
+	)
+}
+
+func testHavingJoinedWithFunctionOverVariable() {
+	value := conditions.Brand.Name
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		value.Concat("asd").Aggregate().Max().Eq(cql.String("asd")),
+	)
+}
+
+func testHavingNotJoinedWithFunction() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		conditions.City.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+}
+
+func testHavingNotJoinedWithFunctionVariable() {
+	value := conditions.City.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd")) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		value,
+	)
+}
+
+func testHavingNotJoinedWithFunctionOverVariable() {
+	value := conditions.City.Name
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		value.Concat("asd").Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+}
+
+func testHavingNotJoinedWithTwoFunctions() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		conditions.City.Name.Concat("asd").Concat("asd").Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+}
+
+func testHavingJoinedConditionInList() {
+	values := []condition.AggregationCondition{
+		conditions.Brand.Name.Aggregate().Max().Eq(cql.String("asd")),
+	}
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		values...,
+	)
+}
+
+func testHavingNotJoinedConditionInList() {
+	values := []condition.AggregationCondition{
+		conditions.City.Name.Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	}
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		values...,
+	)
+}
+
+func testHavingJoinedConditionInListWithAppend() {
+	values := []condition.AggregationCondition{}
+
+	values = append(
+		values,
+		conditions.Brand.Name.Aggregate().Max().Eq(cql.String("asd")),
+	)
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		values...,
+	)
+}
+
+func testHavingNotJoinedConditionInListWithAppend() {
+	values := []condition.AggregationCondition{}
+
+	values = append(
+		values,
+		conditions.City.Name.Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		values...,
+	)
+}
+
+func testHavingNotJoinedConditionInListWithAppendSecond() {
+	values := []condition.AggregationCondition{}
+
+	values = append(
+		values,
+		conditions.Phone.Name.Aggregate().Max().Eq(cql.String("asd")),
+		conditions.City.Name.Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		values...,
+	)
+}
+
+func testHavingNotJoinedConditionInListWithAppendMultiple() {
+	values := []condition.AggregationCondition{}
+
+	values = append(
+		values,
+		conditions.Phone.Name.Aggregate().Max().Eq(cql.String("asd")),
+	)
+
+	values = append(
+		values,
+		conditions.City.Name.Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(),
+	).GroupBy(
+		conditions.Brand.Name,
+	).Having(
+		values...,
+	)
+}
+
+// TODO having:
+// del otro lado del eq (y con funcion y en list y en variable (de ambos lados))
