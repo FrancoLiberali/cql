@@ -26,12 +26,12 @@ var Analyzer = &analysis.Analyzer{
 }
 
 var (
-	cqlMethods     = []string{"Query", "Update", "Delete"}
-	cqlOrder       = []string{"Descending", "Ascending"}
-	cqlConnectors  = []string{"And", "Or", "Not"}
-	cqlSetMultiple = "SetMultiple"
-	cqlSets        = []string{cqlSetMultiple, "Set"}
-	cqlSelectors   = append(cqlOrder, cqlSets...)
+	cqlMethods        = []string{"Query", "Update", "Delete"}
+	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "Select", "Having"}
+	cqlConnectors     = []string{"And", "Or", "Not"}
+	cqlSetMultiple    = "SetMultiple"
+	cqlSets           = []string{cqlSetMultiple, "Set"}
+	cqlSelectors      = append(cqlOrderOrGroupBy, cqlSets...)
 
 	notJoinedMessage              = "%s is not joined by the query"
 	appearanceNotNecessaryMessage = "Appearance call not necessary, %s appears only once"
@@ -119,11 +119,12 @@ func findForSelector(callExpr *ast.CallExpr, positionsToReport []Report) []Repor
 func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, positionsToReport []Report) []Report {
 	_, models := findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
 
-	for _, arg := range callExpr.Args {
-		methodName := selectorExpr.Sel.Name
+	methodName := selectorExpr.Sel.Name
+	isOrderOrGroupBy := pie.Contains(cqlOrderOrGroupBy, methodName)
 
-		if pie.Contains(cqlOrder, methodName) {
-			positionsToReport = findForOrder(arg, positionsToReport, models)
+	for _, arg := range callExpr.Args {
+		if isOrderOrGroupBy {
+			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
 		} else {
 			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
 		}
@@ -186,27 +187,49 @@ func findForSetCall(setCall *ast.CallExpr, positionsToReport []Report, models []
 	return positionsToReport
 }
 
-func findForOrder(order ast.Expr, positionsToReport []Report, models []string) []Report {
-	if orderCall, isCall := order.(*ast.CallExpr); isCall {
-		model, appearance, isModel := getModelFromCall(orderCall)
+func findForOrderOrGroupBy(expr ast.Expr, positionsToReport []Report, models []string) []Report {
+	if exprCall, isCall := expr.(*ast.CallExpr); isCall {
+		if isAppendCall(exprCall) {
+			for _, arg := range exprCall.Args[1:] { // first argument is the base list
+				positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
+			}
+
+			return positionsToReport
+		}
+
+		model, appearance, isModel := getModelFromCall(exprCall)
 		if isModel {
-			return addPositionsToReport(positionsToReport, models, model, appearance)
+			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+		}
+
+		for _, arg := range exprCall.Args {
+			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
 		}
 
 		return positionsToReport
 	}
 
-	if orderSelector, isSelector := order.(*ast.SelectorExpr); isSelector {
-		model := getModel(orderSelector.X.(*ast.SelectorExpr))
+	if exprSelector, isSelector := expr.(*ast.SelectorExpr); isSelector {
+		model := getModel(exprSelector.X.(*ast.SelectorExpr))
 
 		return addPositionsToReport(positionsToReport, models, model, Appearance{selected: false})
 	}
 
-	if variable, isVar := order.(*ast.Ident); isVar {
+	if variable, isVar := expr.(*ast.Ident); isVar {
 		assignments := findVariableAssignments(variable)
 		for _, assign := range assignments {
-			positionsToReport = findForOrder(assign.Rhs[0], positionsToReport, models)
+			positionsToReport = findForOrderOrGroupBy(assign.Rhs[0], positionsToReport, models)
 		}
+
+		return positionsToReport
+	}
+
+	if composite, isComposite := expr.(*ast.CompositeLit); isComposite {
+		for _, expr := range composite.Elts {
+			positionsToReport = findForOrderOrGroupBy(expr, positionsToReport, models)
+		}
+
+		return positionsToReport
 	}
 
 	return positionsToReport

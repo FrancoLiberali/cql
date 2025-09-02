@@ -1,15 +1,11 @@
 package not_concerned
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
-
-var db *gorm.DB
 
 func testSameModel() {
 	cql.Query[models.Brand](
