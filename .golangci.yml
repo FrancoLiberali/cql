@@ -212,10 +212,6 @@ issues:
         - errcheck
         - forcetypeassert
         - err113
-    - path: ^cqllint/pkg/analyzer/testdata/**
-      linters:
-        - unused
-        - lll
     # We need to use the deprecated module since the jsonpb replacement is not backwards compatible.
     - linters:
         - staticcheck
