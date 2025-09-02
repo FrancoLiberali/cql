@@ -7,10 +7,6 @@ import (
 	"github.com/FrancoLiberali/cql/test/models"
 )
 
-// Having
-// TODO Verificar que tenga los campos seleccionados? seria otro tipo de test, que esta bueno pero complicado
-// TODO groupby repetidos
-
 var results = []struct{}{}
 
 func testGroupBySameModel() {
