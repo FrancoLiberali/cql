@@ -119,10 +119,11 @@ func findForSelector(callExpr *ast.CallExpr, positionsToReport []Report) []Repor
 func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, positionsToReport []Report) []Report {
 	_, models := findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
 
-	for _, arg := range callExpr.Args {
-		methodName := selectorExpr.Sel.Name
+	methodName := selectorExpr.Sel.Name
+	isOrderOrGroupBy := pie.Contains(cqlOrderOrGroupBy, methodName)
 
-		if pie.Contains(cqlOrderOrGroupBy, methodName) {
+	for _, arg := range callExpr.Args {
+		if isOrderOrGroupBy {
 			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
 		} else {
 			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
@@ -198,7 +199,11 @@ func findForOrderOrGroupBy(expr ast.Expr, positionsToReport []Report, models []s
 
 		model, appearance, isModel := getModelFromCall(exprCall)
 		if isModel {
-			return addPositionsToReport(positionsToReport, models, model, appearance)
+			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+		}
+
+		for _, arg := range exprCall.Args {
+			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
 		}
 
 		return positionsToReport
