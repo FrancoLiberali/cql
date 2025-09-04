@@ -27,7 +27,7 @@ func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
 func (update *Update[T]) SetMultiple(sets ...ISet) (int64, error) {
 	methodName := "SetMultiple"
 
-	if update.query.gormQuery.Dialector() != sql.MySQL {
+	if update.query.cqlQuery.Dialector() != sql.MySQL {
 		update.query.addError(methodError(ErrUnsupportedByDatabase, methodName))
 	}
 
@@ -39,7 +39,7 @@ func (update *Update[T]) unsafeSet(sets []ISet, methodName string) (int64, error
 		return 0, update.query.err
 	}
 
-	updated, err := update.query.gormQuery.Update(sets)
+	updated, err := update.query.cqlQuery.Update(sets)
 	if err != nil {
 		return 0, methodError(err, methodName)
 	}

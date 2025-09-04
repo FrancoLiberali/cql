@@ -14,7 +14,7 @@ type OrderLimitReturning[T model.Model] struct {
 //
 // available for: mysql
 func (olr *OrderLimitReturning[T]) Ascending(field IField) {
-	if olr.query.gormQuery.Dialector() != sql.MySQL {
+	if olr.query.cqlQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Ascending"))
 	}
 
@@ -26,7 +26,7 @@ func (olr *OrderLimitReturning[T]) Ascending(field IField) {
 //
 // available for: mysql
 func (olr *OrderLimitReturning[T]) Descending(field IField) {
-	if olr.query.gormQuery.Dialector() != sql.MySQL {
+	if olr.query.cqlQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Descending"))
 	}
 
@@ -40,7 +40,7 @@ func (olr *OrderLimitReturning[T]) Descending(field IField) {
 //
 // available for: mysql
 func (olr *OrderLimitReturning[T]) Limit(limit int) {
-	if olr.query.gormQuery.Dialector() != sql.MySQL {
+	if olr.query.cqlQuery.Dialector() != sql.MySQL {
 		olr.query.addError(methodError(ErrUnsupportedByDatabase, "Limit"))
 	}
 
@@ -48,14 +48,14 @@ func (olr *OrderLimitReturning[T]) Limit(limit int) {
 		olr.query.addError(methodError(ErrOrderByMustBeCalled, "Limit"))
 	}
 
-	olr.query.gormQuery.Limit(limit)
+	olr.query.cqlQuery.Limit(limit)
 }
 
 // available for: postgres, sqlite, sqlserver
 //
 // warning: in sqlite preloads are not allowed
 func (olr OrderLimitReturning[T]) Returning(dest *[]T) {
-	err := olr.query.gormQuery.Returning(dest)
+	err := olr.query.cqlQuery.Returning(dest)
 	if err != nil {
 		olr.query.addError(methodError(err, "Returning"))
 	}
