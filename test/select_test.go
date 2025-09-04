@@ -36,13 +36,16 @@ func (ts *SelectIntTestSuite) TestSelect() {
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
 			result.Int = int(value)
 		}),
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+			result.Int = int(value)
+		}),
 	)
 
 	ts.Require().NoError(err)
 	EqualList(&ts.Suite, []ResultInt{
-		{Int: 42},
-		{Int: 42},
-		{Int: 42},
+		{Int: 43},
+		{Int: 43},
+		{Int: 43},
 	}, results)
 }
 

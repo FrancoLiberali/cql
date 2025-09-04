@@ -12,21 +12,20 @@ type ValueIntoSelection[TValue any, TResults any] struct {
 	selector func(TValue, *TResults)
 }
 
-// TODO probablemente ya no sea necesaria
-func (selection ValueIntoSelection[TValue, TResults]) ResultsType() TResults {
-	return *new(TResults)
-}
-
 func (selection ValueIntoSelection[TValue, TResults]) Apply(value any, result *TResults) error {
-	valueT, isT := value.(TValue)
-	if !isT {
+	valueT, isTPointer := value.(*TValue)
+	if !isTPointer {
 		// TODO definir bien el error
 		return errors.New("not possible error")
 	}
 
-	selection.selector(valueT, result)
+	selection.selector(*valueT, result)
 
 	return nil
+}
+
+func (selection ValueIntoSelection[TValue, TResults]) ValueType() any {
+	return new(TValue)
 }
 
 func ValueInto[TValue any, TResults any](

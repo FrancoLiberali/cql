@@ -5,8 +5,8 @@ import (
 )
 
 type Selection[T any] interface {
-	ResultsType() T
 	Apply(value any, result *T) error
+	ValueType() any
 }
 
 func Select[TResults any, TModel model.Model](
@@ -18,7 +18,7 @@ func Select[TResults any, TModel model.Model](
 	}
 
 	// TODO aca poner las selecciones
-	rows, err := query.cqlQuery.gormDB.Select("?", 42).Rows()
+	rows, err := query.cqlQuery.gormDB.Select("?, ?", 42, 43).Rows()
 	if err != nil {
 		return nil, err
 	}
@@ -26,22 +26,22 @@ func Select[TResults any, TModel model.Model](
 
 	var results []TResults
 
-	// cols := make([]any, len(selections))
+	cols := make([]any, 0, len(selections))
+
+	for _, selection := range selections {
+		cols = append(cols, selection.ValueType())
+	}
 
 	for rows.Next() {
-		// err = rows.Scan(cols...)
-		var algo float64
-
-		err = rows.Scan(&algo)
+		err = rows.Scan(cols...)
 		if err != nil {
 			return nil, err
 		}
 
 		var result TResults
 
-		for _, selection := range selections {
-			// err = selection.Apply(cols[i], &result)
-			err = selection.Apply(algo, &result)
+		for i, selection := range selections {
+			err = selection.Apply(cols[i], &result)
 			if err != nil {
 				return nil, err
 			}
