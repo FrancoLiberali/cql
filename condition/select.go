@@ -1,12 +1,15 @@
 package condition
 
 import (
+	"strings"
+
 	"github.com/FrancoLiberali/cql/model"
 )
 
 type Selection[T any] interface {
 	Apply(value any, result *T) error
 	ValueType() any
+	ToSQL(query *CQLQuery) (string, []any, error)
 }
 
 func Select[TResults any, TModel model.Model](
@@ -17,8 +20,24 @@ func Select[TResults any, TModel model.Model](
 		return nil, query.err
 	}
 
-	// TODO aca poner las selecciones
-	rows, err := query.cqlQuery.gormDB.Select("?, ?", 42, 43).Rows()
+	selectSQLs := make([]string, 0, len(selections))
+
+	var allValues []any
+
+	for _, selection := range selections {
+		sql, values, err := selection.ToSQL(query.cqlQuery)
+		if err != nil {
+			return nil, err
+		}
+
+		selectSQLs = append(selectSQLs, sql)
+		allValues = append(allValues, values...)
+	}
+
+	rows, err := query.cqlQuery.gormDB.Select(
+		strings.Join(selectSQLs, ", "),
+		allValues...,
+	).Rows()
 	if err != nil {
 		return nil, err
 	}

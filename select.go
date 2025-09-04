@@ -28,6 +28,10 @@ func (selection ValueIntoSelection[TValue, TResults]) ValueType() any {
 	return new(TValue)
 }
 
+func (selection ValueIntoSelection[TValue, TResults]) ToSQL(query *condition.CQLQuery) (string, []any, error) {
+	return selection.value.ToSQL(query)
+}
+
 func ValueInto[TValue any, TResults any](
 	value condition.ValueOfType[TValue],
 	selector func(TValue, *TResults),
