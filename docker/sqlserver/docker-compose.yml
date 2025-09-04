@@ -1,6 +1,4 @@
 # DEVELOPMENT ONLY, DO NOT USE FOR PRODUCTION
-version: "3.5"
-
 services:
   db:
     container_name: "cql-test-db"
