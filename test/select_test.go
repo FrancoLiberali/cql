@@ -253,7 +253,3 @@ func (ts *SelectIntTestSuite) TestSelectFromNotJoinedModelReturnsError() {
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "field's model is not concerned by the query (not joined); not concerned model: models.Product")
 }
-
-// TODO test de compilacion de esto
-// value tiene que ser del tipo correcto
-// todos los result del mismo tipo
