@@ -32,6 +32,13 @@ func (selection ValueIntoSelection[TValue, TResults]) ToSQL(query *condition.CQL
 	return selection.value.ToSQL(query)
 }
 
+// ValueInto allows the definition of a selection of a value into an attribute of the results
+//
+// For example, to select sale.Code into result.Code:
+//
+//	cql.ValueInto(conditions.Sale.Code, func(value float64, result *Result) {
+//		result.Code = int(value)
+//	})
 func ValueInto[TValue any, TResults any](
 	value condition.ValueOfType[TValue],
 	selector func(TValue, *TResults),
@@ -42,7 +49,19 @@ func ValueInto[TValue any, TResults any](
 	}
 }
 
-// TODO docs
+// Select specify fields that you want when querying.
+//
+// # Use Select when you only want a subset of the fields, not all the fields of a model
+//
+// Use cql.ValueInto to generate the selections, for example:
+//
+//	// Select only sale.Code into a []Result
+//	results, err := cql.Select(
+//		cql.Query[models.Sale](ts.db),
+//		cql.ValueInto(conditions.Sale.Code, func(value float64, result *Result) {
+//			result.Code = int(value)
+//		}),
+//	)
 func Select[TResults any, TModel model.Model](
 	query *condition.Query[TModel],
 	selections ...condition.Selection[TResults],

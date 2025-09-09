@@ -22,8 +22,6 @@ func NewSelectIntTestSuite(
 	}
 }
 
-// TODO hacer lo mismo para los selects del groupby
-
 func (ts *SelectIntTestSuite) TestOneSelect() {
 	ts.createProduct("1", 1, 0, false, nil)
 	ts.createProduct("2", 1, 1, false, nil)
