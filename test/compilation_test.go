@@ -224,13 +224,13 @@ func TestQueryCompilationErrors(t *testing.T) {
 					internalTestCase.Error = fmt.Sprintf(internalTestCase.Error, method)
 				}
 
-				executeTest(t, internalTestCase)
+				executeTest(t, "", internalTestCase)
 			})
 		}
 	}
 }
 
-func executeTest(t *testing.T, testCase testCase) {
+func executeTest(t *testing.T, extraCode string, testCase testCase) {
 	t.Helper()
 
 	code := `
@@ -245,6 +245,7 @@ import (
 )
 
 var db *gorm.DB
+` + extraCode + `
 
 func main() {
 ` + testCase.Code + `
@@ -318,7 +319,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 		t.Run(testCase.Name, func(t *testing.T) {
 			t.Parallel()
 
-			executeTest(t, testCase)
+			executeTest(t, "", testCase)
 		})
 	}
 }
@@ -414,7 +415,60 @@ func TestUpdateCompilationErrors(t *testing.T) {
 		t.Run(testCase.Name, func(t *testing.T) {
 			t.Parallel()
 
-			executeTest(t, testCase)
+			executeTest(t, "", testCase)
+		})
+	}
+}
+
+func TestSelectCompilationErrors(t *testing.T) {
+	t.Parallel()
+
+	tests := []testCase{
+		{
+			Name: "value into different destinations",
+			Code: `
+				_, _ = cql.Select(
+					cql.Query[models.Product](
+						db,
+					),
+					cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+						result.Int = int(value)
+					}),
+					cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt2) {
+						result.Int = int(value)
+					}),
+				)
+			`,
+			Error: `in call to cql.Select, type *cql.ValueIntoSelection[float64, ResultInt2] of cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt2) {…}) does not match inferred type condition.Selection[ResultInt] for condition.Selection[TResults]`,
+		},
+		{
+			Name: "value not the same time of the query",
+			Code: `
+				_, _ = cql.Select(
+					cql.Query[models.Product](
+						db,
+					),
+					cql.ValueInto(conditions.Product.Int, func(value string, result *ResultInt) {
+					}),
+				)
+			`,
+			Error: `in call to cql.ValueInto, type func(value string, result *ResultInt) of func(value string, result *ResultInt) {} does not match inferred type func(float64, *TResults) for func(TValue, *TResults)`,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.Name, func(t *testing.T) {
+			t.Parallel()
+
+			executeTest(t, `
+type ResultInt struct {
+	Int          int
+}
+
+type ResultInt2 struct {
+	Int          int
+}
+`, testCase)
 		})
 	}
 }

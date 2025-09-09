@@ -7,8 +7,8 @@ import (
 )
 
 type Query[T model.Model] struct {
-	gormQuery *CQLQuery
-	err       error
+	cqlQuery *CQLQuery
+	err      error
 }
 
 // Ascending specify an ascending order when retrieving models from database
@@ -24,7 +24,7 @@ func (query *Query[T]) Descending(field IField) *Query[T] {
 // Order specify order when retrieving models from database
 // if descending is true, the ordering is in descending direction
 func (query *Query[T]) order(field IField, descending bool) *Query[T] {
-	err := query.gormQuery.Order(field, descending)
+	err := query.cqlQuery.Order(field, descending)
 	if err != nil {
 		methodName := "Ascending"
 		if descending {
@@ -41,7 +41,7 @@ func (query *Query[T]) order(field IField, descending bool) *Query[T] {
 //
 // Limit conditions can be cancelled by using `Limit(-1)`
 func (query *Query[T]) Limit(limit int) *Query[T] {
-	query.gormQuery.Limit(limit)
+	query.cqlQuery.Limit(limit)
 
 	return query
 }
@@ -52,17 +52,17 @@ func (query *Query[T]) Limit(limit int) *Query[T] {
 //
 // Warning: in MySQL Offset can only be used if Limit is also used
 func (query *Query[T]) Offset(offset int) *Query[T] {
-	query.gormQuery.Offset(offset)
+	query.cqlQuery.Offset(offset)
 
 	return query
 }
 
 // GroupBy arrange identical data into groups
 func (query *Query[T]) GroupBy(fields ...IField) *QueryGroup {
-	query.addError(query.gormQuery.GroupBy(fields))
+	query.addError(query.cqlQuery.GroupBy(fields))
 
 	return &QueryGroup{
-		gormQuery: query.gormQuery,
+		gormQuery: query.cqlQuery,
 		err:       query.err,
 		fields:    fields,
 	}
@@ -76,7 +76,7 @@ func (query *Query[T]) Count() (int64, error) {
 		return 0, query.err
 	}
 
-	return query.gormQuery.Count()
+	return query.cqlQuery.Count()
 }
 
 // First finds the first model ordered by primary key, matching given conditions
@@ -88,7 +88,7 @@ func (query *Query[T]) First() (*T, error) {
 
 	var model *T
 
-	return model, query.gormQuery.First(&model)
+	return model, query.cqlQuery.First(&model)
 }
 
 // Take finds the first model returned by the database in no specified order, matching given conditions
@@ -100,7 +100,7 @@ func (query *Query[T]) Take() (*T, error) {
 
 	var model *T
 
-	return model, query.gormQuery.Take(&model)
+	return model, query.cqlQuery.Take(&model)
 }
 
 // Last finds the last model ordered by primary key, matching given conditions
@@ -112,7 +112,7 @@ func (query *Query[T]) Last() (*T, error) {
 
 	var model *T
 
-	return model, query.gormQuery.Last(&model)
+	return model, query.cqlQuery.Last(&model)
 }
 
 // FindOne finds the only one model that matches given conditions
@@ -141,7 +141,7 @@ func (query *Query[T]) Find() ([]*T, error) {
 
 	var models []*T
 
-	return models, query.gormQuery.Find(&models)
+	return models, query.cqlQuery.Find(&models)
 }
 
 func (query *Query[T]) addError(err error) {
@@ -152,10 +152,10 @@ func (query *Query[T]) addError(err error) {
 
 // Create a Query to which the conditions are applied inside transaction tx
 func NewQuery[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Query[T] {
-	gormQuery, err := ApplyConditions[T](tx, conditions)
+	gormQuery, err := ApplyConditions(tx, conditions)
 
 	return &Query[T]{
-		gormQuery: gormQuery,
-		err:       err,
+		cqlQuery: gormQuery,
+		err:      err,
 	}
 }

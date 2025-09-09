@@ -53,7 +53,7 @@ func (deleteS *Delete[T]) Exec() (int64, error) {
 		return 0, deleteS.query.err
 	}
 
-	return deleteS.query.gormQuery.Delete()
+	return deleteS.query.cqlQuery.Delete()
 }
 
 // Create a Delete to which the conditions are applied inside transaction tx
