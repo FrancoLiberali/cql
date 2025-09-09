@@ -7,6 +7,8 @@ import (
 	"github.com/FrancoLiberali/cql/model"
 )
 
+var errValueTypeIsNotExpectedType = errors.New("type of value is not the expected type")
+
 type ValueIntoSelection[TValue any, TResults any] struct {
 	value    condition.ValueOfType[TValue]
 	selector func(TValue, *TResults)
@@ -15,8 +17,7 @@ type ValueIntoSelection[TValue any, TResults any] struct {
 func (selection ValueIntoSelection[TValue, TResults]) Apply(value any, result *TResults) error {
 	valueT, isTPointer := value.(*TValue)
 	if !isTPointer {
-		// TODO definir bien el error
-		return errors.New("not possible error")
+		return errValueTypeIsNotExpectedType
 	}
 
 	selection.selector(*valueT, result)
