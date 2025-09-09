@@ -4,6 +4,8 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"log"
+	"reflect"
 	"strconv"
 
 	"github.com/elliotchance/pie/v2"
@@ -78,7 +80,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 		callExpr := node.(*ast.CallExpr)
 
-		// methods to be verified have at least one parameter (cql.Query, cql.Update, cql.Delete, Descending, Ascending)
+		// methods to be verified have at least one parameter
 		if len(callExpr.Args) < 1 {
 			return
 		}
@@ -296,54 +298,86 @@ func getFieldName(condition *ast.SelectorExpr) string {
 	return conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
 }
 
-// Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete
+// Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
 func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
+	log.Println("findNotConcernedForIndex")
+
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
-	if !isIndex {
-		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
-		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
-		if isSelector {
-			internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
-			if isCall {
-				return findNotConcernedForIndex(internalCallExpr, positionsToReport)
-			}
+	if isIndex {
+		selectorExpr, isSelector := indexExpr.X.(*ast.SelectorExpr)
+		if !isSelector {
+			return positionsToReport, []string{}
 		}
 
-		return positionsToReport, []string{}
+		ident, isIdent := selectorExpr.X.(*ast.Ident)
+		if !isIdent {
+			return positionsToReport, []string{}
+		}
+
+		if ident.Name != "cql" || !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
+			return positionsToReport, []string{}
+		}
+
+		models := []string{
+			getFirstGenericType(
+				passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
+			),
+		}
+
+		return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 	}
 
-	selectorExpr, isSelector := indexExpr.X.(*ast.SelectorExpr)
-	if !isSelector {
-		return positionsToReport, []string{}
+	// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
+	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
+	if isSelector {
+		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
+		if isCall {
+			return findNotConcernedForIndex(internalCallExpr, positionsToReport)
+		}
 	}
 
-	ident, isIdent := selectorExpr.X.(*ast.Ident)
-	if !isIdent {
-		return positionsToReport, []string{}
+	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
+	if isIndexList {
+		// TODO codigo repetido
+		selectorExpr, isSelector := indexListExpr.X.(*ast.SelectorExpr)
+		if !isSelector {
+			return positionsToReport, []string{}
+		}
+
+		ident, isIdent := selectorExpr.X.(*ast.Ident)
+		if !isIdent {
+			return positionsToReport, []string{}
+		}
+
+		if ident.Name != "cql" || !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
+			return positionsToReport, []string{}
+		}
+
+		log.Println(selectorExpr.Sel.Name)
+		_, queryModels := findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr), positionsToReport)
+		log.Println(queryModels)
+
+		return findErrorIsDynamic(positionsToReport, queryModels, callExpr.Args[1:])
 	}
 
-	if ident.Name != "cql" || !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
-		return positionsToReport, []string{}
-	}
+	log.Println("nada")
+	log.Println(reflect.TypeOf(callExpr.Fun))
 
-	models := []string{
-		getFirstGenericType(
-			passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
-		),
-	}
+	return positionsToReport, []string{}
 
-	return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 }
 
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
 		if conditionCall, isCall := condition.(*ast.CallExpr); isCall {
+			log.Println("isCall")
 			positionsToReport, models = findErrorIsDynamicForCall(positionsToReport, models, conditionCall)
 
 			continue
 		}
 
 		if variable, isVar := condition.(*ast.Ident); isVar {
+			log.Println("isVar")
 			assignments := findVariableAssignments(variable)
 			for _, assign := range assignments {
 				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, assign.Rhs)
@@ -353,10 +387,13 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 		}
 
 		if composite, isComposite := condition.(*ast.CompositeLit); isComposite {
+			log.Println("isComposite")
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, composite.Elts)
 
 			continue
 		}
+
+		log.Println("nada")
 	}
 
 	return positionsToReport, models
@@ -366,6 +403,16 @@ func findErrorIsDynamicForCall(positionsToReport []Report, models []string, cond
 	if conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr); isSelector {
 		if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+
+			return positionsToReport, models
+		}
+
+		if conditionSelector.Sel.Name == "ValueInto" {
+			log.Println("ValueInto")
+			model, appearance, isModel := getModelFromExpr(conditionCall.Args[0])
+			if isModel {
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+			}
 
 			return positionsToReport, models
 		}

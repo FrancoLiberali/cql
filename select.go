@@ -63,7 +63,7 @@ func ValueInto[TValue any, TResults any](
 //			result.Code = int(value)
 //		}),
 //	)
-func Select[TResults any, TModel model.Model](
+func Select[TModel model.Model, TResults any](
 	query *condition.Query[TModel],
 	selections ...condition.Selection[TResults],
 ) ([]TResults, error) {
