@@ -34,6 +34,19 @@ func Select[TResults any, TModel model.Model](
 		allValues = append(allValues, values...)
 	}
 
+	var extraCols []any
+
+	// add selects that where already in the query, for example for the order
+	if query.cqlQuery.selectClause.SQL != "" {
+		selectSQLs = append(selectSQLs, query.cqlQuery.selectClause.SQL)
+		allValues = append(allValues, query.cqlQuery.selectClause.Vars...)
+
+		for range len(strings.Split(query.cqlQuery.selectClause.SQL, ",")) {
+			var anything any
+			extraCols = append(extraCols, &anything)
+		}
+	}
+
 	rows, err := query.cqlQuery.gormDB.Select(
 		strings.Join(selectSQLs, ", "),
 		allValues...,
@@ -45,11 +58,13 @@ func Select[TResults any, TModel model.Model](
 
 	var results []TResults
 
-	cols := make([]any, 0, len(selections))
+	cols := make([]any, 0, len(selections)+len(extraCols))
 
 	for _, selection := range selections {
 		cols = append(cols, selection.ValueType())
 	}
+
+	cols = append(cols, extraCols...)
 
 	for rows.Next() {
 		err = rows.Scan(cols...)

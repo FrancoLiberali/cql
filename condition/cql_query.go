@@ -131,8 +131,7 @@ func (query *CQLQuery) Find(dest any) error {
 	return query.gormDB.Find(dest).Error
 }
 
-// Select specify fields that you want when doing group bys
-func (query *CQLQuery) AddSelectForAggregation(sql string, values []any) {
+func (query *CQLQuery) saveInSelectClause(sql string, values []any) {
 	newSQL := query.selectClause.SQL
 	if newSQL != "" {
 		newSQL = query.selectClause.SQL + "," + sql
@@ -144,6 +143,11 @@ func (query *CQLQuery) AddSelectForAggregation(sql string, values []any) {
 		SQL:  newSQL,
 		Vars: append(query.selectClause.Vars, values...),
 	}
+}
+
+// Select specify fields that you want when doing group bys
+func (query *CQLQuery) AddSelectForAggregation(sql string, values []any) {
+	query.saveInSelectClause(sql, values)
 
 	query.gormDB.Statement.AddClause(clause.Select{
 		Expression: query.selectClause,
@@ -152,6 +156,8 @@ func (query *CQLQuery) AddSelectForAggregation(sql string, values []any) {
 
 // Select specify fields that you want when querying, creating, updating
 func (query *CQLQuery) AddSelect(sql string) {
+	query.saveInSelectClause(sql, nil)
+
 	query.gormDB.Statement.Selects = append(
 		query.gormDB.Statement.Selects,
 		sql,

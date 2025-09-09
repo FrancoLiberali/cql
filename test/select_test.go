@@ -1,6 +1,8 @@
 package test
 
 import (
+	"reflect"
+
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql"
@@ -22,7 +24,27 @@ func NewSelectIntTestSuite(
 	}
 }
 
-func (ts *SelectIntTestSuite) TestOneSelect() {
+func (ts *SelectIntTestSuite) TestSelectOneSelect() {
+	ts.createProduct("1", 1, 0, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			ts.db,
+		),
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+			result.Int = int(value)
+		}),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0},
+		{Int: 1},
+		{Int: 1},
+	}, results)
+}
+
+func (ts *SelectIntTestSuite) TestSelectWithOrder() {
 	ts.createProduct("1", 1, 0, false, nil)
 	ts.createProduct("2", 1, 1, false, nil)
 	ts.createProduct("5", 0, 2, false, nil)
@@ -42,6 +64,48 @@ func (ts *SelectIntTestSuite) TestOneSelect() {
 		{Int: 1},
 		{Int: 1},
 	}, results)
+}
+
+func (ts *SelectIntTestSuite) TestSelectWithMultipleOrder() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 1, true, nil)
+	ts.createProduct("5", 0, 2, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			ts.db,
+		).Descending(conditions.Product.Int).Descending(conditions.Product.Bool),
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+			result.Int = int(value)
+		}),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0},
+		{Int: 1},
+		{Int: 1},
+	}, results)
+}
+
+func (ts *SelectIntTestSuite) TestSelectWithOrderNotSelected() {
+	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("5", 0, 2, true, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			ts.db,
+		).Descending(conditions.Product.Bool),
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+			result.Int = int(value)
+		}),
+	)
+
+	ts.Require().NoError(err)
+	ts.Assert().True(reflect.DeepEqual(results, []ResultInt{
+		{Int: 0},
+		{Int: 1},
+	}))
 }
 
 func (ts *SelectIntTestSuite) TestTwoSelectSameValue() {
