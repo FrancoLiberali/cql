@@ -228,6 +228,40 @@ func (ts *SelectIntTestSuite) TestSelectFromMainModelAfterJoin() {
 	}, results)
 }
 
+func (ts *SelectIntTestSuite) TestSelectFromMainAndJoinedModel() {
+	product0 := ts.createProduct("1", 0, 0, false, nil)
+	product1 := ts.createProduct("2", 1, 1, false, nil)
+	product2 := ts.createProduct("5", 2, 2, false, nil)
+
+	ts.createSale(1, product0, nil)
+	ts.createSale(1, product1, nil)
+	ts.createSale(1, product2, nil)
+	ts.createSale(2, product1, nil)
+	ts.createSale(2, product2, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Sale](
+			ts.db,
+			conditions.Sale.Product(),
+		).Descending(conditions.Product.Int),
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+			result.Int = int(value)
+		}),
+		cql.ValueInto(conditions.Sale.Code, func(value float64, result *ResultInt) {
+			result.Aggregation1 = int(value)
+		}),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0, Aggregation1: 1},
+		{Int: 1, Aggregation1: 1},
+		{Int: 1, Aggregation1: 1},
+		{Int: 2, Aggregation1: 2},
+		{Int: 2, Aggregation1: 2},
+	}, results)
+}
+
 func (ts *SelectIntTestSuite) TestSelectFromNotJoinedModelReturnsError() {
 	product0 := ts.createProduct("1", 0, 0, false, nil)
 	product1 := ts.createProduct("2", 1, 1, false, nil)
