@@ -26,6 +26,8 @@ func NewSelectIntTestSuite(
 
 func (ts *SelectIntTestSuite) TestSelectOneSelect() {
 	ts.createProduct("1", 1, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("5", 0, 2, false, nil)
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
