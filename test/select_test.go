@@ -81,11 +81,11 @@ func (ts *SelectIntTestSuite) TestSelectWithMultipleOrder() {
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	ts.Assert().True(reflect.DeepEqual(results, []ResultInt{
+		{Int: 1},
+		{Int: 1},
 		{Int: 0},
-		{Int: 1},
-		{Int: 1},
-	}, results)
+	}))
 }
 
 func (ts *SelectIntTestSuite) TestSelectWithOrderNotSelected() {
