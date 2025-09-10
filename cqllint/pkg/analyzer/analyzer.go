@@ -484,13 +484,7 @@ func findErrorIsDynamicWhereCondition(
 		conditionFunc := whereCondition.Fun.(*ast.SelectorExpr)
 
 		if conditionFunc.Sel.Name == "Is" {
-			// add first conditions model to models in case is was not set by the query index
-			if len(models) == 0 {
-				model, _, isModel := getModelFromExpr(conditionFunc.X)
-				if isModel {
-					models = append(models, model.Name)
-				}
-			}
+			models = addFirstModel(models, conditionFunc)
 
 			// check arguments of the conditions
 			for _, arg := range conditionCall.Args {
@@ -503,6 +497,18 @@ func findErrorIsDynamicWhereCondition(
 	}
 
 	return positionsToReport
+}
+
+// add first conditions model to models in case is was not set by the query index
+func addFirstModel(models []string, conditionFunc *ast.SelectorExpr) []string {
+	if len(models) == 0 {
+		model, _, isModel := getModelFromExpr(conditionFunc.X)
+		if isModel {
+			models = append(models, model.Name)
+		}
+	}
+
+	return models
 }
 
 func addPositionsToReport(positionsToReport []Report, models []string, model Model, appearance Appearance) []Report {
