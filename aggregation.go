@@ -9,7 +9,7 @@ import (
 //
 // Example:
 //
-// cql.Query[models.Product](db).GroupBy(conditions.Product.Int).Select(cql.CountAll(), "aggregation").Into(&results)
+// cql.Query[models.Product](db).GroupBy(conditions.Product.Int).SelectValue(cql.CountAll(), "aggregation").Into(&results)
 func CountAll() condition.AggregationResult[float64] {
 	return condition.AggregationResult[float64]{
 		Function: sql.CountAll,

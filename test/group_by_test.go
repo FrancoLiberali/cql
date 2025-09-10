@@ -136,7 +136,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectFieldNotPresentReturnsError() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Sale.ID.Aggregate().Count(), "aggregation1",
 	).Into(&results)
 
@@ -155,7 +155,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectSum() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -174,7 +174,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastIntToFloatWorks() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Count(), "aggregation",
 	).Into(&results)
 
@@ -193,7 +193,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastIntToStringWorks() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Count(), "aggregation",
 	).Into(&results)
 
@@ -212,7 +212,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoStructWithLessFieldsWork() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -231,7 +231,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCount() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Count(), "aggregation1",
 	).Into(&results)
 
@@ -252,7 +252,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.IntPointer.Aggregate().Count(), "aggregation1",
 	).Into(&results)
 
@@ -273,7 +273,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		cql.CountAll(), "aggregation1",
 	).Into(&results)
 
@@ -292,7 +292,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAverage() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Float.Aggregate().Average(), "aggregation",
 	).Into(&results)
 
@@ -311,7 +311,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMin() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Float.Aggregate().Min(), "aggregation",
 	).Into(&results)
 
@@ -330,7 +330,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMinForNotNumericField() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.String.Aggregate().Min(), "aggregation",
 	).Into(&results)
 
@@ -349,7 +349,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMax() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Float.Aggregate().Max(), "aggregation",
 	).Into(&results)
 
@@ -368,7 +368,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMaxForNotNumericField() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.String.Aggregate().Max(), "aggregation",
 	).Into(&results)
 
@@ -389,7 +389,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAll() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Bool.Aggregate().All(), "aggregation",
 	).Into(&results)
 
@@ -410,7 +410,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAny() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Bool.Aggregate().Any(), "aggregation",
 	).Into(&results)
 
@@ -431,7 +431,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectNone() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Bool.Aggregate().None(), "aggregation",
 	).Into(&results)
 
@@ -459,7 +459,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Product.IntPointer.Aggregate().And(), "aggregation1",
 		).Into(&results)
 
@@ -479,7 +479,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Product.IntPointer.Aggregate().And(), "aggregation1",
 		).Into(&results)
 
@@ -490,7 +490,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Product.IntPointer.Aggregate().And(), "aggregation",
 		).Into(&results)
 
@@ -520,7 +520,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Product.IntPointer.Aggregate().Or(), "aggregation1",
 		).Into(&results)
 
@@ -531,7 +531,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Product.IntPointer.Aggregate().Or(), "aggregation",
 		).Into(&results)
 
@@ -552,9 +552,9 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMoreThanOne() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation2",
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Count(), "aggregation1",
 	).Into(&results)
 
@@ -576,7 +576,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMoreThanOne() {
 	).GroupBy(
 		conditions.Product.Int,
 		conditions.Product.Float,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Count(), "aggregation1",
 	).Into(&results)
 
@@ -602,9 +602,9 @@ func (ts *GroupByIntTestSuite) TestGroupByMoreThanOneSelectMoreThanOne() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int, conditions.Product.Float,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Count(), "aggregation1",
-	).Select(
+	).SelectValue(
 		conditions.Product.Float.Aggregate().Sum(), "aggregation2",
 	).Into(&results)
 
@@ -635,7 +635,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedField() {
 			conditions.Sale.Product(),
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Sale.Code.Aggregate().Sum(), "aggregation1",
 		).Into(&results)
 
@@ -662,7 +662,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithJoinedFieldInSelect() {
 		conditions.Sale.Product(),
 	).GroupBy(
 		conditions.Sale.Code,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -691,7 +691,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedFieldAndWithJoinedFieldInSelect(
 			conditions.Sale.Product(),
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Product.Float.Aggregate().Sum(), "aggregation1",
 		).Into(&results)
 
@@ -715,7 +715,7 @@ func (ts *GroupByIntTestSuite) TestGroupByFieldPresentInMultipleTables() {
 		conditions.Seller.Company(),
 	).GroupBy(
 		conditions.Seller.Name,
-	).Select(
+	).SelectValue(
 		conditions.Company.Name.Aggregate().Count(), "aggregation",
 	).Into(&results)
 
@@ -758,7 +758,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsBefore() {
 		conditions.Product.Float.Is().Eq(cql.Float64(1.0)),
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -780,7 +780,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithSameCondition() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Int.Aggregate().Sum().Eq(cql.Int(2)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -853,7 +853,7 @@ func (ts *GroupByIntTestSuite) internalTestGroupByHavingWithDifferentCondition(v
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Int.Aggregate().Count().Eq(value),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -875,7 +875,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNum
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Int.Aggregate().Count().Eq(conditions.Product.Int.Aggregate().Sum()),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -897,7 +897,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNum
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Int.Aggregate().Sum().Eq(conditions.Product.Float.Aggregate().Sum()),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -925,7 +925,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationOfA
 		conditions.Sale.Code,
 	).Having(
 		conditions.Product.Float.Aggregate().Sum().Eq(conditions.Sale.ID.Aggregate().Count()),
-	).Select(
+	).SelectValue(
 		conditions.Product.Float.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -950,7 +950,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHaving() {
 	).Having(
 		conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
 		conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -975,7 +975,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithAndConnection() {
 			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
 			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
 		),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1001,7 +1001,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithOrConnection() {
 			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
 			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(1)),
 		),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1029,7 +1029,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithNotConnection() {
 		cql.NotHaving(
 			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
 		),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1059,7 +1059,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithNotConnectionMultiple() {
 			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
 			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
 		),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1084,7 +1084,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingBoolean() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Bool.Aggregate().All().Eq(cql.Bool(true)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1107,7 +1107,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingBooleanCompareWithAnotherAggrega
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Bool.Aggregate().All().Eq(conditions.Product.Bool.Aggregate().Any()),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1133,7 +1133,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingOtherType() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.String.Aggregate().Max().Eq(cql.String("4")),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1156,7 +1156,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingOtherTypeCompareWithAnotherAggre
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.String.Aggregate().Max().Eq(conditions.Product.String.Aggregate().Min()),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1179,7 +1179,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingNotEq() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().NotEq(cql.Float64(2.0)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1202,7 +1202,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLt() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().Lt(cql.Float64(2.0)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1225,7 +1225,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLtOrEq() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().LtOrEq(cql.Float64(2.0)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1248,7 +1248,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingGt() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().Gt(cql.Float64(2.0)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1271,7 +1271,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingGtOrEq() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().GtOrEq(cql.Float64(2.0)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1294,7 +1294,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingIn() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().In([]float64{2.0, 3.0}),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1317,7 +1317,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingNotIn() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().NotIn([]float64{2.0, 3.0}),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1340,7 +1340,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLike() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.String.Aggregate().Max().Like("_4"),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1363,7 +1363,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithField() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1387,7 +1387,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithField() {
 		conditions.Product.Float,
 	).Having(
 		conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Aggregate().Sum(), "aggregation1",
 	).Into(&results)
 
@@ -1409,7 +1409,7 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateAfterFunction() {
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Plus(123).Aggregate().Max(), "aggregation1",
 	).Into(&results)
 
@@ -1433,7 +1433,7 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateHavingAfterFunction() {
 		conditions.Product.Int,
 	).Having(
 		conditions.Product.Int.Plus(12).Aggregate().Max().Eq(cql.Int(13)),
-	).Select(
+	).SelectValue(
 		conditions.Product.Int.Plus(123).Aggregate().Max(), "aggregation1",
 	).Into(&results)
 

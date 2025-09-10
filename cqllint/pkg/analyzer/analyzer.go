@@ -4,8 +4,6 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"log"
-	"reflect"
 	"strconv"
 
 	"github.com/elliotchance/pie/v2"
@@ -28,12 +26,13 @@ var Analyzer = &analysis.Analyzer{
 }
 
 var (
-	cqlMethods        = []string{"Query", "Update", "Delete"}
-	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "Select", "Having"}
+	cqlSelect         = "Select"
+	cqlFunctions      = []string{"Query", "Update", "Delete", cqlSelect}
+	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "SelectValue", "Having"}
 	cqlConnectors     = []string{"And", "Or", "Not"}
 	cqlSetMultiple    = "SetMultiple"
 	cqlSets           = []string{cqlSetMultiple, "Set"}
-	cqlSelectors      = append(cqlOrderOrGroupBy, cqlSets...)
+	cqlMethods        = append(cqlOrderOrGroupBy, cqlSets...)
 
 	notJoinedMessage              = "%s is not joined by the query"
 	appearanceNotNecessaryMessage = "Appearance call not necessary, %s appears only once"
@@ -85,8 +84,8 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			return
 		}
 
-		_, isSelector := callExpr.Fun.(*ast.SelectorExpr)
-		if isSelector {
+		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
+		if isSelector && !selectorIsCQLSelect(selectorExpr) {
 			positionsToReport = findForSelector(callExpr, positionsToReport)
 		} else {
 			positionsToReport, _ = findNotConcernedForIndex(callExpr, positionsToReport)
@@ -108,7 +107,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 func findForSelector(callExpr *ast.CallExpr, positionsToReport []Report) []Report {
 	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
 
-	if !pie.Contains(cqlSelectors, selectorExpr.Sel.Name) {
+	if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
 		return positionsToReport
 	}
 
@@ -300,21 +299,9 @@ func getFieldName(condition *ast.SelectorExpr) string {
 
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
 func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
-	log.Println("findNotConcernedForIndex")
-
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
 	if isIndex {
-		selectorExpr, isSelector := indexExpr.X.(*ast.SelectorExpr)
-		if !isSelector {
-			return positionsToReport, []string{}
-		}
-
-		ident, isIdent := selectorExpr.X.(*ast.Ident)
-		if !isIdent {
-			return positionsToReport, []string{}
-		}
-
-		if ident.Name != "cql" || !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
+		if !selectorIsCQLFunction(indexExpr.X) {
 			return positionsToReport, []string{}
 		}
 
@@ -327,57 +314,74 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 		return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 	}
 
-	// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
 	if isSelector {
+		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 		if isCall {
 			return findNotConcernedForIndex(internalCallExpr, positionsToReport)
 		}
+
+		if selectorIsCQLSelect(selectorExpr) {
+			return findForSelect(callExpr, positionsToReport)
+		}
+
+		if selectorIsCQLFunction(selectorExpr) {
+			return findErrorIsDynamic(positionsToReport, []string{}, callExpr.Args[1:]) // first parameters is ignored as it's the db object
+		}
+
+		return positionsToReport, []string{}
 	}
 
 	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
 	if isIndexList {
-		// TODO codigo repetido
-		selectorExpr, isSelector := indexListExpr.X.(*ast.SelectorExpr)
-		if !isSelector {
+		if !selectorIsCQLSelect(indexListExpr.X) {
 			return positionsToReport, []string{}
 		}
 
-		ident, isIdent := selectorExpr.X.(*ast.Ident)
-		if !isIdent {
-			return positionsToReport, []string{}
-		}
-
-		if ident.Name != "cql" || !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
-			return positionsToReport, []string{}
-		}
-
-		log.Println(selectorExpr.Sel.Name)
-		_, queryModels := findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr), positionsToReport)
-		log.Println(queryModels)
-
-		return findErrorIsDynamic(positionsToReport, queryModels, callExpr.Args[1:])
+		return findForSelect(callExpr, positionsToReport)
 	}
 
-	log.Println("nada")
-	log.Println(reflect.TypeOf(callExpr.Fun))
-
 	return positionsToReport, []string{}
+}
 
+func selectorIsCQLFunction(expr ast.Expr) bool {
+	return selectorIs(expr, cqlFunctions)
+}
+
+func selectorIsCQLSelect(expr ast.Expr) bool {
+	return selectorIs(expr, []string{cqlSelect})
+}
+
+func selectorIs(expr ast.Expr, values []string) bool {
+	selectorExpr, isSelector := expr.(*ast.SelectorExpr)
+	if !isSelector {
+		return false
+	}
+
+	ident, isIdent := selectorExpr.X.(*ast.Ident)
+	if !isIdent {
+		return false
+	}
+
+	return ident.Name == "cql" && pie.Contains(values, selectorExpr.Sel.Name)
+}
+
+func findForSelect(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
+	_, queryModels := findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr), positionsToReport)
+
+	return findErrorIsDynamic(positionsToReport, queryModels, callExpr.Args[1:])
 }
 
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
 	for _, condition := range conditions {
 		if conditionCall, isCall := condition.(*ast.CallExpr); isCall {
-			log.Println("isCall")
 			positionsToReport, models = findErrorIsDynamicForCall(positionsToReport, models, conditionCall)
 
 			continue
 		}
 
 		if variable, isVar := condition.(*ast.Ident); isVar {
-			log.Println("isVar")
 			assignments := findVariableAssignments(variable)
 			for _, assign := range assignments {
 				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, assign.Rhs)
@@ -387,13 +391,10 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 		}
 
 		if composite, isComposite := condition.(*ast.CompositeLit); isComposite {
-			log.Println("isComposite")
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, composite.Elts)
 
 			continue
 		}
-
-		log.Println("nada")
 	}
 
 	return positionsToReport, models
@@ -408,7 +409,6 @@ func findErrorIsDynamicForCall(positionsToReport []Report, models []string, cond
 		}
 
 		if conditionSelector.Sel.Name == "ValueInto" {
-			log.Println("ValueInto")
 			model, appearance, isModel := getModelFromExpr(conditionCall.Args[0])
 			if isModel {
 				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
