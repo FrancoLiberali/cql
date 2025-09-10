@@ -280,7 +280,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			db,
 		).GroupBy(
 			conditions.Product.Int,
-		).Select(
+		).SelectValue(
 			conditions.Product.Int.Aggregate().All(), "aggregation1",
 		)`,
 			Error: `conditions.Product.Int.Aggregate().All undefined (type condition.NumericFieldAggregation has no field or method All)`,
@@ -294,7 +294,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			conditions.Product.Int,
 		).Having(
 			conditions.Product.Int.Aggregate().Max().Eq(cql.String("13")),
-		).Select(
+		).SelectValue(
 			conditions.Product.Int.Aggregate().Max(), "aggregation1",
 		)`,
 			Error: `cannot use cql.String("13") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
@@ -308,7 +308,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			conditions.Product.Int,
 		).Having(
 			conditions.Product.Int.Aggregate().Max().Eq(conditions.Product.String.Aggregate().Min()),
-		).Select(
+		).SelectValue(
 			conditions.Product.Int.Aggregate().Max(), "aggregation1",
 		)`,
 			Error: ` cannot use conditions.Product.String.Aggregate().Min() (value of type condition.AggregationResult[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.AggregationResult[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,

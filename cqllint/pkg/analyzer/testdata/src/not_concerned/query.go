@@ -15,6 +15,14 @@ func testSameModel() {
 	).Find()
 }
 
+func testSameModelWithoutIndex() {
+	cql.Query(
+		db,
+		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
+		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Find()
+}
+
 func testJoinedModel() {
 	cql.Query[models.Phone](
 		db,

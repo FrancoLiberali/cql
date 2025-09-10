@@ -26,12 +26,13 @@ var Analyzer = &analysis.Analyzer{
 }
 
 var (
-	cqlMethods        = []string{"Query", "Update", "Delete"}
-	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "Select", "Having"}
+	cqlSelect         = "Select"
+	cqlFunctions      = []string{"Query", "Update", "Delete", cqlSelect}
+	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "SelectValue", "Having"}
 	cqlConnectors     = []string{"And", "Or", "Not"}
 	cqlSetMultiple    = "SetMultiple"
 	cqlSets           = []string{cqlSetMultiple, "Set"}
-	cqlSelectors      = append(cqlOrderOrGroupBy, cqlSets...)
+	cqlMethods        = append(cqlOrderOrGroupBy, cqlSets...)
 
 	notJoinedMessage              = "%s is not joined by the query"
 	appearanceNotNecessaryMessage = "Appearance call not necessary, %s appears only once"
@@ -78,13 +79,13 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 		callExpr := node.(*ast.CallExpr)
 
-		// methods to be verified have at least one parameter (cql.Query, cql.Update, cql.Delete, Descending, Ascending)
+		// methods to be verified have at least one parameter
 		if len(callExpr.Args) < 1 {
 			return
 		}
 
-		_, isSelector := callExpr.Fun.(*ast.SelectorExpr)
-		if isSelector {
+		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
+		if isSelector && !selectorIsCQLFunction(selectorExpr) {
 			positionsToReport = findForSelector(callExpr, positionsToReport)
 		} else {
 			positionsToReport, _ = findNotConcernedForIndex(callExpr, positionsToReport)
@@ -106,7 +107,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 func findForSelector(callExpr *ast.CallExpr, positionsToReport []Report) []Report {
 	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
 
-	if !pie.Contains(cqlSelectors, selectorExpr.Sel.Name) {
+	if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
 		return positionsToReport
 	}
 
@@ -296,43 +297,80 @@ func getFieldName(condition *ast.SelectorExpr) string {
 	return conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
 }
 
-// Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete
+// Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
 func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
-	if !isIndex {
+	if isIndex {
+		if !selectorIsCQLFunction(indexExpr.X) {
+			return positionsToReport, []string{}
+		}
+
+		models := []string{
+			getFirstGenericType(
+				passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
+			),
+		}
+
+		return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
+	}
+
+	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
+	if isSelector {
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
-		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
-		if isSelector {
-			internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
-			if isCall {
-				return findNotConcernedForIndex(internalCallExpr, positionsToReport)
-			}
+		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
+		if isCall {
+			return findNotConcernedForIndex(internalCallExpr, positionsToReport)
+		}
+
+		if selectorIsCQLSelect(selectorExpr) {
+			return findForSelect(callExpr, positionsToReport)
+		}
+
+		if selectorIsCQLFunction(selectorExpr) {
+			return findErrorIsDynamic(positionsToReport, []string{}, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 		}
 
 		return positionsToReport, []string{}
 	}
 
-	selectorExpr, isSelector := indexExpr.X.(*ast.SelectorExpr)
+	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
+	if isIndexList {
+		if !selectorIsCQLSelect(indexListExpr.X) {
+			return positionsToReport, []string{}
+		}
+
+		return findForSelect(callExpr, positionsToReport)
+	}
+
+	return positionsToReport, []string{}
+}
+
+func selectorIsCQLFunction(expr ast.Expr) bool {
+	return selectorIs(expr, cqlFunctions)
+}
+
+func selectorIsCQLSelect(expr ast.Expr) bool {
+	return selectorIs(expr, []string{cqlSelect})
+}
+
+func selectorIs(expr ast.Expr, values []string) bool {
+	selectorExpr, isSelector := expr.(*ast.SelectorExpr)
 	if !isSelector {
-		return positionsToReport, []string{}
+		return false
 	}
 
 	ident, isIdent := selectorExpr.X.(*ast.Ident)
 	if !isIdent {
-		return positionsToReport, []string{}
+		return false
 	}
 
-	if ident.Name != "cql" || !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
-		return positionsToReport, []string{}
-	}
+	return ident.Name == "cql" && pie.Contains(values, selectorExpr.Sel.Name)
+}
 
-	models := []string{
-		getFirstGenericType(
-			passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
-		),
-	}
+func findForSelect(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
+	_, queryModels := findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr), positionsToReport)
 
-	return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
+	return findErrorIsDynamic(positionsToReport, queryModels, callExpr.Args[1:])
 }
 
 func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
@@ -366,6 +404,15 @@ func findErrorIsDynamicForCall(positionsToReport []Report, models []string, cond
 	if conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr); isSelector {
 		if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
 			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+
+			return positionsToReport, models
+		}
+
+		if conditionSelector.Sel.Name == "ValueInto" {
+			model, appearance, isModel := getModelFromExpr(conditionCall.Args[0])
+			if isModel {
+				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+			}
 
 			return positionsToReport, models
 		}
@@ -433,16 +480,35 @@ func findErrorIsDynamicWhereCondition(
 	conditionSelector *ast.SelectorExpr,
 ) []Report {
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
-	if isWhereCondition && getFieldIsMethodName(whereCondition) == "Is" {
-		for _, arg := range conditionCall.Args {
-			model, appearance, isModel := getModelFromExpr(arg)
-			if isModel {
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+	if isWhereCondition {
+		conditionFunc := whereCondition.Fun.(*ast.SelectorExpr)
+
+		if conditionFunc.Sel.Name == "Is" {
+			models = addFirstModel(models, conditionFunc)
+
+			// check arguments of the conditions
+			for _, arg := range conditionCall.Args {
+				model, appearance, isModel := getModelFromExpr(arg)
+				if isModel {
+					positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+				}
 			}
 		}
 	}
 
 	return positionsToReport
+}
+
+// add first conditions model to models in case is was not set by the query index
+func addFirstModel(models []string, conditionFunc *ast.SelectorExpr) []string {
+	if len(models) == 0 {
+		model, _, isModel := getModelFromExpr(conditionFunc.X)
+		if isModel {
+			models = append(models, model.Name)
+		}
+	}
+
+	return models
 }
 
 func addPositionsToReport(positionsToReport []Report, models []string, model Model, appearance Appearance) []Report {
@@ -483,10 +549,6 @@ func addPositionsToReport(positionsToReport []Report, models []string, model Mod
 	}
 
 	return positionsToReport
-}
-
-func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
-	return whereCondition.Fun.(*ast.SelectorExpr).Sel.Name
 }
 
 // getAppearance returns the Appearance from a model
