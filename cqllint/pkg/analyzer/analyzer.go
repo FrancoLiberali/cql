@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"log"
 	"strconv"
 
 	"github.com/elliotchance/pie/v2"
@@ -85,7 +86,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		}
 
 		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
-		if isSelector && !selectorIsCQLSelect(selectorExpr) {
+		if isSelector && !selectorIsCQLFunction(selectorExpr) {
 			positionsToReport = findForSelector(callExpr, positionsToReport)
 		} else {
 			positionsToReport, _ = findNotConcernedForIndex(callExpr, positionsToReport)
@@ -301,6 +302,7 @@ func getFieldName(condition *ast.SelectorExpr) string {
 func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
 	if isIndex {
+		log.Println("isIndex")
 		if !selectorIsCQLFunction(indexExpr.X) {
 			return positionsToReport, []string{}
 		}
@@ -316,6 +318,7 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 
 	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
 	if isSelector {
+		log.Println("isSelector")
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 		if isCall {
@@ -323,10 +326,12 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 		}
 
 		if selectorIsCQLSelect(selectorExpr) {
+			log.Println("selectorIsCQLSelect")
 			return findForSelect(callExpr, positionsToReport)
 		}
 
 		if selectorIsCQLFunction(selectorExpr) {
+			log.Println("selectorIsCQLFunction")
 			return findErrorIsDynamic(positionsToReport, []string{}, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 		}
 
@@ -335,12 +340,15 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 
 	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
 	if isIndexList {
+		log.Println("isIndexList")
 		if !selectorIsCQLSelect(indexListExpr.X) {
 			return positionsToReport, []string{}
 		}
 
 		return findForSelect(callExpr, positionsToReport)
 	}
+
+	log.Println("nada")
 
 	return positionsToReport, []string{}
 }
