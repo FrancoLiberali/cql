@@ -155,3 +155,21 @@ func testSelectNotJoinedModelInListInVar() {
 		selects...,
 	)
 }
+
+func testSelectNotJoinedModelInListWithAppend() {
+	selects := []condition.Selection[Result]{}
+
+	selects = append(
+		selects,
+		cql.ValueInto(conditions.City.Name, func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	)
+
+	cql.Select(
+		cql.Query[models.Phone](
+			db,
+			conditions.Phone.Brand(),
+			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
+		),
+		selects...,
+	)
+}
