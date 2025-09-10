@@ -4,7 +4,6 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"log"
 	"strconv"
 
 	"github.com/elliotchance/pie/v2"
@@ -302,7 +301,6 @@ func getFieldName(condition *ast.SelectorExpr) string {
 func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
 	if isIndex {
-		log.Println("isIndex")
 		if !selectorIsCQLFunction(indexExpr.X) {
 			return positionsToReport, []string{}
 		}
@@ -318,7 +316,6 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 
 	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
 	if isSelector {
-		log.Println("isSelector")
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 		if isCall {
@@ -326,12 +323,10 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 		}
 
 		if selectorIsCQLSelect(selectorExpr) {
-			log.Println("selectorIsCQLSelect")
 			return findForSelect(callExpr, positionsToReport)
 		}
 
 		if selectorIsCQLFunction(selectorExpr) {
-			log.Println("selectorIsCQLFunction")
 			return findErrorIsDynamic(positionsToReport, []string{}, callExpr.Args[1:]) // first parameters is ignored as it's the db object
 		}
 
@@ -340,15 +335,12 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 
 	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
 	if isIndexList {
-		log.Println("isIndexList")
 		if !selectorIsCQLSelect(indexListExpr.X) {
 			return positionsToReport, []string{}
 		}
 
 		return findForSelect(callExpr, positionsToReport)
 	}
-
-	log.Println("nada")
 
 	return positionsToReport, []string{}
 }
@@ -488,11 +480,24 @@ func findErrorIsDynamicWhereCondition(
 	conditionSelector *ast.SelectorExpr,
 ) []Report {
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
-	if isWhereCondition && getFieldIsMethodName(whereCondition) == "Is" {
-		for _, arg := range conditionCall.Args {
-			model, appearance, isModel := getModelFromExpr(arg)
-			if isModel {
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+	if isWhereCondition {
+		conditionFunc := whereCondition.Fun.(*ast.SelectorExpr)
+
+		if conditionFunc.Sel.Name == "Is" {
+			// add first conditions model to models in case is was not set by the query index
+			if len(models) == 0 {
+				model, _, isModel := getModelFromExpr(conditionFunc.X)
+				if isModel {
+					models = append(models, model.Name)
+				}
+			}
+
+			// check arguments of the conditions
+			for _, arg := range conditionCall.Args {
+				model, appearance, isModel := getModelFromExpr(arg)
+				if isModel {
+					positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
+				}
 			}
 		}
 	}
@@ -538,10 +543,6 @@ func addPositionsToReport(positionsToReport []Report, models []string, model Mod
 	}
 
 	return positionsToReport
-}
-
-func getFieldIsMethodName(whereCondition *ast.CallExpr) string {
-	return whereCondition.Fun.(*ast.SelectorExpr).Sel.Name
 }
 
 // getAppearance returns the Appearance from a model
