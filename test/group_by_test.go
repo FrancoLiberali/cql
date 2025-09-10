@@ -1410,7 +1410,7 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateAfterFunction() {
 	).GroupBy(
 		conditions.Product.Int,
 	).SelectValue(
-		conditions.Product.Int.Plus(123).Aggregate().Max(), "aggregation1",
+		conditions.Product.Int.Plus(cql.Int(123)).Aggregate().Max(), "aggregation1",
 	).Into(&results)
 
 	ts.Require().NoError(err)
@@ -1432,9 +1432,9 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateHavingAfterFunction() {
 	).GroupBy(
 		conditions.Product.Int,
 	).Having(
-		conditions.Product.Int.Plus(12).Aggregate().Max().Eq(cql.Int(13)),
+		conditions.Product.Int.Plus(cql.Int(12)).Aggregate().Max().Eq(cql.Int(13)),
 	).SelectValue(
-		conditions.Product.Int.Plus(123).Aggregate().Max(), "aggregation1",
+		conditions.Product.Int.Plus(cql.Int(123)).Aggregate().Max(), "aggregation1",
 	).Into(&results)
 
 	ts.Require().NoError(err)

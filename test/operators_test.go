@@ -875,7 +875,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPlus() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(1)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(cql.Int(1))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -890,7 +890,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithMinus() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Minus(1)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Minus(cql.Int(1))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -905,7 +905,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithTimes() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Times(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Times(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -920,7 +920,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithDivided() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Divided(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Divided(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -935,7 +935,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithModulo() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Modulo(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Modulo(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -947,7 +947,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPower() {
 	case cqlSQL.SQLite:
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Power(2)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Power(cql.Int(2))),
 		).Find()
 		ts.ErrorContains(err, "no such function: POWER")
 	default:
@@ -958,7 +958,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithPower() {
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Power(2)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Power(cql.Int(2))),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -1018,7 +1018,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithAnd() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.And(1)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.And(cql.Int(1))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1033,7 +1033,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithOr() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Or(3)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Or(cql.Int(3))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1045,7 +1045,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithXor() {
 	case cqlSQL.SQLite:
 		_, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Xor(3)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Xor(cql.Int(3))),
 		).Find()
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "function: Xor")
@@ -1057,7 +1057,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithXor() {
 
 		entities, err := cql.Query[models.Product](
 			ts.db,
-			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Xor(3)),
+			conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Xor(cql.Int(3))),
 		).Find()
 		ts.Require().NoError(err)
 
@@ -1073,7 +1073,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithNot() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Not().And(5)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Not().And(cql.Int(5))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1088,7 +1088,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithShiftLeft() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.ShiftLeft(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.ShiftLeft(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1103,7 +1103,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithShiftRight() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.ShiftRight(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.ShiftRight(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1118,7 +1118,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithMultipleFuncti
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(1).Times(2)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(cql.Int(1)).Times(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1133,7 +1133,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForNumericWithFunctionOfDiff
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Times(1.5)),
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Times(cql.Float64(1.5))),
 	).Find()
 	ts.Require().NoError(err)
 
@@ -1161,7 +1161,7 @@ func (ts *OperatorsIntTestSuite) TestDynamicOperatorForStringWithConcat() {
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
-		conditions.Product.String.Is().Eq(conditions.Product.String2.Concat("123")),
+		conditions.Product.String.Is().Eq(conditions.Product.String2.Concat(cql.String("123"))),
 	).Find()
 	ts.Require().NoError(err)
 

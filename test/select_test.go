@@ -191,7 +191,7 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionInCQL() {
 		cql.Query[models.Product](
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int.Plus(1), func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(1)), func(value float64, result *ResultInt) {
 			result.Int = int(value)
 		}),
 	)
@@ -216,10 +216,10 @@ func (ts *SelectIntTestSuite) TestSelectMultipleWithFunction() {
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultIntAndFloat) {
 			result.Int = int(value)
 		}),
-		cql.ValueInto(conditions.Product.Int.Plus(1), func(value float64, result *ResultIntAndFloat) {
+		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(1)), func(value float64, result *ResultIntAndFloat) {
 			result.Aggregation1 = int(value)
 		}),
-		cql.ValueInto(conditions.Product.Float.Minus(1.5), func(value float64, result *ResultIntAndFloat) {
+		cql.ValueInto(conditions.Product.Float.Minus(cql.Float64(1.5)), func(value float64, result *ResultIntAndFloat) {
 			result.Aggregation2 = value
 		}),
 	)
