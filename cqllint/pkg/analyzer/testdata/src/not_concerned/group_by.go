@@ -254,12 +254,12 @@ func testGroupBySelectJoinedWithFunction() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).SelectValue(
-		conditions.Brand.Name.Concat("asd").Aggregate().Max(), "aggregation1",
+		conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1",
 	)
 }
 
 func testGroupBySelectJoinedWithFunctionVariable() {
-	value := conditions.Brand.Name.Concat("asd").Aggregate().Max()
+	value := conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()
 
 	cql.Query[models.Phone](
 		db,
@@ -280,7 +280,7 @@ func testGroupBySelectJoinedWithFunctionOverVariable() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).SelectValue(
-		value.Concat("asd").Aggregate().Max(), "aggregation1",
+		value.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1",
 	)
 }
 
@@ -291,12 +291,12 @@ func testGroupBySelectNotJoinedWithFunction() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).SelectValue(
-		conditions.City.Name.Concat("asd").Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
 func testGroupBySelectNotJoinedWithFunctionVariable() {
-	value := conditions.City.Name.Concat("asd").Aggregate().Max() // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	value := conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max() // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
 		db,
@@ -317,7 +317,7 @@ func testGroupBySelectNotJoinedWithFunctionOverVariable() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).SelectValue(
-		value.Concat("asd").Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		value.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -328,7 +328,7 @@ func testGroupBySelectNotJoinedWithTwoFunctions() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).SelectValue(
-		conditions.City.Name.Concat("asd").Concat("asd").Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd")).Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -398,12 +398,12 @@ func testHavingJoinedWithFunction() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.Brand.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd")),
+		conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd")),
 	)
 }
 
 func testHavingJoinedWithFunctionVariable() {
-	value := conditions.Brand.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd"))
+	value := conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd"))
 
 	cql.Query[models.Phone](
 		db,
@@ -424,7 +424,7 @@ func testHavingJoinedWithFunctionOverVariable() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		value.Concat("asd").Aggregate().Max().Eq(cql.String("asd")),
+		value.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd")),
 	)
 }
 
@@ -435,12 +435,12 @@ func testHavingNotJoinedWithFunction() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.City.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
 func testHavingNotJoinedWithFunctionVariable() {
-	value := conditions.City.Name.Concat("asd").Aggregate().Max().Eq(cql.String("asd")) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	value := conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd")) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
 		db,
@@ -461,7 +461,7 @@ func testHavingNotJoinedWithFunctionOverVariable() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		value.Concat("asd").Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		value.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -472,7 +472,7 @@ func testHavingNotJoinedWithTwoFunctions() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.City.Name.Concat("asd").Concat("asd").Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -674,7 +674,7 @@ func testHavingDynamicJoinedWithFunctionOnLeft() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.Brand.Name.Concat("asd").Aggregate().Max().Eq(conditions.Brand.Name.Aggregate().Max()),
+		conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max().Eq(conditions.Brand.Name.Aggregate().Max()),
 	)
 }
 
@@ -685,12 +685,12 @@ func testHavingDynamicJoinedWithFunctionOnRight() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat("asd").Aggregate().Max()),
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()),
 	)
 }
 
 func testHavingDynamicJoinedWithFunctionVariable() {
-	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat("asd").Aggregate().Max())
+	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max())
 
 	cql.Query[models.Phone](
 		db,
@@ -711,7 +711,7 @@ func testHavingDynamicJoinedWithFunctionOverVariable() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.Brand.Name.Aggregate().Max().Eq(value.Concat("asd").Aggregate().Max()),
+		conditions.Brand.Name.Aggregate().Max().Eq(value.Concat(cql.String("asd")).Aggregate().Max()),
 	)
 }
 
@@ -722,12 +722,12 @@ func testHavingDynamicNotJoinedWithFunction() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat("asd").Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
 func testHavingDynamicNotJoinedWithFunctionVariable() {
-	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat("asd").Aggregate().Max()) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max()) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
 		db,
@@ -748,13 +748,13 @@ func testHavingDynamicNotJoinedWithFunctionOverVariable() {
 	).GroupBy(
 		conditions.Brand.Name,
 	).Having(
-		conditions.Brand.Name.Aggregate().Max().Eq(value.Concat("asd").Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Aggregate().Max().Eq(value.Concat(cql.String("asd")).Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
 func testHavingDynamicJoinedConditionInList() {
 	values := []condition.AggregationCondition{
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat("asd").Aggregate().Max()),
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()),
 	}
 
 	cql.Query[models.Phone](
@@ -769,7 +769,7 @@ func testHavingDynamicJoinedConditionInList() {
 
 func testHavingDynamicNotJoinedConditionInList() {
 	values := []condition.AggregationCondition{
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat("asd").Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	}
 
 	cql.Query[models.Phone](
@@ -787,7 +787,7 @@ func testHavingDynamicJoinedConditionInListWithAppend() {
 
 	values = append(
 		values,
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat("asd").Aggregate().Max()),
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()),
 	)
 
 	cql.Query[models.Phone](
@@ -805,7 +805,7 @@ func testHavingDynamicNotJoinedConditionInListWithAppend() {
 
 	values = append(
 		values,
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat("asd").Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 
 	cql.Query[models.Phone](
@@ -823,8 +823,8 @@ func testHavingDynamicNotJoinedConditionInListWithAppendSecond() {
 
 	values = append(
 		values,
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat("asd").Aggregate().Max()),
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat("asd").Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()),
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 
 	cql.Query[models.Phone](
@@ -842,12 +842,12 @@ func testHavingDynamicNotJoinedConditionInListWithAppendMultiple() {
 
 	values = append(
 		values,
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat("asd").Aggregate().Max()),
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()),
 	)
 
 	values = append(
 		values,
-		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat("asd").Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max()), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 
 	cql.Query[models.Phone](

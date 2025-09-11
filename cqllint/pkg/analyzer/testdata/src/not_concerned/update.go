@@ -245,7 +245,7 @@ func testSetDynamicNotJoinedWithFunction() {
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
-		conditions.City.Name.Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }
 
@@ -254,7 +254,7 @@ func testSetDynamicNotJoinedWithTwoFunction() {
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
-		conditions.City.Name.Concat("asd").Concat("asd"), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	))
 }
 

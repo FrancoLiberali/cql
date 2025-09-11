@@ -282,13 +282,13 @@ func testDeleteJoinedWithFunction() {
 	cql.Delete[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat("asd")),
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
 		),
 	).Exec()
 }
 
 func testDeleteJoinedWithFunctionVariable() {
-	value := conditions.Phone.Name.Concat("asd")
+	value := conditions.Phone.Name.Concat(cql.String("asd"))
 
 	cql.Delete[models.Phone](
 		db,
@@ -304,7 +304,7 @@ func testDeleteJoinedWithFunctionOverVariable() {
 	cql.Delete[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(value.Concat("asd")),
+			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))),
 		),
 	).Exec()
 }
@@ -313,13 +313,13 @@ func testDeleteNotJoinedWithFunction() {
 	cql.Delete[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 		),
 	).Exec()
 }
 
 func testDeleteNotJoinedWithFunctionVariable() {
-	value := conditions.City.Name.Concat("asd")
+	value := conditions.City.Name.Concat(cql.String("asd"))
 
 	cql.Delete[models.Phone](
 		db,
@@ -335,7 +335,7 @@ func testDeleteNotJoinedWithFunctionOverVariable() {
 	cql.Delete[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(value.Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 		),
 	).Exec()
 }
@@ -344,7 +344,7 @@ func testDeleteNotJoinedWithTwoFunctions() {
 	cql.Delete[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat("asd").Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 		),
 	).Exec()
 }

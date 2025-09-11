@@ -290,13 +290,13 @@ func testJoinedWithFunction() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat("asd")),
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
 		),
 	).Find()
 }
 
 func testJoinedWithFunctionVariable() {
-	value := conditions.Phone.Name.Concat("asd")
+	value := conditions.Phone.Name.Concat(cql.String("asd"))
 
 	cql.Query[models.Phone](
 		db,
@@ -312,7 +312,7 @@ func testJoinedWithFunctionOverVariable() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(value.Concat("asd")),
+			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))),
 		),
 	).Find()
 }
@@ -321,13 +321,13 @@ func testNotJoinedWithFunction() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 		),
 	).Find()
 }
 
 func testNotJoinedWithFunctionVariable() {
-	value := conditions.City.Name.Concat("asd")
+	value := conditions.City.Name.Concat(cql.String("asd"))
 
 	cql.Query[models.Phone](
 		db,
@@ -343,7 +343,7 @@ func testNotJoinedWithFunctionOverVariable() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(value.Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 		),
 	).Find()
 }
@@ -352,7 +352,7 @@ func testNotJoinedWithTwoFunctions() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat("asd").Concat("asd")), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 		),
 	).Find()
 }
