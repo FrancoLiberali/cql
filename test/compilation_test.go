@@ -178,7 +178,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Concat("asd").Is().Eq(cql.Int(1)),
+				conditions.Product.Int.Concat(cql.String("asd")).Is().Eq(cql.Int(1)),
 			)`,
 			Error: `conditions.Product.Int.Concat undefined (type condition.NumericField[models.Product, int] has no field or method Concat)`,
 		},
@@ -187,16 +187,16 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Plus("asd").Is().Eq(cql.Int(1)),
+				conditions.Product.Int.Plus(cql.String("asd")).Is().Eq(cql.Int(1)),
 			)`,
-			Error: `cannot use "asd" (untyped string constant) as float64 value in argument to conditions.Product.Int.Plus`,
+			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use function not present for field type inside comparison",
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Is().Eq(conditions.Product.Int.Concat("asd")),
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Concat(cql.String("asd"))),
 			)`,
 			Error: `conditions.Product.Int.Concat undefined (type condition.NumericField[models.Product, int] has no field or method Concat)`,
 		},
@@ -205,9 +205,9 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus("asd")),
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(cql.String("asd"))),
 			)`,
-			Error: `cannot use "asd" (untyped string constant) as float64 value in argument to conditions.Product.Int.Plus`,
+			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 	}
 
