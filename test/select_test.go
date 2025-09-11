@@ -204,6 +204,28 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionInCQL() {
 	}, results)
 }
 
+func (ts *SelectIntTestSuite) TestOneSelectWithFunctionDynamic() {
+	ts.createProduct("1", 0, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("5", 2, 2, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			ts.db,
+		).Descending(conditions.Product.Int),
+		cql.ValueInto(conditions.Product.Int.Plus(conditions.Product.Float), func(value float64, result *ResultInt) {
+			result.Int = int(value)
+		}),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []ResultInt{
+		{Int: 0},
+		{Int: 2},
+		{Int: 4},
+	}, results)
+}
+
 func (ts *SelectIntTestSuite) TestSelectMultipleWithFunction() {
 	ts.createProduct("1", 0, 0, false, nil)
 	ts.createProduct("2", 1, 1, false, nil)

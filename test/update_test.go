@@ -851,3 +851,33 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunction() {
 		ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 	}
 }
+
+func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunctionDynamic() {
+	product1 := ts.createProduct("1", 0, 1.0, false, nil)
+
+	updated, err := cql.Update[models.Product](
+		ts.db,
+		conditions.Product.Bool.Is().False(),
+	).Set(
+		conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(conditions.Product.Float)),
+	)
+
+	if getDBDialector() == cqlSQL.Postgres && err != nil {
+		// cockroachdb
+		ts.ErrorContains(err, "unsupported binary operator: <decimal> + <anyelement> (returning <int>) (SQLSTATE 22023); method: Set")
+	} else {
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), updated)
+
+		productReturned, err := cql.Query[models.Product](
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(2)),
+		).FindOne()
+
+		ts.Require().NoError(err)
+
+		ts.Equal(product1.ID, productReturned.ID)
+		ts.Equal(2, productReturned.Int)
+		ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
+	}
+}
