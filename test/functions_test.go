@@ -291,6 +291,21 @@ func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithAnd() {
 	EqualList(&ts.Suite, []*models.Product{product1}, entities)
 }
 
+func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithAndDynamic() {
+	int1 := 7
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	product2 := ts.createProduct("", 7, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.And(conditions.Product.Int)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1, product2}, entities)
+}
+
 func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithOr() {
 	int1 := 5
 	product1 := ts.createProduct("", 7, 0.0, false, &int1)
@@ -355,6 +370,21 @@ func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithShiftLeft() {
 	entities, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.ShiftLeft(cql.Int(2))),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithShiftLeftDynamic() {
+	int1 := 1
+	product1 := ts.createProduct("", 1, 2.0, false, &int1)
+	ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Float.Is().Eq(conditions.Product.IntPointer.ShiftLeft(conditions.Product.Int)),
 	).Find()
 	ts.Require().NoError(err)
 

@@ -227,6 +227,42 @@ func TestQueryCompilationErrors(t *testing.T) {
 			)`,
 			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
+		{
+			Name: "Use function with not same type of numeric value for logical operator",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(cql.Float64(1))),
+			)`,
+			Error: `cannot use cql.Float64(1) (value of type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+		},
+		{
+			Name: "Use function with not same type of numeric value for logical operator dynamic",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(conditions.Product.Float)),
+			)`,
+			Error: `cannot use conditions.Product.Float (variable of type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+		},
+		{
+			Name: "Use function with not int type of numeric value for shift operator",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(cql.Float64(1))),
+			)`,
+			Error: `cannot use cql.Float64(1) (value of type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+		},
+		{
+			Name: "Use function with not int type of numeric value for shift operator dynamic",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(conditions.Product.Float)),
+			)`,
+			Error: `cannot use conditions.Product.Float (variable of type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+		},
 	}
 
 	for _, testCase := range tests {

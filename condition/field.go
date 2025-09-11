@@ -326,6 +326,10 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) GetValue() floa
 	return 0
 }
 
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) GetNumericValue() TAttribute {
+	return 0
+}
+
 func (numericField NotUpdatableNumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel] {
 	return newNumericFieldIs(numericField.Field)
 }
@@ -388,19 +392,19 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) Absolute() NotU
 }
 
 // And calculates the bitwise AND between value and other
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) And(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) And(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitAnd, other)
 }
 
 // Or calculates the bitwise OR between value and other
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Or(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Or(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitOr, other)
 }
 
 // Xor calculates the bitwise XOR (exclusive OR) between value and other
 //
 // Available for: postgres, mysql, sqlserver
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Xor(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Xor(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitXor, other)
 }
 
@@ -410,12 +414,12 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) Not() NotUpdata
 }
 
 // ShiftLeft shifts value amount bits to the left
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftLeft(amount ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftLeft(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitShiftLeft, amount)
 }
 
 // ShiftRight shifts value amount bits to the right
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftRight(amount ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftRight(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitShiftRight, amount)
 }
 
@@ -454,6 +458,10 @@ func (numericField NumericField[TModel, TAttribute]) Aggregate() NumericFieldAgg
 }
 
 func (numericField NumericField[TModel, TAttribute]) GetValue() float64 {
+	return 0
+}
+
+func (numericField NumericField[TModel, TAttribute]) GetNumericValue() TAttribute {
 	return 0
 }
 
@@ -506,19 +514,19 @@ func (numericField NumericField[TModel, TAttribute]) Absolute() NotUpdatableNume
 }
 
 // And calculates the bitwise AND between value and other
-func (numericField NumericField[TModel, TAttribute]) And(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) And(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().And(other)
 }
 
 // Or calculates the bitwise OR between value and other
-func (numericField NumericField[TModel, TAttribute]) Or(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Or(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Or(other)
 }
 
 // Xor calculates the bitwise XOR (exclusive OR) between value and other
 //
 // Available for: postgres, mysql, sqlserver
-func (numericField NumericField[TModel, TAttribute]) Xor(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Xor(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Xor(other)
 }
 
@@ -528,12 +536,12 @@ func (numericField NumericField[TModel, TAttribute]) Not() NotUpdatableNumericFi
 }
 
 // ShiftLeft shifts value amount bits to the left
-func (numericField NumericField[TModel, TAttribute]) ShiftLeft(amount ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) ShiftLeft(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().ShiftLeft(amount)
 }
 
 // ShiftRight shifts value amount bits to the right
-func (numericField NumericField[TModel, TAttribute]) ShiftRight(amount ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) ShiftRight(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().ShiftRight(amount)
 }
 

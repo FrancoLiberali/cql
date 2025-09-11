@@ -828,10 +828,6 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUInt64() {
 	ts.internalTestGroupByHavingWithDifferentCondition(cql.UInt64(2))
 }
 
-func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionUIntPTR() {
-	ts.internalTestGroupByHavingWithDifferentCondition(cql.UIntPTR(2))
-}
-
 func (ts *GroupByIntTestSuite) TestGroupByHavingWithDifferentConditionFloat32() {
 	ts.internalTestGroupByHavingWithDifferentCondition(cql.Float32(2))
 }
