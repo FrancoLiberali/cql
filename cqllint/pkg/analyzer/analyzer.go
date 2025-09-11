@@ -486,13 +486,24 @@ func findErrorIsDynamicWhereCondition(
 		if conditionFunc.Sel.Name == "Is" {
 			models = addFirstModel(models, conditionFunc)
 
-			// check arguments of the conditions
-			for _, arg := range conditionCall.Args {
-				model, appearance, isModel := getModelFromExpr(arg)
-				if isModel {
-					positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-				}
+			if leftSideCall, isCall := conditionFunc.X.(*ast.CallExpr); isCall {
+				// check arguments of the functions on the left side
+				positionsToReport = getPositionsToReportFromCall(leftSideCall, positionsToReport, models)
 			}
+
+			// check arguments of the conditions
+			positionsToReport = getPositionsToReportFromCall(conditionCall, positionsToReport, models)
+		}
+	}
+
+	return positionsToReport
+}
+
+func getPositionsToReportFromCall(call *ast.CallExpr, positionsToReport []Report, models []string) []Report {
+	for _, arg := range call.Args {
+		model, appearance, isModel := getModelFromExpr(arg)
+		if isModel {
+			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
 		}
 	}
 
@@ -591,6 +602,11 @@ func getModelFromVar(variable *ast.Ident) (Model, Appearance, bool) {
 	return getModel(variable),
 		Appearance{bypassCheck: true}, // Appearance for variables not implemented
 		true
+}
+
+type Model2 struct {
+	Model      Model
+	Appearance Appearance
 }
 
 // Returns model's package the model name and true if Appearance method is called
