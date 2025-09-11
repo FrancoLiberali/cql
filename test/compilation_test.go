@@ -192,6 +192,15 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
+			Name: "Use function dynamic with incorrect value type",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Plus(conditions.Product.String).Is().Eq(cql.Int(1)),
+			)`,
+			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
 			Name: "Use function not present for field type inside comparison",
 			Code: `
 			_ = %s[models.Product](
@@ -208,6 +217,15 @@ func TestQueryCompilationErrors(t *testing.T) {
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(cql.String("asd"))),
 			)`,
 			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "Use function dynamic with incorrect value type inside comparison",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(conditions.Product.String)),
+			)`,
+			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 	}
 
