@@ -1,11 +1,12 @@
 package test
 
 import (
+	"gorm.io/gorm"
+
 	"github.com/FrancoLiberali/cql"
 	cqlSQL "github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
-	"gorm.io/gorm"
 )
 
 type FunctionsIntTestSuite struct {
@@ -71,6 +72,7 @@ func (ts *FunctionsIntTestSuite) TestFunctionOnLeftSideWithDynamicValue() {
 	ts.createProduct("", 3, 0.0, false, nil)
 	ts.createProduct("", 0, 0.0, false, nil)
 
+	// TODO falta el lint para esto
 	entities, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Plus(conditions.Product.Int).Is().Eq(cql.Int(4)),
@@ -111,6 +113,7 @@ func (ts *FunctionsIntTestSuite) TestFunctionOnBothSidesWithDynamicValue() {
 
 	EqualList(&ts.Suite, []*models.Product{product1}, entities)
 }
+
 func (ts *FunctionsIntTestSuite) TestFunctionOnBothSidesWithDynamicValueWithFunction() {
 	int1 := 1
 	product1 := ts.createProduct("", 1, 0.0, false, &int1)
