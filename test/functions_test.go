@@ -22,7 +22,7 @@ func NewFunctionsIntTestSuite(
 	}
 }
 
-func (ts *FunctionsIntTestSuite) TestFunctionOnRightSideWithStaticValue() {
+func (ts *FunctionsIntTestSuite) TestFunctionOnLeftSideWithStaticValue() {
 	product1 := ts.createProduct("", 2, 0.0, false, nil)
 	ts.createProduct("", 3, 0.0, false, nil)
 	ts.createProduct("", 0, 0.0, false, nil)
@@ -36,7 +36,7 @@ func (ts *FunctionsIntTestSuite) TestFunctionOnRightSideWithStaticValue() {
 	EqualList(&ts.Suite, []*models.Product{product1}, entities)
 }
 
-func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithPlus() {
+func (ts *FunctionsIntTestSuite) TestFunctionOnRightSideWithStaticValue() {
 	int1 := 1
 	product1 := ts.createProduct("", 2, 0.0, false, &int1)
 	ts.createProduct("", 3, 0.0, false, &int1)
@@ -60,6 +60,85 @@ func (ts *FunctionsIntTestSuite) TestFunctionOnBothSidesWithStaticValue() {
 	entities, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Plus(cql.Int(1)).Is().Eq(conditions.Product.IntPointer.Plus(cql.Int(2))),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *FunctionsIntTestSuite) TestFunctionOnLeftSideWithDynamicValue() {
+	product1 := ts.createProduct("", 2, 0.0, false, nil)
+	ts.createProduct("", 3, 0.0, false, nil)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Plus(conditions.Product.Int).Is().Eq(cql.Int(4)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *FunctionsIntTestSuite) TestFunctionOnRightSideWithDynamicValue() {
+	int1 := 1
+	product1 := ts.createProduct("", 2, 0.0, false, &int1)
+	ts.createProduct("", 3, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(conditions.Product.IntPointer)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *FunctionsIntTestSuite) TestFunctionOnBothSidesWithDynamicValue() {
+	int1 := 1
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 3, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Plus(conditions.Product.Int).Is().Eq(
+			conditions.Product.IntPointer.Plus(conditions.Product.IntPointer),
+		),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+func (ts *FunctionsIntTestSuite) TestFunctionOnBothSidesWithDynamicValueWithFunction() {
+	int1 := 1
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 3, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Plus(conditions.Product.Int.Minus(cql.Int(1))).Is().Eq(
+			conditions.Product.IntPointer.Plus(conditions.Product.IntPointer.Minus(cql.Int(1))),
+		),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *FunctionsIntTestSuite) TestFunctionOnBothSidesWithDynamicValueWithFunctions() {
+	int1 := 1
+	product1 := ts.createProduct("", 1, 0.0, false, &int1)
+	ts.createProduct("", 3, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Plus(conditions.Product.Int.Minus(cql.Int(1))).Minus(cql.Int(1)).Minus(cql.Int(2)).Is().Eq(
+			conditions.Product.IntPointer.Plus(conditions.Product.IntPointer.Minus(cql.Int(1))).Minus(cql.Int(3)),
+		),
 	).Find()
 	ts.Require().NoError(err)
 

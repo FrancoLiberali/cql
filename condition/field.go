@@ -123,8 +123,9 @@ func (field Field[TModel, TAttribute]) ToSQLForTable(query *CQLQuery, table Tabl
 				valuesSQLs = append(valuesSQLs, valueSQL)
 			} else {
 				valuesSQLs = append(valuesSQLs, "?")
-				finalValues = append(finalValues, valueValue)
 			}
+
+			finalValues = append(finalValues, valueValue...)
 		}
 
 		finalSQL = function.ApplyTo(finalSQL, valuesSQLs)
