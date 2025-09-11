@@ -22,6 +22,20 @@ func NewFunctionsIntTestSuite(
 	}
 }
 
+func (ts *FunctionsIntTestSuite) TestFunctionOnRightSideWithStaticValue() {
+	product1 := ts.createProduct("", 2, 0.0, false, nil)
+	ts.createProduct("", 3, 0.0, false, nil)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Plus(cql.Int(1)).Is().Eq(cql.Int(3)),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
 func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithPlus() {
 	int1 := 1
 	product1 := ts.createProduct("", 2, 0.0, false, &int1)
@@ -31,6 +45,21 @@ func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithPlus() {
 	entities, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Is().Eq(conditions.Product.IntPointer.Plus(cql.Int(1))),
+	).Find()
+	ts.Require().NoError(err)
+
+	EqualList(&ts.Suite, []*models.Product{product1}, entities)
+}
+
+func (ts *FunctionsIntTestSuite) TestFunctionOnBothSidesWithStaticValue() {
+	int1 := 1
+	product1 := ts.createProduct("", 2, 0.0, false, &int1)
+	ts.createProduct("", 3, 0.0, false, &int1)
+	ts.createProduct("", 0, 0.0, false, nil)
+
+	entities, err := cql.Query[models.Product](
+		ts.db,
+		conditions.Product.Int.Plus(cql.Int(1)).Is().Eq(conditions.Product.IntPointer.Plus(cql.Int(2))),
 	).Find()
 	ts.Require().NoError(err)
 

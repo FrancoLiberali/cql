@@ -9,6 +9,7 @@ import (
 
 type IField interface {
 	ToSQL(query *CQLQuery) (string, []any, error)
+	ToSQLForTable(query *CQLQuery, table Table) (string, []any, error)
 	columnName(query *CQLQuery, table Table) string
 	fieldName() string
 	columnSQL(query *CQLQuery, table Table) string
@@ -99,13 +100,9 @@ func (field Field[TModel, TAttribute]) addFunction(function sql.FunctionByDialec
 	return field
 }
 
-func (field Field[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, error) {
-	table, err := getModelTable(query, field)
-	if err != nil {
-		return "", nil, err
-	}
-
+func (field Field[TModel, TAttribute]) ToSQLForTable(query *CQLQuery, table Table) (string, []any, error) {
 	finalSQL := field.columnSQL(query, table)
+
 	finalValues := []any{}
 
 	for _, functionAndValues := range field.functions {
@@ -134,6 +131,15 @@ func (field Field[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, er
 	}
 
 	return finalSQL, finalValues, nil
+}
+
+func (field Field[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, error) {
+	table, err := getModelTable(query, field)
+	if err != nil {
+		return "", nil, err
+	}
+
+	return field.ToSQLForTable(query, table)
 }
 
 func (field Field[TModel, TAttribute]) GetValue() TAttribute {
