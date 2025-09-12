@@ -572,7 +572,7 @@ func getModelsFromExpr(expr ast.Expr) []ModelWithAppearance {
 	if isSelector {
 		model, isModel := getModelFromSelector(argSelector)
 		if isModel {
-			return []ModelWithAppearance{{model, Appearance{bypassCheck: true}}}
+			return []ModelWithAppearance{{model, Appearance{}}}
 		}
 
 		return nil
