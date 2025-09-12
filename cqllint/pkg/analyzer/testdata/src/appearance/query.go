@@ -23,7 +23,7 @@ func testQueryNotNecessaryWithFunction() {
 	cql.Query[models.Phone](
 		db,
 		conditions.Phone.Brand(
-			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0).Concat("asd")), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0).Concat(cql.String("asd"))), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
 		),
 	).Find()
 }
@@ -50,7 +50,7 @@ func testQueryNecessaryNotCalledWithFunction() {
 		conditions.Child.Parent2(
 			conditions.Parent2.ParentParent(),
 		),
-		conditions.Child.Number.Is().Eq(conditions.ParentParent.Number.Plus(1)), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
+		conditions.Child.Number.Is().Eq(conditions.ParentParent.Number.Plus(cql.Int(1))), // want "github.com/FrancoLiberali/cql/test/models.ParentParent appears more than once, select which one you want to use with Appearance"
 	).Find()
 }
 
