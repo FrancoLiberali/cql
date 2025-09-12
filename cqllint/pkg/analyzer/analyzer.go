@@ -56,6 +56,11 @@ type Appearance struct {
 	bypassCheck bool // bypassCheck allows to bypass the Appearance call check
 }
 
+type Runner struct {
+	positionsToReport []Report
+	models            []string
+}
+
 var (
 	passG      *analysis.Pass
 	inspectorG *inspector.Inspector
@@ -68,7 +73,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		(*ast.CallExpr)(nil),
 	}
 
-	positionsToReport := []Report{}
+	runner := Runner{}
 
 	inspectorG.Preorder(nodeFilter, func(node ast.Node) {
 		defer func() {
@@ -86,13 +91,13 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
 		if isSelector && !selectorIsCQLFunction(selectorExpr) {
-			positionsToReport = findForSelector(callExpr, positionsToReport)
+			runner.findForSelector(callExpr)
 		} else {
-			positionsToReport, _ = findNotConcernedForIndex(callExpr, positionsToReport)
+			runner.findNotConcernedForIndex(callExpr)
 		}
 	})
 
-	for _, report := range positionsToReport {
+	for _, report := range runner.positionsToReport {
 		pass.Reportf(
 			report.model.Pos,
 			report.message,
@@ -104,34 +109,32 @@ func run(pass *analysis.Pass) (interface{}, error) {
 }
 
 // Finds NotConcerned and Repeated errors in selector functions: Descending, Ascending, SetMultiple, Set
-func findForSelector(callExpr *ast.CallExpr, positionsToReport []Report) []Report {
+func (r *Runner) findForSelector(callExpr *ast.CallExpr) {
 	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
 
 	if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
-		return positionsToReport
+		return
 	}
 
 	findRepeatedFields(callExpr, selectorExpr)
 
-	return fieldNotConcerned(callExpr, selectorExpr, positionsToReport)
+	r.fieldNotConcerned(callExpr, selectorExpr)
 }
 
 // Finds NotConcerned errors in selector functions: Descending, Ascending, SetMultiple, Set
-func fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr, positionsToReport []Report) []Report {
-	_, models := findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr), positionsToReport)
+func (r *Runner) fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
+	r.findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr))
 
 	methodName := selectorExpr.Sel.Name
 	isOrderOrGroupBy := pie.Contains(cqlOrderOrGroupBy, methodName)
 
 	for _, arg := range callExpr.Args {
 		if isOrderOrGroupBy {
-			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
+			r.findForOrderOrGroupBy(arg)
 		} else {
-			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
+			r.findForSet(arg, methodName)
 		}
 	}
-
-	return positionsToReport
 }
 
 func isAppendCall(call *ast.CallExpr) bool {
@@ -142,92 +145,90 @@ func isAppendCall(call *ast.CallExpr) bool {
 	return false
 }
 
-func findForSet(set ast.Expr, positionsToReport []Report, models []string, methodName string) []Report {
+func (r *Runner) findForSet(set ast.Expr, methodName string) {
 	if setCall, isCall := set.(*ast.CallExpr); isCall {
-		return findForSetCall(setCall, positionsToReport, models, methodName)
+		r.findForSetCall(setCall, methodName)
+
+		return
 	}
 
 	if variable, isVar := set.(*ast.Ident); isVar {
 		assignments := findVariableAssignments(variable)
 		for _, assign := range assignments {
-			positionsToReport = findForSet(assign.Rhs[0], positionsToReport, models, methodName)
+			r.findForSet(assign.Rhs[0], methodName)
 		}
 	}
 
 	if composite, isComposite := set.(*ast.CompositeLit); isComposite {
 		for _, expr := range composite.Elts {
-			positionsToReport = findForSet(expr, positionsToReport, models, methodName)
+			r.findForSet(expr, methodName)
 		}
 	}
-
-	return positionsToReport
 }
 
-func findForSetCall(setCall *ast.CallExpr, positionsToReport []Report, models []string, methodName string) []Report {
+func (r *Runner) findForSetCall(setCall *ast.CallExpr, methodName string) {
 	if isAppendCall(setCall) {
 		for _, arg := range setCall.Args[1:] { // first argument is the base list
-			positionsToReport = findForSet(arg, positionsToReport, models, methodName)
+			r.findForSet(arg, methodName)
 		}
 
-		return positionsToReport
+		return
 	}
 
 	newModels := getModelsFromExpr(setCall.Args[0])
-	positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
+	r.addPositionsToReport(newModels)
 
 	if methodName == cqlSetMultiple {
 		// set multiple needs more verifications as the model to be set is not compiled
 		newModels := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
-		positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
+		r.addPositionsToReport(newModels)
 	}
-
-	return positionsToReport
 }
 
-func findForOrderOrGroupBy(expr ast.Expr, positionsToReport []Report, models []string) []Report {
+func (r *Runner) findForOrderOrGroupBy(expr ast.Expr) {
 	if exprCall, isCall := expr.(*ast.CallExpr); isCall {
 		if isAppendCall(exprCall) {
 			for _, arg := range exprCall.Args[1:] { // first argument is the base list
-				positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
+				r.findForOrderOrGroupBy(arg)
 			}
 
-			return positionsToReport
+			return
 		}
 
 		newModels := getModelFromCall(exprCall)
-		positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
+		r.addPositionsToReport(newModels)
 
 		for _, arg := range exprCall.Args {
-			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
+			r.findForOrderOrGroupBy(arg)
 		}
 
-		return positionsToReport
+		return
 	}
 
 	if exprSelector, isSelector := expr.(*ast.SelectorExpr); isSelector {
 		model := getModel(exprSelector.X.(*ast.SelectorExpr))
 
-		return addPositionsToReport(positionsToReport, models, []ModelWithAppearance{{model, Appearance{selected: false}}})
+		r.addPositionsToReport([]ModelWithAppearance{{model, Appearance{selected: false}}})
+
+		return
 	}
 
 	if variable, isVar := expr.(*ast.Ident); isVar {
 		assignments := findVariableAssignments(variable)
 		for _, assign := range assignments {
-			positionsToReport = findForOrderOrGroupBy(assign.Rhs[0], positionsToReport, models)
+			r.findForOrderOrGroupBy(assign.Rhs[0])
 		}
 
-		return positionsToReport
+		return
 	}
 
 	if composite, isComposite := expr.(*ast.CompositeLit); isComposite {
 		for _, expr := range composite.Elts {
-			positionsToReport = findForOrderOrGroupBy(expr, positionsToReport, models)
+			r.findForOrderOrGroupBy(expr)
 		}
 
-		return positionsToReport
+		return
 	}
-
-	return positionsToReport
 }
 
 func findRepeatedFields(call *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
@@ -292,20 +293,22 @@ func getFieldName(condition *ast.SelectorExpr) string {
 }
 
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
-func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
+func (r *Runner) findNotConcernedForIndex(callExpr *ast.CallExpr) {
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
 	if isIndex {
 		if !selectorIsCQLFunction(indexExpr.X) {
-			return positionsToReport, []string{}
+			return
 		}
 
-		models := []string{
+		r.models = []string{
 			getFirstGenericType(
 				passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
 			),
 		}
 
-		return findErrorIsDynamic(positionsToReport, models, callExpr.Args[1:]) // first parameters is ignored as it's the db object
+		r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+
+		return
 	}
 
 	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
@@ -313,30 +316,36 @@ func findNotConcernedForIndex(callExpr *ast.CallExpr, positionsToReport []Report
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 		if isCall {
-			return findNotConcernedForIndex(internalCallExpr, positionsToReport)
+			r.findNotConcernedForIndex(internalCallExpr)
+
+			return
 		}
 
 		if selectorIsCQLSelect(selectorExpr) {
-			return findForSelect(callExpr, positionsToReport)
+			r.findForSelect(callExpr)
+
+			return
 		}
 
 		if selectorIsCQLFunction(selectorExpr) {
-			return findErrorIsDynamic(positionsToReport, []string{}, callExpr.Args[1:]) // first parameters is ignored as it's the db object
+			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+
+			return
 		}
 
-		return positionsToReport, []string{}
+		return
 	}
 
 	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
 	if isIndexList {
 		if !selectorIsCQLSelect(indexListExpr.X) {
-			return positionsToReport, []string{}
+			return
 		}
 
-		return findForSelect(callExpr, positionsToReport)
-	}
+		r.findForSelect(callExpr)
 
-	return positionsToReport, []string{}
+		return
+	}
 }
 
 func selectorIsCQLFunction(expr ast.Expr) bool {
@@ -361,16 +370,19 @@ func selectorIs(expr ast.Expr, values []string) bool {
 	return ident.Name == "cql" && pie.Contains(values, selectorExpr.Sel.Name)
 }
 
-func findForSelect(callExpr *ast.CallExpr, positionsToReport []Report) ([]Report, []string) {
-	_, queryModels := findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr), positionsToReport)
+func (r *Runner) findForSelect(callExpr *ast.CallExpr) {
+	newRunner := Runner{}
 
-	return findErrorIsDynamic(positionsToReport, queryModels, callExpr.Args[1:])
+	newRunner.findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr))
+	newRunner.findErrorIsDynamic(callExpr.Args[1:])
+
+	r.positionsToReport = append(r.positionsToReport, newRunner.positionsToReport...)
 }
 
-func findErrorIsDynamic(positionsToReport []Report, models []string, conditions []ast.Expr) ([]Report, []string) {
+func (r *Runner) findErrorIsDynamic(conditions []ast.Expr) {
 	for _, condition := range conditions {
 		if conditionCall, isCall := condition.(*ast.CallExpr); isCall {
-			positionsToReport, models = findErrorIsDynamicForCall(positionsToReport, models, conditionCall)
+			r.findErrorIsDynamicForCall(conditionCall)
 
 			continue
 		}
@@ -378,35 +390,33 @@ func findErrorIsDynamic(positionsToReport []Report, models []string, conditions 
 		if variable, isVar := condition.(*ast.Ident); isVar {
 			assignments := findVariableAssignments(variable)
 			for _, assign := range assignments {
-				positionsToReport, models = findErrorIsDynamic(positionsToReport, models, assign.Rhs)
+				r.findErrorIsDynamic(assign.Rhs)
 			}
 
 			continue
 		}
 
 		if composite, isComposite := condition.(*ast.CompositeLit); isComposite {
-			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, composite.Elts)
+			r.findErrorIsDynamic(composite.Elts)
 
 			continue
 		}
 	}
-
-	return positionsToReport, models
 }
 
-func findErrorIsDynamicForCall(positionsToReport []Report, models []string, conditionCall *ast.CallExpr) ([]Report, []string) {
+func (r *Runner) findErrorIsDynamicForCall(conditionCall *ast.CallExpr) {
 	if conditionSelector, isSelector := conditionCall.Fun.(*ast.SelectorExpr); isSelector {
 		if pie.Contains(cqlConnectors, conditionSelector.Sel.Name) {
-			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+			r.findErrorIsDynamic(conditionCall.Args)
 
-			return positionsToReport, models
+			return
 		}
 
 		if conditionSelector.Sel.Name == "ValueInto" {
 			newModels := getModelsFromExpr(conditionCall.Args[0])
-			positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
+			r.addPositionsToReport(newModels)
 
-			return positionsToReport, models
+			return
 		}
 
 		if conditionSelector.Sel.Name == "Preload" {
@@ -415,26 +425,23 @@ func findErrorIsDynamicForCall(positionsToReport []Report, models []string, cond
 		}
 
 		if _, isJoinCondition := conditionSelector.X.(*ast.SelectorExpr); isJoinCondition {
-			models = append(models, getModelFromJoinCondition(conditionSelector))
+			r.models = append(r.models, getModelFromJoinCondition(conditionSelector))
 
-			positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args)
+			r.findErrorIsDynamic(conditionCall.Args)
 
-			return positionsToReport, models
+			return
 		}
 
-		positionsToReport = findErrorIsDynamicWhereCondition(positionsToReport, models, conditionCall, conditionSelector)
+		r.findErrorIsDynamicWhereCondition(conditionCall, conditionSelector)
 
-		return positionsToReport, models
+		return
 	}
 
 	if isAppendCall(conditionCall) {
-		positionsToReport, models = findErrorIsDynamic(positionsToReport, models, conditionCall.Args[1:]) // first argument is the base list
+		r.findErrorIsDynamic(conditionCall.Args[1:]) // first argument is the base list
 
-		return positionsToReport, models
+		return
 	}
-
-	// cql.True
-	return positionsToReport, models
 }
 
 func findVariableAssignments(variable *ast.Ident) []*ast.AssignStmt {
@@ -466,94 +473,84 @@ func getFirstGenericType(parent *types.Named) string {
 	).(*types.Named).String()
 }
 
-func findErrorIsDynamicWhereCondition(
-	positionsToReport []Report, models []string,
-	conditionCall *ast.CallExpr,
-	conditionSelector *ast.SelectorExpr,
-) []Report {
+func (r *Runner) findErrorIsDynamicWhereCondition(conditionCall *ast.CallExpr, conditionSelector *ast.SelectorExpr) {
 	whereCondition, isWhereCondition := conditionSelector.X.(*ast.CallExpr)
 	if isWhereCondition {
 		conditionFunc := whereCondition.Fun.(*ast.SelectorExpr)
 
 		if conditionFunc.Sel.Name == "Is" {
-			models = addFirstModel(models, conditionFunc)
+			r.addFirstModel(conditionFunc)
 
 			if leftSideCall, isCall := conditionFunc.X.(*ast.CallExpr); isCall {
 				// check arguments of the functions on the left side
-				positionsToReport = getPositionsToReportFromCall(leftSideCall, positionsToReport, models)
+				r.getPositionsToReportFromCall(leftSideCall)
 			}
 
 			// check arguments of the conditions
-			positionsToReport = getPositionsToReportFromCall(conditionCall, positionsToReport, models)
+			r.getPositionsToReportFromCall(conditionCall)
 		}
 	}
-
-	return positionsToReport
 }
 
-func getPositionsToReportFromCall(call *ast.CallExpr, positionsToReport []Report, models []string) []Report {
+func (r *Runner) getPositionsToReportFromCall(call *ast.CallExpr) {
 	for _, arg := range call.Args {
-		positionsToReport = addPositionsToReport(positionsToReport, models, getModelsFromExpr(arg))
+		r.addPositionsToReport(getModelsFromExpr(arg))
 	}
-
-	return positionsToReport
 }
 
 // add first conditions model to models in case is was not set by the query index
-func addFirstModel(models []string, conditionFunc *ast.SelectorExpr) []string {
-	if len(models) == 0 {
+func (r *Runner) addFirstModel(conditionFunc *ast.SelectorExpr) {
+	if len(r.models) == 0 {
 		newModels := getModelsFromExpr(conditionFunc.X)
 		if len(newModels) > 0 {
-			models = append(models, newModels[0].Model.Name)
+			r.models = append(r.models, newModels[0].Model.Name)
 		}
 	}
-
-	return models
 }
 
-func addPositionsToReport(positionsToReport []Report, models []string, newModels []ModelWithAppearance) []Report {
+func (r *Runner) addPositionsToReport(newModels []ModelWithAppearance) {
 	for _, newModel := range newModels {
 		model := newModel.Model
 		appearance := newModel.Appearance
 
-		if !pie.Contains(models, model.Name) {
-			return append(positionsToReport, Report{
+		if !pie.Contains(r.models, model.Name) {
+			newReport := Report{
 				model:   model,
 				message: notJoinedMessage,
-			})
+			}
+
+			if !pie.Contains(r.positionsToReport, newReport) {
+				r.positionsToReport = append(r.positionsToReport, newReport)
+			}
 		}
 
-		joinedTimes := len(pie.Filter(models, func(modelName string) bool {
+		joinedTimes := len(pie.Filter(r.models, func(modelName string) bool {
 			return modelName == model.Name
 		}))
 
 		if appearance.bypassCheck {
-			return positionsToReport
+			continue
 		}
 
 		if appearance.selected {
 			if joinedTimes == 1 {
-				return append(positionsToReport, Report{
+				r.positionsToReport = append(r.positionsToReport, Report{
 					model:   model,
 					message: appearanceNotNecessaryMessage,
 				})
-			}
-
-			if appearance.number > joinedTimes-1 {
-				return append(positionsToReport, Report{
+			} else if joinedTimes > 1 && appearance.number > joinedTimes-1 {
+				r.positionsToReport = append(r.positionsToReport, Report{
 					model:   model,
 					message: appearanceOutOfRangeMessage,
 				})
 			}
 		} else if joinedTimes > 1 {
-			return append(positionsToReport, Report{
+			r.positionsToReport = append(r.positionsToReport, Report{
 				model:   model,
 				message: appearanceMoreThanOnceMessage,
 			})
 		}
 	}
-
-	return positionsToReport
 }
 
 // getAppearance returns the Appearance from a model
