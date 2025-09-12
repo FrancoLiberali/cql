@@ -515,6 +515,45 @@ func testNotJoinedWithFunctionOnRightSide() {
 	).Find()
 }
 
+func testNotJoinedWithMultipleFunctionOnRightSideFirst() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(
+				conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			).Concat(
+				conditions.Phone.Name,
+			)),
+		),
+	).Find()
+}
+
+func testNotJoinedWithMultipleFunctionOnRightSideSecond() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(
+				conditions.Phone.Name,
+			).Concat(
+				conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			)),
+		),
+	).Find()
+}
+
+func testNotJoinedWithMultipleFunctionOnRightSideTwice() {
+	cql.Query[models.Phone](
+		db,
+		conditions.Phone.Brand(
+			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(
+				conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			).Concat(
+				conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			)),
+		),
+	).Find()
+}
+
 func testNotJoinedWithFunctionOverVariableOnRightSide() {
 	value := conditions.City.Name
 
