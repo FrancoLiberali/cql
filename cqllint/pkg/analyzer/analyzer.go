@@ -606,33 +606,39 @@ type ModelWithAppearance struct {
 
 // Returns model's package the model name and true if Appearance method is called
 func getModelFromCall(call *ast.CallExpr) []ModelWithAppearance {
-	newModels := []ModelWithAppearance{}
-
-	if funSelector, isSelector := call.Fun.(*ast.SelectorExpr); isSelector {
-		if selectorX, isXSelector := funSelector.X.(*ast.SelectorExpr); isXSelector {
-			model, isModel := getModelFromSelector(selectorX)
-			if isModel {
-				appearance := getAppearance(call, funSelector)
-
-				newModels = []ModelWithAppearance{ModelWithAppearance{model, appearance}}
-			}
-		}
-
-		if xCall, isCall := funSelector.X.(*ast.CallExpr); isCall {
-			// x is not a selector, so Appearance method or a function is called
-			newModels = getModelFromCall(xCall)
-		}
-
-		if argVar, isVar := funSelector.X.(*ast.Ident); isVar && argVar.Name != "cql" {
-			newModels = []ModelWithAppearance{getModelFromVar(argVar)}
-		}
-	}
+	newModels := getModelFromCallFunction(call)
 
 	for _, arg := range call.Args {
 		newModels = append(newModels, getModelsFromExpr(arg)...)
 	}
 
 	return newModels
+}
+
+func getModelFromCallFunction(call *ast.CallExpr) []ModelWithAppearance {
+	if funSelector, isSelector := call.Fun.(*ast.SelectorExpr); isSelector {
+		if selectorX, isXSelector := funSelector.X.(*ast.SelectorExpr); isXSelector {
+			model, isModel := getModelFromSelector(selectorX)
+			if isModel {
+				appearance := getAppearance(call, funSelector)
+
+				return []ModelWithAppearance{ModelWithAppearance{model, appearance}}
+			}
+
+			return nil
+		}
+
+		if xCall, isCall := funSelector.X.(*ast.CallExpr); isCall {
+			// x is not a selector, so Appearance method or a function is called
+			return getModelFromCall(xCall)
+		}
+
+		if argVar, isVar := funSelector.X.(*ast.Ident); isVar && argVar.Name != "cql" {
+			return []ModelWithAppearance{getModelFromVar(argVar)}
+		}
+	}
+
+	return nil
 }
 
 // Returns model's package the model name and true if Appearance method is called
