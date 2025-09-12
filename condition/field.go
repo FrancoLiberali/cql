@@ -9,6 +9,7 @@ import (
 
 type IField interface {
 	ToSQL(query *CQLQuery) (string, []any, error)
+	ToSQLForTable(query *CQLQuery, table Table) (string, []any, error)
 	columnName(query *CQLQuery, table Table) string
 	fieldName() string
 	columnSQL(query *CQLQuery, table Table) string
@@ -18,7 +19,7 @@ type IField interface {
 
 type functionAndValues struct {
 	function sql.FunctionByDialector
-	values   int
+	values   []IValue
 }
 
 type Field[TModel model.Model, TAttribute any] struct {
@@ -27,7 +28,6 @@ type Field[TModel model.Model, TAttribute any] struct {
 	columnPrefix       string
 	appearance         uint
 	appearanceSelected bool
-	values             []any
 	functions          []functionAndValues
 }
 
@@ -94,11 +94,44 @@ func (field Field[TModel, TAttribute]) columnSQL(query *CQLQuery, table Table) s
 	return table.Alias + "." + field.columnName(query, table)
 }
 
-func (field Field[TModel, TAttribute]) addFunction(function sql.FunctionByDialector, others ...any) Field[TModel, TAttribute] {
-	field.functions = append(field.functions, functionAndValues{function: function, values: len(others)})
-	field.values = append(field.values, others...)
+func (field Field[TModel, TAttribute]) addFunction(function sql.FunctionByDialector, others ...IValue) Field[TModel, TAttribute] {
+	field.functions = append(field.functions, functionAndValues{function: function, values: others})
 
 	return field
+}
+
+func (field Field[TModel, TAttribute]) ToSQLForTable(query *CQLQuery, table Table) (string, []any, error) {
+	finalSQL := field.columnSQL(query, table)
+
+	finalValues := []any{}
+
+	for _, functionAndValues := range field.functions {
+		function, isPresent := functionAndValues.function.Get(query.Dialector())
+		if !isPresent {
+			return "", nil, functionError(ErrUnsupportedByDatabase, functionAndValues.function)
+		}
+
+		valuesSQLs := []string{}
+
+		for _, value := range functionAndValues.values {
+			valueSQL, valueValue, err := value.ToSQL(query)
+			if err != nil {
+				return "", nil, err
+			}
+
+			if valueSQL != "" {
+				valuesSQLs = append(valuesSQLs, valueSQL)
+			} else {
+				valuesSQLs = append(valuesSQLs, "?")
+			}
+
+			finalValues = append(finalValues, valueValue...)
+		}
+
+		finalSQL = function.ApplyTo(finalSQL, valuesSQLs)
+	}
+
+	return finalSQL, finalValues, nil
 }
 
 func (field Field[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, error) {
@@ -107,18 +140,7 @@ func (field Field[TModel, TAttribute]) ToSQL(query *CQLQuery) (string, []any, er
 		return "", nil, err
 	}
 
-	finalSQL := field.columnSQL(query, table)
-
-	for _, functionAndValues := range field.functions {
-		function, isPresent := functionAndValues.function.Get(query.Dialector())
-		if !isPresent {
-			return "", nil, functionError(ErrUnsupportedByDatabase, functionAndValues.function)
-		}
-
-		finalSQL = function.ApplyTo(finalSQL, functionAndValues.values)
-	}
-
-	return finalSQL, field.values, nil
+	return field.ToSQLForTable(query, table)
 }
 
 func (field Field[TModel, TAttribute]) GetValue() TAttribute {
@@ -232,14 +254,14 @@ func (stringField NotUpdatableStringField[TModel]) Is() StringFieldIs[TModel] {
 	return newStringFieldIs(stringField.Field)
 }
 
-func (stringField NotUpdatableStringField[TModel]) addFunction(function sql.FunctionByDialector, others ...any) NotUpdatableStringField[TModel] {
+func (stringField NotUpdatableStringField[TModel]) addFunction(function sql.FunctionByDialector, others ...IValue) NotUpdatableStringField[TModel] {
 	stringField.Field = stringField.Field.addFunction(function, others...)
 
 	return stringField
 }
 
 // Concat concatenates other to value
-func (stringField NotUpdatableStringField[TModel]) Concat(other string) NotUpdatableStringField[TModel] {
+func (stringField NotUpdatableStringField[TModel]) Concat(other ValueOfType[string]) NotUpdatableStringField[TModel] {
 	return stringField.addFunction(sql.Concat, other)
 }
 
@@ -256,7 +278,7 @@ func (stringField StringField[TModel]) toNotUpdatable() NotUpdatableStringField[
 }
 
 // Concat concatenates other to value
-func (stringField StringField[TModel]) Concat(other string) NotUpdatableStringField[TModel] {
+func (stringField StringField[TModel]) Concat(other ValueOfType[string]) NotUpdatableStringField[TModel] {
 	return stringField.toNotUpdatable().Concat(other)
 }
 
@@ -304,6 +326,10 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) GetValue() floa
 	return 0
 }
 
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) GetNumericValue() TAttribute {
+	return 0
+}
+
 func (numericField NotUpdatableNumericField[TModel, TAttribute]) Is() NumericFieldIs[TModel] {
 	return newNumericFieldIs(numericField.Field)
 }
@@ -314,7 +340,7 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) Aggregate() Num
 }
 
 func (numericField NotUpdatableNumericField[TModel, TAttribute]) addFunction(
-	function sql.FunctionByDialector, others ...any,
+	function sql.FunctionByDialector, others ...IValue,
 ) NotUpdatableNumericField[TModel, TAttribute] {
 	numericField.Field = numericField.Field.addFunction(function, others...)
 
@@ -322,34 +348,34 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) addFunction(
 }
 
 // Plus sums other to value
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Plus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Plus(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.Plus, other)
 }
 
 // Minus subtracts other from the value
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Minus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Minus(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.Minus, other)
 }
 
 // Times multiplies value by other
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Times(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Times(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.Times, other)
 }
 
 // Divided divides value by other
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Divided(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Divided(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.Divided, other)
 }
 
 // Modulo returns the remainder of the entire division
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Modulo(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Modulo(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.Modulo, other)
 }
 
 // Power elevates value to other
 //
 // Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: POWER" will be returned
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Power(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Power(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.Power, other)
 }
 
@@ -366,19 +392,19 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) Absolute() NotU
 }
 
 // And calculates the bitwise AND between value and other
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) And(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) And(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitAnd, other)
 }
 
 // Or calculates the bitwise OR between value and other
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Or(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Or(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitOr, other)
 }
 
 // Xor calculates the bitwise XOR (exclusive OR) between value and other
 //
 // Available for: postgres, mysql, sqlserver
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) Xor(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) Xor(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitXor, other)
 }
 
@@ -388,12 +414,12 @@ func (numericField NotUpdatableNumericField[TModel, TAttribute]) Not() NotUpdata
 }
 
 // ShiftLeft shifts value amount bits to the left
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftLeft(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftLeft(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitShiftLeft, amount)
 }
 
 // ShiftRight shifts value amount bits to the right
-func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftRight(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NotUpdatableNumericField[TModel, TAttribute]) ShiftRight(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.addFunction(sql.BitShiftRight, amount)
 }
 
@@ -435,39 +461,43 @@ func (numericField NumericField[TModel, TAttribute]) GetValue() float64 {
 	return 0
 }
 
+func (numericField NumericField[TModel, TAttribute]) GetNumericValue() TAttribute {
+	return 0
+}
+
 func (numericField NumericField[TModel, TAttribute]) toNotUpdatable() NotUpdatableNumericField[TModel, TAttribute] {
 	return NotUpdatableNumericField[TModel, TAttribute]{Field: numericField.Field}
 }
 
 // Plus sums other to value
-func (numericField NumericField[TModel, TAttribute]) Plus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Plus(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Plus(other)
 }
 
 // Minus subtracts other from the value
-func (numericField NumericField[TModel, TAttribute]) Minus(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Minus(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Minus(other)
 }
 
 // Times multiplies value by other
-func (numericField NumericField[TModel, TAttribute]) Times(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Times(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Times(other)
 }
 
 // Divided divides value by other
-func (numericField NumericField[TModel, TAttribute]) Divided(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Divided(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Divided(other)
 }
 
 // Modulo returns the remainder of the entire division
-func (numericField NumericField[TModel, TAttribute]) Modulo(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Modulo(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Modulo(other)
 }
 
 // Power elevates value to other
 //
 // Warning: in sqlite DSQLITE_ENABLE_MATH_FUNCTIONS needs to be enabled or the error "no such function: POWER" will be returned
-func (numericField NumericField[TModel, TAttribute]) Power(other float64) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Power(other ValueOfType[float64]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Power(other)
 }
 
@@ -484,19 +514,19 @@ func (numericField NumericField[TModel, TAttribute]) Absolute() NotUpdatableNume
 }
 
 // And calculates the bitwise AND between value and other
-func (numericField NumericField[TModel, TAttribute]) And(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) And(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().And(other)
 }
 
 // Or calculates the bitwise OR between value and other
-func (numericField NumericField[TModel, TAttribute]) Or(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Or(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Or(other)
 }
 
 // Xor calculates the bitwise XOR (exclusive OR) between value and other
 //
 // Available for: postgres, mysql, sqlserver
-func (numericField NumericField[TModel, TAttribute]) Xor(other int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) Xor(other NumericOfType[TAttribute]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().Xor(other)
 }
 
@@ -506,12 +536,12 @@ func (numericField NumericField[TModel, TAttribute]) Not() NotUpdatableNumericFi
 }
 
 // ShiftLeft shifts value amount bits to the left
-func (numericField NumericField[TModel, TAttribute]) ShiftLeft(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) ShiftLeft(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().ShiftLeft(amount)
 }
 
 // ShiftRight shifts value amount bits to the right
-func (numericField NumericField[TModel, TAttribute]) ShiftRight(amount int) NotUpdatableNumericField[TModel, TAttribute] {
+func (numericField NumericField[TModel, TAttribute]) ShiftRight(amount NumericOfType[int]) NotUpdatableNumericField[TModel, TAttribute] {
 	return numericField.toNotUpdatable().ShiftRight(amount)
 }
 

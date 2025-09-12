@@ -31,15 +31,20 @@ func (condition fieldCondition[TObject, TAtribute]) affectsDeletedAt() bool {
 }
 
 func (condition fieldCondition[TObject, TAtribute]) getSQL(query *CQLQuery, table Table) (string, []any, error) {
+	fieldSQL, fieldValues, err := condition.FieldIdentifier.ToSQLForTable(query, table)
+	if err != nil {
+		return "", nil, err
+	}
+
 	sqlString, values, err := condition.Operator.ToSQL(
 		query,
-		condition.FieldIdentifier.columnSQL(query, table),
+		fieldSQL,
 	)
 	if err != nil {
 		return "", nil, conditionOperatorError[TObject](err, condition)
 	}
 
-	return sqlString, values, nil
+	return sqlString, append(fieldValues, values...), nil
 }
 
 func NewFieldCondition[TObject model.Model, TAttribute any](

@@ -12,6 +12,14 @@ type ValueOfType[T any] interface {
 	GetValue() T
 }
 
+type NumericOfType[T any] interface {
+	IValue
+
+	GetValue() float64
+
+	GetNumericValue() T
+}
+
 type Numeric interface {
 	constraints.Integer | constraints.Float
 }
@@ -20,12 +28,16 @@ type NumericValue[T Numeric] struct {
 	Value T
 }
 
+func (numericValue NumericValue[T]) GetNumericValue() T {
+	return numericValue.Value
+}
+
 func (numericValue NumericValue[T]) GetValue() float64 {
 	return float64(numericValue.Value)
 }
 
 func (numericValue NumericValue[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
-	return "", []any{numericValue.GetValue()}, nil
+	return "", []any{numericValue.Value}, nil
 }
 
 type BoolValue struct {
@@ -37,7 +49,7 @@ func (boolValue BoolValue) GetValue() bool {
 }
 
 func (boolValue BoolValue) ToSQL(_ *CQLQuery) (string, []any, error) {
-	return "", []any{boolValue.GetValue()}, nil
+	return "", []any{boolValue.Value}, nil
 }
 
 type Value[T any] struct {
@@ -49,7 +61,7 @@ func (value Value[T]) GetValue() T {
 }
 
 func (value Value[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
-	return "", []any{value.GetValue()}, nil
+	return "", []any{value.Value}, nil
 }
 
 type unsafeValue struct {

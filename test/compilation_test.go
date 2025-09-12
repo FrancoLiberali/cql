@@ -178,7 +178,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Concat("asd").Is().Eq(cql.Int(1)),
+				conditions.Product.Int.Concat(cql.String("asd")).Is().Eq(cql.Int(1)),
 			)`,
 			Error: `conditions.Product.Int.Concat undefined (type condition.NumericField[models.Product, int] has no field or method Concat)`,
 		},
@@ -187,16 +187,25 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Plus("asd").Is().Eq(cql.Int(1)),
+				conditions.Product.Int.Plus(cql.String("asd")).Is().Eq(cql.Int(1)),
 			)`,
-			Error: `cannot use "asd" (untyped string constant) as float64 value in argument to conditions.Product.Int.Plus`,
+			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "Use function dynamic with incorrect value type",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Plus(conditions.Product.String).Is().Eq(cql.Int(1)),
+			)`,
+			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use function not present for field type inside comparison",
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Is().Eq(conditions.Product.Int.Concat("asd")),
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Concat(cql.String("asd"))),
 			)`,
 			Error: `conditions.Product.Int.Concat undefined (type condition.NumericField[models.Product, int] has no field or method Concat)`,
 		},
@@ -205,9 +214,54 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Code: `
 			_ = %s[models.Product](
 				db,
-				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus("asd")),
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(cql.String("asd"))),
 			)`,
-			Error: `cannot use "asd" (untyped string constant) as float64 value in argument to conditions.Product.Int.Plus`,
+			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "Use function dynamic with incorrect value type inside comparison",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(conditions.Product.String)),
+			)`,
+			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+		},
+		{
+			Name: "Use function with not same type of numeric value for logical operator",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(cql.Float64(1))),
+			)`,
+			Error: `cannot use cql.Float64(1) (value of type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+		},
+		{
+			Name: "Use function with not same type of numeric value for logical operator dynamic",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(conditions.Product.Float)),
+			)`,
+			Error: `cannot use conditions.Product.Float (variable of type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+		},
+		{
+			Name: "Use function with not int type of numeric value for shift operator",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(cql.Float64(1))),
+			)`,
+			Error: `cannot use cql.Float64(1) (value of type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+		},
+		{
+			Name: "Use function with not int type of numeric value for shift operator dynamic",
+			Code: `
+			_ = %s[models.Product](
+				db,
+				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(conditions.Product.Float)),
+			)`,
+			Error: `cannot use conditions.Product.Float (variable of type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
 		},
 	}
 

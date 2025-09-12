@@ -51,6 +51,7 @@ func TestCQL(t *testing.T) {
 	suite.Run(t, NewDeleteIntTestSuite(db))
 	suite.Run(t, NewGroupByIntTestSuite(db))
 	suite.Run(t, NewSelectIntTestSuite(db))
+	suite.Run(t, NewFunctionsIntTestSuite(db))
 }
 
 func NewDBConnection() (*gorm.DB, error) {

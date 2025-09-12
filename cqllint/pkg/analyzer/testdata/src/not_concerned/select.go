@@ -87,7 +87,7 @@ func testSelectJoinedModelWithFunction() {
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.Brand.Name.Concat("1"), func(_ string, _ *Result) {}),
+		cql.ValueInto(conditions.Brand.Name.Concat(cql.String("asd")), func(_ string, _ *Result) {}),
 	)
 }
 
@@ -97,7 +97,7 @@ func testSelectNotJoinedModelWithFunction() {
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.City.Name.Concat("1"), func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		cql.ValueInto(conditions.City.Name.Concat(cql.String("asd")), func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 

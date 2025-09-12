@@ -80,6 +80,6 @@ func testSetDynamicSameValueWithFunction() {
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
-		conditions.Product.Int.Set().Eq(conditions.Product.Int.Plus(1)),
+		conditions.Product.Int.Set().Eq(conditions.Product.Int.Plus(cql.Int(1))),
 	)
 }
