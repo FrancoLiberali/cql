@@ -172,17 +172,13 @@ func findForSetCall(setCall *ast.CallExpr, positionsToReport []Report, models []
 		return positionsToReport
 	}
 
-	model, appearance, isModel := getModelFromExpr(setCall.Args[0])
-	if isModel {
-		positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-	}
+	newModels := getModelsFromExpr(setCall.Args[0])
+	positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
 
 	if methodName == cqlSetMultiple {
 		// set multiple needs more verifications as the model to be set is not compiled
-		model, appearance, isModel := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
-		if isModel {
-			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-		}
+		newModels := getModelFromCall(setCall.Fun.(*ast.SelectorExpr).X.(*ast.CallExpr))
+		positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
 	}
 
 	return positionsToReport
@@ -198,10 +194,8 @@ func findForOrderOrGroupBy(expr ast.Expr, positionsToReport []Report, models []s
 			return positionsToReport
 		}
 
-		model, appearance, isModel := getModelFromCall(exprCall)
-		if isModel {
-			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-		}
+		newModels := getModelFromCall(exprCall)
+		positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
 
 		for _, arg := range exprCall.Args {
 			positionsToReport = findForOrderOrGroupBy(arg, positionsToReport, models)
@@ -213,7 +207,7 @@ func findForOrderOrGroupBy(expr ast.Expr, positionsToReport []Report, models []s
 	if exprSelector, isSelector := expr.(*ast.SelectorExpr); isSelector {
 		model := getModel(exprSelector.X.(*ast.SelectorExpr))
 
-		return addPositionsToReport(positionsToReport, models, model, Appearance{selected: false})
+		return addPositionsToReport(positionsToReport, models, []ModelWithAppearance{{model, Appearance{selected: false}}})
 	}
 
 	if variable, isVar := expr.(*ast.Ident); isVar {
@@ -409,10 +403,8 @@ func findErrorIsDynamicForCall(positionsToReport []Report, models []string, cond
 		}
 
 		if conditionSelector.Sel.Name == "ValueInto" {
-			model, appearance, isModel := getModelFromExpr(conditionCall.Args[0])
-			if isModel {
-				positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-			}
+			newModels := getModelsFromExpr(conditionCall.Args[0])
+			positionsToReport = addPositionsToReport(positionsToReport, models, newModels)
 
 			return positionsToReport, models
 		}
@@ -501,10 +493,7 @@ func findErrorIsDynamicWhereCondition(
 
 func getPositionsToReportFromCall(call *ast.CallExpr, positionsToReport []Report, models []string) []Report {
 	for _, arg := range call.Args {
-		model, appearance, isModel := getModelFromExpr(arg)
-		if isModel {
-			positionsToReport = addPositionsToReport(positionsToReport, models, model, appearance)
-		}
+		positionsToReport = addPositionsToReport(positionsToReport, models, getModelsFromExpr(arg))
 	}
 
 	return positionsToReport
@@ -513,50 +502,55 @@ func getPositionsToReportFromCall(call *ast.CallExpr, positionsToReport []Report
 // add first conditions model to models in case is was not set by the query index
 func addFirstModel(models []string, conditionFunc *ast.SelectorExpr) []string {
 	if len(models) == 0 {
-		model, _, isModel := getModelFromExpr(conditionFunc.X)
-		if isModel {
-			models = append(models, model.Name)
+		newModels := getModelsFromExpr(conditionFunc.X)
+		if len(newModels) > 0 {
+			models = append(models, newModels[0].Model.Name)
 		}
 	}
 
 	return models
 }
 
-func addPositionsToReport(positionsToReport []Report, models []string, model Model, appearance Appearance) []Report {
-	if !pie.Contains(models, model.Name) {
-		return append(positionsToReport, Report{
-			model:   model,
-			message: notJoinedMessage,
-		})
-	}
+func addPositionsToReport(positionsToReport []Report, models []string, newModels []ModelWithAppearance) []Report {
+	for _, newModel := range newModels {
+		model := newModel.Model
+		appearance := newModel.Appearance
 
-	joinedTimes := len(pie.Filter(models, func(modelName string) bool {
-		return modelName == model.Name
-	}))
-
-	if appearance.bypassCheck {
-		return positionsToReport
-	}
-
-	if appearance.selected {
-		if joinedTimes == 1 {
+		if !pie.Contains(models, model.Name) {
 			return append(positionsToReport, Report{
 				model:   model,
-				message: appearanceNotNecessaryMessage,
+				message: notJoinedMessage,
 			})
 		}
 
-		if appearance.number > joinedTimes-1 {
+		joinedTimes := len(pie.Filter(models, func(modelName string) bool {
+			return modelName == model.Name
+		}))
+
+		if appearance.bypassCheck {
+			return positionsToReport
+		}
+
+		if appearance.selected {
+			if joinedTimes == 1 {
+				return append(positionsToReport, Report{
+					model:   model,
+					message: appearanceNotNecessaryMessage,
+				})
+			}
+
+			if appearance.number > joinedTimes-1 {
+				return append(positionsToReport, Report{
+					model:   model,
+					message: appearanceOutOfRangeMessage,
+				})
+			}
+		} else if joinedTimes > 1 {
 			return append(positionsToReport, Report{
 				model:   model,
-				message: appearanceOutOfRangeMessage,
+				message: appearanceMoreThanOnceMessage,
 			})
 		}
-	} else if joinedTimes > 1 {
-		return append(positionsToReport, Report{
-			model:   model,
-			message: appearanceMoreThanOnceMessage,
-		})
 	}
 
 	return positionsToReport
@@ -576,12 +570,15 @@ func getAppearance(call *ast.CallExpr, fun *ast.SelectorExpr) Appearance {
 	return Appearance{selected: false}
 }
 
-func getModelFromExpr(expr ast.Expr) (Model, Appearance, bool) {
+func getModelsFromExpr(expr ast.Expr) []ModelWithAppearance {
 	argSelector, isSelector := expr.(*ast.SelectorExpr)
 	if isSelector {
 		model, isModel := getModelFromSelector(argSelector)
+		if isModel {
+			return []ModelWithAppearance{{model, Appearance{bypassCheck: true}}}
+		}
 
-		return model, Appearance{}, isModel
+		return nil
 	}
 
 	argCall, isCall := expr.(*ast.CallExpr)
@@ -591,34 +588,37 @@ func getModelFromExpr(expr ast.Expr) (Model, Appearance, bool) {
 
 	argVar, isVar := expr.(*ast.Ident)
 	if isVar {
-		return getModelFromVar(argVar)
+		return []ModelWithAppearance{getModelFromVar(argVar)}
 	}
 
-	return Model{}, Appearance{}, false
+	return nil
 }
 
 // Returns model's package the model name and true if Appearance method is called
-func getModelFromVar(variable *ast.Ident) (Model, Appearance, bool) {
-	return getModel(variable),
+func getModelFromVar(variable *ast.Ident) ModelWithAppearance {
+	return ModelWithAppearance{
+		getModel(variable),
 		Appearance{bypassCheck: true}, // Appearance for variables not implemented
-		true
+	}
 }
 
-type Model2 struct {
+type ModelWithAppearance struct {
 	Model      Model
 	Appearance Appearance
 }
 
 // Returns model's package the model name and true if Appearance method is called
-func getModelFromCall(call *ast.CallExpr) (Model, Appearance, bool) {
+func getModelFromCall(call *ast.CallExpr) []ModelWithAppearance {
 	if funSelector, isSelector := call.Fun.(*ast.SelectorExpr); isSelector {
 		if selectorX, isXSelector := funSelector.X.(*ast.SelectorExpr); isXSelector {
 			model, isModel := getModelFromSelector(selectorX)
 			if isModel {
-				return model, getAppearance(call, funSelector), isModel
+				appearance := getAppearance(call, funSelector)
+
+				return []ModelWithAppearance{ModelWithAppearance{model, appearance}}
 			}
 
-			return Model{}, Appearance{}, false
+			return nil
 		}
 
 		if xCall, isCall := funSelector.X.(*ast.CallExpr); isCall {
@@ -627,11 +627,11 @@ func getModelFromCall(call *ast.CallExpr) (Model, Appearance, bool) {
 		}
 
 		if argVar, isVar := funSelector.X.(*ast.Ident); isVar && argVar.Name != "cql" {
-			return getModelFromVar(argVar)
+			return []ModelWithAppearance{getModelFromVar(argVar)}
 		}
 	}
 
-	return Model{}, Appearance{}, false
+	return nil
 }
 
 // Returns model's package the model name and true if Appearance method is called
