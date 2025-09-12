@@ -622,7 +622,7 @@ func getModelFromCallFunction(call *ast.CallExpr) []ModelWithAppearance {
 			if isModel {
 				appearance := getAppearance(call, funSelector)
 
-				return []ModelWithAppearance{ModelWithAppearance{model, appearance}}
+				return []ModelWithAppearance{{model, appearance}}
 			}
 
 			return nil
