@@ -150,7 +150,7 @@ func (aggregation AggregationResult[T]) ToSQL(query *CQLQuery) (string, []any, e
 		return "", nil, functionError(ErrUnsupportedByDatabase, aggregation.Function)
 	}
 
-	return function.ApplyTo(columnSQL, 0), columnValues, nil
+	return function.ApplyTo(columnSQL, nil), columnValues, nil
 }
 
 func (aggregation AggregationResult[T]) toSelectSQL(query *CQLQuery, as string) (string, []any, error) {

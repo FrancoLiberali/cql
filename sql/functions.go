@@ -3,7 +3,7 @@ package sql
 import "strings"
 
 type Function interface {
-	ApplyTo(internalSQL string, values int) string
+	ApplyTo(internalSQL string, values []string) string
 }
 
 type FunctionFunction struct {
@@ -12,13 +12,17 @@ type FunctionFunction struct {
 	sqlSuffix   string
 }
 
-func (f FunctionFunction) ApplyTo(internalSQL string, values int) string {
+func (f FunctionFunction) ApplyTo(internalSQL string, values []string) string {
 	finalSQL := f.sqlPrefix
 
 	if f.sqlFunction != "" {
-		placeholders := strings.Repeat(", ?", values)
+		valuesSQL := ""
 
-		finalSQL += f.sqlFunction + "(" + internalSQL + placeholders
+		if len(values) != 0 {
+			valuesSQL = ", " + strings.Join(values, ", ")
+		}
+
+		finalSQL += f.sqlFunction + "(" + internalSQL + valuesSQL
 
 		if !strings.Contains(f.sqlFunction, "(") {
 			finalSQL += ")"
@@ -36,15 +40,15 @@ type OperatorFunction struct {
 	sqlOperator string
 }
 
-func (f OperatorFunction) ApplyTo(internalSQL string, _ int) string {
-	return "(" + internalSQL + " " + f.sqlOperator + " ?)"
+func (f OperatorFunction) ApplyTo(internalSQL string, values []string) string {
+	return "(" + internalSQL + " " + f.sqlOperator + " " + values[0] + ")"
 }
 
 type PreOperatorFunction struct {
 	sqlOperator string
 }
 
-func (f PreOperatorFunction) ApplyTo(internalSQL string, _ int) string {
+func (f PreOperatorFunction) ApplyTo(internalSQL string, _ []string) string {
 	return f.sqlOperator + internalSQL
 }
 

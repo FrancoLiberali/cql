@@ -47,10 +47,6 @@ func UInt64(value uint64) condition.NumericValue[uint64] {
 	return condition.UInt64(value)
 }
 
-func UIntPTR(value uintptr) condition.NumericValue[uintptr] {
-	return condition.UIntPTR(value)
-}
-
 func Float32(value float32) condition.NumericValue[float32] {
 	return condition.Float32(value)
 }

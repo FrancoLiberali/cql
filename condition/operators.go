@@ -106,10 +106,16 @@ func IsNotDistinct[T any](value IValue) Operator[T] {
 
 type IValueList[T any] []ValueOfType[T]
 
-func (values IValueList[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
+func (values IValueList[T]) ToSQL(query *CQLQuery) (string, []any, error) {
 	valuesAny := make([]any, 0, len(values))
+
 	for _, value := range values {
-		valuesAny = append(valuesAny, value.GetValue())
+		_, valueValues, err := value.ToSQL(query)
+		if err != nil {
+			return "", nil, err
+		}
+
+		valuesAny = append(valuesAny, valueValues...)
 	}
 
 	return "", valuesAny, nil
