@@ -100,9 +100,104 @@ func (ts *InsertIntTestSuite) TestInsertInBatches() {
 	ts.Len(productsReturned, 2)
 }
 
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictAnyDoNothingThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict().DoNothing().Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+	ts.NotEmpty(product.ID)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict(conditions.Product.ID).DoNothing().Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+	ts.NotEmpty(product.ID)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneConflictReturnsError() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).Exec()
+	ts.ErrorContains(err, "UNIQUE constraint failed: products.id")
+	ts.Equal(int64(0), inserted)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictAnyDoNothingThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict().DoNothing().Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(0), inserted)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict(conditions.Product.ID).DoNothing().Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(0), inserted)
+	ts.NotEmpty(product.ID)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
 // create from map no
 // create from sql expresion si puede ser, pero es lo mismo que gormValue, asi que no, pero igual es algo que no estoy manejando bien me parece en las queries
 // upser / onconflict si interesante pero meter la logica de tipos
 // tiene el update all, el do nothing y el update solo algunas columnas al valor de la query o a otro valor
 // insert select es donde esta lo mas interesante
 // insert returning no tiene mucho sentido para el que es por objetos pero si para el que es por select
+
+// TODO inserts con relaciones test
