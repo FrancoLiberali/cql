@@ -193,6 +193,120 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() 
 	ts.Len(productsReturned, 1)
 }
 
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict().UpdateAll().Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+	ts.NotEmpty(product.ID)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	product.Int = 2
+	product.Float = 1
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict().UpdateAll().Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 0)
+
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict().Update(conditions.Product.Int).Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+	ts.NotEmpty(product.ID)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	product.Int = 2
+	product.Float = 1
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict().Update(conditions.Product.Int).Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 0)
+
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Float.Is().Eq(cql.Int(0)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Float.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 0)
+}
+
 // create from map no
 // create from sql expresion si puede ser, pero es lo mismo que gormValue, asi que no, pero igual es algo que no estoy manejando bien me parece en las queries
 // upser / onconflict si interesante pero meter la logica de tipos
@@ -201,3 +315,4 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() 
 // insert returning no tiene mucho sentido para el que es por objetos pero si para el que es por select
 
 // TODO inserts con relaciones test
+// TODO multiple clauses test

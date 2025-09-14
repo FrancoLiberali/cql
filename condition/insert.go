@@ -57,6 +57,34 @@ func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
 	return insertOnConflict.insert
 }
 
+func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *Insert[T] {
+	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
+		Columns:   insertOnConflict.onConflictColumns,
+		UpdateAll: true,
+	})
+
+	return insertOnConflict.insert
+}
+
+func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T] {
+	fieldNames := make([]string, 0, len(fields))
+
+	for _, field := range fields {
+		fieldNames = append(
+			fieldNames,
+			// TODO deberia ser el nombre completo por si los nombres se repiten
+			field.fieldName(),
+		)
+	}
+
+	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
+		Columns:   insertOnConflict.onConflictColumns,
+		DoUpdates: clause.AssignmentColumns(fieldNames),
+	})
+
+	return insertOnConflict.insert
+}
+
 // TODO docs
 func (insert *Insert[T]) Exec() (int64, error) {
 	result := insert.tx.Create(insert.models)
