@@ -72,7 +72,6 @@ func (ts *FunctionsIntTestSuite) TestFunctionOnLeftSideWithDynamicValue() {
 	ts.createProduct("", 3, 0.0, false, nil)
 	ts.createProduct("", 0, 0.0, false, nil)
 
-	// TODO falta el lint para esto
 	entities, err := cql.Query[models.Product](
 		ts.db,
 		conditions.Product.Int.Plus(conditions.Product.Int).Is().Eq(cql.Int(4)),
