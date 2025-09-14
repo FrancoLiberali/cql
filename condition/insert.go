@@ -50,7 +50,8 @@ type InsertOnConflict[T model.Model] struct {
 func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
 	// TODO esto podria ir en cql query
 	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
-		// TODO ver todas las opciones que tiene esto
+		// TODO TargetWhere
+		// TODO OnContraint
 		Columns:   insertOnConflict.onConflictColumns,
 		DoNothing: true,
 	})
@@ -145,10 +146,9 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause
 			return clause.OnConflict{}, err
 		}
 
-		if setSQL == "" && len(setValues) == 1 {
+		if setSQL == "" {
 			assignments[set.getField().fieldName()] = setValues[0]
 		} else {
-			// TODO esto no anda creo
 			assignments[set.getField().fieldName()] = gorm.Expr(
 				setSQL,
 				setValues...,

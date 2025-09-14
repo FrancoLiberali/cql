@@ -360,6 +360,37 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflicts() {
 	ts.Len(productsReturned, 1)
 }
 
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
+	ts.createProduct("", 3, 0, false, nil)
+
+	product := ts.createProduct("", 1, 1, false, nil)
+	ts.NotEmpty(product.ID)
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConflict().Set(
+		// TODO aca tambien necesita linter aunque no seria necesario realmente
+		conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
+	).Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 0)
+
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() {
 	product1 := ts.createProduct("", 3, 0, false, nil)
 	product2 := ts.createProduct("", 1, 0, false, nil)
@@ -408,6 +439,45 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Where(
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Exec()
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
+
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 0)
+
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(3)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWithWhereDynamic() {
+	product1 := ts.createProduct("", 3, 0, false, nil)
+	product2 := ts.createProduct("", 1, 0, false, nil)
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product1,
+		product2,
+	).OnConflict().Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Where(
+		// TODO aca tambien necesita linter aunque no seria necesario realmente
+		conditions.Product.Int.Is().Eq(conditions.Product.Float.Plus(cql.Int(1))),
 	).Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
