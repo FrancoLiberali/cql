@@ -8,6 +8,7 @@ import (
 
 type Insert[T model.Model] struct {
 	tx                *gorm.DB
+	err               error
 	models            []*T
 	onConflictColumns []string
 }
@@ -85,8 +86,88 @@ func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T]
 	return insertOnConflict.insert
 }
 
+func (insertOnConflict *InsertOnConflict[T]) Set(sets ...*Set[T]) *InsertOnConflictSet[T] {
+	return &InsertOnConflictSet[T]{
+		insertOnConflict: insertOnConflict,
+		sets:             sets,
+	}
+}
+
+type InsertOnConflictSet[T model.Model] struct {
+	insertOnConflict *InsertOnConflict[T]
+
+	sets []*Set[T]
+}
+
+func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
+	insert := insertOnConflictSet.insertOnConflict.insert
+
+	onConflictClause, err := insertOnConflictSet.getOnConflictClause()
+	if err != nil {
+		return 0, err
+	}
+
+	insert.tx = insert.tx.Clauses(onConflictClause)
+
+	return insert.Exec()
+}
+
+func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition[T]) *Insert[T] {
+	insert := insertOnConflictSet.insertOnConflict.insert
+
+	query := NewQuery(insert.tx, conditions...)
+
+	onConflictClause, err := insertOnConflictSet.getOnConflictClause()
+	if err != nil {
+		insert.err = err
+	}
+
+	where, isWhere := query.cqlQuery.gormDB.Statement.Clauses["WHERE"].Expression.(clause.Where)
+	if isWhere {
+		onConflictClause.Where = where
+	}
+
+	insert.tx = insert.tx.Clauses(onConflictClause)
+
+	return insert
+}
+
+func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause.OnConflict, error) {
+	assignments := map[string]any{}
+
+	insert := insertOnConflictSet.insertOnConflict.insert
+
+	query := NewQuery[T](insert.tx)
+
+	for _, set := range insertOnConflictSet.sets {
+		setSQL, setValues, err := set.getValue().ToSQL(query.cqlQuery)
+		if err != nil {
+			return clause.OnConflict{}, err
+		}
+
+		if setSQL == "" && len(setValues) == 1 {
+			assignments[set.getField().fieldName()] = setValues[0]
+		} else {
+			// TODO esto no anda creo
+			assignments[set.getField().fieldName()] = gorm.Expr(
+				setSQL,
+				setValues...,
+			)
+		}
+	}
+
+	return clause.OnConflict{
+		Columns:   insertOnConflictSet.insertOnConflict.onConflictColumns,
+		DoUpdates: clause.Assignments(assignments),
+	}, nil
+}
+
 // TODO docs
 func (insert *Insert[T]) Exec() (int64, error) {
+	if insert.err != nil {
+		return 0, insert.err
+	}
+
 	result := insert.tx.Create(insert.models)
 
 	return result.RowsAffected, result.Error
@@ -94,6 +175,10 @@ func (insert *Insert[T]) Exec() (int64, error) {
 
 // TODO docs
 func (insert *Insert[T]) ExecInBatches(batchSize int) (int64, error) {
+	if insert.err != nil {
+		return 0, insert.err
+	}
+
 	result := insert.tx.CreateInBatches(insert.models, batchSize)
 
 	return result.RowsAffected, result.Error
