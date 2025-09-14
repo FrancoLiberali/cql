@@ -29,7 +29,7 @@ func (ts *InsertIntTestSuite) TestInsertOne() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	)
+	).Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
 	ts.NotEmpty(product.ID)
@@ -57,7 +57,7 @@ func (ts *InsertIntTestSuite) TestInsertMultiple() {
 		ts.db,
 		product1,
 		product2,
-	)
+	).Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(2), inserted)
 	ts.NotEmpty(product1.ID)
@@ -82,12 +82,11 @@ func (ts *InsertIntTestSuite) TestInsertInBatches() {
 		String: "2",
 	}
 
-	inserted, err := cql.InsertInBatches(
+	inserted, err := cql.Insert(
 		ts.db,
-		1,
 		product1,
 		product2,
-	)
+	).ExecInBatches(1)
 	ts.Require().NoError(err)
 	ts.Equal(int64(2), inserted)
 	ts.NotEmpty(product1.ID)
@@ -101,8 +100,9 @@ func (ts *InsertIntTestSuite) TestInsertInBatches() {
 	ts.Len(productsReturned, 2)
 }
 
-// insert batch desde models me interesa
 // create from map no
 // create from sql expresion si puede ser, pero es lo mismo que gormValue, asi que no, pero igual es algo que no estoy manejando bien me parece en las queries
 // upser / onconflict si interesante pero meter la logica de tipos
 // tiene el update all, el do nothing y el update solo algunas columnas al valor de la query o a otro valor
+// insert select es donde esta lo mas interesante
+// insert returning no tiene mucho sentido para el que es por objetos pero si para el que es por select
