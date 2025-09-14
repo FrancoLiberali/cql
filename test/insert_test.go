@@ -2,6 +2,7 @@ package test
 
 import (
 	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 	"gorm.io/gorm"
@@ -150,8 +151,14 @@ func (ts *InsertIntTestSuite) TestInsertOneConflictReturnsError() {
 		ts.db,
 		product,
 	).Exec()
-	ts.ErrorContains(err, "UNIQUE constraint failed: products.id")
 	ts.Equal(int64(0), inserted)
+
+	switch getDBDialector() {
+	case sql.Postgres:
+		ts.ErrorContains(err, `duplicate key value violates unique constraint "products_pkey" (SQLSTATE 23505)`)
+	default:
+		ts.ErrorContains(err, "UNIQUE constraint failed: products.id")
+	}
 }
 
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictAnyDoNothingThatConflicts() {
@@ -201,7 +208,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatInserts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict().UpdateAll().Exec()
+	).OnConflict(conditions.Product.ID).UpdateAll().Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
 	ts.NotEmpty(product.ID)
@@ -224,7 +231,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict().UpdateAll().Exec()
+	).OnConflict(conditions.Product.ID).UpdateAll().Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
 
@@ -243,6 +250,56 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
 	ts.Len(productsReturned, 1)
 }
 
+// func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatInserts() {
+// 	product := &models.Product{
+// 		Int: 1,
+// 	}
+
+// 	inserted, err := cql.Insert(
+// 		ts.db,
+// 		product,
+// 	).OnConstraint("products_pkey").UpdateAll().Exec()
+// 	ts.Require().NoError(err)
+// 	ts.Equal(int64(1), inserted)
+// 	ts.NotEmpty(product.ID)
+
+// 	productsReturned, err := cql.Query(
+// 		ts.db,
+// 		conditions.Product.Int.Is().Eq(cql.Int(1)),
+// 	).Find()
+// 	ts.Require().NoError(err)
+// 	ts.Len(productsReturned, 1)
+// }
+
+// func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatConflicts() {
+// 	product := ts.createProduct("", 1, 0, false, nil)
+// 	ts.NotEmpty(product.ID)
+
+// 	product.Int = 2
+// 	product.Float = 1
+
+// 	inserted, err := cql.Insert(
+// 		ts.db,
+// 		product,
+// 	).OnConstraint("products.id").UpdateAll().Exec()
+// 	ts.Require().NoError(err)
+// 	ts.Equal(int64(1), inserted)
+
+// 	productsReturned, err := cql.Query(
+// 		ts.db,
+// 		conditions.Product.Int.Is().Eq(cql.Int(1)),
+// 	).Find()
+// 	ts.Require().NoError(err)
+// 	ts.Len(productsReturned, 0)
+
+// 	productsReturned, err = cql.Query(
+// 		ts.db,
+// 		conditions.Product.Int.Is().Eq(cql.Int(2)),
+// 	).Find()
+// 	ts.Require().NoError(err)
+// 	ts.Len(productsReturned, 1)
+// }
+
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatInserts() {
 	product := &models.Product{
 		Int: 1,
@@ -251,7 +308,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatInserts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict().Update(conditions.Product.Int).Exec()
+	).OnConflict(conditions.Product.ID).Update(conditions.Product.Int).Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
 	ts.NotEmpty(product.ID)
@@ -274,7 +331,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatConflicts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict().Update(conditions.Product.Int).Exec()
+	).OnConflict(conditions.Product.ID).Update(conditions.Product.Int).Exec()
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
 
@@ -315,7 +372,8 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatInserts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict().Set(
+	).OnConflict(conditions.Product.ID).Set(
+		// TODO quantity = your_table.quantity + EXCLUDED.quantity;
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Exec()
 	ts.Require().NoError(err)
@@ -339,7 +397,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflicts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict().Set(
+	).OnConflict(conditions.Product.ID).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Exec()
 	ts.Require().NoError(err)
@@ -369,7 +427,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict().Set(
+	).OnConflict(conditions.Product.ID).Set(
 		// TODO aca tambien necesita linter aunque no seria necesario realmente
 		conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
 	).Exec()
@@ -399,7 +457,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 		ts.db,
 		product1,
 		product2,
-	).OnConflict().Set(
+	).OnConflict(conditions.Product.ID).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Exec()
 	ts.Require().NoError(err)
@@ -435,7 +493,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.db,
 		product1,
 		product2,
-	).OnConflict().Set(
+	).OnConflict(conditions.Product.ID).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Where(
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
@@ -473,7 +531,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.db,
 		product1,
 		product2,
-	).OnConflict().Set(
+	).OnConflict(conditions.Product.ID).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Where(
 		// TODO aca tambien necesita linter aunque no seria necesario realmente

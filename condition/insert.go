@@ -1,16 +1,17 @@
 package condition
 
 import (
-	"github.com/FrancoLiberali/cql/model"
+	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	"github.com/FrancoLiberali/cql/model"
 )
 
 type Insert[T model.Model] struct {
-	tx                *gorm.DB
-	err               error
-	models            []*T
-	onConflictColumns []string
+	tx     *gorm.DB
+	err    error
+	models []*T
 }
 
 func NewInsert[T model.Model](tx *gorm.DB, models []*T) *Insert[T] {
@@ -25,15 +26,14 @@ func NewInsert[T model.Model](tx *gorm.DB, models []*T) *Insert[T] {
 // o hacer dos metodos uno para insertar solo un model y otro para insertar junto con las relations
 // que ahi si necesitas Ifield. El linter lo necesitas de una forma o la otra
 func (insert *Insert[T]) OnConflict(fields ...IField) *InsertOnConflict[T] {
-	onConflictColumns := make([]clause.Column, 0, len(fields))
-
-	for _, field := range fields {
-		onConflictColumns = append(
-			onConflictColumns,
-			// TODO deberia ser el nombre completo por si los nombres se repiten
-			clause.Column{Name: field.fieldName()},
-		)
-	}
+	// TODO postgresql necesita al menos 1 mientras que sqllite no
+	// menos para do nothing
+	onConflictColumns := pie.Map(
+		insert.getFieldNames(fields),
+		func(fieldName string) clause.Column {
+			return clause.Column{Name: fieldName}
+		},
+	)
 
 	return &InsertOnConflict[T]{
 		insert:            insert,
@@ -41,19 +41,41 @@ func (insert *Insert[T]) OnConflict(fields ...IField) *InsertOnConflict[T] {
 	}
 }
 
+func (insert *Insert[T]) getFieldNames(fields []IField) []string {
+	query := NewQuery[T](insert.tx)
+
+	fieldNames := make([]string, 0, len(fields))
+
+	for _, field := range fields {
+		fieldNames = append(
+			fieldNames,
+			field.columnName(query.cqlQuery, query.cqlQuery.initialTable),
+		)
+	}
+
+	return fieldNames
+}
+
+func (insert *Insert[T]) OnConstraint(constraintName string) *InsertOnConflict[T] {
+	return &InsertOnConflict[T]{
+		insert:       insert,
+		onConstraint: constraintName,
+	}
+}
+
 type InsertOnConflict[T model.Model] struct {
 	insert *Insert[T]
 
 	onConflictColumns []clause.Column
+	onConstraint      string
 }
 
 func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
 	// TODO esto podria ir en cql query
 	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
-		// TODO TargetWhere
-		// TODO OnContraint
-		Columns:   insertOnConflict.onConflictColumns,
-		DoNothing: true,
+		OnConstraint: insertOnConflict.onConstraint,
+		Columns:      insertOnConflict.onConflictColumns,
+		DoNothing:    true,
 	})
 
 	return insertOnConflict.insert
@@ -61,27 +83,22 @@ func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
 
 func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *Insert[T] {
 	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
-		Columns:   insertOnConflict.onConflictColumns,
-		UpdateAll: true,
+		OnConstraint: insertOnConflict.onConstraint,
+		Columns:      insertOnConflict.onConflictColumns,
+		UpdateAll:    true,
 	})
 
 	return insertOnConflict.insert
 }
 
 func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T] {
-	fieldNames := make([]string, 0, len(fields))
-
-	for _, field := range fields {
-		fieldNames = append(
-			fieldNames,
-			// TODO deberia ser el nombre completo por si los nombres se repiten
-			field.fieldName(),
-		)
-	}
+	// TODO estos fields podrian ser de solo T
+	fieldNames := insertOnConflict.insert.getFieldNames(fields)
 
 	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
-		Columns:   insertOnConflict.onConflictColumns,
-		DoUpdates: clause.AssignmentColumns(fieldNames),
+		OnConstraint: insertOnConflict.onConstraint,
+		Columns:      insertOnConflict.onConflictColumns,
+		DoUpdates:    clause.AssignmentColumns(fieldNames),
 	})
 
 	return insertOnConflict.insert
@@ -146,10 +163,12 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause
 			return clause.OnConflict{}, err
 		}
 
+		fieldColumn := set.getField().columnName(query.cqlQuery, query.cqlQuery.initialTable)
+
 		if setSQL == "" {
-			assignments[set.getField().fieldName()] = setValues[0]
+			assignments[fieldColumn] = setValues[0]
 		} else {
-			assignments[set.getField().fieldName()] = gorm.Expr(
+			assignments[fieldColumn] = gorm.Expr(
 				setSQL,
 				setValues...,
 			)
@@ -157,8 +176,9 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause
 	}
 
 	return clause.OnConflict{
-		Columns:   insertOnConflictSet.insertOnConflict.onConflictColumns,
-		DoUpdates: clause.Assignments(assignments),
+		OnConstraint: insertOnConflictSet.insertOnConflict.onConstraint,
+		Columns:      insertOnConflictSet.insertOnConflict.onConflictColumns,
+		DoUpdates:    clause.Assignments(assignments),
 	}, nil
 }
 
