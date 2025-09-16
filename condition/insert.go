@@ -6,10 +6,12 @@ import (
 	"gorm.io/gorm/clause"
 
 	"github.com/FrancoLiberali/cql/model"
+	"github.com/FrancoLiberali/cql/sql"
 )
 
 type Insert[T model.Model] struct {
 	tx     *gorm.DB
+	query  *CQLQuery
 	err    error
 	models []*T
 }
@@ -17,6 +19,7 @@ type Insert[T model.Model] struct {
 func NewInsert[T model.Model](tx *gorm.DB, models []*T) *Insert[T] {
 	return &Insert[T]{
 		tx:     tx,
+		query:  NewQuery[T](tx).cqlQuery,
 		models: models,
 	}
 }
@@ -42,14 +45,12 @@ func (insert *Insert[T]) OnConflict(fields ...IField) *InsertOnConflict[T] {
 }
 
 func (insert *Insert[T]) getFieldNames(fields []IField) []string {
-	query := NewQuery[T](insert.tx)
-
 	fieldNames := make([]string, 0, len(fields))
 
 	for _, field := range fields {
 		fieldNames = append(
 			fieldNames,
-			field.columnName(query.cqlQuery, query.cqlQuery.initialTable),
+			field.columnName(insert.query, insert.query.initialTable),
 		)
 	}
 
@@ -63,6 +64,10 @@ func (insert *Insert[T]) OnConstraint(constraintName string) *InsertOnConflict[T
 	}
 }
 
+func (insert *Insert[T]) addOnConflictClause(clause clause.OnConflict) {
+	insert.tx = insert.tx.Clauses(clause)
+}
+
 type InsertOnConflict[T model.Model] struct {
 	insert *Insert[T]
 
@@ -71,8 +76,7 @@ type InsertOnConflict[T model.Model] struct {
 }
 
 func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
-	// TODO esto podria ir en cql query
-	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
+	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
 		OnConstraint: insertOnConflict.onConstraint,
 		Columns:      insertOnConflict.onConflictColumns,
 		DoNothing:    true,
@@ -82,7 +86,7 @@ func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
 }
 
 func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *Insert[T] {
-	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
+	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
 		OnConstraint: insertOnConflict.onConstraint,
 		Columns:      insertOnConflict.onConflictColumns,
 		UpdateAll:    true,
@@ -95,7 +99,7 @@ func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T]
 	// TODO estos fields podrian ser de solo T
 	fieldNames := insertOnConflict.insert.getFieldNames(fields)
 
-	insertOnConflict.insert.tx = insertOnConflict.insert.tx.Clauses(clause.OnConflict{
+	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
 		OnConstraint: insertOnConflict.onConstraint,
 		Columns:      insertOnConflict.onConflictColumns,
 		DoUpdates:    clause.AssignmentColumns(fieldNames),
@@ -125,27 +129,34 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
 		return 0, err
 	}
 
-	insert.tx = insert.tx.Clauses(onConflictClause)
+	insert.addOnConflictClause(onConflictClause)
 
 	return insert.Exec()
 }
 
+// Available for: postgres, sqlserver, sqlite
 func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition[T]) *Insert[T] {
 	insert := insertOnConflictSet.insertOnConflict.insert
 
-	query := NewQuery(insert.tx, conditions...)
+	if insert.query.Dialector() == sql.MySQL {
+		insert.err = methodError(ErrUnsupportedByDatabase, "Where")
+
+		return insert
+	}
+
+	insert.query = NewQuery(insert.query.gormDB, conditions...).cqlQuery
 
 	onConflictClause, err := insertOnConflictSet.getOnConflictClause()
 	if err != nil {
 		insert.err = err
 	}
 
-	where, isWhere := query.cqlQuery.gormDB.Statement.Clauses["WHERE"].Expression.(clause.Where)
+	where, isWhere := insert.query.gormDB.Statement.Clauses["WHERE"].Expression.(clause.Where)
 	if isWhere {
 		onConflictClause.Where = where
 	}
 
-	insert.tx = insert.tx.Clauses(onConflictClause)
+	insert.addOnConflictClause(onConflictClause)
 
 	return insert
 }
@@ -155,15 +166,13 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause
 
 	insert := insertOnConflictSet.insertOnConflict.insert
 
-	query := NewQuery[T](insert.tx)
-
 	for _, set := range insertOnConflictSet.sets {
-		setSQL, setValues, err := set.getValue().ToSQL(query.cqlQuery)
+		setSQL, setValues, err := set.getValue().ToSQL(insert.query)
 		if err != nil {
 			return clause.OnConflict{}, err
 		}
 
-		fieldColumn := set.getField().columnName(query.cqlQuery, query.cqlQuery.initialTable)
+		fieldColumn := set.getField().columnName(insert.query, insert.query.initialTable)
 
 		if setSQL == "" {
 			assignments[fieldColumn] = setValues[0]
@@ -183,6 +192,7 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause
 }
 
 // TODO docs
+// TODO comentario de que mysql retorna otra cosa
 func (insert *Insert[T]) Exec() (int64, error) {
 	if insert.err != nil {
 		return 0, insert.err

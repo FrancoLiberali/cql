@@ -156,6 +156,9 @@ func (ts *InsertIntTestSuite) TestInsertOneConflictReturnsError() {
 	switch getDBDialector() {
 	case sql.Postgres:
 		ts.ErrorContains(err, `duplicate key value violates unique constraint "products_pkey" (SQLSTATE 23505)`)
+	case sql.MySQL:
+		ts.ErrorContains(err, `Error 1062 (23000): Duplicate entry `)
+		ts.ErrorContains(err, `for key 'products.PRIMARY'`)
 	default:
 		ts.ErrorContains(err, "UNIQUE constraint failed: products.id")
 	}
@@ -233,7 +236,13 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
 		product,
 	).OnConflict(conditions.Product.ID).UpdateAll().Exec()
 	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
+
+	switch getDBDialector() {
+	case sql.MySQL:
+		ts.Equal(int64(2), inserted)
+	default:
+		ts.Equal(int64(1), inserted)
+	}
 
 	productsReturned, err := cql.Query(
 		ts.db,
@@ -333,7 +342,13 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatConflicts() {
 		product,
 	).OnConflict(conditions.Product.ID).Update(conditions.Product.Int).Exec()
 	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
+
+	switch getDBDialector() {
+	case sql.MySQL:
+		ts.Equal(int64(2), inserted)
+	default:
+		ts.Equal(int64(1), inserted)
+	}
 
 	productsReturned, err := cql.Query(
 		ts.db,
@@ -401,7 +416,13 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflicts() {
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Exec()
 	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
+
+	switch getDBDialector() {
+	case sql.MySQL:
+		ts.Equal(int64(2), inserted)
+	default:
+		ts.Equal(int64(1), inserted)
+	}
 
 	productsReturned, err := cql.Query(
 		ts.db,
@@ -432,7 +453,13 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 		conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
 	).Exec()
 	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
+
+	switch getDBDialector() {
+	case sql.MySQL:
+		ts.Equal(int64(2), inserted)
+	default:
+		ts.Equal(int64(1), inserted)
+	}
 
 	productsReturned, err := cql.Query(
 		ts.db,
@@ -461,7 +488,13 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Exec()
 	ts.Require().NoError(err)
-	ts.Equal(int64(2), inserted)
+
+	switch getDBDialector() {
+	case sql.MySQL:
+		ts.Equal(int64(4), inserted)
+	default:
+		ts.Equal(int64(2), inserted)
+	}
 
 	productsReturned, err := cql.Query(
 		ts.db,
@@ -498,29 +531,37 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	).Where(
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
 
-	productsReturned, err := cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(1)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 0)
+	switch getDBDialector() {
+	case sql.MySQL:
+		// Where is not supported by mysql
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: Where")
+	default:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
 
-	productsReturned, err = cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(3)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 0)
 
-	productsReturned, err = cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(2)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+		productsReturned, err = cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(3)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+
+		productsReturned, err = cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(2)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
 }
 
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWithWhereDynamic() {
@@ -537,29 +578,37 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		// TODO aca tambien necesita linter aunque no seria necesario realmente
 		conditions.Product.Int.Is().Eq(conditions.Product.Float.Plus(cql.Int(1))),
 	).Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
 
-	productsReturned, err := cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(1)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 0)
+	switch getDBDialector() {
+	case sql.MySQL:
+		// Where is not supported by mysql
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: Where")
+	default:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
 
-	productsReturned, err = cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(3)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 0)
 
-	productsReturned, err = cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(2)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+		productsReturned, err = cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(3)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+
+		productsReturned, err = cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(2)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
 }
 
 // create from map no
