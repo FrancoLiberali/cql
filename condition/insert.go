@@ -24,15 +24,30 @@ func NewInsert[T model.Model](tx *gorm.DB, models []*T) *Insert[T] {
 	}
 }
 
+// WARNING: in postgres OnConflict can be used only with DoNothing,
+// for UpdateAll, Update and Set, OnConflictOn must be used
+func (insert *Insert[T]) OnConflict() *InsertOnConflict[T] {
+	return &InsertOnConflict[T]{
+		insert: insert,
+	}
+}
+
 // TODO este ifield puede ser de cualquier model
 // o necesita linter
 // o hacer dos metodos uno para insertar solo un model y otro para insertar junto con las relations
 // que ahi si necesitas Ifield. El linter lo necesitas de una forma o la otra
-func (insert *Insert[T]) OnConflict(fields ...IField) *InsertOnConflict[T] {
-	// TODO postgresql necesita al menos 1 mientras que sqllite no
-	// menos para do nothing
+// Available for: postgres, sqlite
+func (insert *Insert[T]) OnConflictOn(field IField, fields ...IField) *InsertOnConflict[T] {
+	if insert.query.Dialector() == sql.MySQL || insert.query.Dialector() == sql.SQLServer {
+		insert.err = methodError(ErrUnsupportedByDatabase, "OnConflictOn")
+
+		return &InsertOnConflict[T]{
+			insert: insert,
+		}
+	}
+
 	onConflictColumns := pie.Map(
-		insert.getFieldNames(fields),
+		insert.getFieldNames(pie.Unshift(fields, field)),
 		func(fieldName string) clause.Column {
 			return clause.Column{Name: fieldName}
 		},
@@ -85,7 +100,15 @@ func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
 	return insertOnConflict.insert
 }
 
+func (insertOnConflict *InsertOnConflict[T]) addPostgresErrorIfNotColumns(msg string) {
+	if insertOnConflict.insert.query.Dialector() == sql.Postgres && len(insertOnConflict.onConflictColumns) == 0 {
+		insertOnConflict.insert.err = methodError(ErrUnsupportedByDatabase, msg)
+	}
+}
+
 func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *Insert[T] {
+	insertOnConflict.addPostgresErrorIfNotColumns("UpdateAll after OnConflict")
+
 	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
 		OnConstraint: insertOnConflict.onConstraint,
 		Columns:      insertOnConflict.onConflictColumns,
@@ -96,6 +119,8 @@ func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *Insert[T] {
 }
 
 func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T] {
+	insertOnConflict.addPostgresErrorIfNotColumns("Update after OnConflict")
+
 	// TODO estos fields podrian ser de solo T
 	fieldNames := insertOnConflict.insert.getFieldNames(fields)
 
@@ -109,6 +134,8 @@ func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T]
 }
 
 func (insertOnConflict *InsertOnConflict[T]) Set(sets ...*Set[T]) *InsertOnConflictSet[T] {
+	insertOnConflict.addPostgresErrorIfNotColumns("Set after OnConflict")
+
 	return &InsertOnConflictSet[T]{
 		insertOnConflict: insertOnConflict,
 		sets:             sets,
@@ -134,7 +161,7 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
 	return insert.Exec()
 }
 
-// Available for: postgres, sqlserver, sqlite
+// Available for: postgres, sqlite
 func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition[T]) *Insert[T] {
 	insert := insertOnConflictSet.insertOnConflict.insert
 

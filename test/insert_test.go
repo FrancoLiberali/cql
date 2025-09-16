@@ -102,7 +102,7 @@ func (ts *InsertIntTestSuite) TestInsertInBatches() {
 	ts.Len(productsReturned, 2)
 }
 
-func (ts *InsertIntTestSuite) TestInsertOneOnConflictAnyDoNothingThatInserts() {
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictDoNothingThatInserts() {
 	product := &models.Product{
 		Int: 1,
 	}
@@ -131,17 +131,24 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatInserts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict(conditions.Product.ID).DoNothing().Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
-	ts.NotEmpty(product.ID)
+	).OnConflictOn(conditions.Product.ID).DoNothing().Exec()
 
-	productsReturned, err := cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(1)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConflictOn")
+	default:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
 }
 
 func (ts *InsertIntTestSuite) TestInsertOneConflictReturnsError() {
@@ -168,7 +175,7 @@ func (ts *InsertIntTestSuite) TestInsertOneConflictReturnsError() {
 	}
 }
 
-func (ts *InsertIntTestSuite) TestInsertOneOnConflictAnyDoNothingThatConflicts() {
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictDoNothingThatConflicts() {
 	product := ts.createProduct("", 1, 0, false, nil)
 	ts.NotEmpty(product.ID)
 
@@ -194,17 +201,24 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() 
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict(conditions.Product.ID).DoNothing().Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(0), inserted)
-	ts.NotEmpty(product.ID)
+	).OnConflictOn(conditions.Product.ID).DoNothing().Exec()
 
-	productsReturned, err := cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(1)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConflictOn")
+	default:
+		ts.Require().NoError(err)
+		ts.Equal(int64(0), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
 }
 
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatInserts() {
@@ -215,17 +229,52 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatInserts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict(conditions.Product.ID).UpdateAll().Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
-	ts.NotEmpty(product.ID)
+	).OnConflict().UpdateAll().Exec()
 
-	productsReturned, err := cql.Query(
+	switch getDBDialector() {
+	case sql.Postgres:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: UpdateAll after OnConflict")
+	default:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictOnUpdateAllThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
 		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(1)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+		product,
+	).OnConflictOn(conditions.Product.ID).UpdateAll().Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConflictOn")
+	default:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
 }
 
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
@@ -238,29 +287,78 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
 	inserted, err := cql.Insert(
 		ts.db,
 		product,
-	).OnConflict(conditions.Product.ID).UpdateAll().Exec()
-	ts.Require().NoError(err)
+	).OnConflict().UpdateAll().Exec()
 
 	switch getDBDialector() {
-	case sql.MySQL:
-		ts.Equal(int64(2), inserted)
+	case sql.Postgres:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: UpdateAll after OnConflict")
 	default:
-		ts.Equal(int64(1), inserted)
+		ts.Require().NoError(err)
+
+		switch getDBDialector() {
+		case sql.MySQL:
+			ts.Equal(int64(2), inserted)
+		default:
+			ts.Equal(int64(1), inserted)
+		}
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 0)
+
+		productsReturned, err = cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(2)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
 	}
+}
 
-	productsReturned, err := cql.Query(
-		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(1)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 0)
+func (ts *InsertIntTestSuite) TestInsertOneOnConflictOnUpdateAllThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
 
-	productsReturned, err = cql.Query(
+	product.Int = 2
+	product.Float = 1
+
+	inserted, err := cql.Insert(
 		ts.db,
-		conditions.Product.Int.Is().Eq(cql.Int(2)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(productsReturned, 1)
+		product,
+	).OnConflictOn(conditions.Product.ID).UpdateAll().Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConflictOn")
+	default:
+		ts.Require().NoError(err)
+
+		switch getDBDialector() {
+		case sql.MySQL:
+			ts.Equal(int64(2), inserted)
+		default:
+			ts.Equal(int64(1), inserted)
+		}
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 0)
+
+		productsReturned, err = cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(2)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
 }
 
 // func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatInserts() {
@@ -318,10 +416,23 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatInserts() {
 		Int: 1,
 	}
 
-	inserted, err := cql.Insert(
-		ts.db,
-		product,
-	).OnConflict(conditions.Product.ID).Update(conditions.Product.Int).Exec()
+	var inserted int64
+
+	var err error
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflict().Update(conditions.Product.Int).Exec()
+	default:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflictOn(conditions.Product.ID).Update(conditions.Product.Int).Exec()
+	}
+
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
 	ts.NotEmpty(product.ID)
@@ -341,10 +452,23 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatConflicts() {
 	product.Int = 2
 	product.Float = 1
 
-	inserted, err := cql.Insert(
-		ts.db,
-		product,
-	).OnConflict(conditions.Product.ID).Update(conditions.Product.Int).Exec()
+	var inserted int64
+
+	var err error
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflict().Update(conditions.Product.Int).Exec()
+	default:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflictOn(conditions.Product.ID).Update(conditions.Product.Int).Exec()
+	}
+
 	ts.Require().NoError(err)
 
 	switch getDBDialector() {
@@ -388,13 +512,29 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatInserts() {
 		Int: 1,
 	}
 
-	inserted, err := cql.Insert(
-		ts.db,
-		product,
-	).OnConflict(conditions.Product.ID).Set(
-		// TODO quantity = your_table.quantity + EXCLUDED.quantity;
-		conditions.Product.Int.Set().Eq(cql.Int(2)),
-	).Exec()
+	var inserted int64
+
+	var err error
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflict().Set(
+			// TODO quantity = your_table.quantity + EXCLUDED.quantity;
+			conditions.Product.Int.Set().Eq(cql.Int(2)),
+		).Exec()
+	default:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflictOn(conditions.Product.ID).Set(
+			// TODO quantity = your_table.quantity + EXCLUDED.quantity;
+			conditions.Product.Int.Set().Eq(cql.Int(2)),
+		).Exec()
+	}
+
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), inserted)
 	ts.NotEmpty(product.ID)
@@ -413,12 +553,27 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflicts() {
 	product := ts.createProduct("", 1, 0, false, nil)
 	ts.NotEmpty(product.ID)
 
-	inserted, err := cql.Insert(
-		ts.db,
-		product,
-	).OnConflict(conditions.Product.ID).Set(
-		conditions.Product.Int.Set().Eq(cql.Int(2)),
-	).Exec()
+	var inserted int64
+
+	var err error
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflict().Set(
+			conditions.Product.Int.Set().Eq(cql.Int(2)),
+		).Exec()
+	default:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflictOn(conditions.Product.ID).Set(
+			conditions.Product.Int.Set().Eq(cql.Int(2)),
+		).Exec()
+	}
+
 	ts.Require().NoError(err)
 
 	switch getDBDialector() {
@@ -449,13 +604,29 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 	product := ts.createProduct("", 1, 1, false, nil)
 	ts.NotEmpty(product.ID)
 
-	inserted, err := cql.Insert(
-		ts.db,
-		product,
-	).OnConflict(conditions.Product.ID).Set(
-		// TODO aca tambien necesita linter aunque no seria necesario realmente
-		conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
-	).Exec()
+	var inserted int64
+
+	var err error
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflict().Set(
+			// TODO aca tambien necesita linter aunque no seria necesario realmente
+			conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
+		).Exec()
+	default:
+		inserted, err = cql.Insert(
+			ts.db,
+			product,
+		).OnConflictOn(conditions.Product.ID).Set(
+			// TODO aca tambien necesita linter aunque no seria necesario realmente
+			conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
+		).Exec()
+	}
+
 	ts.Require().NoError(err)
 
 	switch getDBDialector() {
@@ -484,13 +655,29 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 	product1 := ts.createProduct("", 3, 0, false, nil)
 	product2 := ts.createProduct("", 1, 0, false, nil)
 
-	inserted, err := cql.Insert(
-		ts.db,
-		product1,
-		product2,
-	).OnConflict(conditions.Product.ID).Set(
-		conditions.Product.Int.Set().Eq(cql.Int(2)),
-	).Exec()
+	var inserted int64
+
+	var err error
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer:
+		inserted, err = cql.Insert(
+			ts.db,
+			product1,
+			product2,
+		).OnConflict().Set(
+			conditions.Product.Int.Set().Eq(cql.Int(2)),
+		).Exec()
+	default:
+		inserted, err = cql.Insert(
+			ts.db,
+			product1,
+			product2,
+		).OnConflictOn(conditions.Product.ID).Set(
+			conditions.Product.Int.Set().Eq(cql.Int(2)),
+		).Exec()
+	}
+
 	ts.Require().NoError(err)
 
 	switch getDBDialector() {
@@ -530,7 +717,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.db,
 		product1,
 		product2,
-	).OnConflict(conditions.Product.ID).Set(
+	).OnConflictOn(conditions.Product.ID).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Where(
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
@@ -538,7 +725,6 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 
 	switch getDBDialector() {
 	case sql.MySQL, sql.SQLServer:
-		// Where is not supported by mysql
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Where")
 	default:
@@ -576,7 +762,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.db,
 		product1,
 		product2,
-	).OnConflict(conditions.Product.ID).Set(
+	).OnConflictOn(conditions.Product.ID).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Where(
 		// TODO aca tambien necesita linter aunque no seria necesario realmente
