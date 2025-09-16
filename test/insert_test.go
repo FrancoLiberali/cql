@@ -1,11 +1,12 @@
 package test
 
 import (
+	"gorm.io/gorm"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
-	"gorm.io/gorm"
 )
 
 type InsertIntTestSuite struct {
@@ -617,7 +618,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 // create from map no
 // create from sql expresion si puede ser, pero es lo mismo que gormValue, asi que no, pero igual es algo que no estoy manejando bien me parece en las queries
 // upser / onconflict si interesante pero meter la logica de tipos
-// tiene el update all, el do nothing y el update solo algunas columnas al valor de la query o a otro valor
+// tiene el update all, el do nothing y el update solo algunas columns al valor de la query o a otro valor
 // insert select es donde esta lo mas interesante
 // insert returning no tiene mucho sentido para el que es por objetos pero si para el que es por select
 
