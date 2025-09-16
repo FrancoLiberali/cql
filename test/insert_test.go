@@ -221,6 +221,64 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() 
 	}
 }
 
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintDoNothingThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").DoNothing().Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintDoNothingThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	product.Int = 2
+	product.Float = 1
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").DoNothing().Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.Require().NoError(err)
+		ts.Equal(int64(0), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
+}
+
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatInserts() {
 	product := &models.Product{
 		Int: 1,
@@ -294,28 +352,12 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: UpdateAll after OnConflict")
 	default:
-		ts.Require().NoError(err)
-
 		switch getDBDialector() {
 		case sql.MySQL:
-			ts.Equal(int64(2), inserted)
+			ts.checkUpdateAllThatConflicts(int64(2), inserted, err)
 		default:
-			ts.Equal(int64(1), inserted)
+			ts.checkUpdateAllThatConflicts(int64(1), inserted, err)
 		}
-
-		productsReturned, err := cql.Query(
-			ts.db,
-			conditions.Product.Int.Is().Eq(cql.Int(1)),
-		).Find()
-		ts.Require().NoError(err)
-		ts.Len(productsReturned, 0)
-
-		productsReturned, err = cql.Query(
-			ts.db,
-			conditions.Product.Int.Is().Eq(cql.Int(2)),
-		).Find()
-		ts.Require().NoError(err)
-		ts.Len(productsReturned, 1)
 	}
 }
 
@@ -336,80 +378,84 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictOnUpdateAllThatConflicts() 
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: OnConflictOn")
 	default:
-		ts.Require().NoError(err)
-
 		switch getDBDialector() {
 		case sql.MySQL:
-			ts.Equal(int64(2), inserted)
+			ts.checkUpdateAllThatConflicts(int64(2), inserted, err)
 		default:
-			ts.Equal(int64(1), inserted)
+			ts.checkUpdateAllThatConflicts(int64(1), inserted, err)
 		}
+	}
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").UpdateAll().Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
+		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
 		ts.Require().NoError(err)
-		ts.Len(productsReturned, 0)
-
-		productsReturned, err = cql.Query(
-			ts.db,
-			conditions.Product.Int.Is().Eq(cql.Int(2)),
-		).Find()
-		ts.Require().NoError(err)
 		ts.Len(productsReturned, 1)
 	}
 }
 
-// func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatInserts() {
-// 	product := &models.Product{
-// 		Int: 1,
-// 	}
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
 
-// 	inserted, err := cql.Insert(
-// 		ts.db,
-// 		product,
-// 	).OnConstraint("products_pkey").UpdateAll().Exec()
-// 	ts.Require().NoError(err)
-// 	ts.Equal(int64(1), inserted)
-// 	ts.NotEmpty(product.ID)
+	product.Int = 2
+	product.Float = 1
 
-// 	productsReturned, err := cql.Query(
-// 		ts.db,
-// 		conditions.Product.Int.Is().Eq(cql.Int(1)),
-// 	).Find()
-// 	ts.Require().NoError(err)
-// 	ts.Len(productsReturned, 1)
-// }
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").UpdateAll().Exec()
 
-// func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatConflicts() {
-// 	product := ts.createProduct("", 1, 0, false, nil)
-// 	ts.NotEmpty(product.ID)
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.checkUpdateAllThatConflicts(int64(1), inserted, err)
+	}
+}
 
-// 	product.Int = 2
-// 	product.Float = 1
+func (ts *InsertIntTestSuite) checkUpdateAllThatConflicts(expectedInserted, inserted int64, err error) {
+	ts.T().Helper()
 
-// 	inserted, err := cql.Insert(
-// 		ts.db,
-// 		product,
-// 	).OnConstraint("products.id").UpdateAll().Exec()
-// 	ts.Require().NoError(err)
-// 	ts.Equal(int64(1), inserted)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), inserted)
 
-// 	productsReturned, err := cql.Query(
-// 		ts.db,
-// 		conditions.Product.Int.Is().Eq(cql.Int(1)),
-// 	).Find()
-// 	ts.Require().NoError(err)
-// 	ts.Len(productsReturned, 0)
+	productsReturned, err := cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(1)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 0)
 
-// 	productsReturned, err = cql.Query(
-// 		ts.db,
-// 		conditions.Product.Int.Is().Eq(cql.Int(2)),
-// 	).Find()
-// 	ts.Require().NoError(err)
-// 	ts.Len(productsReturned, 1)
-// }
+	productsReturned, err = cql.Query(
+		ts.db,
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).Find()
+	ts.Require().NoError(err)
+	ts.Len(productsReturned, 1)
+}
 
 func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatInserts() {
 	product := &models.Product{
@@ -469,14 +515,68 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatConflicts() {
 		).OnConflictOn(conditions.Product.ID).Update(conditions.Product.Int).Exec()
 	}
 
-	ts.Require().NoError(err)
-
 	switch getDBDialector() {
 	case sql.MySQL:
-		ts.Equal(int64(2), inserted)
+		ts.checkUpdateThatConflicts(int64(2), inserted, err)
 	default:
-		ts.Equal(int64(1), inserted)
+		ts.checkUpdateThatConflicts(int64(1), inserted, err)
 	}
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").Update(conditions.Product.Int).Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	product.Int = 2
+	product.Float = 1
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").Update(conditions.Product.Int).Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.checkUpdateThatConflicts(int64(1), inserted, err)
+	}
+}
+
+func (ts *InsertIntTestSuite) checkUpdateThatConflicts(expectedInserted, inserted int64, err error) {
+	ts.T().Helper()
+
+	ts.Require().NoError(err)
+	ts.Equal(expectedInserted, inserted)
 
 	productsReturned, err := cql.Query(
 		ts.db,
@@ -574,14 +674,69 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflicts() {
 		).Exec()
 	}
 
-	ts.Require().NoError(err)
-
 	switch getDBDialector() {
 	case sql.MySQL:
-		ts.Equal(int64(2), inserted)
+		ts.checkSetThatConflicts(int64(2), inserted, err)
 	default:
-		ts.Equal(int64(1), inserted)
+		ts.checkSetThatConflicts(int64(1), inserted, err)
 	}
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintSetThatInserts() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), inserted)
+		ts.NotEmpty(product.ID)
+
+		productsReturned, err := cql.Query(
+			ts.db,
+			conditions.Product.Int.Is().Eq(cql.Int(1)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(productsReturned, 1)
+	}
+}
+
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintSetThatConflicts() {
+	product := ts.createProduct("", 1, 0, false, nil)
+	ts.NotEmpty(product.ID)
+
+	inserted, err := cql.Insert(
+		ts.db,
+		product,
+	).OnConstraint("products_pkey").Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.checkSetThatConflicts(int64(1), inserted, err)
+	}
+}
+
+func (ts *InsertIntTestSuite) checkSetThatConflicts(expectedInserted, inserted int64, err error) {
+	ts.T().Helper()
+
+	ts.Require().NoError(err)
+	ts.Equal(expectedInserted, inserted)
 
 	productsReturned, err := cql.Query(
 		ts.db,

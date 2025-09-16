@@ -72,7 +72,16 @@ func (insert *Insert[T]) getFieldNames(fields []IField) []string {
 	return fieldNames
 }
 
+// Available for: postgres
 func (insert *Insert[T]) OnConstraint(constraintName string) *InsertOnConflict[T] {
+	if insert.query.Dialector() != sql.Postgres {
+		insert.err = methodError(ErrUnsupportedByDatabase, "OnConstraint")
+
+		return &InsertOnConflict[T]{
+			insert: insert,
+		}
+	}
+
 	return &InsertOnConflict[T]{
 		insert:       insert,
 		onConstraint: constraintName,
@@ -101,7 +110,9 @@ func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
 }
 
 func (insertOnConflict *InsertOnConflict[T]) addPostgresErrorIfNotColumns(msg string) {
-	if insertOnConflict.insert.query.Dialector() == sql.Postgres && len(insertOnConflict.onConflictColumns) == 0 {
+	if insertOnConflict.insert.query.Dialector() == sql.Postgres &&
+		len(insertOnConflict.onConflictColumns) == 0 &&
+		insertOnConflict.onConstraint == "" {
 		insertOnConflict.insert.err = methodError(ErrUnsupportedByDatabase, msg)
 	}
 }
