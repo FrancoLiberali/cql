@@ -138,7 +138,7 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
 func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition[T]) *Insert[T] {
 	insert := insertOnConflictSet.insertOnConflict.insert
 
-	if insert.query.Dialector() == sql.MySQL {
+	if insert.query.Dialector() == sql.MySQL || insert.query.Dialector() == sql.SQLServer {
 		insert.err = methodError(ErrUnsupportedByDatabase, "Where")
 
 		return insert

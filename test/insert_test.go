@@ -159,7 +159,10 @@ func (ts *InsertIntTestSuite) TestInsertOneConflictReturnsError() {
 	case sql.MySQL:
 		ts.ErrorContains(err, `Error 1062 (23000): Duplicate entry `)
 		ts.ErrorContains(err, `for key 'products.PRIMARY'`)
-	default:
+	case sql.SQLServer:
+		ts.ErrorContains(err, `mssql: Violation of PRIMARY KEY constraint 'PK__products__`)
+		ts.ErrorContains(err, `'. Cannot insert duplicate key in object 'dbo.products'. The duplicate key value is `)
+	case sql.SQLite:
 		ts.ErrorContains(err, "UNIQUE constraint failed: products.id")
 	}
 }
@@ -533,7 +536,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	).Exec()
 
 	switch getDBDialector() {
-	case sql.MySQL:
+	case sql.MySQL, sql.SQLServer:
 		// Where is not supported by mysql
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Where")
@@ -580,7 +583,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	).Exec()
 
 	switch getDBDialector() {
-	case sql.MySQL:
+	case sql.MySQL, sql.SQLServer:
 		// Where is not supported by mysql
 		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
 		ts.ErrorContains(err, "method: Where")
