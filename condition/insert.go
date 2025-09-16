@@ -32,12 +32,8 @@ func (insert *Insert[T]) OnConflict() *InsertOnConflict[T] {
 	}
 }
 
-// TODO este ifield puede ser de cualquier model
-// o necesita linter
-// o hacer dos metodos uno para insertar solo un model y otro para insertar junto con las relations
-// que ahi si necesitas Ifield. El linter lo necesitas de una forma o la otra
 // Available for: postgres, sqlite
-func (insert *Insert[T]) OnConflictOn(field IField, fields ...IField) *InsertOnConflict[T] {
+func (insert *Insert[T]) OnConflictOn(field FieldOfModel[T], fields ...FieldOfModel[T]) *InsertOnConflict[T] {
 	if insert.query.Dialector() == sql.MySQL || insert.query.Dialector() == sql.SQLServer {
 		insert.err = methodError(ErrUnsupportedByDatabase, "OnConflictOn")
 
@@ -59,7 +55,7 @@ func (insert *Insert[T]) OnConflictOn(field IField, fields ...IField) *InsertOnC
 	}
 }
 
-func (insert *Insert[T]) getFieldNames(fields []IField) []string {
+func (insert *Insert[T]) getFieldNames(fields []FieldOfModel[T]) []string {
 	fieldNames := make([]string, 0, len(fields))
 
 	for _, field := range fields {
@@ -129,10 +125,9 @@ func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
-func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *InsertExec[T] {
+func (insertOnConflict *InsertOnConflict[T]) Update(fields ...FieldOfModel[T]) *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("Update after OnConflict")
 
-	// TODO estos fields podrian ser de solo T
 	fieldNames := insertOnConflict.insert.getFieldNames(fields)
 
 	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
