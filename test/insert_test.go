@@ -956,12 +956,5 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	}
 }
 
-// create from map no
-// create from sql expresion si puede ser, pero es lo mismo que gormValue, asi que no, pero igual es algo que no estoy manejando bien me parece en las queries
-// upser / onconflict si interesante pero meter la logica de tipos
-// tiene el update all, el do nothing y el update solo algunas columns al valor de la query o a otro valor
-// insert select es donde esta lo mas interesante
-// insert returning no tiene mucho sentido para el que es por objetos pero si para el que es por select
-
 // TODO inserts con relaciones test
-// TODO multiple clauses test: que pasa si ponen varias iguales? o una sin nada y despues otras -> lint posible que no voy a hacer
+// TODO compilation test

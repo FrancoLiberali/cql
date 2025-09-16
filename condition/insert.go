@@ -99,14 +99,14 @@ type InsertOnConflict[T model.Model] struct {
 	onConstraint      string
 }
 
-func (insertOnConflict *InsertOnConflict[T]) DoNothing() *Insert[T] {
+func (insertOnConflict *InsertOnConflict[T]) DoNothing() *InsertExec[T] {
 	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
 		OnConstraint: insertOnConflict.onConstraint,
 		Columns:      insertOnConflict.onConflictColumns,
 		DoNothing:    true,
 	})
 
-	return insertOnConflict.insert
+	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
 func (insertOnConflict *InsertOnConflict[T]) addPostgresErrorIfNotColumns(msg string) {
@@ -117,7 +117,7 @@ func (insertOnConflict *InsertOnConflict[T]) addPostgresErrorIfNotColumns(msg st
 	}
 }
 
-func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *Insert[T] {
+func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("UpdateAll after OnConflict")
 
 	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
@@ -126,10 +126,10 @@ func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *Insert[T] {
 		UpdateAll:    true,
 	})
 
-	return insertOnConflict.insert
+	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
-func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T] {
+func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("Update after OnConflict")
 
 	// TODO estos fields podrian ser de solo T
@@ -141,7 +141,7 @@ func (insertOnConflict *InsertOnConflict[T]) Update(fields ...IField) *Insert[T]
 		DoUpdates:    clause.AssignmentColumns(fieldNames),
 	})
 
-	return insertOnConflict.insert
+	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
 func (insertOnConflict *InsertOnConflict[T]) Set(sets ...*Set[T]) *InsertOnConflictSet[T] {
@@ -173,13 +173,13 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
 }
 
 // Available for: postgres, sqlite
-func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition[T]) *Insert[T] {
+func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition[T]) *InsertExec[T] {
 	insert := insertOnConflictSet.insertOnConflict.insert
 
 	if insert.query.Dialector() == sql.MySQL || insert.query.Dialector() == sql.SQLServer {
 		insert.err = methodError(ErrUnsupportedByDatabase, "Where")
 
-		return insert
+		return &InsertExec[T]{insert: insert}
 	}
 
 	insert.query = NewQuery(insert.query.gormDB, conditions...).cqlQuery
@@ -196,7 +196,7 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition
 
 	insert.addOnConflictClause(onConflictClause)
 
-	return insert
+	return &InsertExec[T]{insert: insert}
 }
 
 func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause.OnConflict, error) {
@@ -227,6 +227,19 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) getOnConflictClause() (clause
 		Columns:      insertOnConflictSet.insertOnConflict.onConflictColumns,
 		DoUpdates:    clause.Assignments(assignments),
 	}, nil
+}
+
+type InsertExec[T model.Model] struct {
+	insert *Insert[T]
+}
+
+func (insertExec *InsertExec[T]) Exec() (int64, error) {
+	return insertExec.insert.Exec()
+}
+
+// TODO docs
+func (insertExec *InsertExec[T]) ExecInBatches(batchSize int) (int64, error) {
+	return insertExec.insert.ExecInBatches(batchSize)
 }
 
 // TODO docs
