@@ -770,7 +770,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 			product,
 		).OnConflict().Set(
 			// TODO aca tambien necesita linter aunque no seria necesario realmente
-			conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
+			conditions.Product.Int.Set().Eq(conditions.Product.Int.Plus(cql.Int(1))),
 		).Exec()
 	default:
 		inserted, err = cql.Insert(
@@ -778,7 +778,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 			product,
 		).OnConflictOn(conditions.Product.ID).Set(
 			// TODO aca tambien necesita linter aunque no seria necesario realmente
-			conditions.Product.Int.Set().Eq(conditions.Product.Float.Plus(cql.Int(1))),
+			conditions.Product.Int.Set().Eq(conditions.Product.Int.Plus(cql.Int(1))),
 		).Exec()
 	}
 
