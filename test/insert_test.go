@@ -956,5 +956,4 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	}
 }
 
-// TODO inserts con relaciones test
 // TODO compilation test

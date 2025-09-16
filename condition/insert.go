@@ -249,7 +249,7 @@ func (insert *Insert[T]) Exec() (int64, error) {
 		return 0, insert.err
 	}
 
-	result := insert.tx.Create(insert.models)
+	result := insert.tx.Omit(clause.Associations).Create(insert.models)
 
 	return result.RowsAffected, result.Error
 }
@@ -260,7 +260,7 @@ func (insert *Insert[T]) ExecInBatches(batchSize int) (int64, error) {
 		return 0, insert.err
 	}
 
-	result := insert.tx.CreateInBatches(insert.models, batchSize)
+	result := insert.tx.Omit(clause.Associations).CreateInBatches(insert.models, batchSize)
 
 	return result.RowsAffected, result.Error
 }
