@@ -440,7 +440,7 @@ func (ts *InsertIntTestSuite) checkUpdateAllThatConflicts(expectedInserted, inse
 	ts.T().Helper()
 
 	ts.Require().NoError(err)
-	ts.Equal(int64(1), inserted)
+	ts.Equal(expectedInserted, inserted)
 
 	productsReturned, err := cql.Query(
 		ts.db,
