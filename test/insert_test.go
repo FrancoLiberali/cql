@@ -622,7 +622,6 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatInserts() {
 			ts.db,
 			product,
 		).OnConflict().Set(
-			// TODO quantity = your_table.quantity + EXCLUDED.quantity;
 			conditions.Product.Int.Set().Eq(cql.Int(2)),
 		).Exec()
 	default:
@@ -630,7 +629,6 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatInserts() {
 			ts.db,
 			product,
 		).OnConflictOn(conditions.Product.ID).Set(
-			// TODO quantity = your_table.quantity + EXCLUDED.quantity;
 			conditions.Product.Int.Set().Eq(cql.Int(2)),
 		).Exec()
 	}
@@ -955,5 +953,3 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.Len(productsReturned, 1)
 	}
 }
-
-// TODO compilation test
