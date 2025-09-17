@@ -767,7 +767,6 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 			ts.db,
 			product,
 		).OnConflict().Set(
-			// TODO aca tambien necesita linter aunque no seria necesario realmente
 			conditions.Product.Int.Set().Eq(conditions.Product.Int.Plus(cql.Int(1))),
 		).Exec()
 	default:
@@ -775,7 +774,6 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 			ts.db,
 			product,
 		).OnConflictOn(conditions.Product.ID).Set(
-			// TODO aca tambien necesita linter aunque no seria necesario realmente
 			conditions.Product.Int.Set().Eq(conditions.Product.Int.Plus(cql.Int(1))),
 		).Exec()
 	}
@@ -918,7 +916,6 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	).OnConflictOn(conditions.Product.ID).Set(
 		conditions.Product.Int.Set().Eq(cql.Int(2)),
 	).Where(
-		// TODO aca tambien necesita linter aunque no seria necesario realmente
 		conditions.Product.Int.Is().Eq(conditions.Product.Float.Plus(cql.Int(1))),
 	).Exec()
 

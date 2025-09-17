@@ -24,6 +24,8 @@ func NewInsert[T model.Model](tx *gorm.DB, models []*T) *Insert[T] {
 	}
 }
 
+// OnConflict allows to set the action to be taken when any conflict happens when inserting the data.
+//
 // WARNING: in postgres OnConflict can be used only with DoNothing,
 // for UpdateAll, Update and Set, OnConflictOn must be used
 func (insert *Insert[T]) OnConflict() *InsertOnConflict[T] {
@@ -32,6 +34,10 @@ func (insert *Insert[T]) OnConflict() *InsertOnConflict[T] {
 	}
 }
 
+// OnConflictOn allows to set the action to be taken when a conflict
+// with the fields specified by parameter happens when inserting the data.
+// For this, there must be a constraint on these fields, otherwise an error will be returned.
+//
 // Available for: postgres, sqlite
 func (insert *Insert[T]) OnConflictOn(field FieldOfModel[T], fields ...FieldOfModel[T]) *InsertOnConflict[T] {
 	if insert.query.Dialector() == sql.MySQL || insert.query.Dialector() == sql.SQLServer {
@@ -68,6 +74,10 @@ func (insert *Insert[T]) getFieldNames(fields []FieldOfModel[T]) []string {
 	return fieldNames
 }
 
+// OnConstraint allows to set the action to be taken when a conflict
+// with the constraint specified by parameter happens when inserting the data.
+// For this, the constraint must exist, otherwise an error will be returned.
+//
 // Available for: postgres
 func (insert *Insert[T]) OnConstraint(constraintName string) *InsertOnConflict[T] {
 	if insert.query.Dialector() != sql.Postgres {
@@ -95,6 +105,7 @@ type InsertOnConflict[T model.Model] struct {
 	onConstraint      string
 }
 
+// DoNothing will not take any action, simply preventing an error from being responded.
 func (insertOnConflict *InsertOnConflict[T]) DoNothing() *InsertExec[T] {
 	insertOnConflict.insert.addOnConflictClause(clause.OnConflict{
 		OnConstraint: insertOnConflict.onConstraint,
@@ -113,6 +124,7 @@ func (insertOnConflict *InsertOnConflict[T]) addPostgresErrorIfNotColumns(msg st
 	}
 }
 
+// UpdateAll will update all model attributes with the values of the models to be inserted.
 func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("UpdateAll after OnConflict")
 
@@ -125,6 +137,7 @@ func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
+// UpdateAll will update the attributes specified by parameter with the values of the models to be inserted.
 func (insertOnConflict *InsertOnConflict[T]) Update(fields ...FieldOfModel[T]) *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("Update after OnConflict")
 
@@ -139,6 +152,7 @@ func (insertOnConflict *InsertOnConflict[T]) Update(fields ...FieldOfModel[T]) *
 	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
+// Set allows to specify which updates to perform.
 func (insertOnConflict *InsertOnConflict[T]) Set(sets ...*Set[T]) *InsertOnConflictSet[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("Set after OnConflict")
 
@@ -154,7 +168,30 @@ type InsertOnConflictSet[T model.Model] struct {
 	sets []*Set[T]
 }
 
+// Exec execute the insert statement, returning the amount of rows inserted.
+// It will also update the inserted model's primary key in their ids
+//
+// WARNING: the value returned may depend on the db engine, for example mysql
+// returns the double of the other ones when there is conflict
 func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
+	return insertOnConflictSet.internalExec(func(insert *Insert[T]) (int64, error) {
+		return insert.Exec()
+	})
+}
+
+// ExecInBatches execute the insert statement in batches of batchSize,
+// returning the amount of rows inserted.
+// It will also update the inserted model's primary key in their ids
+//
+// WARNING: the value returned may depend on the db engine, for example mysql
+// returns the double of the other ones when there is conflict
+func (insertOnConflictSet *InsertOnConflictSet[T]) ExecInBatches(batchSize int) (int64, error) {
+	return insertOnConflictSet.internalExec(func(insert *Insert[T]) (int64, error) {
+		return insert.ExecInBatches(batchSize)
+	})
+}
+
+func (insertOnConflictSet *InsertOnConflictSet[T]) internalExec(execFunc func(*Insert[T]) (int64, error)) (int64, error) {
 	insert := insertOnConflictSet.insertOnConflict.insert
 
 	onConflictClause, err := insertOnConflictSet.getOnConflictClause()
@@ -164,9 +201,11 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
 
 	insert.addOnConflictClause(onConflictClause)
 
-	return insert.Exec()
+	return execFunc(insert)
 }
 
+// Where allows to set conditions on the models that generate conflicts when performing the updates.
+//
 // Available for: postgres, sqlite
 func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition[T]) *InsertExec[T] {
 	insert := insertOnConflictSet.insertOnConflict.insert
@@ -228,17 +267,30 @@ type InsertExec[T model.Model] struct {
 	insert *Insert[T]
 }
 
+// Exec execute the insert statement, returning the amount of rows inserted.
+// It will also update the inserted model's primary key in their ids
+//
+// WARNING: the value returned may depend on the db engine, for example mysql
+// returns the double of the other ones when there is conflict
 func (insertExec *InsertExec[T]) Exec() (int64, error) {
 	return insertExec.insert.Exec()
 }
 
-// TODO docs
+// ExecInBatches execute the insert statement in batches of batchSize,
+// returning the amount of rows inserted.
+// It will also update the inserted model's primary key in their ids
+//
+// WARNING: the value returned may depend on the db engine, for example mysql
+// returns the double of the other ones when there is conflict
 func (insertExec *InsertExec[T]) ExecInBatches(batchSize int) (int64, error) {
 	return insertExec.insert.ExecInBatches(batchSize)
 }
 
-// TODO docs
-// TODO comentario de que mysql retorna otra cosa
+// Exec execute the insert statement, returning the amount of rows inserted.
+// It will also update the inserted model's primary key in their ids
+//
+// WARNING: the value returned may depend on the db engine, for example mysql
+// returns the double of the other ones when there is conflict
 func (insert *Insert[T]) Exec() (int64, error) {
 	if insert.err != nil {
 		return 0, insert.err
@@ -249,7 +301,12 @@ func (insert *Insert[T]) Exec() (int64, error) {
 	return result.RowsAffected, result.Error
 }
 
-// TODO docs
+// ExecInBatches execute the insert statement in batches of batchSize,
+// returning the amount of rows inserted.
+// It will also update the inserted model's primary key in their ids
+//
+// WARNING: the value returned may depend on the db engine, for example mysql
+// returns the double of the other ones when there is conflict
 func (insert *Insert[T]) ExecInBatches(batchSize int) (int64, error) {
 	if insert.err != nil {
 		return 0, insert.err
