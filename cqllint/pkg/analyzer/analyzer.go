@@ -91,9 +91,9 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
 		if isSelector && !selectorIsCQLFunction(selectorExpr) {
-			runner.findForSelector(callExpr)
+			runner.findForMethods(callExpr, selectorExpr)
 		} else {
-			runner.findNotConcernedForIndex(callExpr)
+			runner.findNotConcernedForCall(callExpr)
 		}
 	})
 
@@ -109,9 +109,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 }
 
 // Finds NotConcerned and Repeated errors in selector functions: Descending, Ascending, SetMultiple, Set
-func (r *Runner) findForSelector(callExpr *ast.CallExpr) {
-	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
-
+func (r *Runner) findForMethods(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 	if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
 		return
 	}
@@ -123,7 +121,7 @@ func (r *Runner) findForSelector(callExpr *ast.CallExpr) {
 
 // Finds NotConcerned errors in selector functions: Descending, Ascending, SetMultiple, Set
 func (r *Runner) fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
-	r.findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr))
+	r.findNotConcernedForCall(selectorExpr.X.(*ast.CallExpr))
 
 	methodName := selectorExpr.Sel.Name
 	isOrderOrGroupBy := pie.Contains(cqlOrderOrGroupBy, methodName)
@@ -293,7 +291,7 @@ func getFieldName(condition *ast.SelectorExpr) string {
 }
 
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
-func (r *Runner) findNotConcernedForIndex(callExpr *ast.CallExpr) {
+func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
 	if isIndex {
 		if !selectorIsCQLFunction(indexExpr.X) {
@@ -316,7 +314,7 @@ func (r *Runner) findNotConcernedForIndex(callExpr *ast.CallExpr) {
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 		if isCall {
-			r.findNotConcernedForIndex(internalCallExpr)
+			r.findNotConcernedForCall(internalCallExpr)
 
 			return
 		}
@@ -373,7 +371,7 @@ func selectorIs(expr ast.Expr, values []string) bool {
 func (r *Runner) findForSelect(callExpr *ast.CallExpr) {
 	newRunner := Runner{}
 
-	newRunner.findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr))
+	newRunner.findNotConcernedForCall(callExpr.Args[0].(*ast.CallExpr))
 	newRunner.findErrorIsDynamic(callExpr.Args[1:])
 
 	r.positionsToReport = append(r.positionsToReport, newRunner.positionsToReport...)
