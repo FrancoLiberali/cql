@@ -17,6 +17,12 @@ type IField interface {
 	getAppearance() (uint, bool)
 }
 
+type FieldOfModel[T model.Model] interface {
+	IField
+
+	getModel() T
+}
+
 type functionAndValues struct {
 	function sql.FunctionByDialector
 	values   []IValue
@@ -29,6 +35,10 @@ type Field[TModel model.Model, TAttribute any] struct {
 	appearance         uint
 	appearanceSelected bool
 	functions          []functionAndValues
+}
+
+func (field Field[TModel, TAttribute]) getModel() TModel {
+	return *new(TModel)
 }
 
 // Is allows creating conditions that include the field and a static value

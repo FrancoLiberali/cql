@@ -526,3 +526,102 @@ type ResultInt2 struct {
 		})
 	}
 }
+
+func TestInsertCompilationErrors(t *testing.T) {
+	t.Parallel()
+
+	tests := []testCase{
+		{
+			Name: "no other conflict can be called after DoNothing",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflict().DoNothing().OnConflict().DoNothing().Exec()
+			`,
+			Error: `cql.Insert(db, product).OnConflict().DoNothing().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+		},
+		{
+			Name: "no other conflict can be called after UpdateAll",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflict().UpdateAll().OnConflict().UpdateAll().Exec()
+			`,
+			Error: `cql.Insert(db, product).OnConflict().UpdateAll().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+		},
+		{
+			Name: "no other conflict can be called after Update",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflict().Update().OnConflict().Update().Exec()
+			`,
+			Error: `cql.Insert(db, product).OnConflict().Update().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+		},
+		{
+			Name: "no other conflict can be called after Set",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflict().Set().OnConflict().Set().Exec()
+			`,
+			Error: `cql.Insert(db, product).OnConflict().Set().OnConflict undefined (type *condition.InsertOnConflictSet[models.Product] has no field or method OnConflict)`,
+		},
+		{
+			Name: "no other conflict can be called after Where",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflict().Set().Where().OnConflict().Set().Exec()
+			`,
+			Error: `cql.Insert(db, product).OnConflict().Set().Where().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+		},
+		{
+			Name: "on conflict on field of different model",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflictOn(conditions.City.ID).Update(conditions.Product.Int).Exec()
+			`,
+			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(db, product).OnConflictOn: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
+		},
+		{
+			Name: "update field of different model",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflictOn(conditions.Product.ID).Update(conditions.City.ID).Exec()
+			`,
+			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(db, product).OnConflictOn(conditions.Product.ID).Update: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
+		},
+		{
+			Name: "set field of different model",
+			Code: `
+				_, _ = cql.Insert(
+					db,
+					product,
+				).OnConflictOn(conditions.Product.ID).Set(
+					conditions.City.Name.Set().Eq(cql.String("asd")),
+				).Exec()
+			`,
+			Error: `cannot use conditions.City.Name.Set().Eq(cql.String("asd")) (value of type *condition.Set[models.City]) as *condition.Set[models.Product] value in argument to cql.Insert(db, product).OnConflictOn(conditions.Product.ID).Set`,
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.Name, func(t *testing.T) {
+			t.Parallel()
+
+			executeTest(t, `
+var product = &models.Product{}
+`, testCase)
+		})
+	}
+}
