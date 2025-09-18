@@ -62,8 +62,9 @@ type Runner struct {
 }
 
 var (
-	passG      *analysis.Pass
-	inspectorG *inspector.Inspector
+	passG        *analysis.Pass
+	inspectorG   *inspector.Inspector
+	globalModels = map[ast.Expr][]string{}
 )
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -73,8 +74,6 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		(*ast.CallExpr)(nil),
 	}
 
-	runner := Runner{}
-
 	inspectorG.Preorder(nodeFilter, func(node ast.Node) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -82,6 +81,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 		}()
 
+		runner := Runner{}
 		callExpr := node.(*ast.CallExpr)
 
 		// methods to be verified have at least one parameter
@@ -95,15 +95,15 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		} else {
 			runner.findNotConcernedForCall(callExpr)
 		}
-	})
 
-	for _, report := range runner.positionsToReport {
-		pass.Reportf(
-			report.model.Pos,
-			report.message,
-			report.model.Name,
-		)
-	}
+		for _, report := range runner.positionsToReport {
+			pass.Reportf(
+				report.model.Pos,
+				report.message,
+				report.model.Name,
+			)
+		}
+	})
 
 	return nil, nil //nolint:nilnil // is necessary
 }
@@ -298,13 +298,15 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 			return
 		}
 
-		r.models = []string{
-			getFirstGenericType(
-				passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
-			),
-		}
+		r.getOrSetModels(indexExpr, func() {
+			r.models = []string{
+				getFirstGenericType(
+					passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
+				),
+			}
 
-		r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+		})
 
 		return
 	}
@@ -326,7 +328,9 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 		}
 
 		if selectorIsCQLFunction(selectorExpr) {
-			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+			r.getOrSetModels(selectorExpr, func() {
+				r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+			})
 
 			return
 		}
@@ -344,6 +348,19 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 
 		return
 	}
+}
+
+func (r *Runner) getOrSetModels(expr ast.Expr, setModelsFunc func()) {
+	models, isPresent := globalModels[expr]
+	if isPresent {
+		r.models = models
+
+		return
+	}
+
+	setModelsFunc()
+
+	globalModels[expr] = r.models
 }
 
 func selectorIsCQLFunction(expr ast.Expr) bool {
