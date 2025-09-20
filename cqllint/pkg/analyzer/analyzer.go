@@ -29,7 +29,7 @@ var (
 	cqlSelect         = "Select"
 	cqlInsert         = "Insert"
 	cqlFunctions      = []string{"Query", "Update", "Delete", cqlSelect}
-	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "SelectValue", "Having"}
+	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "SelectValue", "Having", "Where"}
 	cqlConnectors     = []string{"And", "Or", "Not"}
 	cqlSetMultiple    = "SetMultiple"
 	cqlSets           = []string{cqlSetMultiple, "Set"}

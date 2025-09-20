@@ -81,3 +81,95 @@ func testOnConflictSetDifferentModelIndex() {
 		conditions.Product.String.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Exec()
 }
+
+func testOnConflictSetWhereStatic() {
+	cql.Insert(
+		db,
+		&models.Product{},
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Where(
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).Exec()
+}
+
+func testOnConflictSetWhereStaticIndex() {
+	cql.Insert[models.Product](
+		db,
+		&models.Product{},
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Where(
+		conditions.Product.Int.Is().Eq(cql.Int(2)),
+	).Exec()
+}
+
+func testOnConflictSetWhereSameModel() {
+	cql.Insert(
+		db,
+		&models.Product{},
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Where(
+		conditions.Product.Int.Is().Eq(conditions.Product.Float),
+	).Exec()
+}
+
+func testOnConflictSetWhereSameModelVar() {
+	product := &models.Product{}
+
+	cql.Insert(
+		db,
+		product,
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Where(
+		conditions.Product.Int.Is().Eq(conditions.Product.Float),
+	).Exec()
+}
+
+func testOnConflictSetWhereSameModelIndex() {
+	cql.Insert[models.Product](
+		db,
+		&models.Product{},
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.Int.Set().Eq(cql.Int(2)),
+	).Where(
+		conditions.Product.Int.Is().Eq(conditions.Product.Float),
+	).Exec()
+}
+
+func testOnConflictSetWhereDifferentModel() {
+	cql.Insert(
+		db,
+		&models.Product{},
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.String.Set().Eq(cql.String("asd")),
+	).Where(
+		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Exec()
+}
+
+func testOnConflictSetWhereDifferentModelVar() {
+	product := &models.Product{}
+
+	cql.Insert(
+		db,
+		product,
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.String.Set().Eq(cql.String("asd")),
+	).Where(
+		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Exec()
+}
+
+func testOnConflictSetWhereDifferentModelIndex() {
+	cql.Insert[models.Product](
+		db,
+		&models.Product{},
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.String.Set().Eq(cql.String("asd")),
+	).Where(
+		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Exec()
+}
