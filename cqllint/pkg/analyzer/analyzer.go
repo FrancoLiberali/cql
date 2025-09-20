@@ -302,23 +302,7 @@ func findModelFromFunctionReturnValueIndex(indexExpr ast.Expr) string {
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
 func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 	if indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr); isIndex {
-		if selectorIsCQLInsert(indexExpr.X) {
-			r.getOrSetModels(indexExpr, func() {
-				// for insert we only need the main model, joins are not possible
-				r.models = []string{findModelFromFunctionReturnValueIndex(indexExpr)}
-			})
-
-			return
-		}
-
-		if !selectorIsCQLFunction(indexExpr.X) {
-			return
-		}
-
-		r.getOrSetModels(indexExpr, func() {
-			r.models = []string{findModelFromFunctionReturnValueIndex(indexExpr)}
-			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
-		})
+		r.findNotConcernedForCQLFunction(callExpr, indexExpr, indexExpr.X)
 
 		return
 	}
@@ -332,33 +316,13 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 			return
 		}
 
-		if selectorIsCQLInsert(selectorExpr) {
-			r.getOrSetModels(selectorExpr, func() {
-				// for insert we only need the main model, joins are not possible
-				r.models = []string{findModelFromFunctionReturnValueIndex(selectorExpr)}
-			})
-
-			return
-		}
-
-		if selectorIsCQLSelect(selectorExpr) {
-			r.findForSelect(callExpr)
-
-			return
-		}
-
-		if selectorIsCQLFunction(selectorExpr) {
-			r.getOrSetModels(selectorExpr, func() {
-				r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
-			})
-
-			return
-		}
+		r.findNotConcernedForCQLFunction(callExpr, selectorExpr, selectorExpr)
 
 		return
 	}
 
 	if indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr); isIndexList {
+		// only select has more than one type index
 		if !selectorIsCQLSelect(indexListExpr.X) {
 			return
 		}
@@ -369,8 +333,30 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 	}
 }
 
-func getFunctionParameterTypes(expr ast.Expr) *types.Tuple {
-	return passG.TypesInfo.Types[expr].Type.(*types.Signature).Params()
+func (r *Runner) findNotConcernedForCQLFunction(callExpr *ast.CallExpr, cqlFunction ast.Expr, selectorExpr ast.Expr) {
+	if selectorIsCQLInsert(selectorExpr) {
+		r.getOrSetModels(cqlFunction, func() {
+			// for insert we only need the main model, joins are not possible
+			r.models = []string{findModelFromFunctionReturnValueIndex(cqlFunction)}
+		})
+
+		return
+	}
+
+	if selectorIsCQLSelect(selectorExpr) {
+		r.findForSelect(callExpr)
+
+		return
+	}
+
+	if selectorIsCQLFunction(selectorExpr) {
+		r.getOrSetModels(cqlFunction, func() {
+			r.models = []string{findModelFromFunctionReturnValueIndex(cqlFunction)}
+			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+		})
+
+		return
+	}
 }
 
 func (r *Runner) getOrSetModels(expr ast.Expr, setModelsFunc func()) {
@@ -500,6 +486,10 @@ func findVariableAssignments(variable *ast.Ident) []*ast.AssignStmt {
 	}
 
 	return assignments
+}
+
+func getFunctionParameterTypes(expr ast.Expr) *types.Tuple {
+	return passG.TypesInfo.Types[expr].Type.(*types.Signature).Params()
 }
 
 // conditions.Phone.Brand -> Brand (or its correct type if not the same)
