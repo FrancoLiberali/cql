@@ -343,18 +343,10 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 		if selectorIsCQLInsert(selectorExpr) {
 			log.Println("es insert")
 			r.getOrSetModels(selectorExpr, func() {
-				// TODO aca intentar obtener de que tipo es la funcion
-				// for insert we only need the main model, joins are not possible
-				// return getFirstGenericType(
-				// 	passG.TypesInfo.Types[conditionSelector].Type.(*types.Signature).Params().At(0).Type().(*types.Slice).Elem().(*types.Named),
-				// )
-				log.Println(passG.TypesInfo.Types[selectorExpr])
-				log.Println(passG.TypesInfo.Types[selectorExpr].Type.(*types.Signature))
-				// newModels := getModelsFromExpr(callExpr.Args[1])
-				// if len(newModels) > 0 {
-				// 	// TODO el if no deberia ser necesario
-				// 	r.models = []string{newModels[0].Model.Name}
-				// }
+				// obtain model from Insert second parameter type
+				r.models = []string{
+					getFunctionParameterTypes(selectorExpr).At(1).Type().(*types.Slice).Elem().(*types.Pointer).Elem().String(),
+				}
 			})
 
 			return
@@ -386,6 +378,10 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 
 		return
 	}
+}
+
+func getFunctionParameterTypes(expr ast.Expr) *types.Tuple {
+	return passG.TypesInfo.Types[expr].Type.(*types.Signature).Params()
 }
 
 func (r *Runner) getOrSetModels(expr ast.Expr, setModelsFunc func()) {
@@ -520,7 +516,7 @@ func findVariableAssignments(variable *ast.Ident) []*ast.AssignStmt {
 // conditions.Phone.Brand -> Brand (or its correct type if not the same)
 func getModelFromJoinCondition(conditionSelector *ast.SelectorExpr) string {
 	return getFirstGenericType(
-		passG.TypesInfo.Types[conditionSelector].Type.(*types.Signature).Params().At(0).Type().(*types.Slice).Elem().(*types.Named),
+		getFunctionParameterTypes(conditionSelector).At(0).Type().(*types.Slice).Elem().(*types.Named),
 	)
 }
 
