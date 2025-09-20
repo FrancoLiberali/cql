@@ -291,14 +291,6 @@ func getFieldName(condition *ast.SelectorExpr) string {
 	return conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
 }
 
-// example: for "func cql.Insert(tx *gorm.DB, models ...*models.Product) *condition.Insert[models.Product]"
-// it will return models.Product as it is the index of the return value *condition.Insert[models.Product]
-func findModelFromFunctionReturnValueIndex(indexExpr ast.Expr) string {
-	return getFirstGenericType(
-		passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
-	)
-}
-
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
 func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 	if indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr); isIndex {
@@ -357,6 +349,14 @@ func (r *Runner) findNotConcernedForCQLFunction(callExpr *ast.CallExpr, cqlFunct
 
 		return
 	}
+}
+
+// example: for "func cql.Insert(tx *gorm.DB, models ...*models.Product) *condition.Insert[models.Product]"
+// it will return models.Product as it is the index of the return value *condition.Insert[models.Product]
+func findModelFromFunctionReturnValueIndex(indexExpr ast.Expr) string {
+	return getFirstGenericType(
+		passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
+	)
 }
 
 func (r *Runner) getOrSetModels(expr ast.Expr, setModelsFunc func()) {
