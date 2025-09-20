@@ -4,7 +4,6 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
-	"log"
 	"strconv"
 
 	"github.com/elliotchance/pie/v2"
@@ -115,9 +114,6 @@ func (r *Runner) findForMethods(callExpr *ast.CallExpr, selectorExpr *ast.Select
 	if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
 		return
 	}
-
-	log.Println("findForMethods")
-	log.Println(selectorExpr.Sel.Name)
 
 	findRepeatedFields(callExpr, selectorExpr)
 
@@ -304,11 +300,7 @@ func findModelFromIndex(indexExpr *ast.IndexExpr) string {
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
 func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 	if indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr); isIndex {
-		log.Println("isIndex")
-
 		if selectorIsCQLInsert(indexExpr.X) {
-			log.Println("es insert")
-
 			r.getOrSetModels(indexExpr, func() {
 				// for insert we only need the main model, joins are not possible
 				r.models = []string{findModelFromIndex(indexExpr)}
@@ -318,8 +310,6 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 		}
 
 		if !selectorIsCQLFunction(indexExpr.X) {
-			log.Println("no es cql")
-
 			return
 		}
 
@@ -341,7 +331,6 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 		}
 
 		if selectorIsCQLInsert(selectorExpr) {
-			log.Println("es insert")
 			r.getOrSetModels(selectorExpr, func() {
 				// obtain model from Insert second parameter type
 				r.models = []string{
