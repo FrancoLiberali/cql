@@ -291,7 +291,9 @@ func getFieldName(condition *ast.SelectorExpr) string {
 	return conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
 }
 
-func findModelFromIndex(indexExpr *ast.IndexExpr) string {
+// example: for "func cql.Insert(tx *gorm.DB, models ...*models.Product) *condition.Insert[models.Product]"
+// it will return models.Product as it is the index of the return value *condition.Insert[models.Product]
+func findModelFromFunctionReturnValueIndex(indexExpr ast.Expr) string {
 	return getFirstGenericType(
 		passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
 	)
@@ -303,7 +305,7 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 		if selectorIsCQLInsert(indexExpr.X) {
 			r.getOrSetModels(indexExpr, func() {
 				// for insert we only need the main model, joins are not possible
-				r.models = []string{findModelFromIndex(indexExpr)}
+				r.models = []string{findModelFromFunctionReturnValueIndex(indexExpr)}
 			})
 
 			return
@@ -314,7 +316,7 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 		}
 
 		r.getOrSetModels(indexExpr, func() {
-			r.models = []string{findModelFromIndex(indexExpr)}
+			r.models = []string{findModelFromFunctionReturnValueIndex(indexExpr)}
 			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
 		})
 
@@ -332,10 +334,8 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 
 		if selectorIsCQLInsert(selectorExpr) {
 			r.getOrSetModels(selectorExpr, func() {
-				// obtain model from Insert second parameter type
-				r.models = []string{
-					getFunctionParameterTypes(selectorExpr).At(1).Type().(*types.Slice).Elem().(*types.Pointer).Elem().String(),
-				}
+				// for insert we only need the main model, joins are not possible
+				r.models = []string{findModelFromFunctionReturnValueIndex(selectorExpr)}
 			})
 
 			return
