@@ -33,6 +33,17 @@ func testOnConflictSetSameModel() {
 	).Exec()
 }
 
+func testOnConflictSetSameModelVar() {
+	product := &models.Product{}
+
+	cql.Insert(
+		db,
+		product,
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.Int.Set().Eq(conditions.Product.Float),
+	).Exec()
+}
+
 func testOnConflictSetSameModelIndex() {
 	cql.Insert[models.Product](
 		db,
@@ -46,6 +57,17 @@ func testOnConflictSetDifferentModel() {
 	cql.Insert(
 		db,
 		&models.Product{},
+	).OnConflictOn(conditions.Product.ID).Set(
+		conditions.Product.String.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	).Exec()
+}
+
+func testOnConflictSetDifferentModelVar() {
+	product := &models.Product{}
+
+	cql.Insert(
+		db,
+		product,
 	).OnConflictOn(conditions.Product.ID).Set(
 		conditions.Product.String.Set().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Exec()

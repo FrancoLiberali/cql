@@ -4,6 +4,7 @@ import (
 	"go/ast"
 	"go/token"
 	"go/types"
+	"log"
 	"strconv"
 
 	"github.com/elliotchance/pie/v2"
@@ -27,6 +28,7 @@ var Analyzer = &analysis.Analyzer{
 
 var (
 	cqlSelect         = "Select"
+	cqlInsert         = "Insert"
 	cqlFunctions      = []string{"Query", "Update", "Delete", cqlSelect}
 	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "SelectValue", "Having"}
 	cqlConnectors     = []string{"And", "Or", "Not"}
@@ -113,6 +115,9 @@ func (r *Runner) findForMethods(callExpr *ast.CallExpr, selectorExpr *ast.Select
 	if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
 		return
 	}
+
+	log.Println("findForMethods")
+	log.Println(selectorExpr.Sel.Name)
 
 	findRepeatedFields(callExpr, selectorExpr)
 
@@ -290,33 +295,67 @@ func getFieldName(condition *ast.SelectorExpr) string {
 	return conditionModel.X.(*ast.Ident).Name + "." + conditionModel.Sel.Name + "." + condition.Sel.Name
 }
 
+func findModelFromIndex(indexExpr *ast.IndexExpr) string {
+	return getFirstGenericType(
+		passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
+	)
+}
+
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
 func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
-	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
-	if isIndex {
+	if indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr); isIndex {
+		log.Println("isIndex")
+
+		if selectorIsCQLInsert(indexExpr.X) {
+			log.Println("es insert")
+
+			r.getOrSetModels(indexExpr, func() {
+				// for insert we only need the main model, joins are not possible
+				r.models = []string{findModelFromIndex(indexExpr)}
+			})
+
+			return
+		}
+
 		if !selectorIsCQLFunction(indexExpr.X) {
+			log.Println("no es cql")
+
 			return
 		}
 
 		r.getOrSetModels(indexExpr, func() {
-			r.models = []string{
-				getFirstGenericType(
-					passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
-				),
-			}
-
+			r.models = []string{findModelFromIndex(indexExpr)}
 			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
 		})
 
 		return
 	}
 
-	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
-	if isSelector {
+	if selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr); isSelector {
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 		if isCall {
 			r.findNotConcernedForCall(internalCallExpr)
+
+			return
+		}
+
+		if selectorIsCQLInsert(selectorExpr) {
+			log.Println("es insert")
+			r.getOrSetModels(selectorExpr, func() {
+				// TODO aca intentar obtener de que tipo es la funcion
+				// for insert we only need the main model, joins are not possible
+				// return getFirstGenericType(
+				// 	passG.TypesInfo.Types[conditionSelector].Type.(*types.Signature).Params().At(0).Type().(*types.Slice).Elem().(*types.Named),
+				// )
+				log.Println(passG.TypesInfo.Types[selectorExpr])
+				log.Println(passG.TypesInfo.Types[selectorExpr].Type.(*types.Signature))
+				// newModels := getModelsFromExpr(callExpr.Args[1])
+				// if len(newModels) > 0 {
+				// 	// TODO el if no deberia ser necesario
+				// 	r.models = []string{newModels[0].Model.Name}
+				// }
+			})
 
 			return
 		}
@@ -338,8 +377,7 @@ func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
 		return
 	}
 
-	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
-	if isIndexList {
+	if indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr); isIndexList {
 		if !selectorIsCQLSelect(indexListExpr.X) {
 			return
 		}
@@ -369,6 +407,10 @@ func selectorIsCQLFunction(expr ast.Expr) bool {
 
 func selectorIsCQLSelect(expr ast.Expr) bool {
 	return selectorIs(expr, []string{cqlSelect})
+}
+
+func selectorIsCQLInsert(expr ast.Expr) bool {
+	return selectorIs(expr, []string{cqlInsert})
 }
 
 func selectorIs(expr ast.Expr, values []string) bool {
