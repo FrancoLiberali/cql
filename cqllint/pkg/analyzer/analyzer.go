@@ -27,8 +27,9 @@ var Analyzer = &analysis.Analyzer{
 
 var (
 	cqlSelect         = "Select"
+	cqlInsert         = "Insert"
 	cqlFunctions      = []string{"Query", "Update", "Delete", cqlSelect}
-	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "SelectValue", "Having"}
+	cqlOrderOrGroupBy = []string{"Descending", "Ascending", "GroupBy", "SelectValue", "Having", "Where"}
 	cqlConnectors     = []string{"And", "Or", "Not"}
 	cqlSetMultiple    = "SetMultiple"
 	cqlSets           = []string{cqlSetMultiple, "Set"}
@@ -62,8 +63,9 @@ type Runner struct {
 }
 
 var (
-	passG      *analysis.Pass
-	inspectorG *inspector.Inspector
+	passG        *analysis.Pass
+	inspectorG   *inspector.Inspector
+	globalModels = map[ast.Expr][]string{}
 )
 
 func run(pass *analysis.Pass) (interface{}, error) {
@@ -73,8 +75,6 @@ func run(pass *analysis.Pass) (interface{}, error) {
 		(*ast.CallExpr)(nil),
 	}
 
-	runner := Runner{}
-
 	inspectorG.Preorder(nodeFilter, func(node ast.Node) {
 		defer func() {
 			if r := recover(); r != nil {
@@ -82,6 +82,7 @@ func run(pass *analysis.Pass) (interface{}, error) {
 			}
 		}()
 
+		runner := Runner{}
 		callExpr := node.(*ast.CallExpr)
 
 		// methods to be verified have at least one parameter
@@ -91,27 +92,25 @@ func run(pass *analysis.Pass) (interface{}, error) {
 
 		selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
 		if isSelector && !selectorIsCQLFunction(selectorExpr) {
-			runner.findForSelector(callExpr)
+			runner.findForMethods(callExpr, selectorExpr)
 		} else {
-			runner.findNotConcernedForIndex(callExpr)
+			runner.findNotConcernedForCall(callExpr)
+		}
+
+		for _, report := range runner.positionsToReport {
+			pass.Reportf(
+				report.model.Pos,
+				report.message,
+				report.model.Name,
+			)
 		}
 	})
-
-	for _, report := range runner.positionsToReport {
-		pass.Reportf(
-			report.model.Pos,
-			report.message,
-			report.model.Name,
-		)
-	}
 
 	return nil, nil //nolint:nilnil // is necessary
 }
 
 // Finds NotConcerned and Repeated errors in selector functions: Descending, Ascending, SetMultiple, Set
-func (r *Runner) findForSelector(callExpr *ast.CallExpr) {
-	selectorExpr := callExpr.Fun.(*ast.SelectorExpr)
-
+func (r *Runner) findForMethods(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
 	if !pie.Contains(cqlMethods, selectorExpr.Sel.Name) {
 		return
 	}
@@ -123,7 +122,7 @@ func (r *Runner) findForSelector(callExpr *ast.CallExpr) {
 
 // Finds NotConcerned errors in selector functions: Descending, Ascending, SetMultiple, Set
 func (r *Runner) fieldNotConcerned(callExpr *ast.CallExpr, selectorExpr *ast.SelectorExpr) {
-	r.findNotConcernedForIndex(selectorExpr.X.(*ast.CallExpr))
+	r.findNotConcernedForCall(selectorExpr.X.(*ast.CallExpr))
 
 	methodName := selectorExpr.Sel.Name
 	isOrderOrGroupBy := pie.Contains(cqlOrderOrGroupBy, methodName)
@@ -293,51 +292,29 @@ func getFieldName(condition *ast.SelectorExpr) string {
 }
 
 // Finds NotConcerned errors in index functions: cql.Query, cql.Update, cql.Delete, cql.Select
-func (r *Runner) findNotConcernedForIndex(callExpr *ast.CallExpr) {
-	indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr)
-	if isIndex {
-		if !selectorIsCQLFunction(indexExpr.X) {
-			return
-		}
-
-		r.models = []string{
-			getFirstGenericType(
-				passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
-			),
-		}
-
-		r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+func (r *Runner) findNotConcernedForCall(callExpr *ast.CallExpr) {
+	if indexExpr, isIndex := callExpr.Fun.(*ast.IndexExpr); isIndex {
+		r.findNotConcernedForCQLFunction(callExpr, indexExpr, indexExpr.X)
 
 		return
 	}
 
-	selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr)
-	if isSelector {
+	if selectorExpr, isSelector := callExpr.Fun.(*ast.SelectorExpr); isSelector {
 		// other functions may be between callExpr and the cql method, example: cql.Query(...).Limit(1).Descending
 		internalCallExpr, isCall := selectorExpr.X.(*ast.CallExpr)
 		if isCall {
-			r.findNotConcernedForIndex(internalCallExpr)
+			r.findNotConcernedForCall(internalCallExpr)
 
 			return
 		}
 
-		if selectorIsCQLSelect(selectorExpr) {
-			r.findForSelect(callExpr)
-
-			return
-		}
-
-		if selectorIsCQLFunction(selectorExpr) {
-			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
-
-			return
-		}
+		r.findNotConcernedForCQLFunction(callExpr, selectorExpr, selectorExpr)
 
 		return
 	}
 
-	indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr)
-	if isIndexList {
+	if indexListExpr, isIndexList := callExpr.Fun.(*ast.IndexListExpr); isIndexList {
+		// only select has more than one type index
 		if !selectorIsCQLSelect(indexListExpr.X) {
 			return
 		}
@@ -348,12 +325,63 @@ func (r *Runner) findNotConcernedForIndex(callExpr *ast.CallExpr) {
 	}
 }
 
+func (r *Runner) findNotConcernedForCQLFunction(callExpr *ast.CallExpr, cqlFunction ast.Expr, selectorExpr ast.Expr) {
+	if selectorIsCQLInsert(selectorExpr) {
+		r.getOrSetModels(cqlFunction, func() {
+			// for insert we only need the main model, joins are not possible
+			r.models = []string{findModelFromFunctionReturnValueIndex(cqlFunction)}
+		})
+
+		return
+	}
+
+	if selectorIsCQLSelect(selectorExpr) {
+		r.findForSelect(callExpr)
+
+		return
+	}
+
+	if selectorIsCQLFunction(selectorExpr) {
+		r.getOrSetModels(cqlFunction, func() {
+			r.models = []string{findModelFromFunctionReturnValueIndex(cqlFunction)}
+			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+		})
+
+		return
+	}
+}
+
+// example: for "func cql.Insert(tx *gorm.DB, models ...*models.Product) *condition.Insert[models.Product]"
+// it will return models.Product as it is the index of the return value *condition.Insert[models.Product]
+func findModelFromFunctionReturnValueIndex(indexExpr ast.Expr) string {
+	return getFirstGenericType(
+		passG.TypesInfo.Types[indexExpr].Type.(*types.Signature).Results().At(0).Type().(*types.Pointer).Elem().(*types.Named),
+	)
+}
+
+func (r *Runner) getOrSetModels(expr ast.Expr, setModelsFunc func()) {
+	models, isPresent := globalModels[expr]
+	if isPresent {
+		r.models = models
+
+		return
+	}
+
+	setModelsFunc()
+
+	globalModels[expr] = r.models
+}
+
 func selectorIsCQLFunction(expr ast.Expr) bool {
 	return selectorIs(expr, cqlFunctions)
 }
 
 func selectorIsCQLSelect(expr ast.Expr) bool {
 	return selectorIs(expr, []string{cqlSelect})
+}
+
+func selectorIsCQLInsert(expr ast.Expr) bool {
+	return selectorIs(expr, []string{cqlInsert})
 }
 
 func selectorIs(expr ast.Expr, values []string) bool {
@@ -373,7 +401,7 @@ func selectorIs(expr ast.Expr, values []string) bool {
 func (r *Runner) findForSelect(callExpr *ast.CallExpr) {
 	newRunner := Runner{}
 
-	newRunner.findNotConcernedForIndex(callExpr.Args[0].(*ast.CallExpr))
+	newRunner.findNotConcernedForCall(callExpr.Args[0].(*ast.CallExpr))
 	newRunner.findErrorIsDynamic(callExpr.Args[1:])
 
 	r.positionsToReport = append(r.positionsToReport, newRunner.positionsToReport...)
@@ -460,10 +488,14 @@ func findVariableAssignments(variable *ast.Ident) []*ast.AssignStmt {
 	return assignments
 }
 
+func getFunctionParameterTypes(expr ast.Expr) *types.Tuple {
+	return passG.TypesInfo.Types[expr].Type.(*types.Signature).Params()
+}
+
 // conditions.Phone.Brand -> Brand (or its correct type if not the same)
 func getModelFromJoinCondition(conditionSelector *ast.SelectorExpr) string {
 	return getFirstGenericType(
-		passG.TypesInfo.Types[conditionSelector].Type.(*types.Signature).Params().At(0).Type().(*types.Slice).Elem().(*types.Named),
+		getFunctionParameterTypes(conditionSelector).At(0).Type().(*types.Slice).Elem().(*types.Named),
 	)
 }
 
