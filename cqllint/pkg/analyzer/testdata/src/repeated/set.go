@@ -1,13 +1,10 @@
-package not_concerned
+package repeated
 
 import (
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
-	"gorm.io/gorm"
 )
-
-var db *gorm.DB
 
 func testSetRepeated() {
 	cql.Update[models.Product](

@@ -14,8 +14,8 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/driver/sqlserver"
-	"gorm.io/gorm"
 
+	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/logger"
 	"github.com/FrancoLiberali/cql/sql"
 )
@@ -37,7 +37,7 @@ func TestCQL(t *testing.T) {
 		log.Fatalln(err)
 	}
 
-	err = db.AutoMigrate(ListOfTables...)
+	err = db.GormDB.AutoMigrate(ListOfTables...)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -55,8 +55,8 @@ func TestCQL(t *testing.T) {
 	suite.Run(t, NewInsertIntTestSuite(db))
 }
 
-func NewDBConnection() (*gorm.DB, error) {
-	var dialector gorm.Dialector
+func NewDBConnection() (*cql.DB, error) {
+	var dialector cql.Dialector
 
 	switch getDBDialector() {
 	case sql.Postgres:

@@ -4,26 +4,24 @@ import (
 	"context"
 	"time"
 
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/logger"
 )
 
 func OpenWithRetry(
-	dialector gorm.Dialector,
+	dialector cql.Dialector,
 	logger logger.Interface,
 	connectionTries uint,
 	retryTime time.Duration,
-) (*gorm.DB, error) {
+) (*cql.DB, error) {
 	var err error
 
-	var gormDB *gorm.DB
+	var db *cql.DB
 
 	for retryNumber := uint(0); retryNumber < connectionTries; retryNumber++ {
-		gormDB, err = cql.Open(
+		db, err = cql.Open(
 			dialector,
-			&gorm.Config{
+			&cql.Config{
 				Logger: logger,
 			},
 		)
@@ -31,7 +29,7 @@ func OpenWithRetry(
 		if err == nil {
 			logger.Info(context.Background(), "Database connection is active")
 
-			return gormDB, nil
+			return db, nil
 		}
 
 		// there are more retries

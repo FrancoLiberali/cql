@@ -1,8 +1,6 @@
 package test
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/sql"
@@ -15,7 +13,7 @@ type GroupByIntTestSuite struct {
 }
 
 func NewGroupByIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *GroupByIntTestSuite {
 	return &GroupByIntTestSuite{
 		testSuite: testSuite{

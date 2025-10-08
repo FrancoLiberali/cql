@@ -1,8 +1,6 @@
 package test
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -14,7 +12,7 @@ type JoinConditionsIntTestSuite struct {
 }
 
 func NewJoinConditionsIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *JoinConditionsIntTestSuite {
 	return &JoinConditionsIntTestSuite{
 		testSuite: testSuite{
@@ -238,7 +236,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsAddsDeletedAtAutomat
 	seller1 := ts.createSeller("franco", nil)
 	seller2 := ts.createSeller("agustin", nil)
 
-	ts.Nil(ts.db.Delete(product2).Error)
+	ts.Nil(ts.db.GormDB.Delete(product2).Error)
 
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
@@ -261,7 +259,7 @@ func (ts *JoinConditionsIntTestSuite) TestConditionThatJoinsOnDeletedAt() {
 	seller1 := ts.createSeller("franco", nil)
 	seller2 := ts.createSeller("agustin", nil)
 
-	ts.Nil(ts.db.Delete(product1).Error)
+	ts.Nil(ts.db.GormDB.Delete(product1).Error)
 
 	match := ts.createSale(0, product1, seller1)
 	ts.createSale(0, product2, seller2)
@@ -458,7 +456,7 @@ func (ts *JoinConditionsIntTestSuite) TestDynamicOperatorJoinMoreThanOnceWithApp
 	parent1 := &models.Parent1{ParentParent: *parentParent}
 	parent2 := &models.Parent2{ParentParent: *parentParent}
 	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "franco"}
-	err := ts.db.Create(child).Error
+	err := ts.db.GormDB.Create(child).Error
 	ts.Require().NoError(err)
 
 	entities, err := cql.Query[models.Child](

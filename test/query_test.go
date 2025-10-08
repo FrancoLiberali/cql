@@ -16,7 +16,7 @@ type QueryIntTestSuite struct {
 }
 
 func NewQueryIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *QueryIntTestSuite {
 	return &QueryIntTestSuite{
 		testSuite: testSuite{
@@ -261,14 +261,14 @@ func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndAppeara
 	parent11 := &models.Parent1{ParentParent: *parentParent1}
 	parent12 := &models.Parent2{ParentParent: *parentParent1}
 	child1 := &models.Child{Parent1: *parent11, Parent2: *parent12, Name: "franco"}
-	err := ts.db.Create(child1).Error
+	err := ts.db.GormDB.Create(child1).Error
 	ts.Require().NoError(err)
 
 	parentParent2 := &models.ParentParent{Name: "b"}
 	parent21 := &models.Parent1{ParentParent: *parentParent2}
 	parent22 := &models.Parent2{ParentParent: *parentParent2}
 	child2 := &models.Child{Parent1: *parent21, Parent2: *parent22, Name: "franco"}
-	err = ts.db.Create(child2).Error
+	err = ts.db.GormDB.Create(child2).Error
 	ts.Require().NoError(err)
 
 	children, err := cql.Query[models.Child](

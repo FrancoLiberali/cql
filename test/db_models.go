@@ -4,8 +4,8 @@ import (
 	"log"
 
 	"github.com/elliotchance/pie/v2"
-	"gorm.io/gorm"
 
+	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/models"
 )
 
@@ -27,14 +27,14 @@ var ListOfTables = []any{
 	models.Child{},
 }
 
-func CleanDB(db *gorm.DB) {
+func CleanDB(db *cql.DB) {
 	CleanDBTables(db, pie.Reverse(ListOfTables))
 }
 
-func CleanDBTables(db *gorm.DB, listOfTables []any) {
+func CleanDBTables(db *cql.DB, listOfTables []any) {
 	// clean database to ensure independency between tests
 	for _, table := range listOfTables {
-		err := db.Unscoped().Where("1 = 1").Delete(table).Error
+		err := db.GormDB.Unscoped().Where("1 = 1").Delete(table).Error
 		if err != nil {
 			log.Fatalln("could not clean database: ", err)
 		}

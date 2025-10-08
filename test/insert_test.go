@@ -1,8 +1,6 @@
 package test
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -14,7 +12,7 @@ type InsertIntTestSuite struct {
 }
 
 func NewInsertIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *InsertIntTestSuite {
 	return &InsertIntTestSuite{
 		testSuite: testSuite{

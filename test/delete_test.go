@@ -1,7 +1,6 @@
 package test
 
 import (
-	"gorm.io/gorm"
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
@@ -15,7 +14,7 @@ type DeleteIntTestSuite struct {
 }
 
 func NewDeleteIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *DeleteIntTestSuite {
 	return &DeleteIntTestSuite{
 		testSuite: testSuite{

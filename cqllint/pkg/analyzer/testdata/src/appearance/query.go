@@ -1,14 +1,10 @@
 package appearance
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
-
-var db *gorm.DB
 
 func testQueryNotNecessary() {
 	cql.Query[models.Phone](

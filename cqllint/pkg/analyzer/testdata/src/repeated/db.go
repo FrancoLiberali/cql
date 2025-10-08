@@ -1,4 +1,4 @@
-package not_concerned
+package repeated
 
 import "github.com/FrancoLiberali/cql"
 
