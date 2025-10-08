@@ -14,7 +14,6 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/driver/sqlserver"
-	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/logger"
@@ -57,7 +56,7 @@ func TestCQL(t *testing.T) {
 }
 
 func NewDBConnection() (*cql.DB, error) {
-	var dialector gorm.Dialector
+	var dialector cql.Dialector
 
 	switch getDBDialector() {
 	case sql.Postgres:
