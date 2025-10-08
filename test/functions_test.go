@@ -1,8 +1,6 @@
 package test
 
 import (
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	cqlSQL "github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -14,7 +12,7 @@ type FunctionsIntTestSuite struct {
 }
 
 func NewFunctionsIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *FunctionsIntTestSuite {
 	return &FunctionsIntTestSuite{
 		testSuite: testSuite{
@@ -428,12 +426,12 @@ func (ts *FunctionsIntTestSuite) TestDynamicOperatorForNumericWithFunctionOfDiff
 func (ts *FunctionsIntTestSuite) TestDynamicOperatorForStringWithConcat() {
 	product1 := ts.createProduct("asd123", 2, 0.0, false, nil)
 	product1.String2 = "asd"
-	err := ts.db.Save(product1).Error
+	err := ts.db.GormDB.Save(product1).Error
 	ts.Require().NoError(err)
 
 	product2 := ts.createProduct("asd", 3, 0.0, false, nil)
 	product2.String2 = "asd"
-	err = ts.db.Save(product2).Error
+	err = ts.db.GormDB.Save(product2).Error
 	ts.Require().NoError(err)
 
 	ts.createProduct("asd123", 3, 0.0, false, nil)

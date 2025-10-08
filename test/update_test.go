@@ -3,7 +3,6 @@ package test
 import (
 	"database/sql"
 
-	"gorm.io/gorm"
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
@@ -17,7 +16,7 @@ type UpdateIntTestSuite struct {
 }
 
 func NewUpdateIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *UpdateIntTestSuite {
 	return &UpdateIntTestSuite{
 		testSuite: testSuite{
@@ -267,7 +266,7 @@ func (ts *UpdateIntTestSuite) TestUpdateWithMultilevelJoinInConditions() {
 func (ts *UpdateIntTestSuite) TestUpdateSetNull() {
 	product := ts.createProduct("", 0, 0, false, nil)
 	product.NullFloat = sql.NullFloat64{Valid: true, Float64: 1.3}
-	err := ts.db.Save(product).Error
+	err := ts.db.GormDB.Save(product).Error
 	ts.Require().NoError(err)
 
 	updated, err := cql.Update[models.Product](
@@ -292,7 +291,7 @@ func (ts *UpdateIntTestSuite) TestUpdateSetNull() {
 func (ts *UpdateIntTestSuite) TestUpdateSetNullForBool() {
 	product := ts.createProduct("", 0, 0, false, nil)
 	product.NullBool = sql.NullBool{Valid: true, Bool: true}
-	err := ts.db.Save(product).Error
+	err := ts.db.GormDB.Save(product).Error
 	ts.Require().NoError(err)
 
 	updated, err := cql.Update[models.Product](
@@ -429,7 +428,7 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithAppearance() {
 	parent1 := &models.Parent1{ParentParent: *parentParent}
 	parent2 := &models.Parent2{ParentParent: *parentParent}
 	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "not_franco"}
-	err := ts.db.Create(child).Error
+	err := ts.db.GormDB.Create(child).Error
 	ts.Require().NoError(err)
 
 	updated, err := cql.Update[models.Child](
@@ -725,13 +724,13 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesTableJoinedMultipleTimesAn
 
 	parentParent1 := &models.ParentParent{Name: "franco"}
 	parentParent2 := &models.ParentParent{Name: "ruben"}
-	err := ts.db.Create(parentParent2).Error
+	err := ts.db.GormDB.Create(parentParent2).Error
 	ts.Require().NoError(err)
 
 	parent1 := &models.Parent1{ParentParent: *parentParent1}
 	parent2 := &models.Parent2{ParentParent: *parentParent2}
 	child := &models.Child{Parent1: *parent1, Parent2: *parent2, Name: "not_franco"}
-	err = ts.db.Create(child).Error
+	err = ts.db.GormDB.Create(child).Error
 	ts.Require().NoError(err)
 
 	updated, err := cql.Update[models.Child](

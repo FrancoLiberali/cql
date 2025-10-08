@@ -1,4 +1,4 @@
-package not_concerned
+package appearance
 
 import "github.com/FrancoLiberali/cql"
 

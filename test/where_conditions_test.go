@@ -3,8 +3,6 @@ package test
 import (
 	"log"
 
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/mysql"
 	"github.com/FrancoLiberali/cql/sql"
@@ -18,7 +16,7 @@ type WhereConditionsIntTestSuite struct {
 }
 
 func NewWhereConditionsIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *WhereConditionsIntTestSuite {
 	return &WhereConditionsIntTestSuite{
 		testSuite: testSuite{
@@ -190,7 +188,7 @@ func (ts *WhereConditionsIntTestSuite) TestDeletedAtConditionIsAddedAutomaticall
 	match := ts.createProduct("", 0, 0.0, false, nil)
 	deleted := ts.createProduct("", 0, 0.0, false, nil)
 
-	ts.Nil(ts.db.Delete(deleted).Error)
+	ts.Nil(ts.db.GormDB.Delete(deleted).Error)
 
 	entities, err := cql.Query[models.Product](ts.db).Find()
 	ts.Require().NoError(err)
@@ -202,7 +200,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfDeletedAt() {
 	match := ts.createProduct("", 0, 0.0, false, nil)
 	ts.createProduct("", 0, 0.0, false, nil)
 
-	ts.Nil(ts.db.Delete(match).Error)
+	ts.Nil(ts.db.GormDB.Delete(match).Error)
 
 	entities, err := cql.Query[models.Product](
 		ts.db,
@@ -219,7 +217,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfEmbedded() {
 
 	match.EmbeddedInt = 1
 
-	err := ts.db.Save(match).Error
+	err := ts.db.GormDB.Save(match).Error
 	ts.Require().NoError(err)
 
 	entities, err := cql.Query[models.Product](
@@ -237,7 +235,7 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfGormEmbedded() {
 
 	match.GormEmbedded.Int = 1
 
-	err := ts.db.Save(match).Error
+	err := ts.db.GormDB.Save(match).Error
 	ts.Require().NoError(err)
 
 	entities, err := cql.Query[models.Product](
@@ -273,10 +271,10 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfByteArrayWithContent() {
 	match.ByteArray = []byte{1, 2}
 	notMatch1.ByteArray = []byte{2, 3}
 
-	err := ts.db.Save(match).Error
+	err := ts.db.GormDB.Save(match).Error
 	ts.Require().NoError(err)
 
-	err = ts.db.Save(notMatch1).Error
+	err = ts.db.GormDB.Save(notMatch1).Error
 	ts.Require().NoError(err)
 
 	entities, err := cql.Query[models.Product](
@@ -296,10 +294,10 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfByteArrayEmpty() {
 	match.ByteArray = []byte{}
 	notMatch1.ByteArray = []byte{2, 3}
 
-	err := ts.db.Save(match).Error
+	err := ts.db.GormDB.Save(match).Error
 	ts.Require().NoError(err)
 
-	err = ts.db.Save(notMatch1).Error
+	err = ts.db.GormDB.Save(notMatch1).Error
 	ts.Require().NoError(err)
 
 	entities, err := cql.Query[models.Product](
@@ -319,10 +317,10 @@ func (ts *WhereConditionsIntTestSuite) TestConditionOfCustomType() {
 	match.MultiString = models.MultiString{"salut", "hola"}
 	notMatch1.MultiString = models.MultiString{"salut", "hola", "hello"}
 
-	err := ts.db.Save(match).Error
+	err := ts.db.GormDB.Save(match).Error
 	ts.Require().NoError(err)
 
-	err = ts.db.Save(notMatch1).Error
+	err = ts.db.GormDB.Save(notMatch1).Error
 	ts.Require().NoError(err)
 
 	entities, err := cql.Query[models.Product](

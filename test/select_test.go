@@ -3,8 +3,6 @@ package test
 import (
 	"reflect"
 
-	"gorm.io/gorm"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -15,7 +13,7 @@ type SelectIntTestSuite struct {
 }
 
 func NewSelectIntTestSuite(
-	db *gorm.DB,
+	db *cql.DB,
 ) *SelectIntTestSuite {
 	return &SelectIntTestSuite{
 		testSuite: testSuite{
