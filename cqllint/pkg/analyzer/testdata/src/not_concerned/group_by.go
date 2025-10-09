@@ -1,6 +1,8 @@
 package not_concerned
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -11,6 +13,7 @@ var results = []struct{}{}
 
 func testGroupBySameModel() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -20,6 +23,7 @@ func testGroupBySameModel() {
 
 func testGroupByJoinedModel() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -30,6 +34,7 @@ func testGroupByJoinedModel() {
 
 func testGroupByJoinedWithJoinedWithCondition() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -42,6 +47,7 @@ func testGroupByJoinedWithJoinedWithCondition() {
 
 func testGroupByJoinedWithJoinedWithPreload() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand().Preload(),
 	).GroupBy(
@@ -52,6 +58,7 @@ func testGroupByJoinedWithJoinedWithPreload() {
 
 func testGroupByJoinedWithJoinedWithConditionsWithPreload() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -66,6 +73,7 @@ func testGroupByJoinedModelInVariable() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -75,6 +83,7 @@ func testGroupByJoinedModelInVariable() {
 
 func testGroupByNotJoined() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 	).GroupBy(
 		conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -85,6 +94,7 @@ func testGroupByNotJoinedInVariable() {
 	value := conditions.City.Name // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -98,6 +108,7 @@ func testGroupByJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -111,6 +122,7 @@ func testGroupByNotJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -127,6 +139,7 @@ func testGroupByJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -143,6 +156,7 @@ func testGroupByNotJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -160,6 +174,7 @@ func testGroupByNotJoinedConditionInListWithAppendSecond() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -181,6 +196,7 @@ func testGroupByNotJoinedConditionInListWithAppendMultiple() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -190,6 +206,7 @@ func testGroupByNotJoinedConditionInListWithAppendMultiple() {
 
 func testGroupBySelectSameModel() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -201,6 +218,7 @@ func testGroupBySelectSameModel() {
 
 func testGroupBySelectJoinedModel() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -212,6 +230,7 @@ func testGroupBySelectJoinedModel() {
 
 func testGroupBySelectNotJoined() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -225,6 +244,7 @@ func testGroupBySelectJoinedModelInVariable() {
 	value := conditions.Brand.Name.Aggregate().Max()
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -238,6 +258,7 @@ func testGroupBySelectNotJoinedInVariable() {
 	value := conditions.City.Name.Aggregate().Max() // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -249,6 +270,7 @@ func testGroupBySelectNotJoinedInVariable() {
 
 func testGroupBySelectJoinedWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -262,6 +284,7 @@ func testGroupBySelectJoinedWithFunctionVariable() {
 	value := conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -275,6 +298,7 @@ func testGroupBySelectJoinedWithFunctionOverVariable() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -286,6 +310,7 @@ func testGroupBySelectJoinedWithFunctionOverVariable() {
 
 func testGroupBySelectNotJoinedWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -299,6 +324,7 @@ func testGroupBySelectNotJoinedWithFunctionVariable() {
 	value := conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max() // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -312,6 +338,7 @@ func testGroupBySelectNotJoinedWithFunctionOverVariable() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -323,6 +350,7 @@ func testGroupBySelectNotJoinedWithFunctionOverVariable() {
 
 func testGroupBySelectNotJoinedWithTwoFunctions() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -334,6 +362,7 @@ func testGroupBySelectNotJoinedWithTwoFunctions() {
 
 func testHavingSameModel() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -345,6 +374,7 @@ func testHavingSameModel() {
 
 func testHavingJoinedModel() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -356,6 +386,7 @@ func testHavingJoinedModel() {
 
 func testHavingNotJoined() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -369,6 +400,7 @@ func testHavingJoinedModelInVariable() {
 	value := conditions.Brand.Name.Aggregate().Max().Eq(cql.String("asd"))
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -382,6 +414,7 @@ func testHavingNotJoinedInVariable() {
 	value := conditions.City.Name.Aggregate().Max().Eq(cql.String("asd")) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -393,6 +426,7 @@ func testHavingNotJoinedInVariable() {
 
 func testHavingJoinedWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -406,6 +440,7 @@ func testHavingJoinedWithFunctionVariable() {
 	value := conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd"))
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -419,6 +454,7 @@ func testHavingJoinedWithFunctionOverVariable() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -430,6 +466,7 @@ func testHavingJoinedWithFunctionOverVariable() {
 
 func testHavingNotJoinedWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -443,6 +480,7 @@ func testHavingNotJoinedWithFunctionVariable() {
 	value := conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max().Eq(cql.String("asd")) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -456,6 +494,7 @@ func testHavingNotJoinedWithFunctionOverVariable() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -467,6 +506,7 @@ func testHavingNotJoinedWithFunctionOverVariable() {
 
 func testHavingNotJoinedWithTwoFunctions() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -482,6 +522,7 @@ func testHavingJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -497,6 +538,7 @@ func testHavingNotJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -515,6 +557,7 @@ func testHavingJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -533,6 +576,7 @@ func testHavingNotJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -552,6 +596,7 @@ func testHavingNotJoinedConditionInListWithAppendSecond() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -575,6 +620,7 @@ func testHavingNotJoinedConditionInListWithAppendMultiple() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -586,6 +632,7 @@ func testHavingNotJoinedConditionInListWithAppendMultiple() {
 
 func testHavingDynamicSameModel() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -597,6 +644,7 @@ func testHavingDynamicSameModel() {
 
 func testHavingDynamicJoinedModel() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -608,6 +656,7 @@ func testHavingDynamicJoinedModel() {
 
 func testHavingDynamicNotJoined() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -619,6 +668,7 @@ func testHavingDynamicNotJoined() {
 
 func testHavingDynamicNotJoinedOnLeft() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -630,6 +680,7 @@ func testHavingDynamicNotJoinedOnLeft() {
 
 func testHavingDynamicNotJoinedOnBoth() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).GroupBy(
@@ -645,6 +696,7 @@ func testHavingDynamicJoinedModelInVariable() {
 	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Aggregate().Max())
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -658,6 +710,7 @@ func testHavingDynamicNotJoinedInVariable() {
 	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Aggregate().Max()) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -669,6 +722,7 @@ func testHavingDynamicNotJoinedInVariable() {
 
 func testHavingDynamicJoinedWithFunctionOnLeft() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -680,6 +734,7 @@ func testHavingDynamicJoinedWithFunctionOnLeft() {
 
 func testHavingDynamicJoinedWithFunctionOnRight() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -693,6 +748,7 @@ func testHavingDynamicJoinedWithFunctionVariable() {
 	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max())
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -706,6 +762,7 @@ func testHavingDynamicJoinedWithFunctionOverVariable() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -717,6 +774,7 @@ func testHavingDynamicJoinedWithFunctionOverVariable() {
 
 func testHavingDynamicNotJoinedWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -730,6 +788,7 @@ func testHavingDynamicNotJoinedWithFunctionVariable() {
 	value := conditions.Brand.Name.Aggregate().Max().Eq(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max()) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -743,6 +802,7 @@ func testHavingDynamicNotJoinedWithFunctionOverVariable() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -758,6 +818,7 @@ func testHavingDynamicJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -773,6 +834,7 @@ func testHavingDynamicNotJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -791,6 +853,7 @@ func testHavingDynamicJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -809,6 +872,7 @@ func testHavingDynamicNotJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -828,6 +892,7 @@ func testHavingDynamicNotJoinedConditionInListWithAppendSecond() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(
@@ -851,6 +916,7 @@ func testHavingDynamicNotJoinedConditionInListWithAppendMultiple() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).GroupBy(

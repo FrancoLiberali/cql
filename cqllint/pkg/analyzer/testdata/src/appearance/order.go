@@ -1,6 +1,8 @@
 package appearance
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -8,12 +10,14 @@ import (
 
 func testOrderNotNecessary() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 	).Descending(conditions.Brand.Name.Appearance(0)).Find() // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Brand appears only once"
 }
 
 func testOrderNecessaryNotCalled() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -26,6 +30,7 @@ func testOrderNecessaryNotCalled() {
 
 func testOrderNecessaryCalled() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -38,6 +43,7 @@ func testOrderNecessaryCalled() {
 
 func testOrderOutOfRange() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),

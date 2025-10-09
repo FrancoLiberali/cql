@@ -27,6 +27,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "wrong name of condition",
 			Code: `
 	_ = %s[models.Product](
+		context.Background(),
 		db,
 		conditions.ProductNotExists.Int.Is().Eq(cql.Int(1)),
 	)`,
@@ -36,6 +37,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "wrong name of property",
 			Code: `
 		_ = %s[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.IntNotExists.Is().Eq(cql.Int(1)),
 		)`,
@@ -45,6 +47,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "basic wrong type in value",
 			Code: `
 		_ = %s[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Int.Is().Eq("1"),
 		)`,
@@ -54,6 +57,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use wrong type in value",
 			Code: `
 		_ = %s[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Int.Is().Eq(cql.Int("1")),
 		)`,
@@ -63,6 +67,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Compare with wrong type",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(cql.String("1")),
 			)`,
@@ -72,6 +77,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Compare with wrong type for multiple values operator",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Between(
 					cql.Int(1),
@@ -84,6 +90,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Compare with wrong type for list of values operator",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().In(
 					cql.Int(1),
@@ -96,6 +103,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use condition of another model",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Sale.Code.Is().Eq(cql.Int(1)),
 			)`,
@@ -105,6 +113,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use condition of another model inside join",
 			Code: `
 			_ = %s[models.Sale](
+				context.Background(),
 				db,
 				conditions.Sale.Seller(
 					conditions.Sale.Code.Is().Eq(cql.Int(1)),
@@ -116,6 +125,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use condition of another model inside logical operator",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))),
 			)`,
@@ -125,6 +135,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use condition of another model inside logical operator multiple",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				cql.Or[models.Product](
 					conditions.Product.Int.Is().Eq(cql.Int(1)),
@@ -137,6 +148,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use condition of another model inside slice operator",
 			Code: `
 			_ = %s[models.Company](
+				context.Background(),
 				db,
 				conditions.Company.Sellers.Any(
 					conditions.Sale.Code.Is().Eq(cql.Int(1)),
@@ -148,6 +160,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Condition with field of another type",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.ID),
 			)`,
@@ -157,6 +170,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use operator not present for field type",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().True(),
 			)`,
@@ -166,6 +180,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use custom operator not present for field type",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Custom(
 					condition.Like("_a!_").Escape('!'),
@@ -177,6 +192,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function not present for field type",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Concat(cql.String("asd")).Is().Eq(cql.Int(1)),
 			)`,
@@ -186,6 +202,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function with incorrect value type",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Plus(cql.String("asd")).Is().Eq(cql.Int(1)),
 			)`,
@@ -195,6 +212,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function dynamic with incorrect value type",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Plus(conditions.Product.String).Is().Eq(cql.Int(1)),
 			)`,
@@ -204,6 +222,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function not present for field type inside comparison",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Concat(cql.String("asd"))),
 			)`,
@@ -213,6 +232,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function with incorrect value type inside comparison",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(cql.String("asd"))),
 			)`,
@@ -222,6 +242,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function dynamic with incorrect value type inside comparison",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(conditions.Product.String)),
 			)`,
@@ -231,6 +252,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function with not same type of numeric value for logical operator",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(cql.Float64(1))),
 			)`,
@@ -240,6 +262,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function with not same type of numeric value for logical operator dynamic",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(conditions.Product.Float)),
 			)`,
@@ -249,6 +272,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function with not int type of numeric value for shift operator",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(cql.Float64(1))),
 			)`,
@@ -258,6 +282,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 			Name: "Use function with not int type of numeric value for shift operator dynamic",
 			Code: `
 			_ = %s[models.Product](
+				context.Background(),
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(conditions.Product.Float)),
 			)`,
@@ -291,14 +316,15 @@ func executeTest(t *testing.T, extraCode string, testCase testCase) {
 package main
 
 import (
-	"gorm.io/gorm"
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/models"
 	"github.com/FrancoLiberali/cql/test/conditions"
 )
 
-var db *gorm.DB
+var db *cql.DB
 ` + extraCode + `
 
 func main() {
@@ -331,6 +357,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			Name: "aggregation do not exist for value type",
 			Code: `
 		_ = cql.Query[models.Product](
+			context.Background(),
 			db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -343,6 +370,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			Name: "having not compared with correct type of value",
 			Code: `
 		_ = cql.Query[models.Product](
+			context.Background(),
 			db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -357,6 +385,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			Name: "having not compared with correct type of another aggregation",
 			Code: `
 		_ = cql.Query[models.Product](
+			context.Background(),
 			db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -386,6 +415,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 			Name: "set value of wrong type",
 			Code: `
 		_, _ = cql.Update[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Bool.Is().False(),
 		).Set(
@@ -397,6 +427,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 			Name: "set field of wrong type",
 			Code: `
 		_, _ = cql.Update[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Bool.Is().False(),
 		).Set(
@@ -408,6 +439,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 			Name: "set multiple value of wrong type",
 			Code: `
 		_, _ = cql.Update[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Bool.Is().False(),
 		).SetMultiple(
@@ -419,6 +451,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 			Name: "set field of wrong type",
 			Code: `
 		_, _ = cql.Update[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Bool.Is().False(),
 		).SetMultiple(
@@ -430,6 +463,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 			Name: "set can not be used after a function",
 			Code: `
 		_, _ = cql.Update[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Bool.Is().False(),
 		).Set(
@@ -441,6 +475,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 			Name: "set null can not be used for not nullable types",
 			Code: `
 		_, _ = cql.Update[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Bool.Is().False(),
 		).Set(
@@ -454,6 +489,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 		productsReturned := []models.Seller{}
 
 		_, _ = cql.Update[models.Product](
+			context.Background(),
 			db,
 			conditions.Product.Bool.Is().False(),
 		).Returning(
@@ -461,7 +497,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 		).Set(
 			conditions.Product.Int.Set().Eq(cql.Int(1)),
 		)`,
-			Error: `cannot use &productsReturned (value of type *[]models.Seller) as *[]models.Product value in argument to cql.Update[models.Product](db, conditions.Product.Bool.Is().False()).Returning`,
+			Error: `cannot use &productsReturned (value of type *[]models.Seller) as *[]models.Product value in argument to cql.Update[models.Product](context.Background(), db, conditions.Product.Bool.Is().False()).Returning`,
 		},
 	}
 
@@ -483,6 +519,7 @@ func TestSelectCompilationErrors(t *testing.T) {
 			Code: `
 				_, _ = cql.Select(
 					cql.Query[models.Product](
+						context.Background(),
 						db,
 					),
 					cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -500,6 +537,7 @@ func TestSelectCompilationErrors(t *testing.T) {
 			Code: `
 				_, _ = cql.Select(
 					cql.Query[models.Product](
+						context.Background(),
 						db,
 					),
 					cql.ValueInto(conditions.Product.Int, func(value string, result *ResultInt) {
@@ -535,83 +573,91 @@ func TestInsertCompilationErrors(t *testing.T) {
 			Name: "no other conflict can be called after DoNothing",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflict().DoNothing().OnConflict().DoNothing().Exec()
 			`,
-			Error: `cql.Insert(db, product).OnConflict().DoNothing().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+			Error: `cql.Insert(context.Background(), db, product).OnConflict().DoNothing().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
 		},
 		{
 			Name: "no other conflict can be called after UpdateAll",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflict().UpdateAll().OnConflict().UpdateAll().Exec()
 			`,
-			Error: `cql.Insert(db, product).OnConflict().UpdateAll().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+			Error: `cql.Insert(context.Background(), db, product).OnConflict().UpdateAll().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
 		},
 		{
 			Name: "no other conflict can be called after Update",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflict().Update().OnConflict().Update().Exec()
 			`,
-			Error: `cql.Insert(db, product).OnConflict().Update().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+			Error: `cql.Insert(context.Background(), db, product).OnConflict().Update().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
 		},
 		{
 			Name: "no other conflict can be called after Set",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflict().Set().OnConflict().Set().Exec()
 			`,
-			Error: `cql.Insert(db, product).OnConflict().Set().OnConflict undefined (type *condition.InsertOnConflictSet[models.Product] has no field or method OnConflict)`,
+			Error: `cql.Insert(context.Background(), db, product).OnConflict().Set().OnConflict undefined (type *condition.InsertOnConflictSet[models.Product] has no field or method OnConflict)`,
 		},
 		{
 			Name: "no other conflict can be called after Where",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflict().Set().Where().OnConflict().Set().Exec()
 			`,
-			Error: `cql.Insert(db, product).OnConflict().Set().Where().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
+			Error: `cql.Insert(context.Background(), db, product).OnConflict().Set().Where().OnConflict undefined (type *condition.InsertExec[models.Product] has no field or method OnConflict)`,
 		},
 		{
 			Name: "on conflict on field of different model",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflictOn(conditions.City.ID).Update(conditions.Product.Int).Exec()
 			`,
-			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(db, product).OnConflictOn: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
+			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(context.Background(), db, product).OnConflictOn: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
 		},
 		{
 			Name: "update field of different model",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflictOn(conditions.Product.ID).Update(conditions.City.ID).Exec()
 			`,
-			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(db, product).OnConflictOn(conditions.Product.ID).Update: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
+			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(context.Background(), db, product).OnConflictOn(conditions.Product.ID).Update: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
 		},
 		{
 			Name: "set field of different model",
 			Code: `
 				_, _ = cql.Insert(
+					context.Background(),
 					db,
 					product,
 				).OnConflictOn(conditions.Product.ID).Set(
 					conditions.City.Name.Set().Eq(cql.String("asd")),
 				).Exec()
 			`,
-			Error: `cannot use conditions.City.Name.Set().Eq(cql.String("asd")) (value of type *condition.Set[models.City]) as *condition.Set[models.Product] value in argument to cql.Insert(db, product).OnConflictOn(conditions.Product.ID).Set`,
+			Error: `cannot use conditions.City.Name.Set().Eq(cql.String("asd")) (value of type *condition.Set[models.City]) as *condition.Set[models.Product] value in argument to cql.Insert(context.Background(), db, product).OnConflictOn(conditions.Product.ID).Set`,
 		},
 	}
 

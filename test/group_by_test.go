@@ -1,6 +1,8 @@
 package test
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/sql"
@@ -78,6 +80,7 @@ func (ts *GroupByIntTestSuite) TestGroupByNoSelect() {
 	results := []ResultAlone{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(conditions.Product.Int).Into(&results)
 
@@ -89,6 +92,7 @@ func (ts *GroupByIntTestSuite) TestGroupByFieldNotPresentReturnsError() {
 	results := []ResultAlone{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(conditions.Sale.SellerID).Into(&results)
 
@@ -104,6 +108,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoStructWithMoreFieldsWork() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(conditions.Product.Int).Into(&results)
 
@@ -119,6 +124,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsNoSelect() {
 	results := []ResultAlone{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).GroupBy(conditions.Product.Int).Into(&results)
@@ -131,6 +137,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectFieldNotPresentReturnsError() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -150,6 +157,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectSum() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -169,6 +177,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastIntToFloatWorks() {
 	results := []ResultFloat{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -188,6 +197,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoCastIntToStringWorks() {
 	results := []ResultString{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -207,6 +217,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectIntoStructWithLessFieldsWork() {
 	results := []ResultAlone{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -226,6 +237,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCount() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -247,6 +259,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -268,6 +281,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -287,6 +301,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAverage() {
 	results := []ResultFloat{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -306,6 +321,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMin() {
 	results := []ResultFloat{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -325,6 +341,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMinForNotNumericField() {
 	results := []ResultString{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -344,6 +361,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMax() {
 	results := []ResultFloat{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -363,6 +381,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMaxForNotNumericField() {
 	results := []ResultString{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -384,6 +403,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAll() {
 	results := []ResultBool{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -405,6 +425,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAny() {
 	results := []ResultBool{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -426,6 +447,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectNone() {
 	results := []ResultBool{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -454,6 +476,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 		ts.createProduct("3", 3, 1, false, nil)
 
 		err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -474,6 +497,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 		ts.createProduct("3", 3, 1, false, &int1)
 
 		err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -485,6 +509,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 1}, {Int: 2, Aggregation1: 3}, {Int: 3, Aggregation1: 1}}, results)
 	case sql.SQLite, sql.SQLServer:
 		err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -515,6 +540,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 		ts.createProduct("3", 3, 1, false, nil)
 
 		err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -526,6 +552,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 		EqualList(&ts.Suite, []ResultInt{{Int: 1, Aggregation1: 3}, {Int: 2, Aggregation1: 3}, {Int: 0, Aggregation1: 0}, {Int: 3, Aggregation1: 1}}, results)
 	case sql.SQLite, sql.SQLServer:
 		err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).GroupBy(
 			conditions.Product.Int,
@@ -547,6 +574,7 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMoreThanOne() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -570,6 +598,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMoreThanOne() {
 	results := []ResultIntAndFloat{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -597,6 +626,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMoreThanOneSelectMoreThanOne() {
 	results := []ResultIntAndFloat{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int, conditions.Product.Float,
@@ -629,6 +659,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedField() {
 	// TODO group by joined field doesn't work for Postgres by bug in gorm
 	case sql.MySQL, sql.SQLServer, sql.SQLite:
 		err := cql.Query[models.Sale](
+			context.Background(),
 			ts.db,
 			conditions.Sale.Product(),
 		).GroupBy(
@@ -656,6 +687,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithJoinedFieldInSelect() {
 	results := []ResultCode{}
 
 	err := cql.Query[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Product(),
 	).GroupBy(
@@ -685,6 +717,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedFieldAndWithJoinedFieldInSelect(
 	// TODO group by joined field doesn't work for Postgres by bug in gorm
 	case sql.MySQL, sql.SQLServer, sql.SQLite:
 		err := cql.Query[models.Sale](
+			context.Background(),
 			ts.db,
 			conditions.Sale.Product(),
 		).GroupBy(
@@ -709,6 +742,7 @@ func (ts *GroupByIntTestSuite) TestGroupByFieldPresentInMultipleTables() {
 	results := []ResultName{}
 
 	err := cql.Query[models.Seller](
+		context.Background(),
 		ts.db,
 		conditions.Seller.Company(),
 	).GroupBy(
@@ -728,6 +762,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedMultipleTimesFieldReturnsError()
 	results := []ResultInt{}
 
 	err := cql.Query[models.Child](
+		context.Background(),
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -752,6 +787,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsBefore() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Float.Is().Eq(cql.Float64(1.0)),
 	).GroupBy(
@@ -773,6 +809,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithSameCondition() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -842,6 +879,7 @@ func (ts *GroupByIntTestSuite) internalTestGroupByHavingWithDifferentCondition(v
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -864,6 +902,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNum
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -886,6 +925,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNum
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -913,6 +953,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationOfA
 	results := []ResultCode{}
 
 	err := cql.Query[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Product(),
 	).GroupBy(
@@ -938,6 +979,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHaving() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -961,6 +1003,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithAndConnection() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -987,6 +1030,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithOrConnection() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1016,6 +1060,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithNotConnection() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1045,6 +1090,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithNotConnectionMultiple() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1073,6 +1119,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingBoolean() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1096,6 +1143,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingBooleanCompareWithAnotherAggrega
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1122,6 +1170,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingOtherType() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1145,6 +1194,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingOtherTypeCompareWithAnotherAggre
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1168,6 +1218,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingNotEq() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1191,6 +1242,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLt() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1214,6 +1266,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLtOrEq() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1237,6 +1290,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingGt() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1260,6 +1314,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingGtOrEq() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1283,6 +1338,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingIn() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1306,6 +1362,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingNotIn() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1329,6 +1386,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLike() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1352,6 +1410,7 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithField() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1375,6 +1434,7 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithField() {
 	results := []ResultIntAndFloat{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1400,6 +1460,7 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateAfterFunction() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1422,6 +1483,7 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateAfterFunctionDynamic() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1444,6 +1506,7 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateHavingAfterFunction() {
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,
@@ -1467,6 +1530,7 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateHavingAfterFunctionDynamic() 
 	results := []ResultInt{}
 
 	err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).GroupBy(
 		conditions.Product.Int,

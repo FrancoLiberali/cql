@@ -1,6 +1,8 @@
 package not_concerned
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -12,6 +14,7 @@ type Result struct{}
 func testQueryMainModelInsideSelect() {
 	cql.Select[models.Brand, any](
 		cql.Query[models.Brand](
+			context.Background(),
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
@@ -21,6 +24,7 @@ func testQueryMainModelInsideSelect() {
 func testQueryJoinedInsideSelect() {
 	cql.Select[models.Phone, any](
 		cql.Query[models.Phone](
+			context.Background(),
 			db,
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -31,6 +35,7 @@ func testQueryJoinedInsideSelect() {
 func testQueryNotJoinedInsideSelect() {
 	cql.Select[models.Brand, any](
 		cql.Query[models.Brand](
+			context.Background(),
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 			conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -41,6 +46,7 @@ func testQueryNotJoinedInsideSelect() {
 func testSelectMainModel() {
 	cql.Select(
 		cql.Query[models.Brand](
+			context.Background(),
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
@@ -51,6 +57,7 @@ func testSelectMainModel() {
 func testSelectJoinedModel() {
 	cql.Select(
 		cql.Query[models.Phone](
+			context.Background(),
 			db,
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -62,6 +69,7 @@ func testSelectJoinedModel() {
 func testSelectNotJoinedModel() {
 	cql.Select(
 		cql.Query[models.Brand](
+			context.Background(),
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
@@ -72,6 +80,7 @@ func testSelectNotJoinedModel() {
 func testSelectNotJoinedModelSecond() {
 	cql.Select[models.Brand, Result](
 		cql.Query[models.Brand](
+			context.Background(),
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
@@ -83,6 +92,7 @@ func testSelectNotJoinedModelSecond() {
 func testSelectJoinedModelWithFunction() {
 	cql.Select(
 		cql.Query[models.Phone](
+			context.Background(),
 			db,
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -94,6 +104,7 @@ func testSelectJoinedModelWithFunction() {
 func testSelectNotJoinedModelWithFunction() {
 	cql.Select[models.Brand, Result](
 		cql.Query[models.Brand](
+			context.Background(),
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
@@ -106,6 +117,7 @@ func testSelectJoinedModelInVar() {
 
 	cql.Select(
 		cql.Query[models.Phone](
+			context.Background(),
 			db,
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -119,6 +131,7 @@ func testSelectNotJoinedModelInVar() {
 
 	cql.Select[models.Brand, Result](
 		cql.Query[models.Brand](
+			context.Background(),
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
@@ -133,6 +146,7 @@ func testSelectJoinedModelInListInVar() {
 
 	cql.Select(
 		cql.Query[models.Phone](
+			context.Background(),
 			db,
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -148,6 +162,7 @@ func testSelectNotJoinedModelInListInVar() {
 
 	cql.Select(
 		cql.Query[models.Phone](
+			context.Background(),
 			db,
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -166,6 +181,7 @@ func testSelectNotJoinedModelInListWithAppend() {
 
 	cql.Select(
 		cql.Query[models.Phone](
+			context.Background(),
 			db,
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),

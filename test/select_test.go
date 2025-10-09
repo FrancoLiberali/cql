@@ -1,6 +1,7 @@
 package test
 
 import (
+	"context"
 	"reflect"
 
 	"github.com/FrancoLiberali/cql"
@@ -29,6 +30,7 @@ func (ts *SelectIntTestSuite) TestSelectOneSelect() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -51,6 +53,7 @@ func (ts *SelectIntTestSuite) TestSelectWithOrder() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -73,6 +76,7 @@ func (ts *SelectIntTestSuite) TestSelectWithMultipleOrder() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int).Descending(conditions.Product.Bool),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -94,6 +98,7 @@ func (ts *SelectIntTestSuite) TestSelectWithOrderNotSelected() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Bool),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -115,6 +120,7 @@ func (ts *SelectIntTestSuite) TestTwoSelectSameValue() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -140,6 +146,7 @@ func (ts *SelectIntTestSuite) TestTwoSelectDifferentValue() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -165,6 +172,7 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionInGo() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
@@ -187,6 +195,7 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionInCQL() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(1)), func(value float64, result *ResultInt) {
@@ -209,6 +218,7 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionDynamic() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int.Plus(conditions.Product.Float), func(value float64, result *ResultInt) {
@@ -231,6 +241,7 @@ func (ts *SelectIntTestSuite) TestSelectMultipleWithFunction() {
 
 	results, err := cql.Select(
 		cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultIntAndFloat) {
@@ -265,6 +276,7 @@ func (ts *SelectIntTestSuite) TestSelectFromJoinedModel() {
 
 	results, err := cql.Select(
 		cql.Query[models.Sale](
+			context.Background(),
 			ts.db,
 			conditions.Sale.Product(),
 		).Descending(conditions.Product.Int),
@@ -296,6 +308,7 @@ func (ts *SelectIntTestSuite) TestSelectFromMainModelAfterJoin() {
 
 	results, err := cql.Select(
 		cql.Query[models.Sale](
+			context.Background(),
 			ts.db,
 			conditions.Sale.Product(),
 		).Descending(conditions.Sale.Code),
@@ -327,6 +340,7 @@ func (ts *SelectIntTestSuite) TestSelectFromMainAndJoinedModel() {
 
 	results, err := cql.Select(
 		cql.Query[models.Sale](
+			context.Background(),
 			ts.db,
 			conditions.Sale.Product(),
 		).Descending(conditions.Product.Int),
@@ -361,6 +375,7 @@ func (ts *SelectIntTestSuite) TestSelectFromNotJoinedModelReturnsError() {
 
 	_, err := cql.Select(
 		cql.Query[models.Sale](
+			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
 		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {

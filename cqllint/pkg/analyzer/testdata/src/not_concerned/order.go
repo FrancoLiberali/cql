@@ -1,6 +1,8 @@
 package not_concerned
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -8,12 +10,14 @@ import (
 
 func testOrderNotJoinedInSameLine() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 	).Descending(conditions.City.Name).Find() // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 }
 
 func testOrderNotJoinedInDifferentLines() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 	).Descending(
 		conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -22,6 +26,7 @@ func testOrderNotJoinedInDifferentLines() {
 
 func testOrderMainModel() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
@@ -33,6 +38,7 @@ func testOrderJoinedInVariable() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).Descending(
@@ -44,6 +50,7 @@ func testOrderNotJoinedInVariable() {
 	value := conditions.City.Name // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 	).Descending(
@@ -53,6 +60,7 @@ func testOrderNotJoinedInVariable() {
 
 func testOrderJoinedModelWithoutConditions() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -63,6 +71,7 @@ func testOrderJoinedModelWithoutConditions() {
 
 func testOrderJoinedModelWithConditions() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -75,6 +84,7 @@ func testOrderJoinedModelWithConditions() {
 
 func testOrderJoinedModelWithoutConditionsWithPreload() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand().Preload(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -85,6 +95,7 @@ func testOrderJoinedModelWithoutConditionsWithPreload() {
 
 func testOrderJoinedModelWithConditionsWithPreload() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -97,6 +108,7 @@ func testOrderJoinedModelWithConditionsWithPreload() {
 
 func testOrderNestedJoinedModel() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -109,6 +121,7 @@ func testOrderNestedJoinedModel() {
 
 func testOrderMainModelWithoutConditions() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 	).Descending(
 		conditions.Brand.Name,
@@ -117,6 +130,7 @@ func testOrderMainModelWithoutConditions() {
 
 func testOrderMainModelWithLimitAfter() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Descending(
@@ -126,6 +140,7 @@ func testOrderMainModelWithLimitAfter() {
 
 func testOrderMainModelWithLimitBefore() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Limit(1).Descending(
@@ -135,6 +150,7 @@ func testOrderMainModelWithLimitBefore() {
 
 func testOrderNotJoinedWithLimitAfter() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 	).Descending(
 		conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -143,6 +159,7 @@ func testOrderNotJoinedWithLimitAfter() {
 
 func testOrderNotJoinedWithLimitBefore() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 	).Limit(1).Descending(
 		conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"

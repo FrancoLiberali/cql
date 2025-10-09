@@ -1,6 +1,8 @@
 package test
 
 import (
+	"context"
+
 	"gotest.tools/assert"
 
 	"github.com/FrancoLiberali/cql"
@@ -28,6 +30,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithTrue() {
 	ts.createProduct("", 1, 0, false, nil)
 
 	deleted, err := cql.Delete[models.Product](
+		context.Background(),
 		ts.db,
 		cql.True[models.Product](),
 	).Exec()
@@ -35,6 +38,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithTrue() {
 	ts.Equal(int64(2), deleted)
 
 	productsReturned, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).Find()
 	ts.Require().NoError(err)
@@ -45,6 +49,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenNothingMatchConditions() {
 	ts.createProduct("", 0, 0, false, nil)
 
 	deleted, err := cql.Delete[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Exec()
@@ -56,6 +61,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenAModelMatchConditions() {
 	ts.createProduct("", 0, 0, false, nil)
 
 	deleted, err := cql.Delete[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Exec()
@@ -63,6 +69,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenAModelMatchConditions() {
 	ts.Equal(int64(1), deleted)
 
 	productReturned, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -75,6 +82,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenMultipleModelsMatchConditions() {
 	ts.createProduct("2", 0, 0, false, nil)
 
 	deleted, err := cql.Delete[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Exec()
@@ -82,6 +90,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenMultipleModelsMatchConditions() {
 	ts.Equal(int64(2), deleted)
 
 	productReturned, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Bool.Is().False(),
 	).Find()
@@ -97,6 +106,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinInConditions() {
 	ts.createPhone("iphone", *brand2)
 
 	deleted, err := cql.Delete[models.Phone](
+		context.Background(),
 		ts.db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("google")),
@@ -106,6 +116,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinInConditions() {
 	ts.Equal(int64(1), deleted)
 
 	phones, err := cql.Query[models.Phone](
+		context.Background(),
 		ts.db,
 		conditions.Phone.Name.Is().Eq(cql.String("pixel")),
 	).Find()
@@ -126,6 +137,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinDifferentEntitiesInConditions() 
 	ts.createSale(3, product2, seller1)
 
 	deleted, err := cql.Delete[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Product(
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
@@ -138,6 +150,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinDifferentEntitiesInConditions() 
 	ts.Equal(int64(1), deleted)
 
 	sales, err := cql.Query[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 	).Find()
@@ -159,6 +172,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithMultilevelJoinInConditions() {
 	ts.createSale(1, product2, seller2)
 
 	deleted, err := cql.Delete[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Seller(
 			conditions.Seller.Name.Is().Eq(cql.String("franco")),
@@ -171,6 +185,7 @@ func (ts *DeleteIntTestSuite) TestDeleteWithMultilevelJoinInConditions() {
 	ts.Equal(int64(1), deleted)
 
 	sales, err := cql.Query[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 	).Find()
@@ -183,6 +198,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 	// delete returning only supported for postgres, sqlite, sqlserver
 	case sql.MySQL:
 		_, err := cql.Delete[models.Phone](
+			context.Background(),
 			ts.db,
 			conditions.Phone.Name.Is().Eq(cql.String("asd")),
 		).Returning(nil).Exec()
@@ -193,6 +209,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 
 		productsReturned := []models.Product{}
 		deleted, err := cql.Delete[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(0)),
 		).Returning(&productsReturned).Exec()
@@ -204,6 +221,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 		ts.Equal(product.ID, productReturned.ID)
 
 		products, err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(0)),
 		).Find()
@@ -218,6 +236,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 	case sql.SQLite, sql.SQLServer:
 		salesReturned := []models.Sale{}
 		_, err := cql.Delete[models.Sale](
+			context.Background(),
 			ts.db,
 			conditions.Sale.Code.Is().Eq(cql.Int(0)),
 			conditions.Sale.Product().Preload(),
@@ -234,6 +253,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 
 		salesReturned := []models.Sale{}
 		deleted, err := cql.Delete[models.Sale](
+			context.Background(),
 			ts.db,
 			conditions.Sale.Code.Is().Eq(cql.Int(0)),
 			conditions.Sale.Product().Preload(),
@@ -269,6 +289,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadAtSecondLevel() {
 
 	salesReturned := []models.Sale{}
 	deleted, err := cql.Delete[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 		conditions.Sale.Seller(
@@ -299,6 +320,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
 
 		companiesReturned := []models.Company{}
 		deleted, err := cql.Delete[models.Company](
+			context.Background(),
 			ts.db,
 			conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 			conditions.Company.Sellers.Preload(),
@@ -319,6 +341,7 @@ func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
 	// delete order by limit only supported for mysql
 	if getDBDialector() != sql.MySQL {
 		_, err := cql.Delete[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Ascending(
@@ -331,6 +354,7 @@ func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
 		ts.createProduct("2", 0, 0, false, nil)
 
 		deleted, err := cql.Delete[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Descending(
@@ -340,6 +364,7 @@ func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
 		ts.Equal(int64(1), deleted)
 
 		productReturned, err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(0)),
 		).FindOne()
@@ -353,6 +378,7 @@ func (ts *DeleteIntTestSuite) TestDeleteLimitWithoutOrderByReturnsError() {
 	// delete order by limit only supported for mysql
 	if getDBDialector() != sql.MySQL {
 		_, err := cql.Delete[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Exec()
@@ -360,6 +386,7 @@ func (ts *DeleteIntTestSuite) TestDeleteLimitWithoutOrderByReturnsError() {
 		ts.ErrorContains(err, "method: Limit")
 	} else {
 		_, err := cql.Delete[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Bool.Is().False(),
 		).Limit(1).Exec()

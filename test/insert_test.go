@@ -1,6 +1,8 @@
 package test
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -27,6 +29,7 @@ func (ts *InsertIntTestSuite) TestInsertOne() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).Exec()
@@ -35,6 +38,7 @@ func (ts *InsertIntTestSuite) TestInsertOne() {
 	ts.NotEmpty(product.ID)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -54,6 +58,7 @@ func (ts *InsertIntTestSuite) TestInsertMultiple() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product1,
 		product2,
@@ -64,6 +69,7 @@ func (ts *InsertIntTestSuite) TestInsertMultiple() {
 	ts.NotEmpty(product2.ID)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -83,6 +89,7 @@ func (ts *InsertIntTestSuite) TestInsertInBatches() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product1,
 		product2,
@@ -93,6 +100,7 @@ func (ts *InsertIntTestSuite) TestInsertInBatches() {
 	ts.NotEmpty(product2.ID)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -106,6 +114,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictDoNothingThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflict().DoNothing().Exec()
@@ -114,6 +123,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictDoNothingThatInserts() {
 	ts.NotEmpty(product.ID)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -127,6 +137,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflictOn(conditions.Product.ID).DoNothing().Exec()
@@ -141,6 +152,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatInserts() {
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -154,6 +166,7 @@ func (ts *InsertIntTestSuite) TestInsertOneConflictReturnsError() {
 	ts.NotEmpty(product.ID)
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).Exec()
@@ -178,6 +191,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictDoNothingThatConflicts() {
 	ts.NotEmpty(product.ID)
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflict().DoNothing().Exec()
@@ -185,6 +199,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictDoNothingThatConflicts() {
 	ts.Equal(int64(0), inserted)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -197,6 +212,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() 
 	ts.NotEmpty(product.ID)
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflictOn(conditions.Product.ID).DoNothing().Exec()
@@ -211,6 +227,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() 
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -225,6 +242,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintDoNothingThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").DoNothing().Exec()
@@ -239,6 +257,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintDoNothingThatInserts() {
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -255,6 +274,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintDoNothingThatConflicts() 
 	product.Float = 1
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").DoNothing().Exec()
@@ -269,6 +289,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintDoNothingThatConflicts() 
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -283,6 +304,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflict().UpdateAll().Exec()
@@ -297,6 +319,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatInserts() {
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -311,6 +334,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictOnUpdateAllThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflictOn(conditions.Product.ID).UpdateAll().Exec()
@@ -325,6 +349,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictOnUpdateAllThatInserts() {
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -341,6 +366,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateAllThatConflicts() {
 	product.Float = 1
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflict().UpdateAll().Exec()
@@ -367,6 +393,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictOnUpdateAllThatConflicts() 
 	product.Float = 1
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConflictOn(conditions.Product.ID).UpdateAll().Exec()
@@ -391,6 +418,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").UpdateAll().Exec()
@@ -405,6 +433,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatInserts() {
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -421,6 +450,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateAllThatConflicts() 
 	product.Float = 1
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").UpdateAll().Exec()
@@ -441,6 +471,7 @@ func (ts *InsertIntTestSuite) checkUpdateAllThatConflicts(expectedInserted, inse
 	ts.Equal(expectedInserted, inserted)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -448,6 +479,7 @@ func (ts *InsertIntTestSuite) checkUpdateAllThatConflicts(expectedInserted, inse
 	ts.Len(productsReturned, 0)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(2)),
 	).Find()
@@ -467,11 +499,13 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatInserts() {
 	switch getDBDialector() {
 	case sql.MySQL, sql.SQLServer:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflict().Update(conditions.Product.Int).Exec()
 	default:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflictOn(conditions.Product.ID).Update(conditions.Product.Int).Exec()
@@ -482,6 +516,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatInserts() {
 	ts.NotEmpty(product.ID)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -503,11 +538,13 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictUpdateThatConflicts() {
 	switch getDBDialector() {
 	case sql.MySQL, sql.SQLServer:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflict().Update(conditions.Product.Int).Exec()
 	default:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflictOn(conditions.Product.ID).Update(conditions.Product.Int).Exec()
@@ -527,6 +564,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").Update(conditions.Product.Int).Exec()
@@ -541,6 +579,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateThatInserts() {
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -557,6 +596,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintUpdateThatConflicts() {
 	product.Float = 1
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").Update(conditions.Product.Int).Exec()
@@ -577,6 +617,7 @@ func (ts *InsertIntTestSuite) checkUpdateThatConflicts(expectedInserted, inserte
 	ts.Equal(expectedInserted, inserted)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -584,6 +625,7 @@ func (ts *InsertIntTestSuite) checkUpdateThatConflicts(expectedInserted, inserte
 	ts.Len(productsReturned, 0)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(2)),
 	).Find()
@@ -591,6 +633,7 @@ func (ts *InsertIntTestSuite) checkUpdateThatConflicts(expectedInserted, inserte
 	ts.Len(productsReturned, 1)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Float.Is().Eq(cql.Int(0)),
 	).Find()
@@ -598,6 +641,7 @@ func (ts *InsertIntTestSuite) checkUpdateThatConflicts(expectedInserted, inserte
 	ts.Len(productsReturned, 1)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Float.Is().Eq(cql.Int(1)),
 	).Find()
@@ -617,6 +661,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatInserts() {
 	switch getDBDialector() {
 	case sql.MySQL, sql.SQLServer:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflict().Set(
@@ -624,6 +669,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatInserts() {
 		).Exec()
 	default:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflictOn(conditions.Product.ID).Set(
@@ -636,6 +682,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatInserts() {
 	ts.NotEmpty(product.ID)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -656,6 +703,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflicts() {
 	switch getDBDialector() {
 	case sql.MySQL, sql.SQLServer:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflict().Set(
@@ -663,6 +711,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflicts() {
 		).Exec()
 	default:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflictOn(conditions.Product.ID).Set(
@@ -684,6 +733,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintSetThatInserts() {
 	}
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").Set(
@@ -700,6 +750,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintSetThatInserts() {
 		ts.NotEmpty(product.ID)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -713,6 +764,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConstraintSetThatConflicts() {
 	ts.NotEmpty(product.ID)
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product,
 	).OnConstraint("products_pkey").Set(
@@ -735,6 +787,7 @@ func (ts *InsertIntTestSuite) checkSetThatConflicts(expectedInserted, inserted i
 	ts.Equal(expectedInserted, inserted)
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -742,6 +795,7 @@ func (ts *InsertIntTestSuite) checkSetThatConflicts(expectedInserted, inserted i
 	ts.Len(productsReturned, 0)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(2)),
 	).Find()
@@ -762,6 +816,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 	switch getDBDialector() {
 	case sql.MySQL, sql.SQLServer:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflict().Set(
@@ -769,6 +824,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 		).Exec()
 	default:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product,
 		).OnConflictOn(conditions.Product.ID).Set(
@@ -786,6 +842,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 	}
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -793,6 +850,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsDynamic() {
 	ts.Len(productsReturned, 0)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(2)),
 	).Find()
@@ -811,6 +869,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 	switch getDBDialector() {
 	case sql.MySQL, sql.SQLServer:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product1,
 			product2,
@@ -819,6 +878,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 		).Exec()
 	default:
 		inserted, err = cql.Insert(
+			context.Background(),
 			ts.db,
 			product1,
 			product2,
@@ -837,6 +897,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 	}
 
 	productsReturned, err := cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Find()
@@ -844,6 +905,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 	ts.Len(productsReturned, 0)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(3)),
 	).Find()
@@ -851,6 +913,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultiple() 
 	ts.Len(productsReturned, 0)
 
 	productsReturned, err = cql.Query(
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(2)),
 	).Find()
@@ -863,6 +926,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	product2 := ts.createProduct("", 1, 0, false, nil)
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product1,
 		product2,
@@ -881,6 +945,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.Equal(int64(1), inserted)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -888,6 +953,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.Len(productsReturned, 0)
 
 		productsReturned, err = cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(3)),
 		).Find()
@@ -895,6 +961,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.Len(productsReturned, 1)
 
 		productsReturned, err = cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(2)),
 		).Find()
@@ -908,6 +975,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 	product2 := ts.createProduct("", 1, 0, false, nil)
 
 	inserted, err := cql.Insert(
+		context.Background(),
 		ts.db,
 		product1,
 		product2,
@@ -927,6 +995,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.Equal(int64(1), inserted)
 
 		productsReturned, err := cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Find()
@@ -934,6 +1003,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.Len(productsReturned, 0)
 
 		productsReturned, err = cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(3)),
 		).Find()
@@ -941,6 +1011,7 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictSetThatConflictsMultipleWit
 		ts.Len(productsReturned, 1)
 
 		productsReturned, err = cql.Query(
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(2)),
 		).Find()

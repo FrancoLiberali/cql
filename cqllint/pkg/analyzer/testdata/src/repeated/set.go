@@ -1,6 +1,8 @@
 package repeated
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -8,6 +10,7 @@ import (
 
 func testSetRepeated() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
@@ -18,6 +21,7 @@ func testSetRepeated() {
 
 func testSetNotRepeated() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
@@ -27,6 +31,7 @@ func testSetNotRepeated() {
 
 func testSetDynamicRepeated() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
@@ -37,6 +42,7 @@ func testSetDynamicRepeated() {
 
 func testSetDynamicNotRepeated() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
@@ -46,6 +52,7 @@ func testSetDynamicNotRepeated() {
 
 func testSetMultipleRepeated() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).SetMultiple(
@@ -56,6 +63,7 @@ func testSetMultipleRepeated() {
 
 func testSetMultipleNotRepeated() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).SetMultiple(
@@ -65,6 +73,7 @@ func testSetMultipleNotRepeated() {
 
 func testSetDynamicSameValue() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
@@ -74,6 +83,7 @@ func testSetDynamicSameValue() {
 
 func testSetDynamicSameValueWithFunction() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Set(
