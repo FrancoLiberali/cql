@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -17,13 +18,16 @@ const (
 )
 
 var (
+	// Discard logger will print any log to io.Discard
+	Discard       = NewWithWriter(Config{}, log.New(io.Discard, "", log.LstdFlags))
 	DefaultConfig = Config{
-		LogLevel:                  gormLogger.Warn,
+		LogLevel:                  Warn,
 		SlowQueryThreshold:        defaultSlowQueryThreshold,
 		SlowTransactionThreshold:  defaultSlowTransactionThreshold,
 		IgnoreRecordNotFoundError: false,
 		ParameterizedQueries:      false,
 	}
+	// Default is default logger
 	Default       = New(DefaultConfig)
 	defaultWriter = log.New(os.Stdout, "\r\n", log.LstdFlags)
 )
@@ -37,7 +41,7 @@ func New(config Config) Interface {
 	return NewWithWriter(config, defaultWriter)
 }
 
-func NewWithWriter(config Config, writer gormLogger.Writer) Interface {
+func NewWithWriter(config Config, writer Writer) Interface {
 	return &defaultLogger{
 		Config: config,
 		Interface: gormLogger.New(
@@ -47,12 +51,12 @@ func NewWithWriter(config Config, writer gormLogger.Writer) Interface {
 	}
 }
 
-func (l *defaultLogger) LogMode(level gormLogger.LogLevel) gormLogger.Interface {
+func (l *defaultLogger) LogMode(level LogLevel) gormLogger.Interface {
 	// method made to satisfy gormLogger.Interface
 	return l.ToLogMode(level)
 }
 
-func (l *defaultLogger) ToLogMode(level gormLogger.LogLevel) Interface {
+func (l *defaultLogger) ToLogMode(level LogLevel) Interface {
 	newLogger := *l
 	newLogger.LogLevel = level
 	newLogger.Interface = newLogger.Interface.LogMode(level)
