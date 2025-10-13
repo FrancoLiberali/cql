@@ -67,22 +67,22 @@ func (l *defaultLogger) ToLogMode(level LogLevel) Interface {
 const nanoToMicro = 1e6
 
 func (l defaultLogger) TraceTransaction(ctx context.Context, begin time.Time) {
-	if l.LogLevel <= gormLogger.Silent {
+	if l.LogLevel <= Silent {
 		return
 	}
 
 	elapsed := time.Since(begin)
 
 	switch {
-	case l.SlowTransactionThreshold != DisableThreshold && elapsed > l.SlowTransactionThreshold && l.LogLevel >= gormLogger.Warn:
+	case l.SlowTransactionThreshold != DisableThreshold && elapsed > l.SlowTransactionThreshold && l.LogLevel >= Warn:
 		l.Interface.Warn(ctx, "transaction_slow (>= %v) [%.3fms]", l.SlowTransactionThreshold, float64(elapsed.Nanoseconds())/nanoToMicro)
-	case l.LogLevel >= gormLogger.Info:
+	case l.LogLevel >= Info:
 		l.Interface.Info(ctx, "transaction_exec [%.3fms]", float64(elapsed.Nanoseconds())/nanoToMicro)
 	}
 }
 
 type writerWrapper struct {
-	Writer gormLogger.Writer
+	Writer Writer
 }
 
 // Info, Warn, Error or Trace + Printf
