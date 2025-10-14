@@ -15,7 +15,7 @@ import (
 // For details see https://compiledquerylenguage.readthedocs.io/en/latest/cql/delete.html
 func Delete[T model.Model](ctx context.Context, tx *DB, conditions ...condition.Condition[T]) *condition.Delete[T] {
 	return condition.NewDelete(
-		tx.GormDB.WithContext(ctx),
+		tx.gormDBWithContext(ctx),
 		conditions,
 	)
 }

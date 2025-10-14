@@ -11,5 +11,5 @@ import (
 // the models received by parameter in the db
 // and apply on conflict clauses
 func Insert[T model.Model](ctx context.Context, tx *DB, models ...*T) *condition.Insert[T] {
-	return condition.NewInsert(tx.GormDB.WithContext(ctx), models)
+	return condition.NewInsert(tx.gormDBWithContext(ctx), models)
 }

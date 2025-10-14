@@ -11,5 +11,5 @@ import (
 //
 // For details see https://compiledquerylenguage.readthedocs.io/en/latest/cql/query.html
 func Query[T model.Model](ctx context.Context, tx *DB, conditions ...condition.Condition[T]) *condition.Query[T] {
-	return condition.NewQuery(tx.GormDB.WithContext(ctx), conditions...)
+	return condition.NewQuery(tx.gormDBWithContext(ctx), conditions...)
 }

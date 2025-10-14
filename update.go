@@ -15,7 +15,7 @@ import (
 // For details see https://compiledquerylenguage.readthedocs.io/en/latest/cql/update.html
 func Update[T model.Model](ctx context.Context, tx *DB, conditions ...condition.Condition[T]) *condition.Update[T] {
 	return condition.NewUpdate(
-		tx.GormDB.WithContext(ctx),
+		tx.gormDBWithContext(ctx),
 		conditions,
 	)
 }

@@ -1,6 +1,8 @@
 package cql
 
 import (
+	"context"
+
 	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 
@@ -9,6 +11,11 @@ import (
 
 type DB struct {
 	GormDB *gorm.DB
+}
+
+// gormDBWithContext return a gormdb with changed context to ctx
+func (db *DB) gormDBWithContext(ctx context.Context) *gorm.DB {
+	return db.GormDB.WithContext(ctx)
 }
 
 type (
