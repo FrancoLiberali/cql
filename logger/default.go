@@ -88,7 +88,7 @@ type writerWrapper struct {
 // Info, Warn, Error or Trace + Printf
 const defaultStacktraceLen = 2
 
-func (w writerWrapper) Printf(msg string, args ...interface{}) {
+func (w writerWrapper) Printf(msg string, args ...any) {
 	if len(args) > 0 {
 		// change the file path to avoid showing cql internal files
 		firstArg := args[0]

@@ -1,4 +1,4 @@
-package gormzap_test
+package cqlzap_test
 
 import (
 	"context"
@@ -13,14 +13,14 @@ import (
 	"go.uber.org/zap/zaptest/observer"
 
 	"github.com/FrancoLiberali/cql/logger"
-	"github.com/FrancoLiberali/cql/logger/gormzap"
+	"github.com/FrancoLiberali/cql/logger/cqlzap"
 )
 
 func TestTraceError(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	zapLogger := zap.New(core)
 
-	logger := gormzap.NewDefault(zapLogger)
+	logger := cqlzap.NewDefault(zapLogger)
 	err := errors.New("sql error")
 	logger.Trace(
 		context.Background(),
@@ -45,7 +45,7 @@ func TestTraceSlowQuery(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	zapLogger := zap.New(core)
 
-	logger := gormzap.NewDefault(zapLogger)
+	logger := cqlzap.NewDefault(zapLogger)
 	logger.Trace(
 		context.Background(),
 		time.Now().Add(-300*time.Millisecond),
@@ -68,7 +68,7 @@ func TestTraceQueryExec(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	zapLogger := zap.New(core)
 
-	logger := gormzap.NewDefault(zapLogger).ToLogMode(logger.Info)
+	logger := cqlzap.NewDefault(zapLogger).ToLogMode(logger.Info)
 	logger.Trace(
 		context.Background(),
 		time.Now().Add(3*time.Hour),
@@ -91,7 +91,7 @@ func TestTraceSlowTransaction(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	zapLogger := zap.New(core)
 
-	logger := gormzap.NewDefault(zapLogger)
+	logger := cqlzap.NewDefault(zapLogger)
 	logger.TraceTransaction(
 		context.Background(),
 		time.Now().Add(-300*time.Millisecond),
@@ -108,7 +108,7 @@ func TestTraceTransactionExec(t *testing.T) {
 	core, logs := observer.New(zap.DebugLevel)
 	zapLogger := zap.New(core)
 
-	logger := gormzap.NewDefault(zapLogger).ToLogMode(logger.Info)
+	logger := cqlzap.NewDefault(zapLogger).ToLogMode(logger.Info)
 	logger.TraceTransaction(
 		context.Background(),
 		time.Now().Add(3*time.Hour),
