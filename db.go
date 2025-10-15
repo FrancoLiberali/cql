@@ -88,7 +88,7 @@ func Open(dialector Dialector, opts ...Option) (*DB, error) {
 		return isWithLoggerFromContext
 	})
 	if withLoggerFromContextIndex != -1 {
-		db.withLoggerFromContext = opts[withLoggerFromContextIndex].(*LoggerFromContext)
+		db.withLoggerFromContext, _ = opts[withLoggerFromContextIndex].(*LoggerFromContext)
 	}
 
 	return db, nil
