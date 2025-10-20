@@ -1,6 +1,8 @@
 package not_concerned
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -9,6 +11,7 @@ import (
 
 func testDeleteSameModel() {
 	cql.Delete[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -17,6 +20,7 @@ func testDeleteSameModel() {
 
 func testDeleteJoinedModel() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -26,6 +30,7 @@ func testDeleteJoinedModel() {
 
 func testDeleteJoinedWithJoinedWithCondition() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -37,6 +42,7 @@ func testDeleteJoinedWithJoinedWithCondition() {
 
 func testDeleteJoinedWithJoinedWithPreload() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand().Preload(),
 		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -46,6 +52,7 @@ func testDeleteJoinedWithJoinedWithPreload() {
 
 func testDeleteJoinedWithJoinedWithConditionsWithPreload() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -59,6 +66,7 @@ func testDeleteJoinedModelInVariable() {
 	value := conditions.Brand.Name
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(value),
@@ -67,6 +75,7 @@ func testDeleteJoinedModelInVariable() {
 
 func testDeleteNotJoinedInSameLine() {
 	cql.Delete[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Exec()
@@ -74,6 +83,7 @@ func testDeleteNotJoinedInSameLine() {
 
 func testDeleteNotJoinedInDifferentLines() {
 	cql.Delete[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(
 			conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -85,6 +95,7 @@ func testDeleteNotJoinedInVariable() {
 	value := conditions.City.Name
 
 	cql.Delete[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(value), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Exec()
@@ -92,6 +103,7 @@ func testDeleteNotJoinedInVariable() {
 
 func testDeleteNotJoinedWithTrue() {
 	cql.Delete[models.Brand](
+		context.Background(),
 		db,
 		cql.True[models.Brand](),
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -100,6 +112,7 @@ func testDeleteNotJoinedWithTrue() {
 
 func testDeleteJoinedInsideConnector() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		cql.And(
@@ -110,6 +123,7 @@ func testDeleteJoinedInsideConnector() {
 
 func testDeleteNotJoinedInsideConnector() {
 	cql.Delete[models.Brand](
+		context.Background(),
 		db,
 		cql.And(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -119,6 +133,7 @@ func testDeleteNotJoinedInsideConnector() {
 
 func testDeleteJoinedInsideJoinCondition() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -128,6 +143,7 @@ func testDeleteJoinedInsideJoinCondition() {
 
 func testDeleteNotJoinedInsideJoinCondition() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -137,6 +153,7 @@ func testDeleteNotJoinedInsideJoinCondition() {
 
 func testDeleteJoinedInSecondCondition() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -147,6 +164,7 @@ func testDeleteJoinedInSecondCondition() {
 
 func testDeleteNotJoinedInSecondCondition() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -157,6 +175,7 @@ func testDeleteNotJoinedInSecondCondition() {
 
 func testDeleteNotJoinedInsideNestedJoinCondition() {
 	cql.Delete[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(
@@ -168,6 +187,7 @@ func testDeleteNotJoinedInsideNestedJoinCondition() {
 
 func testDeleteJoinedInsideNestedJoinConditionWithMainModel() {
 	cql.Delete[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(
@@ -179,6 +199,7 @@ func testDeleteJoinedInsideNestedJoinConditionWithMainModel() {
 
 func testDeleteJoinedInsideNestedJoinConditionWithPreviousJoin() {
 	cql.Delete[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(
@@ -190,6 +211,7 @@ func testDeleteJoinedInsideNestedJoinConditionWithPreviousJoin() {
 
 func testDeleteNotJoinedWithJoinedWithConditionBefore() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Name.Is().Eq(conditions.Brand.Name), // want "github.com/FrancoLiberali/cql/test/models.Brand is not joined by the query"
 		conditions.Phone.Brand(
@@ -200,6 +222,7 @@ func testDeleteNotJoinedWithJoinedWithConditionBefore() {
 
 func testDeleteJoinedWithDifferentRelationNameWithConditionsUsesConditionName() {
 	cql.Delete[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner(
 			conditions.Person.Name.Is().Eq(cql.String("asd")),
@@ -211,6 +234,7 @@ func testDeleteJoinedWithDifferentRelationNameWithConditionsUsesConditionName() 
 
 func testDeleteJoinedWithDifferentRelationNameWithConditionsWithPreloadUsesConditionName() {
 	cql.Delete[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner(
 			conditions.Person.Name.Is().Eq(cql.String("asd")),
@@ -222,6 +246,7 @@ func testDeleteJoinedWithDifferentRelationNameWithConditionsWithPreloadUsesCondi
 
 func testDeleteJoinedWithDifferentRelationNameWithoutConditions() {
 	cql.Delete[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner(),
 		conditions.Bicycle.Name.Is().Eq(conditions.Person.Name),
@@ -231,6 +256,7 @@ func testDeleteJoinedWithDifferentRelationNameWithoutConditions() {
 
 func testDeleteJoinedWithDifferentRelationNameWithoutConditionsWithPreload() {
 	cql.Delete[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner().Preload(),
 		conditions.Bicycle.Name.Is().Eq(conditions.Person.Name),
@@ -240,6 +266,7 @@ func testDeleteJoinedWithDifferentRelationNameWithoutConditionsWithPreload() {
 
 func testDeleteJoinedWithAppearance() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Brand(),
@@ -251,6 +278,7 @@ func testDeleteJoinedWithAppearanceVariable() {
 	value := conditions.Brand.Name.Appearance(0)
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Brand(),
@@ -260,6 +288,7 @@ func testDeleteJoinedWithAppearanceVariable() {
 
 func testDeleteNotJoinedWithAppearance() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name.Appearance(0)), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -271,6 +300,7 @@ func testDeleteNotJoinedWithAppearanceVariable() {
 	value := conditions.City.Name.Appearance(0)
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -280,6 +310,7 @@ func testDeleteNotJoinedWithAppearanceVariable() {
 
 func testDeleteJoinedWithFunction() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
@@ -291,6 +322,7 @@ func testDeleteJoinedWithFunctionVariable() {
 	value := conditions.Phone.Name.Concat(cql.String("asd"))
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value),
@@ -302,6 +334,7 @@ func testDeleteJoinedWithFunctionOverVariable() {
 	value := conditions.Phone.Name
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))),
@@ -311,6 +344,7 @@ func testDeleteJoinedWithFunctionOverVariable() {
 
 func testDeleteNotJoinedWithFunction() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -322,6 +356,7 @@ func testDeleteNotJoinedWithFunctionVariable() {
 	value := conditions.City.Name.Concat(cql.String("asd"))
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -333,6 +368,7 @@ func testDeleteNotJoinedWithFunctionOverVariable() {
 	value := conditions.City.Name
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -342,6 +378,7 @@ func testDeleteNotJoinedWithFunctionOverVariable() {
 
 func testDeleteNotJoinedWithTwoFunctions() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -351,6 +388,7 @@ func testDeleteNotJoinedWithTwoFunctions() {
 
 func testDeleteMultipleArgumentsFirstNotJoined() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -366,6 +404,7 @@ func testDeleteMultipleArgumentsFirstNotJoinedWithVariable() {
 	value := conditions.City.Name
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -379,6 +418,7 @@ func testDeleteMultipleArgumentsFirstNotJoinedWithVariable() {
 
 func testDeleteMultipleArgumentsSecondNotJoined() {
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -394,6 +434,7 @@ func testDeleteMultipleArgumentsSecondNotJoinedWithVariable() {
 	value := conditions.City.Name
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -409,6 +450,7 @@ func testDeleteJoinedConditionInVariable() {
 	value := conditions.Phone.Name.Is().Eq(conditions.Phone.Name)
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		value,
 	).Exec()
@@ -418,6 +460,7 @@ func testDeleteNotJoinedConditionInVariable() {
 	value := conditions.Phone.Name.Is().Eq(conditions.City.Name) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		value,
 	).Exec()
@@ -429,6 +472,7 @@ func testDeleteJoinedConditionInList() {
 	}
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Exec()
@@ -440,6 +484,7 @@ func testDeleteNotJoinedConditionInList() {
 	}
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Exec()
@@ -454,6 +499,7 @@ func testDeleteJoinedConditionInListWithAppend() {
 	)
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Exec()
@@ -468,6 +514,7 @@ func testDeleteNotJoinedConditionInListWithAppend() {
 	)
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Exec()
@@ -483,6 +530,7 @@ func testDeleteNotJoinedConditionInListWithAppendSecond() {
 	)
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Exec()
@@ -502,6 +550,7 @@ func testDeleteNotJoinedConditionInListWithAppendMultiple() {
 	)
 
 	cql.Delete[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Exec()

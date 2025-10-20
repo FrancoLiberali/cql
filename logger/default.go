@@ -2,6 +2,7 @@ package logger
 
 import (
 	"context"
+	"io"
 	"log"
 	"os"
 	"strconv"
@@ -17,13 +18,16 @@ const (
 )
 
 var (
+	// Discard logger will print any log to io.Discard
+	Discard       = NewWithWriter(Config{}, log.New(io.Discard, "", log.LstdFlags))
 	DefaultConfig = Config{
-		LogLevel:                  gormLogger.Warn,
+		LogLevel:                  Warn,
 		SlowQueryThreshold:        defaultSlowQueryThreshold,
 		SlowTransactionThreshold:  defaultSlowTransactionThreshold,
 		IgnoreRecordNotFoundError: false,
 		ParameterizedQueries:      false,
 	}
+	// Default is default logger
 	Default       = New(DefaultConfig)
 	defaultWriter = log.New(os.Stdout, "\r\n", log.LstdFlags)
 )
@@ -37,7 +41,7 @@ func New(config Config) Interface {
 	return NewWithWriter(config, defaultWriter)
 }
 
-func NewWithWriter(config Config, writer gormLogger.Writer) Interface {
+func NewWithWriter(config Config, writer Writer) Interface {
 	return &defaultLogger{
 		Config: config,
 		Interface: gormLogger.New(
@@ -47,12 +51,12 @@ func NewWithWriter(config Config, writer gormLogger.Writer) Interface {
 	}
 }
 
-func (l *defaultLogger) LogMode(level gormLogger.LogLevel) gormLogger.Interface {
+func (l *defaultLogger) LogMode(level LogLevel) gormLogger.Interface {
 	// method made to satisfy gormLogger.Interface
 	return l.ToLogMode(level)
 }
 
-func (l *defaultLogger) ToLogMode(level gormLogger.LogLevel) Interface {
+func (l *defaultLogger) ToLogMode(level LogLevel) Interface {
 	newLogger := *l
 	newLogger.LogLevel = level
 	newLogger.Interface = newLogger.Interface.LogMode(level)
@@ -63,28 +67,28 @@ func (l *defaultLogger) ToLogMode(level gormLogger.LogLevel) Interface {
 const nanoToMicro = 1e6
 
 func (l defaultLogger) TraceTransaction(ctx context.Context, begin time.Time) {
-	if l.LogLevel <= gormLogger.Silent {
+	if l.LogLevel <= Silent {
 		return
 	}
 
 	elapsed := time.Since(begin)
 
 	switch {
-	case l.SlowTransactionThreshold != DisableThreshold && elapsed > l.SlowTransactionThreshold && l.LogLevel >= gormLogger.Warn:
+	case l.SlowTransactionThreshold != DisableThreshold && elapsed > l.SlowTransactionThreshold && l.LogLevel >= Warn:
 		l.Interface.Warn(ctx, "transaction_slow (>= %v) [%.3fms]", l.SlowTransactionThreshold, float64(elapsed.Nanoseconds())/nanoToMicro)
-	case l.LogLevel >= gormLogger.Info:
+	case l.LogLevel >= Info:
 		l.Interface.Info(ctx, "transaction_exec [%.3fms]", float64(elapsed.Nanoseconds())/nanoToMicro)
 	}
 }
 
 type writerWrapper struct {
-	Writer gormLogger.Writer
+	Writer Writer
 }
 
 // Info, Warn, Error or Trace + Printf
 const defaultStacktraceLen = 2
 
-func (w writerWrapper) Printf(msg string, args ...interface{}) {
+func (w writerWrapper) Printf(msg string, args ...any) {
 	if len(args) > 0 {
 		// change the file path to avoid showing cql internal files
 		firstArg := args[0]

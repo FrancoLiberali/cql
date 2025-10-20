@@ -344,7 +344,7 @@ func (r *Runner) findNotConcernedForCQLFunction(callExpr *ast.CallExpr, cqlFunct
 	if selectorIsCQLFunction(selectorExpr) {
 		r.getOrSetModels(cqlFunction, func() {
 			r.models = []string{findModelFromFunctionReturnValueIndex(cqlFunction)}
-			r.findErrorIsDynamic(callExpr.Args[1:]) // first parameters is ignored as it's the db object
+			r.findErrorIsDynamic(callExpr.Args[2:]) // first 2 parameters is ignored as they are the context and the db object
 		})
 
 		return

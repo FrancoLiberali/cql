@@ -1,6 +1,8 @@
 package not_concerned
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -9,6 +11,7 @@ import (
 
 func testSetDynamicJoined() {
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
@@ -16,6 +19,7 @@ func testSetDynamicJoined() {
 
 func testSetDynamicNotJoinedInSameLine() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(conditions.City.Name)) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -23,6 +27,7 @@ func testSetDynamicNotJoinedInSameLine() {
 
 func testSetDynamicNotJoinedInDifferentLines() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
@@ -32,6 +37,7 @@ func testSetDynamicNotJoinedInDifferentLines() {
 
 func testSetDynamicNotJoinedInMultiple() {
 	cql.Update[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner(),
 	).Set(
@@ -44,6 +50,7 @@ func testSetDynamicJoinedFromVariable() {
 	set := conditions.Brand.Name
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(conditions.Phone.Name.Set().Eq(set))
@@ -53,6 +60,7 @@ func testSetDynamicNotJoinedFromVariable() {
 	set := conditions.City.Name
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(conditions.Phone.Name.Set().Eq(set)) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -62,6 +70,7 @@ func testSetDynamicJoinedInVariable() {
 	set := conditions.Phone.Name.Set().Eq(conditions.Brand.Name)
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(set)
@@ -71,6 +80,7 @@ func testSetDynamicNotJoinedInVariable() {
 	set := conditions.Phone.Name.Set().Eq(conditions.City.Name) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(set)
@@ -82,6 +92,7 @@ func testSetDynamicJoinedInList() {
 	}
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(sets...)
@@ -93,6 +104,7 @@ func testSetDynamicNotJoinedInList() {
 	}
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(sets...)
@@ -107,6 +119,7 @@ func testSetDynamicNotJoinedInListWithAppend() {
 	)
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(sets...)
@@ -119,6 +132,7 @@ func testSetDynamicNotJoinedInListMultiple() {
 	}
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 	).Set(sets...)
@@ -126,6 +140,7 @@ func testSetDynamicNotJoinedInListMultiple() {
 
 func testSetDynamicSameModel() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
@@ -137,6 +152,7 @@ func testSetDynamicSameModel() {
 
 func testSetDynamicSameModelMultipleTimes() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Set(
@@ -151,6 +167,7 @@ func testSetDynamicSameModelMultipleTimes() {
 
 func testSetDynamicJoinedModel() {
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -161,6 +178,7 @@ func testSetDynamicJoinedModel() {
 
 func testSetDynamicNestedJoinedModel() {
 	cql.Update[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -174,6 +192,7 @@ func testSetDynamicNestedJoinedModel() {
 
 func testSetMultipleNotJoinedInSameLine() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).SetMultiple(conditions.City.Name.Set().Eq(cql.String("asd"))) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -181,6 +200,7 @@ func testSetMultipleNotJoinedInSameLine() {
 
 func testSetMultipleNotJoinedInDifferentLines() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).SetMultiple(
@@ -190,6 +210,7 @@ func testSetMultipleNotJoinedInDifferentLines() {
 
 func testSetMultipleDynamicNotJoined() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).SetMultiple(
@@ -199,6 +220,7 @@ func testSetMultipleDynamicNotJoined() {
 
 func testSetMultipleMainModel() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
@@ -208,6 +230,7 @@ func testSetMultipleMainModel() {
 
 func testSetMultipleMainModelMultipleTimes() {
 	cql.Update[models.Product](
+		context.Background(),
 		db,
 		conditions.Product.String.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).SetMultiple(
@@ -218,6 +241,7 @@ func testSetMultipleMainModelMultipleTimes() {
 
 func testSetMultipleJoinedModel() {
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -229,6 +253,7 @@ func testSetMultipleJoinedModel() {
 
 func testSetMultipleNestedJoinedModel() {
 	cql.Update[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -242,6 +267,7 @@ func testSetMultipleNestedJoinedModel() {
 
 func testSetDynamicNotJoinedWithFunction() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
@@ -251,6 +277,7 @@ func testSetDynamicNotJoinedWithFunction() {
 
 func testSetDynamicNotJoinedWithTwoFunction() {
 	cql.Update[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(cql.String("asd")),
 	).Set(conditions.Brand.Name.Set().Eq(
@@ -260,6 +287,7 @@ func testSetDynamicNotJoinedWithTwoFunction() {
 
 func testUpdateJoined() {
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -268,6 +296,7 @@ func testUpdateJoined() {
 
 func testUpdateNotJoined() {
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -278,6 +307,7 @@ func testUpdateJoinedInVariable() {
 	condition := conditions.Phone.Name.Is().Eq(conditions.Phone.Name)
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		condition,
@@ -288,6 +318,7 @@ func testUpdateNotJoinedInVariable() {
 	condition := conditions.Phone.Name.Is().Eq(conditions.City.Name) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		condition,
@@ -301,6 +332,7 @@ func testUpdateJoinedInList() {
 	}
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditionList...,
 	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
@@ -313,6 +345,7 @@ func testUpdateNotJoinedInList() {
 	}
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditionList...,
 	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))
@@ -329,6 +362,7 @@ func testUpdateNotJoinedInListWithAppend() {
 	)
 
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditionList...,
 	).Set(conditions.Phone.Name.Set().Eq(conditions.Brand.Name))

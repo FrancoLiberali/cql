@@ -1,6 +1,8 @@
 package not_concerned
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -8,6 +10,7 @@ import (
 
 func testOnConflictSetStatic() {
 	cql.Insert(
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -17,6 +20,7 @@ func testOnConflictSetStatic() {
 
 func testOnConflictSetStaticIndex() {
 	cql.Insert[models.Product](
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -26,6 +30,7 @@ func testOnConflictSetStaticIndex() {
 
 func testOnConflictSetSameModel() {
 	cql.Insert(
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -37,6 +42,7 @@ func testOnConflictSetSameModelVar() {
 	product := &models.Product{}
 
 	cql.Insert(
+		context.Background(),
 		db,
 		product,
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -46,6 +52,7 @@ func testOnConflictSetSameModelVar() {
 
 func testOnConflictSetSameModelIndex() {
 	cql.Insert[models.Product](
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -55,6 +62,7 @@ func testOnConflictSetSameModelIndex() {
 
 func testOnConflictSetDifferentModel() {
 	cql.Insert(
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -66,6 +74,7 @@ func testOnConflictSetDifferentModelVar() {
 	product := &models.Product{}
 
 	cql.Insert(
+		context.Background(),
 		db,
 		product,
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -75,6 +84,7 @@ func testOnConflictSetDifferentModelVar() {
 
 func testOnConflictSetDifferentModelIndex() {
 	cql.Insert[models.Product](
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -84,6 +94,7 @@ func testOnConflictSetDifferentModelIndex() {
 
 func testOnConflictSetWhereStatic() {
 	cql.Insert(
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -95,6 +106,7 @@ func testOnConflictSetWhereStatic() {
 
 func testOnConflictSetWhereStaticIndex() {
 	cql.Insert[models.Product](
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -106,6 +118,7 @@ func testOnConflictSetWhereStaticIndex() {
 
 func testOnConflictSetWhereSameModel() {
 	cql.Insert(
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -119,6 +132,7 @@ func testOnConflictSetWhereSameModelVar() {
 	product := &models.Product{}
 
 	cql.Insert(
+		context.Background(),
 		db,
 		product,
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -130,6 +144,7 @@ func testOnConflictSetWhereSameModelVar() {
 
 func testOnConflictSetWhereSameModelIndex() {
 	cql.Insert[models.Product](
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -141,6 +156,7 @@ func testOnConflictSetWhereSameModelIndex() {
 
 func testOnConflictSetWhereDifferentModel() {
 	cql.Insert(
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -154,6 +170,7 @@ func testOnConflictSetWhereDifferentModelVar() {
 	product := &models.Product{}
 
 	cql.Insert(
+		context.Background(),
 		db,
 		product,
 	).OnConflictOn(conditions.Product.ID).Set(
@@ -165,6 +182,7 @@ func testOnConflictSetWhereDifferentModelVar() {
 
 func testOnConflictSetWhereDifferentModelIndex() {
 	cql.Insert[models.Product](
+		context.Background(),
 		db,
 		&models.Product{},
 	).OnConflictOn(conditions.Product.ID).Set(

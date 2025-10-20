@@ -1,6 +1,8 @@
 package appearance
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -8,6 +10,7 @@ import (
 
 func testQueryNotNecessary() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0)), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
@@ -17,6 +20,7 @@ func testQueryNotNecessary() {
 
 func testQueryNotNecessaryWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0).Concat(cql.String("asd"))), // want "Appearance call not necessary, github.com/FrancoLiberali/cql/test/models.Phone appears only once"
@@ -26,6 +30,7 @@ func testQueryNotNecessaryWithFunction() {
 
 func testQueryNecessaryNotCalled() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -39,6 +44,7 @@ func testQueryNecessaryNotCalled() {
 
 func testQueryNecessaryNotCalledWithFunction() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -52,6 +58,7 @@ func testQueryNecessaryNotCalledWithFunction() {
 
 func testQueryNecessaryCalled() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -65,6 +72,7 @@ func testQueryNecessaryCalled() {
 
 func testQueryOutOfRange() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),

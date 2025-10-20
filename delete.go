@@ -1,6 +1,8 @@
 package cql
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/model"
 )
@@ -11,9 +13,9 @@ import (
 // In case this is the desired behavior, use cql.True.
 //
 // For details see https://compiledquerylenguage.readthedocs.io/en/latest/cql/delete.html
-func Delete[T model.Model](tx *DB, conditions ...condition.Condition[T]) *condition.Delete[T] {
+func Delete[T model.Model](ctx context.Context, tx *DB, conditions ...condition.Condition[T]) *condition.Delete[T] {
 	return condition.NewDelete(
-		tx.GormDB,
+		tx.gormDBWithContext(ctx),
 		conditions,
 	)
 }

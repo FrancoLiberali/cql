@@ -1,6 +1,8 @@
 package test
 
 import (
+	"context"
+
 	"github.com/google/go-cmp/cmp"
 	"gorm.io/gorm"
 	"gotest.tools/assert"
@@ -29,6 +31,7 @@ func NewQueryIntTestSuite(
 
 func (ts *QueryIntTestSuite) TestCountReturns0IfNotModels() {
 	count, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 	).Count()
 
@@ -39,6 +42,7 @@ func (ts *QueryIntTestSuite) TestCountReturns0IfNotModels() {
 func (ts *QueryIntTestSuite) TestCountReturns0IfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	count, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Count()
@@ -50,6 +54,7 @@ func (ts *QueryIntTestSuite) TestCountReturns0IfConditionsDontMatch() {
 func (ts *QueryIntTestSuite) TestCountReturns1IfConditionsMatch() {
 	ts.createProduct("", 1, 0, false, nil)
 	count, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Count()
@@ -61,6 +66,7 @@ func (ts *QueryIntTestSuite) TestReturnsNIfMoreThanOneMatchConditions() {
 	ts.createProduct("", 0, 0, false, nil)
 	ts.createProduct("", 0, 0, false, nil)
 	count, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).Count()
@@ -73,6 +79,7 @@ func (ts *QueryIntTestSuite) TestReturnsNIfMoreThanOneMatchConditions() {
 func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).FindOne()
@@ -82,6 +89,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfConditionsDontMatch() {
 func (ts *QueryIntTestSuite) TestFindOneReturnsEntityIfConditionsMatch() {
 	product := ts.createProduct("", 1, 0, false, nil)
 	productReturned, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).FindOne()
@@ -94,6 +102,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfMoreThanOneMatchConditions
 	ts.createProduct("", 0, 0, false, nil)
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(0)),
 	).FindOne()
@@ -105,6 +114,7 @@ func (ts *QueryIntTestSuite) TestFindOneReturnsErrorIfMoreThanOneMatchConditions
 func (ts *QueryIntTestSuite) TestFirstReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).First()
@@ -116,6 +126,7 @@ func (ts *QueryIntTestSuite) TestFirstReturnsFirstEntityIfConditionsMatch() {
 	ts.createBrand("a")
 
 	brandReturned, err := cql.Query[models.Brand](
+		context.Background(),
 		ts.db,
 		conditions.Brand.Name.Is().Eq(cql.String("a")),
 	).First()
@@ -129,6 +140,7 @@ func (ts *QueryIntTestSuite) TestFirstReturnsFirstEntityIfConditionsMatch() {
 func (ts *QueryIntTestSuite) TestLastReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Last()
@@ -140,6 +152,7 @@ func (ts *QueryIntTestSuite) TestLastReturnsLastEntityIfConditionsMatch() {
 	brand2 := ts.createBrand("a")
 
 	brandReturned, err := cql.Query[models.Brand](
+		context.Background(),
 		ts.db,
 		conditions.Brand.Name.Is().Eq(cql.String("a")),
 	).Last()
@@ -153,6 +166,7 @@ func (ts *QueryIntTestSuite) TestLastReturnsLastEntityIfConditionsMatch() {
 func (ts *QueryIntTestSuite) TestTakeReturnsErrorIfConditionsDontMatch() {
 	ts.createProduct("", 0, 0, false, nil)
 	_, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Take()
@@ -163,6 +177,7 @@ func (ts *QueryIntTestSuite) TestTakeReturnsFirstCreatedEntityIfConditionsMatch(
 	product1 := ts.createProduct("", 1, 0, false, nil)
 	product2 := ts.createProduct("", 1, 0, false, nil)
 	productReturned, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Take()
@@ -177,6 +192,7 @@ func (ts *QueryIntTestSuite) TestAscendingReturnsResultsInAscendingOrder() {
 	product1 := ts.createProduct("", 1, 1.0, false, nil)
 	product2 := ts.createProduct("", 1, 2.0, false, nil)
 	products, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Ascending(conditions.Product.Float).Find()
@@ -191,6 +207,7 @@ func (ts *QueryIntTestSuite) TestDescendingReturnsResultsInDescendingOrder() {
 	product1 := ts.createProduct("", 1, 1.0, false, nil)
 	product2 := ts.createProduct("", 1, 2.0, false, nil)
 	products, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Descending(conditions.Product.Float).Find()
@@ -209,6 +226,7 @@ func (ts *QueryIntTestSuite) TestOrderByFieldThatIsJoined() {
 	sale2 := ts.createSale(0, product2, nil)
 
 	sales, err := cql.Query[models.Sale](
+		context.Background(),
 		ts.db,
 		conditions.Sale.Product(),
 	).Descending(conditions.Product.Float).Find()
@@ -221,6 +239,7 @@ func (ts *QueryIntTestSuite) TestOrderByFieldThatIsJoined() {
 
 func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsNotConcerned() {
 	_, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Descending(conditions.Seller.ID).Find()
@@ -230,6 +249,7 @@ func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsNotConcerned() {
 
 func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAndAppearanceIsNotSelected() {
 	_, err := cql.Query[models.Child](
+		context.Background(),
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -244,6 +264,7 @@ func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfFieldIsJoinedMoreThanOnceAnd
 
 func (ts *QueryIntTestSuite) TestOrderReturnsErrorIfAppearanceIfOutOfRange() {
 	_, err := cql.Query[models.Child](
+		context.Background(),
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -272,6 +293,7 @@ func (ts *QueryIntTestSuite) TestOrderWorksIfFieldIsJoinedMoreThanOnceAndAppeara
 	ts.Require().NoError(err)
 
 	children, err := cql.Query[models.Child](
+		context.Background(),
 		ts.db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -293,6 +315,7 @@ func (ts *QueryIntTestSuite) TestLimitLimitsTheAmountOfModelsReturned() {
 	product1 := ts.createProduct("", 1, 0, false, nil)
 	product2 := ts.createProduct("", 1, 0, false, nil)
 	products, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Limit(1).Find()
@@ -306,6 +329,7 @@ func (ts *QueryIntTestSuite) TestLimitCanBeCanceled() {
 	product1 := ts.createProduct("", 1, 0, false, nil)
 	product2 := ts.createProduct("", 1, 0, false, nil)
 	products, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Limit(1).Limit(-1).Find()
@@ -323,6 +347,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 	switch getDBDialector() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite:
 		products, err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Ascending(conditions.Product.Float).Offset(1).Find()
@@ -331,6 +356,7 @@ func (ts *QueryIntTestSuite) TestOffsetSkipsTheModelsReturned() {
 		EqualList(&ts.Suite, []*models.Product{product2}, products)
 	case sql.MySQL:
 		products, err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Ascending(conditions.Product.Float).Offset(1).Limit(10).Find()
@@ -347,6 +373,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 	switch getDBDialector() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite:
 		products, err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Offset(2).Find()
@@ -355,6 +382,7 @@ func (ts *QueryIntTestSuite) TestOffsetReturnsEmptyIfMoreOffsetThanResults() {
 		EqualList(&ts.Suite, []*models.Product{}, products)
 	case sql.MySQL:
 		products, err := cql.Query[models.Product](
+			context.Background(),
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).Offset(2).Limit(10).Find()
@@ -369,6 +397,7 @@ func (ts *QueryIntTestSuite) TestOffsetAndLimitWorkTogether() {
 	product2 := ts.createProduct("", 1, 2, false, nil)
 	ts.createProduct("", 1, 3, false, nil)
 	products, err := cql.Query[models.Product](
+		context.Background(),
 		ts.db,
 		conditions.Product.Int.Is().Eq(cql.Int(1)),
 	).Ascending(conditions.Product.Float).Offset(1).Limit(1).Find()

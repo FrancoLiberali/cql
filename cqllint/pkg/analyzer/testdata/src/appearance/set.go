@@ -1,6 +1,8 @@
 package appearance
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
@@ -8,6 +10,7 @@ import (
 
 func testSetNotNecessary() {
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Name.Is().Eq(cql.String("asd")),
 	).Set(
@@ -17,6 +20,7 @@ func testSetNotNecessary() {
 
 func testSetNotNecessaryWithFunction() {
 	cql.Update[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Name.Is().Eq(cql.String("asd")),
 	).Set(
@@ -26,6 +30,7 @@ func testSetNotNecessaryWithFunction() {
 
 func testSetNecessaryNotCalled() {
 	cql.Update[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -40,6 +45,7 @@ func testSetNecessaryNotCalled() {
 
 func testSetNecessaryNotCalledWithFunction() {
 	cql.Update[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -54,6 +60,7 @@ func testSetNecessaryNotCalledWithFunction() {
 
 func testSetNecessaryCalled() {
 	cql.Update[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),
@@ -68,6 +75,7 @@ func testSetNecessaryCalled() {
 
 func testSetOutOfRange() {
 	cql.Update[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(),

@@ -1,6 +1,8 @@
 package not_concerned
 
 import (
+	"context"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -9,6 +11,7 @@ import (
 
 func testSameModel() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -17,6 +20,7 @@ func testSameModel() {
 
 func testSameModelWithoutIndex() {
 	cql.Query(
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -25,6 +29,7 @@ func testSameModelWithoutIndex() {
 
 func testJoinedModel() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -34,6 +39,7 @@ func testJoinedModel() {
 
 func testJoinedWithJoinedWithCondition() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -45,6 +51,7 @@ func testJoinedWithJoinedWithCondition() {
 
 func testJoinedWithJoinedWithPreload() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand().Preload(),
 		conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
@@ -54,6 +61,7 @@ func testJoinedWithJoinedWithPreload() {
 
 func testJoinedWithJoinedWithConditionsWithPreload() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(cql.String("asd")),
@@ -67,6 +75,7 @@ func testJoinedModelInVariable() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Name.Is().Eq(value),
@@ -75,6 +84,7 @@ func testJoinedModelInVariable() {
 
 func testNotJoinedInSameLine() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Find()
@@ -82,6 +92,7 @@ func testNotJoinedInSameLine() {
 
 func testNotJoinedInDifferentLines() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(
 			conditions.City.Name, // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -93,6 +104,7 @@ func testNotJoinedInVariable() {
 	value := conditions.City.Name
 
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		conditions.Brand.Name.Is().Eq(value), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	).Find()
@@ -100,6 +112,7 @@ func testNotJoinedInVariable() {
 
 func testNotJoinedWithTrue() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		cql.True[models.Brand](),
 		conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -108,6 +121,7 @@ func testNotJoinedWithTrue() {
 
 func testJoinedInsideConnector() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		cql.And(
@@ -118,6 +132,7 @@ func testJoinedInsideConnector() {
 
 func testNotJoinedInsideConnector() {
 	cql.Query[models.Brand](
+		context.Background(),
 		db,
 		cql.And(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -127,6 +142,7 @@ func testNotJoinedInsideConnector() {
 
 func testJoinedInsideJoinCondition() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -136,6 +152,7 @@ func testJoinedInsideJoinCondition() {
 
 func testNotJoinedInsideJoinCondition() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -145,6 +162,7 @@ func testNotJoinedInsideJoinCondition() {
 
 func testJoinedInSecondCondition() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -155,6 +173,7 @@ func testJoinedInSecondCondition() {
 
 func testNotJoinedInSecondCondition() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -165,6 +184,7 @@ func testNotJoinedInSecondCondition() {
 
 func testNotJoinedInsideNestedJoinCondition() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(
@@ -176,6 +196,7 @@ func testNotJoinedInsideNestedJoinCondition() {
 
 func testJoinedInsideNestedJoinConditionWithMainModel() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(
@@ -187,6 +208,7 @@ func testJoinedInsideNestedJoinConditionWithMainModel() {
 
 func testJoinedInsideNestedJoinConditionWithPreviousJoin() {
 	cql.Query[models.Child](
+		context.Background(),
 		db,
 		conditions.Child.Parent1(
 			conditions.Parent1.ParentParent(
@@ -198,6 +220,7 @@ func testJoinedInsideNestedJoinConditionWithPreviousJoin() {
 
 func testNotJoinedWithJoinedWithConditionBefore() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Name.Is().Eq(conditions.Brand.Name), // want "github.com/FrancoLiberali/cql/test/models.Brand is not joined by the query"
 		conditions.Phone.Brand(
@@ -208,6 +231,7 @@ func testNotJoinedWithJoinedWithConditionBefore() {
 
 func testJoinedWithDifferentRelationNameWithConditionsUsesConditionName() {
 	cql.Query[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner(
 			conditions.Person.Name.Is().Eq(cql.String("asd")),
@@ -219,6 +243,7 @@ func testJoinedWithDifferentRelationNameWithConditionsUsesConditionName() {
 
 func testJoinedWithDifferentRelationNameWithConditionsWithPreloadUsesConditionName() {
 	cql.Query[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner(
 			conditions.Person.Name.Is().Eq(cql.String("asd")),
@@ -230,6 +255,7 @@ func testJoinedWithDifferentRelationNameWithConditionsWithPreloadUsesConditionNa
 
 func testJoinedWithDifferentRelationNameWithoutConditions() {
 	cql.Query[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner(),
 		conditions.Bicycle.Name.Is().Eq(conditions.Person.Name),
@@ -239,6 +265,7 @@ func testJoinedWithDifferentRelationNameWithoutConditions() {
 
 func testJoinedWithDifferentRelationNameWithoutConditionsWithPreload() {
 	cql.Query[models.Bicycle](
+		context.Background(),
 		db,
 		conditions.Bicycle.Owner().Preload(),
 		conditions.Bicycle.Name.Is().Eq(conditions.Person.Name),
@@ -248,6 +275,7 @@ func testJoinedWithDifferentRelationNameWithoutConditionsWithPreload() {
 
 func testJoinedWithAppearance() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Brand(),
@@ -259,6 +287,7 @@ func testJoinedWithAppearanceVariable() {
 	value := conditions.Brand.Name.Appearance(0)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(),
 		conditions.Phone.Brand(),
@@ -268,6 +297,7 @@ func testJoinedWithAppearanceVariable() {
 
 func testNotJoinedWithAppearance() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name.Appearance(0)), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -279,6 +309,7 @@ func testNotJoinedWithAppearanceVariable() {
 	value := conditions.City.Name.Appearance(0)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -288,6 +319,7 @@ func testNotJoinedWithAppearanceVariable() {
 
 func testJoinedWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
@@ -299,6 +331,7 @@ func testJoinedWithFunctionVariable() {
 	value := conditions.Phone.Name.Concat(cql.String("asd"))
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value),
@@ -310,6 +343,7 @@ func testJoinedWithFunctionOverVariable() {
 	value := conditions.Phone.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))),
@@ -319,6 +353,7 @@ func testJoinedWithFunctionOverVariable() {
 
 func testNotJoinedWithFunction() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -330,6 +365,7 @@ func testNotJoinedWithFunctionVariable() {
 	value := conditions.City.Name.Concat(cql.String("asd"))
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -341,6 +377,7 @@ func testNotJoinedWithFunctionOverVariable() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value.Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -350,6 +387,7 @@ func testNotJoinedWithFunctionOverVariable() {
 
 func testNotJoinedWithTwoFunctions() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd"))), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -359,6 +397,7 @@ func testNotJoinedWithTwoFunctions() {
 
 func testMultipleArgumentsFirstNotJoined() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -374,6 +413,7 @@ func testMultipleArgumentsFirstNotJoinedWithVariable() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -387,6 +427,7 @@ func testMultipleArgumentsFirstNotJoinedWithVariable() {
 
 func testMultipleArgumentsSecondNotJoined() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -402,6 +443,7 @@ func testMultipleArgumentsSecondNotJoinedWithVariable() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name),
@@ -415,6 +457,7 @@ func testMultipleArgumentsSecondNotJoinedWithVariable() {
 
 func testJoinedWithFunctionOnLeftSide() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Concat(conditions.Phone.Name).Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
@@ -426,6 +469,7 @@ func testJoinedWithFunctionVariableOnLeftSide() {
 	value := conditions.Brand.Name.Concat(conditions.Phone.Name)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			value.Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
@@ -437,6 +481,7 @@ func testJoinedWithFunctionOverVariableOnLeftSide() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			value.Concat(conditions.Phone.Name).Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
@@ -448,6 +493,7 @@ func testJoinedWithFunctionWithVariableOnLeftSide() {
 	value := conditions.Phone.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Concat(value).Is().Eq(conditions.Phone.Name.Concat(cql.String("asd"))),
@@ -457,6 +503,7 @@ func testJoinedWithFunctionWithVariableOnLeftSide() {
 
 func testNotJoinedWithFunctionOnLeftSide() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Concat(conditions.City.Name).Is().Eq(conditions.Phone.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -468,6 +515,7 @@ func testNotJoinedWithFunctionOverVariableOnLeftSide() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Concat(value).Is().Eq(conditions.Phone.Name), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -477,6 +525,7 @@ func testNotJoinedWithFunctionOverVariableOnLeftSide() {
 
 func testJoinedWithFunctionOnRightSide() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(conditions.Phone.Name)),
@@ -488,6 +537,7 @@ func testJoinedWithFunctionVariableOnRightSide() {
 	value := conditions.Brand.Name.Concat(conditions.Phone.Name)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(value),
@@ -499,6 +549,7 @@ func testJoinedWithFunctionOverVariableOnRightSide() {
 	value := conditions.Brand.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(value)),
@@ -508,6 +559,7 @@ func testJoinedWithFunctionOverVariableOnRightSide() {
 
 func testNotJoinedWithFunctionOnRightSide() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(conditions.City.Name)), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -517,6 +569,7 @@ func testNotJoinedWithFunctionOnRightSide() {
 
 func testNotJoinedWithMultipleFunctionOnRightSideFirst() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(
@@ -530,6 +583,7 @@ func testNotJoinedWithMultipleFunctionOnRightSideFirst() {
 
 func testNotJoinedWithMultipleFunctionOnRightSideSecond() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(
@@ -543,6 +597,7 @@ func testNotJoinedWithMultipleFunctionOnRightSideSecond() {
 
 func testNotJoinedWithMultipleFunctionOnRightSideTwice() {
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(
@@ -558,6 +613,7 @@ func testNotJoinedWithFunctionOverVariableOnRightSide() {
 	value := conditions.City.Name
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		conditions.Phone.Brand(
 			conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Concat(value)), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
@@ -569,6 +625,7 @@ func testJoinedConditionInVariable() {
 	value := conditions.Phone.Name.Is().Eq(conditions.Phone.Name)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		value,
 	).Find()
@@ -578,6 +635,7 @@ func testNotJoinedConditionInVariable() {
 	value := conditions.Phone.Name.Is().Eq(conditions.City.Name) // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		value,
 	).Find()
@@ -589,6 +647,7 @@ func testJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Find()
@@ -600,6 +659,7 @@ func testNotJoinedConditionInList() {
 	}
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Find()
@@ -614,6 +674,7 @@ func testJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Find()
@@ -628,6 +689,7 @@ func testNotJoinedConditionInListWithAppend() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Find()
@@ -643,6 +705,7 @@ func testNotJoinedConditionInListWithAppendSecond() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Find()
@@ -662,6 +725,7 @@ func testNotJoinedConditionInListWithAppendMultiple() {
 	)
 
 	cql.Query[models.Phone](
+		context.Background(),
 		db,
 		values...,
 	).Find()
