@@ -10,35 +10,33 @@ import (
 	"github.com/FrancoLiberali/cql/logger"
 )
 
-// Executes the function "toExec" inside a transaction
+// Transaction executes the function "toExec" inside a transaction
 // The transaction is automatically rolled back in case "toExec" returns an error
 // opts can be used to pass arguments to the transaction
-func Transaction[RT any](
-	db *gorm.DB,
-	toExec func(*gorm.DB) (RT, error),
+func (db *DB) Transaction(
+	ctx context.Context,
+	toExec func(*DB) error,
 	opts ...*sql.TxOptions,
-) (RT, error) {
+) error {
 	begin := time.Now()
 
-	var returnValue RT
-
-	err := db.Transaction(
+	err := db.GormDB.Transaction(
 		func(tx *gorm.DB) error {
-			var err error
-			returnValue, err = toExec(tx)
-
-			return err
+			return toExec(&DB{
+				GormDB:                tx,
+				withLoggerFromContext: db.withLoggerFromContext,
+			})
 		},
 		opts...,
 	)
 	if err != nil {
-		return *new(RT), err
+		return err
 	}
 
-	loggerInterface, isLoggerInterface := db.Logger.(logger.Interface)
+	loggerInterface, isLoggerInterface := db.gormDBWithContext(ctx).Logger.(logger.Interface)
 	if isLoggerInterface {
-		loggerInterface.TraceTransaction(context.Background(), begin)
+		loggerInterface.TraceTransaction(ctx, begin)
 	}
 
-	return returnValue, nil
+	return nil
 }
