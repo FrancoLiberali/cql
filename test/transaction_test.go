@@ -3,10 +3,11 @@ package test
 import (
 	"context"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
-	"github.com/stretchr/testify/assert"
 )
 
 type TransactionIntTestSuite struct {
