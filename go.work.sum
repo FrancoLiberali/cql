@@ -138,6 +138,8 @@ github.com/FrancoLiberali/gorm v0.0.0-20251021224900-53fc0a3300d6 h1:BkhwWvh3VFd
 github.com/FrancoLiberali/gorm v0.0.0-20251021224900-53fc0a3300d6/go.mod h1:XyQVbO2k6YkOis7C2437jSit3SsDK72s7n7rsSHd+Gs=
 github.com/FrancoLiberali/gorm v0.0.0-20251022005014-1db8075395ed h1:IX06tS1PTjPyE+VhQxZCjBzGINOYVv4EkKsTevVn1OE=
 github.com/FrancoLiberali/gorm v0.0.0-20251022005014-1db8075395ed/go.mod h1:XyQVbO2k6YkOis7C2437jSit3SsDK72s7n7rsSHd+Gs=
+github.com/FrancoLiberali/gorm v1.31.1 h1:5hjLkbifZSwdjN6ND2q22Z/syBJePAvQqa2aGL8HjUI=
+github.com/FrancoLiberali/gorm v1.31.1/go.mod h1:XyQVbO2k6YkOis7C2437jSit3SsDK72s7n7rsSHd+Gs=
 github.com/Masterminds/semver/v3 v3.1.1 h1:hLg3sBzpNErnxhQtUy/mmLR2I9foDujNK030IGemrRc=
 github.com/alecthomas/template v0.0.0-20160405071501-a0175ee3bccc/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
 github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751/go.mod h1:LOuyumcjzFXgccqObfd/Ljyb9UuFJ6TxHnclSeseNhc=
