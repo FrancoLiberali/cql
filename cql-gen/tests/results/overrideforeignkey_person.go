@@ -5,24 +5,15 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	overrideforeignkey "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/overrideforeignkey"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type personConditions struct {
-	ID        condition.Field[overrideforeignkey.Person, model.UUID]
-	CreatedAt condition.Field[overrideforeignkey.Person, time.Time]
-	UpdatedAt condition.Field[overrideforeignkey.Person, time.Time]
-	DeletedAt condition.Field[overrideforeignkey.Person, time.Time]
+	ID condition.Field[overrideforeignkey.Person, model.UUID]
 }
 
-var Person = personConditions{
-	CreatedAt: condition.NewField[overrideforeignkey.Person, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[overrideforeignkey.Person, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[overrideforeignkey.Person, model.UUID]("ID", "", ""),
-	UpdatedAt: condition.NewField[overrideforeignkey.Person, time.Time]("UpdatedAt", "", ""),
-}
+var Person = personConditions{ID: condition.NewField[overrideforeignkey.Person, model.UUID]("ID", "", "")}
 
 // Preload allows preloading the Person when doing a query
 func (personConditions personConditions) preload() condition.Condition[overrideforeignkey.Person] {
-	return condition.NewPreloadCondition[overrideforeignkey.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt)
+	return condition.NewPreloadCondition[overrideforeignkey.Person](personConditions.ID)
 }

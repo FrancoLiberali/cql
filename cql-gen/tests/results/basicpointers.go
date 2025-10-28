@@ -5,14 +5,10 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	basicpointers "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basicpointers"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type basicPointersConditions struct {
 	ID         condition.Field[basicpointers.BasicPointers, model.UUID]
-	CreatedAt  condition.Field[basicpointers.BasicPointers, time.Time]
-	UpdatedAt  condition.Field[basicpointers.BasicPointers, time.Time]
-	DeletedAt  condition.Field[basicpointers.BasicPointers, time.Time]
 	Bool       condition.NullableBoolField[basicpointers.BasicPointers]
 	Int        condition.NullableNumericField[basicpointers.BasicPointers, int]
 	Int8       condition.NullableNumericField[basicpointers.BasicPointers, int8]
@@ -38,8 +34,6 @@ var BasicPointers = basicPointersConditions{
 	Byte:       condition.NewNullableNumericField[basicpointers.BasicPointers, uint8]("Byte", "", ""),
 	Complex128: condition.NewNullableField[basicpointers.BasicPointers, complex128]("Complex128", "", ""),
 	Complex64:  condition.NewNullableField[basicpointers.BasicPointers, complex64]("Complex64", "", ""),
-	CreatedAt:  condition.NewField[basicpointers.BasicPointers, time.Time]("CreatedAt", "", ""),
-	DeletedAt:  condition.NewField[basicpointers.BasicPointers, time.Time]("DeletedAt", "", ""),
 	Float32:    condition.NewNullableNumericField[basicpointers.BasicPointers, float32]("Float32", "", ""),
 	Float64:    condition.NewNullableNumericField[basicpointers.BasicPointers, float64]("Float64", "", ""),
 	ID:         condition.NewField[basicpointers.BasicPointers, model.UUID]("ID", "", ""),
@@ -55,10 +49,9 @@ var BasicPointers = basicPointersConditions{
 	UInt64:     condition.NewNullableNumericField[basicpointers.BasicPointers, uint64]("UInt64", "", ""),
 	UInt8:      condition.NewNullableNumericField[basicpointers.BasicPointers, uint8]("UInt8", "", ""),
 	UIntptr:    condition.NewNullableField[basicpointers.BasicPointers, uintptr]("UIntptr", "", ""),
-	UpdatedAt:  condition.NewField[basicpointers.BasicPointers, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the BasicPointers when doing a query
 func (basicPointersConditions basicPointersConditions) preload() condition.Condition[basicpointers.BasicPointers] {
-	return condition.NewPreloadCondition[basicpointers.BasicPointers](basicPointersConditions.ID, basicPointersConditions.CreatedAt, basicPointersConditions.UpdatedAt, basicPointersConditions.DeletedAt, basicPointersConditions.Bool, basicPointersConditions.Int, basicPointersConditions.Int8, basicPointersConditions.Int16, basicPointersConditions.Int32, basicPointersConditions.Int64, basicPointersConditions.UInt, basicPointersConditions.UInt8, basicPointersConditions.UInt16, basicPointersConditions.UInt32, basicPointersConditions.UInt64, basicPointersConditions.UIntptr, basicPointersConditions.Float32, basicPointersConditions.Float64, basicPointersConditions.Complex64, basicPointersConditions.Complex128, basicPointersConditions.String, basicPointersConditions.Byte)
+	return condition.NewPreloadCondition[basicpointers.BasicPointers](basicPointersConditions.ID, basicPointersConditions.Bool, basicPointersConditions.Int, basicPointersConditions.Int8, basicPointersConditions.Int16, basicPointersConditions.Int32, basicPointersConditions.Int64, basicPointersConditions.UInt, basicPointersConditions.UInt8, basicPointersConditions.UInt16, basicPointersConditions.UInt32, basicPointersConditions.UInt64, basicPointersConditions.UIntptr, basicPointersConditions.Float32, basicPointersConditions.Float64, basicPointersConditions.Complex64, basicPointersConditions.Complex128, basicPointersConditions.String, basicPointersConditions.Byte)
 }

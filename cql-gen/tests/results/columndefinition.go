@@ -5,26 +5,19 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	columndefinition "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/columndefinition"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type columnDefinitionConditions struct {
-	ID        condition.Field[columndefinition.ColumnDefinition, model.UUID]
-	CreatedAt condition.Field[columndefinition.ColumnDefinition, time.Time]
-	UpdatedAt condition.Field[columndefinition.ColumnDefinition, time.Time]
-	DeletedAt condition.Field[columndefinition.ColumnDefinition, time.Time]
-	String    condition.StringField[columndefinition.ColumnDefinition]
+	ID     condition.Field[columndefinition.ColumnDefinition, model.UUID]
+	String condition.StringField[columndefinition.ColumnDefinition]
 }
 
 var ColumnDefinition = columnDefinitionConditions{
-	CreatedAt: condition.NewField[columndefinition.ColumnDefinition, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[columndefinition.ColumnDefinition, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[columndefinition.ColumnDefinition, model.UUID]("ID", "", ""),
-	String:    condition.NewStringField[columndefinition.ColumnDefinition]("String", "string_something_else", ""),
-	UpdatedAt: condition.NewField[columndefinition.ColumnDefinition, time.Time]("UpdatedAt", "", ""),
+	ID:     condition.NewField[columndefinition.ColumnDefinition, model.UUID]("ID", "", ""),
+	String: condition.NewStringField[columndefinition.ColumnDefinition]("String", "string_something_else", ""),
 }
 
 // Preload allows preloading the ColumnDefinition when doing a query
 func (columnDefinitionConditions columnDefinitionConditions) preload() condition.Condition[columndefinition.ColumnDefinition] {
-	return condition.NewPreloadCondition[columndefinition.ColumnDefinition](columnDefinitionConditions.ID, columnDefinitionConditions.CreatedAt, columnDefinitionConditions.UpdatedAt, columnDefinitionConditions.DeletedAt, columnDefinitionConditions.String)
+	return condition.NewPreloadCondition[columndefinition.ColumnDefinition](columnDefinitionConditions.ID, columnDefinitionConditions.String)
 }

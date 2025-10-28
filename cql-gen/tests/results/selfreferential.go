@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	selfreferential "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/selfreferential"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 func (employeeConditions employeeConditions) Boss(conditions ...condition.Condition[selfreferential.Employee]) condition.JoinCondition[selfreferential.Employee] {
@@ -13,22 +12,16 @@ func (employeeConditions employeeConditions) Boss(conditions ...condition.Condit
 }
 
 type employeeConditions struct {
-	ID        condition.Field[selfreferential.Employee, model.UUID]
-	CreatedAt condition.Field[selfreferential.Employee, time.Time]
-	UpdatedAt condition.Field[selfreferential.Employee, time.Time]
-	DeletedAt condition.Field[selfreferential.Employee, time.Time]
-	BossID    condition.NullableField[selfreferential.Employee, model.UUID]
+	ID     condition.Field[selfreferential.Employee, model.UUID]
+	BossID condition.NullableField[selfreferential.Employee, model.UUID]
 }
 
 var Employee = employeeConditions{
-	BossID:    condition.NewNullableField[selfreferential.Employee, model.UUID]("BossID", "", ""),
-	CreatedAt: condition.NewField[selfreferential.Employee, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[selfreferential.Employee, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[selfreferential.Employee, model.UUID]("ID", "", ""),
-	UpdatedAt: condition.NewField[selfreferential.Employee, time.Time]("UpdatedAt", "", ""),
+	BossID: condition.NewNullableField[selfreferential.Employee, model.UUID]("BossID", "", ""),
+	ID:     condition.NewField[selfreferential.Employee, model.UUID]("ID", "", ""),
 }
 
 // Preload allows preloading the Employee when doing a query
 func (employeeConditions employeeConditions) preload() condition.Condition[selfreferential.Employee] {
-	return condition.NewPreloadCondition[selfreferential.Employee](employeeConditions.ID, employeeConditions.CreatedAt, employeeConditions.UpdatedAt, employeeConditions.DeletedAt, employeeConditions.BossID)
+	return condition.NewPreloadCondition[selfreferential.Employee](employeeConditions.ID, employeeConditions.BossID)
 }

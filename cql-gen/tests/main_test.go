@@ -21,11 +21,39 @@ func TestUIntModel(t *testing.T) {
 	CheckFileNotExists(t, "./uintmodel/cql.go")
 }
 
+func TestUIntModelWithTimestamp(t *testing.T) {
+	doTest(t, "./uintmodelwithtimestamp", []Comparison{
+		{Have: "u_int_model_with_timestamp_conditions.go", Expected: "./results/uintmodelwithtimestamp.go"},
+	})
+	CheckFileNotExists(t, "./uintmodelwithtimestamp/cql.go")
+}
+
+func TestUIntModelWithTimestamps(t *testing.T) {
+	doTest(t, "./uintmodelwithtimestamps", []Comparison{
+		{Have: "u_int_model_with_timestamps_conditions.go", Expected: "./results/uintmodelwithtimestamps.go"},
+	})
+	CheckFileNotExists(t, "./uintmodelwithtimestamps/cql.go")
+}
+
 func TestUUIDModel(t *testing.T) {
 	doTest(t, "./uuidmodel", []Comparison{
 		{Have: "uuid_model_conditions.go", Expected: "./results/uuidmodel.go"},
 	})
 	CheckFileNotExists(t, "./uuidmodel/cql.go")
+}
+
+func TestUUIDModelWithTimestamp(t *testing.T) {
+	doTest(t, "./uuidmodelwithtimestamp", []Comparison{
+		{Have: "uuid_model_with_timestamp_conditions.go", Expected: "./results/uuidmodelwithtimestamp.go"},
+	})
+	CheckFileNotExists(t, "./uuidmodelwithtimestamp/cql.go")
+}
+
+func TestUUIDModelWithTimestamps(t *testing.T) {
+	doTest(t, "./uuidmodelwithtimestamps", []Comparison{
+		{Have: "uuid_model_with_timestamps_conditions.go", Expected: "./results/uuidmodelwithtimestamps.go"},
+	})
+	CheckFileNotExists(t, "./uuidmodelwithtimestamps/cql.go")
 }
 
 func TestBasicTypes(t *testing.T) {

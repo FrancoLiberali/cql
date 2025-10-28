@@ -5,24 +5,15 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	uuidmodel "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/uuidmodel"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type uuidModelConditions struct {
-	ID        condition.Field[uuidmodel.UUIDModel, model.UUID]
-	CreatedAt condition.Field[uuidmodel.UUIDModel, time.Time]
-	UpdatedAt condition.Field[uuidmodel.UUIDModel, time.Time]
-	DeletedAt condition.Field[uuidmodel.UUIDModel, time.Time]
+	ID condition.Field[uuidmodel.UUIDModel, model.UUID]
 }
 
-var UUIDModel = uuidModelConditions{
-	CreatedAt: condition.NewField[uuidmodel.UUIDModel, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[uuidmodel.UUIDModel, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[uuidmodel.UUIDModel, model.UUID]("ID", "", ""),
-	UpdatedAt: condition.NewField[uuidmodel.UUIDModel, time.Time]("UpdatedAt", "", ""),
-}
+var UUIDModel = uuidModelConditions{ID: condition.NewField[uuidmodel.UUIDModel, model.UUID]("ID", "", "")}
 
 // Preload allows preloading the UUIDModel when doing a query
 func (uuidModelConditions uuidModelConditions) preload() condition.Condition[uuidmodel.UUIDModel] {
-	return condition.NewPreloadCondition[uuidmodel.UUIDModel](uuidModelConditions.ID, uuidModelConditions.CreatedAt, uuidModelConditions.UpdatedAt, uuidModelConditions.DeletedAt)
+	return condition.NewPreloadCondition[uuidmodel.UUIDModel](uuidModelConditions.ID)
 }

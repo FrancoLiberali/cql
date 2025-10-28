@@ -30,11 +30,13 @@ const (
 	cqlCollection           = "Collection"
 	cqlNewCollection        = "NewCollection"
 	// cql/model
-	modelPath = cqlPath + "/model"
-	uIntID    = "UIntID"
-	uuid      = "UUID"
-	uuidModel = "UUIDModel"
-	uIntModel = "UIntModel"
+	modelPath               = cqlPath + "/model"
+	uIntID                  = "UIntID"
+	uuid                    = "UUID"
+	uuidModel               = "UUIDModel"
+	uuidModelWithTimestamps = "UUIDModelWithTimestamps"
+	uIntModel               = "UIntModel"
+	uIntModelWithTimestamps = "UIntModelWithTimestamps"
 )
 
 const preloadMethod = "preload"

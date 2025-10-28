@@ -5,14 +5,10 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	basictypes "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basictypes"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type basicTypesConditions struct {
 	ID         condition.Field[basictypes.BasicTypes, model.UUID]
-	CreatedAt  condition.Field[basictypes.BasicTypes, time.Time]
-	UpdatedAt  condition.Field[basictypes.BasicTypes, time.Time]
-	DeletedAt  condition.Field[basictypes.BasicTypes, time.Time]
 	Bool       condition.BoolField[basictypes.BasicTypes]
 	Int        condition.NumericField[basictypes.BasicTypes, int]
 	Int8       condition.NumericField[basictypes.BasicTypes, int8]
@@ -38,8 +34,6 @@ var BasicTypes = basicTypesConditions{
 	Byte:       condition.NewNumericField[basictypes.BasicTypes, uint8]("Byte", "", ""),
 	Complex128: condition.NewUpdatableField[basictypes.BasicTypes, complex128]("Complex128", "", ""),
 	Complex64:  condition.NewUpdatableField[basictypes.BasicTypes, complex64]("Complex64", "", ""),
-	CreatedAt:  condition.NewField[basictypes.BasicTypes, time.Time]("CreatedAt", "", ""),
-	DeletedAt:  condition.NewField[basictypes.BasicTypes, time.Time]("DeletedAt", "", ""),
 	Float32:    condition.NewNumericField[basictypes.BasicTypes, float32]("Float32", "", ""),
 	Float64:    condition.NewNumericField[basictypes.BasicTypes, float64]("Float64", "", ""),
 	ID:         condition.NewField[basictypes.BasicTypes, model.UUID]("ID", "", ""),
@@ -55,10 +49,9 @@ var BasicTypes = basicTypesConditions{
 	UInt64:     condition.NewNumericField[basictypes.BasicTypes, uint64]("UInt64", "", ""),
 	UInt8:      condition.NewNumericField[basictypes.BasicTypes, uint8]("UInt8", "", ""),
 	UIntptr:    condition.NewUpdatableField[basictypes.BasicTypes, uintptr]("UIntptr", "", ""),
-	UpdatedAt:  condition.NewField[basictypes.BasicTypes, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the BasicTypes when doing a query
 func (basicTypesConditions basicTypesConditions) preload() condition.Condition[basictypes.BasicTypes] {
-	return condition.NewPreloadCondition[basictypes.BasicTypes](basicTypesConditions.ID, basicTypesConditions.CreatedAt, basicTypesConditions.UpdatedAt, basicTypesConditions.DeletedAt, basicTypesConditions.Bool, basicTypesConditions.Int, basicTypesConditions.Int8, basicTypesConditions.Int16, basicTypesConditions.Int32, basicTypesConditions.Int64, basicTypesConditions.UInt, basicTypesConditions.UInt8, basicTypesConditions.UInt16, basicTypesConditions.UInt32, basicTypesConditions.UInt64, basicTypesConditions.UIntptr, basicTypesConditions.Float32, basicTypesConditions.Float64, basicTypesConditions.Complex64, basicTypesConditions.Complex128, basicTypesConditions.String, basicTypesConditions.Byte)
+	return condition.NewPreloadCondition[basictypes.BasicTypes](basicTypesConditions.ID, basicTypesConditions.Bool, basicTypesConditions.Int, basicTypesConditions.Int8, basicTypesConditions.Int16, basicTypesConditions.Int32, basicTypesConditions.Int64, basicTypesConditions.UInt, basicTypesConditions.UInt8, basicTypesConditions.UInt16, basicTypesConditions.UInt32, basicTypesConditions.UInt64, basicTypesConditions.UIntptr, basicTypesConditions.Float32, basicTypesConditions.Float64, basicTypesConditions.Complex64, basicTypesConditions.Complex128, basicTypesConditions.String, basicTypesConditions.Byte)
 }
