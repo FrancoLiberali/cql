@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
-	"time"
 )
 
 func (employeeConditions employeeConditions) Boss(conditions ...condition.Condition[models.Employee]) condition.JoinCondition[models.Employee] {
@@ -13,24 +12,18 @@ func (employeeConditions employeeConditions) Boss(conditions ...condition.Condit
 }
 
 type employeeConditions struct {
-	ID        condition.Field[models.Employee, model.UUID]
-	CreatedAt condition.Field[models.Employee, time.Time]
-	UpdatedAt condition.Field[models.Employee, time.Time]
-	DeletedAt condition.Field[models.Employee, time.Time]
-	Name      condition.StringField[models.Employee]
-	BossID    condition.NullableField[models.Employee, model.UUID]
+	ID     condition.Field[models.Employee, model.UUID]
+	Name   condition.StringField[models.Employee]
+	BossID condition.NullableField[models.Employee, model.UUID]
 }
 
 var Employee = employeeConditions{
-	BossID:    condition.NewNullableField[models.Employee, model.UUID]("BossID", "", ""),
-	CreatedAt: condition.NewField[models.Employee, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Employee, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.Employee, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.Employee]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.Employee, time.Time]("UpdatedAt", "", ""),
+	BossID: condition.NewNullableField[models.Employee, model.UUID]("BossID", "", ""),
+	ID:     condition.NewField[models.Employee, model.UUID]("ID", "", ""),
+	Name:   condition.NewStringField[models.Employee]("Name", "", ""),
 }
 
 // Preload allows preloading the Employee when doing a query
 func (employeeConditions employeeConditions) preload() condition.Condition[models.Employee] {
-	return condition.NewPreloadCondition[models.Employee](employeeConditions.ID, employeeConditions.CreatedAt, employeeConditions.UpdatedAt, employeeConditions.DeletedAt, employeeConditions.Name, employeeConditions.BossID)
+	return condition.NewPreloadCondition[models.Employee](employeeConditions.ID, employeeConditions.Name, employeeConditions.BossID)
 }

@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
-	"time"
 )
 
 func (cityConditions cityConditions) Country(conditions ...condition.Condition[models.Country]) condition.JoinCondition[models.City] {
@@ -14,23 +13,17 @@ func (cityConditions cityConditions) Country(conditions ...condition.Condition[m
 
 type cityConditions struct {
 	ID        condition.Field[models.City, model.UUID]
-	CreatedAt condition.Field[models.City, time.Time]
-	UpdatedAt condition.Field[models.City, time.Time]
-	DeletedAt condition.Field[models.City, time.Time]
 	Name      condition.StringField[models.City]
 	CountryID condition.UpdatableField[models.City, model.UUID]
 }
 
 var City = cityConditions{
 	CountryID: condition.NewUpdatableField[models.City, model.UUID]("CountryID", "", ""),
-	CreatedAt: condition.NewField[models.City, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.City, time.Time]("DeletedAt", "", ""),
 	ID:        condition.NewField[models.City, model.UUID]("ID", "", ""),
 	Name:      condition.NewStringField[models.City]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.City, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the City when doing a query
 func (cityConditions cityConditions) preload() condition.Condition[models.City] {
-	return condition.NewPreloadCondition[models.City](cityConditions.ID, cityConditions.CreatedAt, cityConditions.UpdatedAt, cityConditions.DeletedAt, cityConditions.Name, cityConditions.CountryID)
+	return condition.NewPreloadCondition[models.City](cityConditions.ID, cityConditions.Name, cityConditions.CountryID)
 }

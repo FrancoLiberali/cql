@@ -5,26 +5,19 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
-	"time"
 )
 
 type personConditions struct {
-	ID        condition.Field[models.Person, model.UUID]
-	CreatedAt condition.Field[models.Person, time.Time]
-	UpdatedAt condition.Field[models.Person, time.Time]
-	DeletedAt condition.Field[models.Person, time.Time]
-	Name      condition.StringField[models.Person]
+	ID   condition.Field[models.Person, model.UUID]
+	Name condition.StringField[models.Person]
 }
 
 var Person = personConditions{
-	CreatedAt: condition.NewField[models.Person, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Person, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.Person, model.UUID]("ID", "", ""),
-	Name:      condition.NewStringField[models.Person]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.Person, time.Time]("UpdatedAt", "", ""),
+	ID:   condition.NewField[models.Person, model.UUID]("ID", "", ""),
+	Name: condition.NewStringField[models.Person]("Name", "", ""),
 }
 
 // Preload allows preloading the Person when doing a query
 func (personConditions personConditions) preload() condition.Condition[models.Person] {
-	return condition.NewPreloadCondition[models.Person](personConditions.ID, personConditions.CreatedAt, personConditions.UpdatedAt, personConditions.DeletedAt, personConditions.Name)
+	return condition.NewPreloadCondition[models.Person](personConditions.ID, personConditions.Name)
 }

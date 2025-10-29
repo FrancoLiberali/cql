@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
-	"time"
 )
 
 func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Condition[models.Person]) condition.JoinCondition[models.Bicycle] {
@@ -14,23 +13,17 @@ func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Conditi
 
 type bicycleConditions struct {
 	ID        condition.Field[models.Bicycle, model.UUID]
-	CreatedAt condition.Field[models.Bicycle, time.Time]
-	UpdatedAt condition.Field[models.Bicycle, time.Time]
-	DeletedAt condition.Field[models.Bicycle, time.Time]
 	Name      condition.StringField[models.Bicycle]
 	OwnerName condition.StringField[models.Bicycle]
 }
 
 var Bicycle = bicycleConditions{
-	CreatedAt: condition.NewField[models.Bicycle, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Bicycle, time.Time]("DeletedAt", "", ""),
 	ID:        condition.NewField[models.Bicycle, model.UUID]("ID", "", ""),
 	Name:      condition.NewStringField[models.Bicycle]("Name", "", ""),
 	OwnerName: condition.NewStringField[models.Bicycle]("OwnerName", "", ""),
-	UpdatedAt: condition.NewField[models.Bicycle, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Bicycle when doing a query
 func (bicycleConditions bicycleConditions) preload() condition.Condition[models.Bicycle] {
-	return condition.NewPreloadCondition[models.Bicycle](bicycleConditions.ID, bicycleConditions.CreatedAt, bicycleConditions.UpdatedAt, bicycleConditions.DeletedAt, bicycleConditions.Name, bicycleConditions.OwnerName)
+	return condition.NewPreloadCondition[models.Bicycle](bicycleConditions.ID, bicycleConditions.Name, bicycleConditions.OwnerName)
 }

@@ -8,6 +8,8 @@ import (
 
 type Delete[T model.Model] struct {
 	OrderLimitReturning[T]
+
+	secondaryQuery *Query[T]
 }
 
 // Ascending specify an ascending order when updating models
@@ -53,7 +55,9 @@ func (deleteS *Delete[T]) Exec() (int64, error) {
 		return 0, deleteS.query.err
 	}
 
-	return deleteS.query.cqlQuery.Delete()
+	return deleteS.query.cqlQuery.Delete(
+		deleteS.secondaryQuery.cqlQuery,
+	)
 }
 
 // Create a Delete to which the conditions are applied inside transaction tx
@@ -64,15 +68,18 @@ func NewDelete[T model.Model](tx *gorm.DB, conditions []Condition[T]) *Delete[T]
 		err = methodError(ErrEmptyConditions, "Delete")
 	}
 
-	query := NewQuery(tx, conditions...)
+	primaryQuery := NewQuery[T](tx)
 	if err != nil {
-		query.err = err
+		primaryQuery.err = err
 	}
+
+	secondaryQuery := NewQuery(tx, conditions...)
 
 	return &Delete[T]{
 		OrderLimitReturning: OrderLimitReturning[T]{
-			query:         query,
+			query:         primaryQuery,
 			orderByCalled: false,
 		},
+		secondaryQuery: secondaryQuery,
 	}
 }

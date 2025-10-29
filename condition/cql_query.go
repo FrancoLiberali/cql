@@ -16,11 +16,18 @@ import (
 	"github.com/FrancoLiberali/cql/sql"
 )
 
+var softDeleteTypes = []reflect.Type{
+	reflect.TypeOf(gorm.DeletedAt{}),
+	reflect.TypeOf(model.UIntModelWithTimestamps{}),
+	reflect.TypeOf(model.UUIDModelWithTimestamps{}),
+}
+
 type CQLQuery struct {
 	gormDB          *gorm.DB
 	concernedModels map[reflect.Type][]Table
 	initialTable    Table
 	selectClause    clause.Expr
+	initialModel    model.Model
 }
 
 // Order specify order when retrieving models from database.
@@ -257,6 +264,7 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *CQ
 		gormDB:          db.Model(&initialModel).Select(initialTable.Name + ".*"),
 		concernedModels: map[reflect.Type][]Table{},
 		initialTable:    initialTable,
+		initialModel:    initialModel,
 	}
 
 	query.AddConcernedModel(initialModel, initialTable)
@@ -451,29 +459,65 @@ func splitJoin(joinStatement string) (string, string, string) {
 	return tableSplit[0], tableSplit[1], onStatement
 }
 
-func (query *CQLQuery) Delete() (int64, error) {
-	switch query.Dialector() {
-	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
-		query.joinsToFrom()
-	case sql.MySQL:
-		// if at least one join is done,
-		// allow UPDATE without WHERE as the condition can be the join
-		if len(query.gormDB.Statement.Joins) > 0 {
-			query.gormDB.AllowGlobalUpdate = true
+func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
+	isSoftDelete := false
+
+	modelType := reflect.TypeOf(query.initialModel)
+
+	for i := range modelType.NumField() {
+		field := modelType.Field(i)
+		if pie.Contains(softDeleteTypes, field.Type) {
+			isSoftDelete = true
+			break
+		}
+	}
+
+	if isSoftDelete {
+		query.gormDB.Statement.Clauses = cqlSubQuery.gormDB.Statement.Clauses
+
+		switch query.Dialector() {
+		case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
+			query.joinsToFrom()
+		case sql.MySQL:
+			// if at least one join is done,
+			// allow UPDATE without WHERE as the condition can be the join
+			if len(query.gormDB.Statement.Joins) > 0 {
+				query.gormDB.AllowGlobalUpdate = true
+			}
+
+			query.gormDB.Clauses(clause.Set{clause.Assignment{
+				Column: clause.Column{
+					Name:  "deleted_at",
+					Table: query.initialTable.SQLName(),
+				},
+				Value: time.Now(),
+			}})
 		}
 
-		query.gormDB.Clauses(clause.Set{clause.Assignment{
-			Column: clause.Column{
-				Name:  "deleted_at",
-				Table: query.initialTable.SQLName(),
-			},
-			Value: time.Now(),
-		}})
+		query.gormDB.Statement.Selects = []string{}
+
+		deleteTx := query.gormDB.Delete(query.gormDB.Statement.Model)
+
+		return deleteTx.RowsAffected, deleteTx.Error
 	}
 
 	query.gormDB.Statement.Selects = []string{}
 
-	deleteTx := query.gormDB.Delete(query.gormDB.Statement.Model)
+	var deleteTx *gorm.DB
+
+	if len(cqlSubQuery.gormDB.Statement.Joins) > 0 {
+		// there are joins, we must use delete from subquery as gorm does not support delete join
+		deleteTx = query.gormDB.
+			Where(
+				"id IN (?)",
+				cqlSubQuery.gormDB.Select(cqlSubQuery.initialTable.Name+".id"),
+			).
+			Delete(query.gormDB.Statement.Model)
+	} else {
+		query.gormDB.Statement.Clauses = cqlSubQuery.gormDB.Statement.Clauses
+
+		deleteTx = query.gormDB.Delete(query.gormDB.Statement.Model)
+	}
 
 	return deleteTx.RowsAffected, deleteTx.Error
 }

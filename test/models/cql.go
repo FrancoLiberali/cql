@@ -18,6 +18,9 @@ func (m City) GetCountry() (*Country, error) {
 func (m Company) GetSellers() ([]Seller, error) {
 	return preload.VerifyCollectionLoaded[Seller](m.Sellers)
 }
+func (m CompanyNoTimestamps) GetSellers() ([]SellerNoTimestamps, error) {
+	return preload.VerifyCollectionLoaded[SellerNoTimestamps](m.Sellers)
+}
 func (m Country) GetCapital() (*City, error) {
 	return preload.VerifyStructLoaded[City](&m.Capital)
 }
@@ -33,15 +36,30 @@ func (m Parent2) GetParentParent() (*ParentParent, error) {
 func (m Phone) GetBrand() (*Brand, error) {
 	return preload.VerifyStructLoaded[Brand](&m.Brand)
 }
+func (m PhoneNoTimestamps) GetBrand() (*Brand, error) {
+	return preload.VerifyStructLoaded[Brand](&m.Brand)
+}
 func (m Sale) GetProduct() (*Product, error) {
 	return preload.VerifyStructLoaded[Product](&m.Product)
 }
 func (m Sale) GetSeller() (*Seller, error) {
 	return preload.VerifyPointerLoaded[Seller](m.SellerID, m.Seller)
 }
+func (m SaleNoTimestamps) GetProduct() (*ProductNoTimestamps, error) {
+	return preload.VerifyStructLoaded[ProductNoTimestamps](&m.Product)
+}
+func (m SaleNoTimestamps) GetSeller() (*SellerNoTimestamps, error) {
+	return preload.VerifyPointerLoaded[SellerNoTimestamps](m.SellerID, m.Seller)
+}
 func (m Seller) GetCompany() (*Company, error) {
 	return preload.VerifyPointerLoaded[Company](m.CompanyID, m.Company)
 }
 func (m Seller) GetUniversity() (*University, error) {
+	return preload.VerifyPointerLoaded[University](m.UniversityID, m.University)
+}
+func (m SellerNoTimestamps) GetCompanyNoTimestamps() (*CompanyNoTimestamps, error) {
+	return preload.VerifyPointerLoaded[CompanyNoTimestamps](m.CompanyNoTimestampsID, m.CompanyNoTimestamps)
+}
+func (m SellerNoTimestamps) GetUniversity() (*University, error) {
 	return preload.VerifyPointerLoaded[University](m.UniversityID, m.University)
 }

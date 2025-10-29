@@ -5,26 +5,19 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
-	"time"
 )
 
 type brandConditions struct {
-	ID        condition.Field[models.Brand, model.UIntID]
-	CreatedAt condition.Field[models.Brand, time.Time]
-	UpdatedAt condition.Field[models.Brand, time.Time]
-	DeletedAt condition.Field[models.Brand, time.Time]
-	Name      condition.StringField[models.Brand]
+	ID   condition.Field[models.Brand, model.UIntID]
+	Name condition.StringField[models.Brand]
 }
 
 var Brand = brandConditions{
-	CreatedAt: condition.NewField[models.Brand, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Brand, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[models.Brand, model.UIntID]("ID", "", ""),
-	Name:      condition.NewStringField[models.Brand]("Name", "", ""),
-	UpdatedAt: condition.NewField[models.Brand, time.Time]("UpdatedAt", "", ""),
+	ID:   condition.NewField[models.Brand, model.UIntID]("ID", "", ""),
+	Name: condition.NewStringField[models.Brand]("Name", "", ""),
 }
 
 // Preload allows preloading the Brand when doing a query
 func (brandConditions brandConditions) preload() condition.Condition[models.Brand] {
-	return condition.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.CreatedAt, brandConditions.UpdatedAt, brandConditions.DeletedAt, brandConditions.Name)
+	return condition.NewPreloadCondition[models.Brand](brandConditions.ID, brandConditions.Name)
 }
