@@ -43,8 +43,19 @@ func (deleteS *Delete[T]) Limit(limit int) *Delete[T] {
 
 // available for: postgres, sqlite, sqlserver
 //
-// warning: in sqlite preloads are not allowed
+// warning: in mysql preloads are not allowed
 func (deleteS *Delete[T]) Returning(dest *[]T) *Delete[T] {
+	if len(deleteS.secondaryQuery.cqlQuery.gormDB.Statement.Selects) > 1 {
+		deleteS.query.addError(
+			methodError(
+				preloadsInReturningNotAllowed(deleteS.secondaryQuery.cqlQuery.Dialector()),
+				"Returning",
+			),
+		)
+
+		return deleteS
+	}
+
 	deleteS.OrderLimitReturning.Returning(dest)
 
 	return deleteS

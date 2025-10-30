@@ -288,7 +288,7 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 //
 // warning: in sqlite, sqlserver preloads are not allowed
 func (query *CQLQuery) Returning(dest any) error {
-	query.gormDB.Model(dest)
+	query.gormDB = query.gormDB.Model(dest)
 
 	switch query.Dialector() {
 	case sql.Postgres: // support RETURNING from any table
@@ -303,13 +303,13 @@ func (query *CQLQuery) Returning(dest any) error {
 			})
 		}
 
-		query.gormDB.Clauses(clause.Returning{Columns: columns})
+		query.gormDB = query.gormDB.Clauses(clause.Returning{Columns: columns})
 	case sql.SQLite, sql.SQLServer: // supports RETURNING only from main table
 		if len(query.gormDB.Statement.Selects) > 1 {
 			return preloadsInReturningNotAllowed(query.Dialector())
 		}
 
-		query.gormDB.Clauses(clause.Returning{})
+		query.gormDB = query.gormDB.Clauses(clause.Returning{})
 	case sql.MySQL: // RETURNING not supported
 		return ErrUnsupportedByDatabase
 	}
@@ -501,9 +501,10 @@ func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
 		return deleteTx.RowsAffected, deleteTx.Error
 	}
 
-	query.gormDB.Statement.Selects = []string{}
-
 	var deleteTx *gorm.DB
+
+	// to allow preload of collections
+	query.gormDB.Statement.Preloads = cqlSubQuery.gormDB.Statement.Preloads
 
 	if len(cqlSubQuery.gormDB.Statement.Joins) > 0 {
 		// there are joins, we must use delete from subquery as gorm does not support delete join
@@ -514,7 +515,7 @@ func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
 			).
 			Delete(query.gormDB.Statement.Model)
 	} else {
-		query.gormDB.Statement.Clauses = cqlSubQuery.gormDB.Statement.Clauses
+		query.gormDB.Statement.Clauses["WHERE"] = cqlSubQuery.gormDB.Statement.Clauses["WHERE"]
 
 		deleteTx = query.gormDB.Delete(query.gormDB.Statement.Model)
 	}

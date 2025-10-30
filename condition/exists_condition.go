@@ -52,12 +52,12 @@ func (condition existsCondition[T1, T2]) getSQL(query *CQLQuery, t1Table Table) 
 	}
 
 	deletedAtSQL := ""
-	if !connectionCondition.affectsDeletedAt() {
-		deletedAtSQL = fmt.Sprintf(
-			"AND %s.deleted_at IS NULL",
-			t2Table.Alias,
-		)
-	}
+	// if !connectionCondition.affectsDeletedAt() {
+	// 	deletedAtSQL = fmt.Sprintf(
+	// 		"AND %s.deleted_at IS NULL",
+	// 		t2Table.Alias,
+	// 	)
+	// }
 
 	return fmt.Sprintf(
 		"EXISTS (SELECT(1) FROM %s %s WHERE %s AND %s %s)",

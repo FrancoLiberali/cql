@@ -72,7 +72,7 @@ func (ts *testSuite) createSeller(name string, company *models.Company) *models.
 	})
 }
 
-func (ts *testSuite) createSellerNoTimestamps(name string, company *models.Company) *models.SellerNoTimestamps {
+func (ts *testSuite) createSellerNoTimestamps(name string, company *models.CompanyNoTimestamps) *models.SellerNoTimestamps {
 	var companyID *model.UUID
 	if company != nil {
 		companyID = &company.ID
@@ -86,6 +86,12 @@ func (ts *testSuite) createSellerNoTimestamps(name string, company *models.Compa
 
 func (ts *testSuite) createCompany(name string) *models.Company {
 	return create(ts, &models.Company{
+		Name: name,
+	})
+}
+
+func (ts *testSuite) createCompanyNoTimestamps(name string) *models.CompanyNoTimestamps {
+	return create(ts, &models.CompanyNoTimestamps{
 		Name: name,
 	})
 }

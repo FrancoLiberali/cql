@@ -3,8 +3,6 @@ package test
 import (
 	"context"
 
-	"gotest.tools/assert"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -115,23 +113,6 @@ func (ts *DeleteIntTestSuite) TestDeleteWithJoinInConditions() {
 	ts.Require().NoError(err)
 	ts.Equal(int64(1), deleted)
 
-	// joins delete no funciona, no veo nada en gorm de tests de que esto funcione
-	// ts.db.GormDB.
-	// 	Unscoped().
-	// 	Joins("JOIN brands ON brands.id = phone_no_timestamps.brand_id"). //AND (Brand.name = ?) AND Brand.deleted_at IS NULL").
-	// 	// Where("1=1").
-	// 	Delete(&models.PhoneNoTimestamps{})
-
-	// ts.db.GormDB.
-	// 	Where(
-	// 		"id IN (?)",
-	// 		ts.db.GormDB.Model(&models.PhoneNoTimestamps{}).
-	// 			Joins("JOIN brands ON brands.id = phone_no_timestamps.brand_id").
-	// 			// Where("roles.name = ?", "admin").
-	// 			Select("phone_no_timestamps.id"),
-	// 	).
-	// 	Delete(&models.PhoneNoTimestamps{})
-
 	phones, err := cql.Query[models.PhoneNoTimestamps](
 		context.Background(),
 		ts.db,
@@ -179,8 +160,8 @@ func (ts *DeleteIntTestSuite) TestDeleteWithMultilevelJoinInConditions() {
 	product1 := ts.createProductNoTimestamps("", 0, 0.0, false, nil)
 	product2 := ts.createProductNoTimestamps("", 0, 0.0, false, nil)
 
-	company1 := ts.createCompany("ditrit")
-	company2 := ts.createCompany("orness")
+	company1 := ts.createCompanyNoTimestamps("ditrit")
+	company2 := ts.createCompanyNoTimestamps("orness")
 
 	seller1 := ts.createSellerNoTimestamps("franco", company1)
 	seller2 := ts.createSellerNoTimestamps("agustin", company2)
@@ -248,90 +229,31 @@ func (ts *DeleteIntTestSuite) TestDeleteReturning() {
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
-	switch getDBDialector() {
-	// delete returning with preload only supported for postgres
-	case sql.SQLite, sql.SQLServer:
-		salesReturned := []models.SaleNoTimestamps{}
-		_, err := cql.Delete[models.SaleNoTimestamps](
-			context.Background(),
-			ts.db,
-			conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
-			conditions.SaleNoTimestamps.Product().Preload(),
-		).Returning(&salesReturned).Exec()
-		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
-		ts.ErrorContains(err, "preloads in returning are not allowed for database")
-		ts.ErrorContains(err, "method: Returning")
-	case sql.Postgres:
-		product1 := ts.createProductNoTimestamps("a_string", 1, 0.0, false, nil)
-		product2 := ts.createProductNoTimestamps("", 2, 0.0, false, nil)
-
-		sale1 := ts.createSaleNoTimestamps(0, product1, nil)
-		ts.createSaleNoTimestamps(1, product2, nil)
-
-		salesReturned := []models.SaleNoTimestamps{}
-		deleted, err := cql.Delete[models.SaleNoTimestamps](
-			context.Background(),
-			ts.db,
-			conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
-			conditions.SaleNoTimestamps.Product().Preload(),
-		).Returning(&salesReturned).Exec()
-		ts.Require().NoError(err)
-		ts.Equal(int64(1), deleted)
-
-		ts.Len(salesReturned, 1)
-		saleReturned := salesReturned[0]
-		ts.Equal(sale1.ID, saleReturned.ID)
-		productPreloaded, err := saleReturned.GetProduct()
-		ts.Require().NoError(err)
-		assert.DeepEqual(ts.T(), product1, productPreloaded)
-	}
-}
-
-func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadAtSecondLevel() {
-	// delete returning with preloads only supported for postgres
-	if getDBDialector() != sql.Postgres {
-		return
-	}
-
-	product1 := ts.createProductNoTimestamps("a_string", 1, 0.0, false, nil)
-	product2 := ts.createProductNoTimestamps("", 2, 0.0, false, nil)
-
-	company := ts.createCompany("ditrit")
-
-	withCompany := ts.createSellerNoTimestamps("with", company)
-	withoutCompany := ts.createSellerNoTimestamps("without", nil)
-
-	sale1 := ts.createSaleNoTimestamps(0, product1, withCompany)
-	ts.createSaleNoTimestamps(1, product2, withoutCompany)
-
 	salesReturned := []models.SaleNoTimestamps{}
-	deleted, err := cql.Delete[models.SaleNoTimestamps](
+	_, err := cql.Delete[models.SaleNoTimestamps](
 		context.Background(),
 		ts.db,
 		conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
-		conditions.SaleNoTimestamps.Seller(
-			conditions.SellerNoTimestamps.CompanyNoTimestamps().Preload(),
-		),
+		conditions.SaleNoTimestamps.Product().Preload(),
 	).Returning(&salesReturned).Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), deleted)
-
-	ts.Len(salesReturned, 1)
-	saleReturned := salesReturned[0]
-	ts.Equal(sale1.ID, saleReturned.ID)
-	sellerPreloaded, err := saleReturned.GetSeller()
-	ts.Require().NoError(err)
-	assert.DeepEqual(ts.T(), withCompany, sellerPreloaded)
-	companyPreloaded, err := sellerPreloaded.GetCompanyNoTimestamps()
-	ts.Require().NoError(err)
-	assert.DeepEqual(ts.T(), company, companyPreloaded)
+	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+	ts.ErrorContains(err, "preloads in returning are not allowed for database")
+	ts.ErrorContains(err, "method: Returning")
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
 	switch getDBDialector() {
+	case sql.MySQL:
+		_, err := cql.Delete[models.PhoneNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.PhoneNoTimestamps.Name.Is().Eq(cql.String("asd")),
+		).Returning(nil).Exec()
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: Returning")
 	// delete returning only supported for postgres, sqlite, sqlserver
 	case sql.Postgres, sql.SQLite, sql.SQLServer:
-		company := ts.createCompany("ditrit")
+		company := ts.createCompanyNoTimestamps("ditrit")
 		seller1 := ts.createSellerNoTimestamps("1", company)
 		seller2 := ts.createSellerNoTimestamps("2", company)
 
