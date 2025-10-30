@@ -2,6 +2,7 @@ package condition
 
 import (
 	"fmt"
+	"maps"
 	"reflect"
 	"strings"
 	"sync"
@@ -473,7 +474,11 @@ func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
 	}
 
 	if isSoftDelete {
-		query.gormDB.Statement.Clauses = cqlSubQuery.gormDB.Statement.Clauses
+		// TODO si el if soft delete lo tengo de antes lo puedo hacer todo directo sobre el primary query
+		maps.Copy(query.gormDB.Statement.Clauses, cqlSubQuery.gormDB.Statement.Clauses)
+		query.gormDB.Statement.Joins = cqlSubQuery.gormDB.Statement.Joins
+		// to allow preload of collections
+		query.gormDB.Statement.Preloads = cqlSubQuery.gormDB.Statement.Preloads
 
 		switch query.Dialector() {
 		case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
