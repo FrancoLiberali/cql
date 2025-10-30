@@ -34,6 +34,7 @@ func (ts *testSuite) createProduct(stringV string, intV int, floatV float64, boo
 	})
 }
 
+//nolint:unparam // same params as createProduct
 func (ts *testSuite) createProductNoTimestamps(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.ProductNoTimestamps {
 	return create(ts, &models.ProductNoTimestamps{
 		String:     stringV,
@@ -52,6 +53,7 @@ func (ts *testSuite) createSale(code int, product *models.Product, seller *model
 	})
 }
 
+//nolint:unparam // same params as createSale
 func (ts *testSuite) createSaleNoTimestamps(code int, product *models.ProductNoTimestamps, seller *models.SellerNoTimestamps) *models.SaleNoTimestamps {
 	return create(ts, &models.SaleNoTimestamps{
 		Code:    code,
@@ -130,6 +132,7 @@ func (ts *testSuite) createPhone(name string, brand models.Brand) *models.Phone 
 	})
 }
 
+//nolint:unparam // same params as createPhone
 func (ts *testSuite) createPhoneNoTimestamps(name string, brand models.Brand) *models.PhoneNoTimestamps {
 	return create(ts, &models.PhoneNoTimestamps{
 		Name:  name,
