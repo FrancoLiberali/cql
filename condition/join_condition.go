@@ -140,8 +140,10 @@ func (condition joinConditionImpl[T1, T2]) addJoin(query *CQLQuery, t1Table, t2T
 		t2Table,
 	)
 
+	t2Model := *new(T2)
+
 	query.AddConcernedModel(
-		*new(T2),
+		t2Model,
 		t2Table,
 	)
 
@@ -157,12 +159,13 @@ func (condition joinConditionImpl[T1, T2]) addJoin(query *CQLQuery, t1Table, t2T
 		joinQuery += clause.AndWithSpace + onQuery
 	}
 
-	// if !connectionCondition.affectsDeletedAt() {
-	// 	joinQuery += fmt.Sprintf(
-	// 		clause.AndWithSpace+"%s.deleted_at IS NULL",
-	// 		t2Table.Alias,
-	// 	)
-	// }
+	if t2Model.SoftDeleteColumnName() != "" && !connectionCondition.affectsDeletedAt() {
+		joinQuery += fmt.Sprintf(
+			clause.AndWithSpace+"%s.%s IS NULL",
+			t2Table.Alias,
+			t2Model.SoftDeleteColumnName(),
+		)
+	}
 
 	// add the join to the query
 	query.Joins(

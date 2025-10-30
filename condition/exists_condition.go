@@ -41,7 +41,9 @@ func (condition existsCondition[T1, T2]) applyTo(query *CQLQuery, table Table) e
 func (condition existsCondition[T1, T2]) getSQL(query *CQLQuery, t1Table Table) (string, []any, error) {
 	connectionCondition := And(condition.Conditions...)
 
-	t2Table, err := t1Table.DeliverTable(query, *new(T2), condition.RelationField)
+	t2Model := *new(T2)
+
+	t2Table, err := t1Table.DeliverTable(query, t2Model, condition.RelationField)
 	if err != nil {
 		return "", nil, err
 	}
@@ -52,12 +54,13 @@ func (condition existsCondition[T1, T2]) getSQL(query *CQLQuery, t1Table Table) 
 	}
 
 	deletedAtSQL := ""
-	// if !connectionCondition.affectsDeletedAt() {
-	// 	deletedAtSQL = fmt.Sprintf(
-	// 		"AND %s.deleted_at IS NULL",
-	// 		t2Table.Alias,
-	// 	)
-	// }
+	if t2Model.SoftDeleteColumnName() != "" && !connectionCondition.affectsDeletedAt() {
+		deletedAtSQL = fmt.Sprintf(
+			"AND %s.%s IS NULL",
+			t2Table.Alias,
+			t2Model.SoftDeleteColumnName(),
+		)
+	}
 
 	return fmt.Sprintf(
 		"EXISTS (SELECT(1) FROM %s %s WHERE %s AND %s %s)",
