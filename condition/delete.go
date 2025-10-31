@@ -45,7 +45,10 @@ func (deleteS *Delete[T]) Limit(limit int) *Delete[T] {
 //
 // warning: in mysql preloads are not allowed
 func (deleteS *Delete[T]) Returning(dest *[]T) *Delete[T] {
-	if len(deleteS.secondaryQuery.cqlQuery.gormDB.Statement.Selects) > 1 {
+	gormDB := deleteS.secondaryQuery.cqlQuery.gormDB
+
+	if len(gormDB.Statement.Selects) > 1 ||
+		len(gormDB.Statement.Preloads) > 0 {
 		deleteS.query.addError(
 			methodError(
 				preloadsInReturningNotAllowed(deleteS.secondaryQuery.cqlQuery.Dialector()),

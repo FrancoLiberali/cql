@@ -3,8 +3,6 @@ package test
 import (
 	"context"
 
-	"gotest.tools/assert"
-
 	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
@@ -231,110 +229,28 @@ func (ts *SoftDeleteIntTestSuite) TestSoftDeleteReturning() {
 }
 
 func (ts *SoftDeleteIntTestSuite) TestSoftDeleteReturningWithPreload() {
-	switch getDBDialector() {
-	// delete returning with preload only supported for postgres
-	case sql.SQLite, sql.SQLServer, sql.MySQL:
-		salesReturned := []models.Sale{}
-		_, err := cql.Delete[models.Sale](
-			context.Background(),
-			ts.db,
-			conditions.Sale.Code.Is().Eq(cql.Int(0)),
-			conditions.Sale.Product().Preload(),
-		).Returning(&salesReturned).Exec()
-		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
-		ts.ErrorContains(err, "preloads in returning are not allowed for database")
-		ts.ErrorContains(err, "method: Returning")
-	case sql.Postgres:
-		product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
-		product2 := ts.createProduct("", 2, 0.0, false, nil)
-
-		sale1 := ts.createSale(0, product1, nil)
-		ts.createSale(1, product2, nil)
-
-		salesReturned := []models.Sale{}
-		deleted, err := cql.Delete[models.Sale](
-			context.Background(),
-			ts.db,
-			conditions.Sale.Code.Is().Eq(cql.Int(0)),
-			conditions.Sale.Product().Preload(),
-		).Returning(&salesReturned).Exec()
-		ts.Require().NoError(err)
-		ts.Equal(int64(1), deleted)
-
-		ts.Len(salesReturned, 1)
-		saleReturned := salesReturned[0]
-		ts.Equal(sale1.ID, saleReturned.ID)
-		productPreloaded, err := saleReturned.GetProduct()
-		ts.Require().NoError(err)
-		assert.DeepEqual(ts.T(), product1, productPreloaded)
-	}
-}
-
-func (ts *SoftDeleteIntTestSuite) TestSoftDeleteReturningWithPreloadAtSecondLevel() {
-	// delete returning with preloads only supported for postgres
-	if getDBDialector() != sql.Postgres {
-		return
-	}
-
-	product1 := ts.createProduct("a_string", 1, 0.0, false, nil)
-	product2 := ts.createProduct("", 2, 0.0, false, nil)
-
-	company := ts.createCompany("ditrit")
-
-	withCompany := ts.createSeller("with", company)
-	withoutCompany := ts.createSeller("without", nil)
-
-	sale1 := ts.createSale(0, product1, withCompany)
-	ts.createSale(1, product2, withoutCompany)
-
 	salesReturned := []models.Sale{}
-	deleted, err := cql.Delete[models.Sale](
+	_, err := cql.Delete[models.Sale](
 		context.Background(),
 		ts.db,
 		conditions.Sale.Code.Is().Eq(cql.Int(0)),
-		conditions.Sale.Seller(
-			conditions.Seller.Company().Preload(),
-		),
+		conditions.Sale.Product().Preload(),
 	).Returning(&salesReturned).Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), deleted)
-
-	ts.Len(salesReturned, 1)
-	saleReturned := salesReturned[0]
-	ts.Equal(sale1.ID, saleReturned.ID)
-	sellerPreloaded, err := saleReturned.GetSeller()
-	ts.Require().NoError(err)
-	assert.DeepEqual(ts.T(), withCompany, sellerPreloaded)
-	companyPreloaded, err := sellerPreloaded.GetCompany()
-	ts.Require().NoError(err)
-	assert.DeepEqual(ts.T(), company, companyPreloaded)
+	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+	ts.ErrorContains(err, "preloads in returning are not allowed for database")
+	ts.ErrorContains(err, "method: Returning")
 }
 
 func (ts *SoftDeleteIntTestSuite) TestSoftDeleteReturningWithPreloadCollection() {
-	switch getDBDialector() {
-	// delete returning only supported for postgres, sqlite, sqlserver
-	case sql.Postgres, sql.SQLite, sql.SQLServer:
-		company := ts.createCompany("ditrit")
-		seller1 := ts.createSeller("1", company)
-		seller2 := ts.createSeller("2", company)
-
-		companiesReturned := []models.Company{}
-		deleted, err := cql.Delete[models.Company](
-			context.Background(),
-			ts.db,
-			conditions.Company.Name.Is().Eq(cql.String("ditrit")),
-			conditions.Company.Sellers.Preload(),
-		).Returning(&companiesReturned).Exec()
-		ts.Require().NoError(err)
-		ts.Equal(int64(1), deleted)
-
-		ts.Len(companiesReturned, 1)
-		companyReturned := companiesReturned[0]
-		ts.Equal(company.ID, companyReturned.ID)
-		sellersPreloaded, err := companyReturned.GetSellers()
-		ts.Require().NoError(err)
-		EqualList(&ts.Suite, []models.Seller{*seller1, *seller2}, sellersPreloaded)
-	}
+	companiesReturned := []models.Company{}
+	_, err := cql.Delete[models.Company](
+		context.Background(),
+		ts.db,
+		conditions.Company.Name.Is().Eq(cql.String("ditrit")),
+		conditions.Company.Sellers.Preload(),
+	).Returning(&companiesReturned).Exec()
+	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+	ts.ErrorContains(err, "method: Returning")
 }
 
 func (ts *SoftDeleteIntTestSuite) TestSoftDeleteOrderByLimit() {

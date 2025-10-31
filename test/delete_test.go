@@ -242,38 +242,15 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
-	switch getDBDialector() {
-	case sql.MySQL:
-		_, err := cql.Delete[models.PhoneNoTimestamps](
-			context.Background(),
-			ts.db,
-			conditions.PhoneNoTimestamps.Name.Is().Eq(cql.String("asd")),
-		).Returning(nil).Exec()
-		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
-		ts.ErrorContains(err, "method: Returning")
-	// delete returning only supported for postgres, sqlite, sqlserver
-	case sql.Postgres, sql.SQLite, sql.SQLServer:
-		company := ts.createCompanyNoTimestamps("ditrit")
-		seller1 := ts.createSellerNoTimestamps("1", company)
-		seller2 := ts.createSellerNoTimestamps("2", company)
-
-		companiesReturned := []models.CompanyNoTimestamps{}
-		deleted, err := cql.Delete[models.CompanyNoTimestamps](
-			context.Background(),
-			ts.db,
-			conditions.CompanyNoTimestamps.Name.Is().Eq(cql.String("ditrit")),
-			conditions.CompanyNoTimestamps.Sellers.Preload(),
-		).Returning(&companiesReturned).Exec()
-		ts.Require().NoError(err)
-		ts.Equal(int64(1), deleted)
-
-		ts.Len(companiesReturned, 1)
-		companyReturned := companiesReturned[0]
-		ts.Equal(company.ID, companyReturned.ID)
-		sellersPreloaded, err := companyReturned.GetSellers()
-		ts.Require().NoError(err)
-		EqualList(&ts.Suite, []models.SellerNoTimestamps{*seller1, *seller2}, sellersPreloaded)
-	}
+	companiesReturned := []models.CompanyNoTimestamps{}
+	_, err := cql.Delete[models.CompanyNoTimestamps](
+		context.Background(),
+		ts.db,
+		conditions.CompanyNoTimestamps.Name.Is().Eq(cql.String("ditrit")),
+		conditions.CompanyNoTimestamps.Sellers.Preload(),
+	).Returning(&companiesReturned).Exec()
+	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+	ts.ErrorContains(err, "method: Returning")
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteOrderByLimit() {
