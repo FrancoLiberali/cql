@@ -370,7 +370,7 @@ We can run this tutorial with `make tutorial_10` and we will obtain the followin
 
     ./tutorial_10.go:20:3:
         cannot use conditions.Country.Name.Is().Eq("Paris")
-        (value of type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
+        (value of interface type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
 
 As you can see, in this tutorial we are trying to put a condition on Country 
 (conditions.Country) to a Query whose main model is City (Query[models.City]). 
