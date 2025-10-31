@@ -465,6 +465,7 @@ func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
 
 	modelType := reflect.TypeOf(query.initialModel)
 
+	// TODO ya no es necesario
 	for i := range modelType.NumField() {
 		field := modelType.Field(i)
 		if pie.Contains(softDeleteTypes, field.Type) {
@@ -507,13 +508,22 @@ func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
 	var deleteTx *gorm.DB
 
 	if len(cqlSubQuery.gormDB.Statement.Joins) > 0 {
-		// there are joins, we must use delete from subquery as gorm does not support delete join
-		deleteTx = query.gormDB.
-			Where(
-				"id IN (?)",
-				cqlSubQuery.gormDB.Select(cqlSubQuery.initialTable.Name+".id"),
-			).
-			Delete(query.gormDB.Statement.Model)
+		switch query.Dialector() {
+		case sql.Postgres, sql.SQLServer, sql.SQLite: // support DELETE SELECT
+			// there are joins, we must use delete from subquery as gorm does not support delete join
+			deleteTx = query.gormDB.
+				Where(
+					"id IN (?)",
+					cqlSubQuery.gormDB.Select(cqlSubQuery.initialTable.Name+".id"),
+				).
+				Delete(query.gormDB.Statement.Model)
+		case sql.MySQL:
+			return 0,
+				methodError(
+					joinsInDeleteNotAllowed(sql.MySQL),
+					"Delete",
+				)
+		}
 	} else {
 		query.gormDB.Statement.Clauses["WHERE"] = cqlSubQuery.gormDB.Statement.Clauses["WHERE"]
 

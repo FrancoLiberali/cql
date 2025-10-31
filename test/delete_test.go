@@ -97,98 +97,143 @@ func (ts *DeleteIntTestSuite) TestDeleteWhenMultipleModelsMatchConditions() {
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteWithJoinInConditions() {
-	brand1 := ts.createBrand("google")
-	brand2 := ts.createBrand("apple")
+	switch getDBDialector() {
+	// delete join only supported for postgres, sqlite, sqlserver
+	case sql.MySQL:
+		_, err := cql.Delete[models.PhoneNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.PhoneNoTimestamps.Brand(
+				conditions.Brand.Name.Is().Eq(cql.String("google")),
+			),
+		).Exec()
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: Delete")
+		ts.ErrorContains(err, "joins in delete statement are not allowed for database")
+	case sql.Postgres, sql.SQLite, sql.SQLServer:
+		brand1 := ts.createBrand("google")
+		brand2 := ts.createBrand("apple")
 
-	ts.createPhoneNoTimestamps("pixel", *brand1)
-	ts.createPhoneNoTimestamps("iphone", *brand2)
+		ts.createPhoneNoTimestamps("pixel", *brand1)
+		ts.createPhoneNoTimestamps("iphone", *brand2)
 
-	deleted, err := cql.Delete[models.PhoneNoTimestamps](
-		context.Background(),
-		ts.db,
-		conditions.PhoneNoTimestamps.Brand(
-			conditions.Brand.Name.Is().Eq(cql.String("google")),
-		),
-	).Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), deleted)
+		deleted, err := cql.Delete[models.PhoneNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.PhoneNoTimestamps.Brand(
+				conditions.Brand.Name.Is().Eq(cql.String("google")),
+			),
+		).Exec()
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), deleted)
 
-	phones, err := cql.Query[models.PhoneNoTimestamps](
-		context.Background(),
-		ts.db,
-		conditions.PhoneNoTimestamps.Name.Is().Eq(cql.String("pixel")),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(phones, 0)
+		phones, err := cql.Query[models.PhoneNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.PhoneNoTimestamps.Name.Is().Eq(cql.String("pixel")),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(phones, 0)
+	}
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteWithJoinDifferentEntitiesInConditions() {
-	product1 := ts.createProductNoTimestamps("", 1, 0.0, false, nil)
-	product2 := ts.createProductNoTimestamps("", 2, 0.0, false, nil)
+	switch getDBDialector() {
+	// delete join only supported for postgres, sqlite, sqlserver
+	case sql.MySQL:
+		_, err := cql.Delete[models.PhoneNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.PhoneNoTimestamps.Brand(
+				conditions.Brand.Name.Is().Eq(cql.String("google")),
+			),
+		).Exec()
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: Delete")
+		ts.ErrorContains(err, "joins in delete statement are not allowed for database")
+	case sql.Postgres, sql.SQLite, sql.SQLServer:
+		product1 := ts.createProductNoTimestamps("", 1, 0.0, false, nil)
+		product2 := ts.createProductNoTimestamps("", 2, 0.0, false, nil)
 
-	seller1 := ts.createSellerNoTimestamps("franco", nil)
-	seller2 := ts.createSellerNoTimestamps("agustin", nil)
+		seller1 := ts.createSellerNoTimestamps("franco", nil)
+		seller2 := ts.createSellerNoTimestamps("agustin", nil)
 
-	ts.createSaleNoTimestamps(0, product1, seller1)
-	ts.createSaleNoTimestamps(1, product2, seller2)
-	ts.createSaleNoTimestamps(2, product1, seller2)
-	ts.createSaleNoTimestamps(3, product2, seller1)
+		ts.createSaleNoTimestamps(0, product1, seller1)
+		ts.createSaleNoTimestamps(1, product2, seller2)
+		ts.createSaleNoTimestamps(2, product1, seller2)
+		ts.createSaleNoTimestamps(3, product2, seller1)
 
-	deleted, err := cql.Delete[models.SaleNoTimestamps](
-		context.Background(),
-		ts.db,
-		conditions.SaleNoTimestamps.Product(
-			conditions.ProductNoTimestamps.Int.Is().Eq(cql.Int(1)),
-		),
-		conditions.SaleNoTimestamps.Seller(
-			conditions.SellerNoTimestamps.Name.Is().Eq(cql.String("franco")),
-		),
-	).Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), deleted)
+		deleted, err := cql.Delete[models.SaleNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.SaleNoTimestamps.Product(
+				conditions.ProductNoTimestamps.Int.Is().Eq(cql.Int(1)),
+			),
+			conditions.SaleNoTimestamps.Seller(
+				conditions.SellerNoTimestamps.Name.Is().Eq(cql.String("franco")),
+			),
+		).Exec()
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), deleted)
 
-	sales, err := cql.Query[models.SaleNoTimestamps](
-		context.Background(),
-		ts.db,
-		conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(sales, 0)
+		sales, err := cql.Query[models.SaleNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(sales, 0)
+	}
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteWithMultilevelJoinInConditions() {
-	product1 := ts.createProductNoTimestamps("", 0, 0.0, false, nil)
-	product2 := ts.createProductNoTimestamps("", 0, 0.0, false, nil)
-
-	company1 := ts.createCompanyNoTimestamps("ditrit")
-	company2 := ts.createCompanyNoTimestamps("orness")
-
-	seller1 := ts.createSellerNoTimestamps("franco", company1)
-	seller2 := ts.createSellerNoTimestamps("agustin", company2)
-
-	ts.createSaleNoTimestamps(0, product1, seller1)
-	ts.createSaleNoTimestamps(1, product2, seller2)
-
-	deleted, err := cql.Delete[models.SaleNoTimestamps](
-		context.Background(),
-		ts.db,
-		conditions.SaleNoTimestamps.Seller(
-			conditions.SellerNoTimestamps.Name.Is().Eq(cql.String("franco")),
-			conditions.SellerNoTimestamps.CompanyNoTimestamps(
-				conditions.CompanyNoTimestamps.Name.Is().Eq(cql.String("ditrit")),
+	switch getDBDialector() {
+	// delete join only supported for postgres, sqlite, sqlserver
+	case sql.MySQL:
+		_, err := cql.Delete[models.PhoneNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.PhoneNoTimestamps.Brand(
+				conditions.Brand.Name.Is().Eq(cql.String("google")),
 			),
-		),
-	).Exec()
-	ts.Require().NoError(err)
-	ts.Equal(int64(1), deleted)
+		).Exec()
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: Delete")
+		ts.ErrorContains(err, "joins in delete statement are not allowed for database")
+	case sql.Postgres, sql.SQLite, sql.SQLServer:
+		product1 := ts.createProductNoTimestamps("", 0, 0.0, false, nil)
+		product2 := ts.createProductNoTimestamps("", 0, 0.0, false, nil)
 
-	sales, err := cql.Query[models.SaleNoTimestamps](
-		context.Background(),
-		ts.db,
-		conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
-	).Find()
-	ts.Require().NoError(err)
-	ts.Len(sales, 0)
+		company1 := ts.createCompanyNoTimestamps("ditrit")
+		company2 := ts.createCompanyNoTimestamps("orness")
+
+		seller1 := ts.createSellerNoTimestamps("franco", company1)
+		seller2 := ts.createSellerNoTimestamps("agustin", company2)
+
+		ts.createSaleNoTimestamps(0, product1, seller1)
+		ts.createSaleNoTimestamps(1, product2, seller2)
+
+		deleted, err := cql.Delete[models.SaleNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.SaleNoTimestamps.Seller(
+				conditions.SellerNoTimestamps.Name.Is().Eq(cql.String("franco")),
+				conditions.SellerNoTimestamps.CompanyNoTimestamps(
+					conditions.CompanyNoTimestamps.Name.Is().Eq(cql.String("ditrit")),
+				),
+			),
+		).Exec()
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), deleted)
+
+		sales, err := cql.Query[models.SaleNoTimestamps](
+			context.Background(),
+			ts.db,
+			conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
+		).Find()
+		ts.Require().NoError(err)
+		ts.Len(sales, 0)
+	}
 }
 
 func (ts *DeleteIntTestSuite) TestDeleteReturning() {
@@ -237,6 +282,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 		conditions.SaleNoTimestamps.Product().Preload(),
 	).Returning(&salesReturned).Exec()
 	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+	// TODO el error deberia ser distinto
 	ts.ErrorContains(err, "preloads in returning are not allowed for database")
 	ts.ErrorContains(err, "method: Returning")
 }

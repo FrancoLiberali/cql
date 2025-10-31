@@ -64,6 +64,13 @@ func preloadsInReturningNotAllowed(dialector sql.Dialector) error {
 	)
 }
 
+func joinsInDeleteNotAllowed(dialector sql.Dialector) error {
+	return fmt.Errorf("%w; joins in delete statement are not allowed for database: %s",
+		ErrUnsupportedByDatabase,
+		dialector,
+	)
+}
+
 func conditionOperatorError[TObject model.Model, TAtribute any](operatorErr error, condition fieldCondition[TObject, TAtribute]) error {
 	return fmt.Errorf(
 		"%w; model: %T, field: %s",
