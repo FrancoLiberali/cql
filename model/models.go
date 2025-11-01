@@ -16,6 +16,7 @@ type ID interface {
 type Model interface {
 	IsLoaded() bool
 	SoftDeleteColumnName() string
+	UpdatedAtColumnName() string
 }
 
 // Base Model for cql with uuid as id and timestamps for creation, edition and deletion (soft-delete)
@@ -32,6 +33,10 @@ func (model UUIDModel) IsLoaded() bool {
 }
 
 func (model UUIDModel) SoftDeleteColumnName() string {
+	return ""
+}
+
+func (model UUIDModel) UpdatedAtColumnName() string {
 	return ""
 }
 
@@ -61,6 +66,10 @@ func (model UUIDModelWithTimestamps) IsLoaded() bool {
 
 func (model UUIDModelWithTimestamps) SoftDeleteColumnName() string {
 	return "deleted_at"
+}
+
+func (model UUIDModelWithTimestamps) UpdatedAtColumnName() string {
+	return "updated_at"
 }
 
 func (model *UUIDModelWithTimestamps) BeforeCreate(_ *gorm.DB) (err error) {
@@ -96,6 +105,10 @@ func (model UIntModel) SoftDeleteColumnName() string {
 	return ""
 }
 
+func (model UIntModel) UpdatedAtColumnName() string {
+	return ""
+}
+
 // Base Model for cql with uint as id and timestamps for creation, edition and deletion (soft-delete)
 //
 // Every model intended to be saved in the database must embed
@@ -114,4 +127,8 @@ func (model UIntModelWithTimestamps) IsLoaded() bool {
 
 func (model UIntModelWithTimestamps) SoftDeleteColumnName() string {
 	return "deleted_at"
+}
+
+func (model UIntModelWithTimestamps) UpdatedAtColumnName() string {
+	return "updated_at"
 }

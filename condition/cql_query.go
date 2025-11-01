@@ -322,6 +322,11 @@ func (query *CQLQuery) cleanSelects() {
 	query.gormDB.Statement.Selects = []string{}
 }
 
+type modelAndTable struct {
+	Model model.Model
+	Table Table
+}
+
 // Find finds all models matching given conditions
 func (query *CQLQuery) Update(sets []ISet) (int64, error) {
 	updateMap := map[string]any{}
@@ -355,7 +360,7 @@ func (query *CQLQuery) Update(sets []ISet) (int64, error) {
 		}
 
 		setClause := clause.Set{}
-		updatedTables := []Table{}
+		updatedTables := []modelAndTable{}
 
 		for _, set := range sets {
 			field := set.getField()
@@ -378,18 +383,26 @@ func (query *CQLQuery) Update(sets []ISet) (int64, error) {
 				Value: updateValue,
 			})
 
-			updatedTables = append(updatedTables, table)
+			updatedTables = append(updatedTables, modelAndTable{
+				Model: set.getModel(),
+				Table: table,
+			})
 		}
 
 		now := time.Now()
-		for _, table := range pie.Unique(updatedTables) {
-			setClause = append(setClause, clause.Assignment{
-				Column: clause.Column{
-					Name:  "updated_at",
-					Table: table.SQLName(),
-				},
-				Value: now,
-			})
+
+		for _, modelAndTable := range pie.Unique(updatedTables) {
+			updatedAtColumn := modelAndTable.Model.UpdatedAtColumnName()
+
+			if updatedAtColumn != "" {
+				setClause = append(setClause, clause.Assignment{
+					Column: clause.Column{
+						Name:  updatedAtColumn,
+						Table: modelAndTable.Table.SQLName(),
+					},
+					Value: now,
+				})
+			}
 		}
 
 		query.gormDB.Clauses(setClause)
