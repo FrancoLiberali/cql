@@ -2,13 +2,11 @@ package condition
 
 import (
 	"fmt"
-	"maps"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
-	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
@@ -28,7 +26,6 @@ type CQLQuery struct {
 	concernedModels map[reflect.Type][]Table
 	initialTable    Table
 	selectClause    clause.Expr
-	initialModel    model.Model
 }
 
 // Order specify order when retrieving models from database.
@@ -265,7 +262,6 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *CQ
 		gormDB:          db.Model(&initialModel).Select(initialTable.Name + ".*"),
 		concernedModels: map[reflect.Type][]Table{},
 		initialTable:    initialTable,
-		initialModel:    initialModel,
 	}
 
 	query.AddConcernedModel(initialModel, initialTable)
@@ -465,51 +461,34 @@ func splitJoin(joinStatement string) (string, string, string) {
 	return tableSplit[0], tableSplit[1], onStatement
 }
 
+func (query *CQLQuery) SoftDelete(softDeleteColumnName string) (int64, error) {
+	switch query.Dialector() {
+	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
+		query.joinsToFrom()
+	case sql.MySQL:
+		// if at least one join is done,
+		// allow UPDATE without WHERE as the condition can be the join
+		if len(query.gormDB.Statement.Joins) > 0 {
+			query.gormDB.AllowGlobalUpdate = true
+		}
+
+		query.gormDB.Clauses(clause.Set{clause.Assignment{
+			Column: clause.Column{
+				Name:  softDeleteColumnName,
+				Table: query.initialTable.SQLName(),
+			},
+			Value: time.Now(),
+		}})
+	}
+
+	query.gormDB.Statement.Selects = []string{}
+
+	deleteTx := query.gormDB.Delete(query.gormDB.Statement.Model)
+
+	return deleteTx.RowsAffected, deleteTx.Error
+}
+
 func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
-	isSoftDelete := false
-
-	modelType := reflect.TypeOf(query.initialModel)
-
-	// TODO ya no es necesario
-	for i := range modelType.NumField() {
-		field := modelType.Field(i)
-		if pie.Contains(softDeleteTypes, field.Type) {
-			isSoftDelete = true
-			break
-		}
-	}
-
-	if isSoftDelete {
-		// TODO si el if soft delete lo tengo de antes lo puedo hacer todo directo sobre el primary query
-		maps.Copy(query.gormDB.Statement.Clauses, cqlSubQuery.gormDB.Statement.Clauses)
-		query.gormDB.Statement.Joins = cqlSubQuery.gormDB.Statement.Joins
-
-		switch query.Dialector() {
-		case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
-			query.joinsToFrom()
-		case sql.MySQL:
-			// if at least one join is done,
-			// allow UPDATE without WHERE as the condition can be the join
-			if len(query.gormDB.Statement.Joins) > 0 {
-				query.gormDB.AllowGlobalUpdate = true
-			}
-
-			query.gormDB.Clauses(clause.Set{clause.Assignment{
-				Column: clause.Column{
-					Name:  "deleted_at",
-					Table: query.initialTable.SQLName(),
-				},
-				Value: time.Now(),
-			}})
-		}
-
-		query.gormDB.Statement.Selects = []string{}
-
-		deleteTx := query.gormDB.Delete(query.gormDB.Statement.Model)
-
-		return deleteTx.RowsAffected, deleteTx.Error
-	}
-
 	var deleteTx *gorm.DB
 
 	if len(cqlSubQuery.gormDB.Statement.Joins) > 0 {
