@@ -32,6 +32,8 @@ var (
 	// preload
 
 	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
+
+	ErrPreloadsInDeleteReturningNotAllowed = errors.New("preloads in delete returning are not allowed")
 )
 
 func methodError(err error, method string) error {

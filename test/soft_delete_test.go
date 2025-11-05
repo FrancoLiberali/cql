@@ -236,8 +236,8 @@ func (ts *SoftDeleteIntTestSuite) TestSoftDeleteReturningWithPreload() {
 		conditions.Sale.Code.Is().Eq(cql.Int(0)),
 		conditions.Sale.Product().Preload(),
 	).Returning(&salesReturned).Exec()
-	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
-	ts.ErrorContains(err, "preloads in returning are not allowed for database")
+	ts.ErrorIs(err, cql.ErrPreloadsInDeleteReturningNotAllowed)
+	ts.ErrorContains(err, "preloads in delete returning are not allowed")
 	ts.ErrorContains(err, "method: Returning")
 }
 
@@ -249,7 +249,7 @@ func (ts *SoftDeleteIntTestSuite) TestSoftDeleteReturningWithPreloadCollection()
 		conditions.Company.Name.Is().Eq(cql.String("ditrit")),
 		conditions.Company.Sellers.Preload(),
 	).Returning(&companiesReturned).Exec()
-	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+	ts.ErrorIs(err, cql.ErrPreloadsInDeleteReturningNotAllowed)
 	ts.ErrorContains(err, "method: Returning")
 }
 

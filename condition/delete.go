@@ -56,7 +56,7 @@ func (deleteS *Delete[T]) Returning(dest *[]T) *Delete[T] {
 		len(gormDB.Statement.Preloads) > 0 {
 		deleteS.query.addError(
 			methodError(
-				preloadsInReturningNotAllowed(deleteS.query.cqlQuery.Dialector()),
+				ErrPreloadsInDeleteReturningNotAllowed,
 				"Returning",
 			),
 		)

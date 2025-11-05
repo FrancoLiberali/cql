@@ -281,9 +281,8 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreload() {
 		conditions.SaleNoTimestamps.Code.Is().Eq(cql.Int(0)),
 		conditions.SaleNoTimestamps.Product().Preload(),
 	).Returning(&salesReturned).Exec()
-	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
-	// TODO el error deberia ser distinto
-	ts.ErrorContains(err, "preloads in returning are not allowed for database")
+	ts.ErrorIs(err, cql.ErrPreloadsInDeleteReturningNotAllowed)
+	ts.ErrorContains(err, "preloads in delete returning are not allowed")
 	ts.ErrorContains(err, "method: Returning")
 }
 
@@ -295,7 +294,7 @@ func (ts *DeleteIntTestSuite) TestDeleteReturningWithPreloadCollection() {
 		conditions.CompanyNoTimestamps.Name.Is().Eq(cql.String("ditrit")),
 		conditions.CompanyNoTimestamps.Sellers.Preload(),
 	).Returning(&companiesReturned).Exec()
-	ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+	ts.ErrorIs(err, cql.ErrPreloadsInDeleteReturningNotAllowed)
 	ts.ErrorContains(err, "method: Returning")
 }
 
