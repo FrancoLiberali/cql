@@ -15,12 +15,6 @@ import (
 	"github.com/FrancoLiberali/cql/sql"
 )
 
-var softDeleteTypes = []reflect.Type{
-	reflect.TypeOf(gorm.DeletedAt{}),
-	reflect.TypeOf(model.UIntModelWithTimestamps{}),
-	reflect.TypeOf(model.UUIDModelWithTimestamps{}),
-}
-
 type CQLQuery struct {
 	gormDB          *gorm.DB
 	concernedModels map[reflect.Type][]Table
