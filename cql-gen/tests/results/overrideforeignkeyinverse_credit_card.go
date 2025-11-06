@@ -5,26 +5,19 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	overrideforeignkeyinverse "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/overrideforeignkeyinverse"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type creditCardConditions struct {
 	ID            condition.Field[overrideforeignkeyinverse.CreditCard, model.UUID]
-	CreatedAt     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]
-	UpdatedAt     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]
-	DeletedAt     condition.Field[overrideforeignkeyinverse.CreditCard, time.Time]
 	UserReference condition.UpdatableField[overrideforeignkeyinverse.CreditCard, model.UUID]
 }
 
 var CreditCard = creditCardConditions{
-	CreatedAt:     condition.NewField[overrideforeignkeyinverse.CreditCard, time.Time]("CreatedAt", "", ""),
-	DeletedAt:     condition.NewField[overrideforeignkeyinverse.CreditCard, time.Time]("DeletedAt", "", ""),
 	ID:            condition.NewField[overrideforeignkeyinverse.CreditCard, model.UUID]("ID", "", ""),
-	UpdatedAt:     condition.NewField[overrideforeignkeyinverse.CreditCard, time.Time]("UpdatedAt", "", ""),
 	UserReference: condition.NewUpdatableField[overrideforeignkeyinverse.CreditCard, model.UUID]("UserReference", "", ""),
 }
 
 // Preload allows preloading the CreditCard when doing a query
 func (creditCardConditions creditCardConditions) preload() condition.Condition[overrideforeignkeyinverse.CreditCard] {
-	return condition.NewPreloadCondition[overrideforeignkeyinverse.CreditCard](creditCardConditions.ID, creditCardConditions.CreatedAt, creditCardConditions.UpdatedAt, creditCardConditions.DeletedAt, creditCardConditions.UserReference)
+	return condition.NewPreloadCondition[overrideforeignkeyinverse.CreditCard](creditCardConditions.ID, creditCardConditions.UserReference)
 }

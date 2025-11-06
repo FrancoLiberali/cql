@@ -71,7 +71,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(cql.String("1")),
 			)`,
-			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("1") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Compare with wrong type for multiple values operator",
@@ -84,7 +84,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 					cql.String("1"),
 				),
 			)`,
-			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Between: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("1") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Between: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Compare with wrong type for list of values operator",
@@ -97,7 +97,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 					cql.String("1"),
 				),
 			)`,
-			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().In: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("1") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().In: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use condition of another model",
@@ -107,7 +107,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Sale.Code.Is().Eq(cql.Int(1)),
 			)`,
-			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to %s[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of interface type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to %s[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use condition of another model inside join",
@@ -119,7 +119,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 					conditions.Sale.Code.Is().Eq(cql.Int(1)),
 				),
 			)`,
-			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Seller] value in argument to conditions.Sale.Seller: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Seller] (wrong type for method interfaceVerificationMethod)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of interface type condition.WhereCondition[models.Sale]) as condition.Condition[models.Seller] value in argument to conditions.Sale.Seller: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Seller] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use condition of another model inside logical operator",
@@ -129,7 +129,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))),
 			)`,
-			Error: `cannot use cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))) (value of type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to %s[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
+			Error: `cannot use cql.Or(conditions.Sale.Code.Is().Eq(cql.Int(1))) (value of interface type condition.WhereCondition[models.Sale]) as condition.Condition[models.Product] value in argument to %s[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.Condition[models.Product] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use condition of another model inside logical operator multiple",
@@ -142,7 +142,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 					conditions.Sale.Code.Is().Eq(cql.Int(1)),
 				),
 			)`,
-			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.WhereCondition[models.Product] value in argument to cql.Or[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.WhereCondition[models.Product] (wrong type for method interfaceVerificationMethod)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of interface type condition.WhereCondition[models.Sale]) as condition.WhereCondition[models.Product] value in argument to cql.Or[models.Product]: condition.WhereCondition[models.Sale] does not implement condition.WhereCondition[models.Product] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use condition of another model inside slice operator",
@@ -154,7 +154,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 					conditions.Sale.Code.Is().Eq(cql.Int(1)),
 				),
 			)`,
-			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of type condition.WhereCondition[models.Sale]) as condition.WhereCondition[models.Seller] value in argument to conditions.Company.Sellers.Any: condition.WhereCondition[models.Sale] does not implement condition.WhereCondition[models.Seller] (wrong type for method interfaceVerificationMethod)`,
+			Error: `cannot use conditions.Sale.Code.Is().Eq(cql.Int(1)) (value of interface type condition.WhereCondition[models.Sale]) as condition.WhereCondition[models.Seller] value in argument to conditions.Company.Sellers.Any: condition.WhereCondition[models.Sale] does not implement condition.WhereCondition[models.Seller] (wrong type for method interfaceVerificationMethod)`,
 		},
 		{
 			Name: "Condition with field of another type",
@@ -164,7 +164,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.ID),
 			)`,
-			Error: `cannot use conditions.Product.ID (variable of type condition.Field[models.Product, model.UUID]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Eq: condition.Field[models.Product, model.UUID] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use conditions.Product.ID (variable of struct type condition.Field[models.Product, model.UUID]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Is().Eq: condition.Field[models.Product, model.UUID] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use operator not present for field type",
@@ -186,7 +186,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 					condition.Like("_a!_").Escape('!'),
 				),
 			)`,
-			Error: `cannot use condition.Like("_a!_").Escape('!') (value of type condition.ValueOperator[string]) as condition.Operator[float64] value in argument to conditions.Product.Int.Is().Custom: condition.ValueOperator[string] does not implement condition.Operator[float64] (wrong type for method InterfaceVerificationMethod)`,
+			Error: `cannot use condition.Like("_a!_").Escape('!') (value of struct type condition.ValueOperator[string]) as condition.Operator[float64] value in argument to conditions.Product.Int.Is().Custom: condition.ValueOperator[string] does not implement condition.Operator[float64] (wrong type for method InterfaceVerificationMethod)`,
 		},
 		{
 			Name: "Use function not present for field type",
@@ -206,7 +206,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Plus(cql.String("asd")).Is().Eq(cql.Int(1)),
 			)`,
-			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("asd") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use function dynamic with incorrect value type",
@@ -216,7 +216,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Plus(conditions.Product.String).Is().Eq(cql.Int(1)),
 			)`,
-			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use conditions.Product.String (variable of struct type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use function not present for field type inside comparison",
@@ -236,7 +236,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(cql.String("asd"))),
 			)`,
-			Error: `cannot use cql.String("asd") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("asd") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use function dynamic with incorrect value type inside comparison",
@@ -246,7 +246,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Plus(conditions.Product.String)),
 			)`,
-			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use conditions.Product.String (variable of struct type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Plus: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "Use function with not same type of numeric value for logical operator",
@@ -256,7 +256,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(cql.Float64(1))),
 			)`,
-			Error: `cannot use cql.Float64(1) (value of type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+			Error: `cannot use cql.Float64(1) (value of struct type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
 		},
 		{
 			Name: "Use function with not same type of numeric value for logical operator dynamic",
@@ -266,7 +266,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.Or(conditions.Product.Float)),
 			)`,
-			Error: `cannot use conditions.Product.Float (variable of type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+			Error: `cannot use conditions.Product.Float (variable of struct type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.Or: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
 		},
 		{
 			Name: "Use function with not int type of numeric value for shift operator",
@@ -276,7 +276,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(cql.Float64(1))),
 			)`,
-			Error: `cannot use cql.Float64(1) (value of type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+			Error: `cannot use cql.Float64(1) (value of struct type condition.NumericValue[float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericValue[float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
 		},
 		{
 			Name: "Use function with not int type of numeric value for shift operator dynamic",
@@ -286,7 +286,7 @@ func TestQueryCompilationErrors(t *testing.T) {
 				db,
 				conditions.Product.Int.Is().Eq(conditions.Product.Int.ShiftLeft(conditions.Product.Float)),
 			)`,
-			Error: `cannot use conditions.Product.Float (variable of type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
+			Error: `cannot use conditions.Product.Float (variable of struct type condition.NumericField[models.Product, float64]) as condition.NumericOfType[int] value in argument to conditions.Product.Int.ShiftLeft: condition.NumericField[models.Product, float64] does not implement condition.NumericOfType[int] (wrong type for method GetNumericValue)`,
 		},
 	}
 
@@ -379,7 +379,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 		).SelectValue(
 			conditions.Product.Int.Aggregate().Max(), "aggregation1",
 		)`,
-			Error: `cannot use cql.String("13") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("13") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "having not compared with correct type of another aggregation",
@@ -394,7 +394,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 		).SelectValue(
 			conditions.Product.Int.Aggregate().Max(), "aggregation1",
 		)`,
-			Error: ` cannot use conditions.Product.String.Aggregate().Min() (value of type condition.AggregationResult[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.AggregationResult[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: ` cannot use conditions.Product.String.Aggregate().Min() (value of struct type condition.AggregationResult[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.AggregationResult[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 	}
 
@@ -421,7 +421,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 		).Set(
 			conditions.Product.Int.Set().Eq(cql.String("1")),
 		)`,
-			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("1") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "set field of wrong type",
@@ -433,7 +433,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 		).Set(
 			conditions.Product.Int.Set().Eq(conditions.Product.String),
 		)`,
-			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use conditions.Product.String (variable of struct type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "set multiple value of wrong type",
@@ -445,7 +445,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 		).SetMultiple(
 			conditions.Product.Int.Set().Eq(cql.String("1")),
 		)`,
-			Error: `cannot use cql.String("1") (value of type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use cql.String("1") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "set field of wrong type",
@@ -457,7 +457,7 @@ func TestUpdateCompilationErrors(t *testing.T) {
 		).SetMultiple(
 			conditions.Product.Int.Set().Eq(conditions.Product.String),
 		)`,
-			Error: `cannot use conditions.Product.String (variable of type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
+			Error: `cannot use conditions.Product.String (variable of struct type condition.StringField[models.Product]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Set().Eq: condition.StringField[models.Product] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "set can not be used after a function",
@@ -633,7 +633,7 @@ func TestInsertCompilationErrors(t *testing.T) {
 					product,
 				).OnConflictOn(conditions.City.ID).Update(conditions.Product.Int).Exec()
 			`,
-			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(context.Background(), db, product).OnConflictOn: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
+			Error: `cannot use conditions.City.ID (variable of struct type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(context.Background(), db, product).OnConflictOn: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
 		},
 		{
 			Name: "update field of different model",
@@ -644,7 +644,7 @@ func TestInsertCompilationErrors(t *testing.T) {
 					product,
 				).OnConflictOn(conditions.Product.ID).Update(conditions.City.ID).Exec()
 			`,
-			Error: `cannot use conditions.City.ID (variable of type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(context.Background(), db, product).OnConflictOn(conditions.Product.ID).Update: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
+			Error: `cannot use conditions.City.ID (variable of struct type condition.Field[models.City, model.UUID]) as condition.FieldOfModel[models.Product] value in argument to cql.Insert(context.Background(), db, product).OnConflictOn(conditions.Product.ID).Update: condition.Field[models.City, model.UUID] does not implement condition.FieldOfModel[models.Product] (wrong type for method getModel)`,
 		},
 		{
 			Name: "set field of different model",

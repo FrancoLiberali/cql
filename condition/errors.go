@@ -32,6 +32,8 @@ var (
 	// preload
 
 	ErrOnlyPreloadsAllowed = errors.New("only conditions that do a preload are allowed")
+
+	ErrPreloadsInDeleteReturningNotAllowed = errors.New("preloads in delete returning are not allowed")
 )
 
 func methodError(err error, method string) error {
@@ -59,6 +61,13 @@ func appearanceOutOfRangeError(field IField) error {
 
 func preloadsInReturningNotAllowed(dialector sql.Dialector) error {
 	return fmt.Errorf("%w; preloads in returning are not allowed for database: %s",
+		ErrUnsupportedByDatabase,
+		dialector,
+	)
+}
+
+func joinsInDeleteNotAllowed(dialector sql.Dialector) error {
+	return fmt.Errorf("%w; joins in delete statement are not allowed for database: %s",
 		ErrUnsupportedByDatabase,
 		dialector,
 	)

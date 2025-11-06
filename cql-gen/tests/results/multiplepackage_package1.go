@@ -6,7 +6,6 @@ import (
 	package1 "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/multiplepackage/package1"
 	package2 "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 func (package1Conditions package1Conditions) Package2(conditions ...condition.Condition[package2.Package2]) condition.JoinCondition[package1.Package1] {
@@ -14,20 +13,12 @@ func (package1Conditions package1Conditions) Package2(conditions ...condition.Co
 }
 
 type package1Conditions struct {
-	ID        condition.Field[package1.Package1, model.UUID]
-	CreatedAt condition.Field[package1.Package1, time.Time]
-	UpdatedAt condition.Field[package1.Package1, time.Time]
-	DeletedAt condition.Field[package1.Package1, time.Time]
+	ID condition.Field[package1.Package1, model.UUID]
 }
 
-var Package1 = package1Conditions{
-	CreatedAt: condition.NewField[package1.Package1, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[package1.Package1, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[package1.Package1, model.UUID]("ID", "", ""),
-	UpdatedAt: condition.NewField[package1.Package1, time.Time]("UpdatedAt", "", ""),
-}
+var Package1 = package1Conditions{ID: condition.NewField[package1.Package1, model.UUID]("ID", "", "")}
 
 // Preload allows preloading the Package1 when doing a query
 func (package1Conditions package1Conditions) preload() condition.Condition[package1.Package1] {
-	return condition.NewPreloadCondition[package1.Package1](package1Conditions.ID, package1Conditions.CreatedAt, package1Conditions.UpdatedAt, package1Conditions.DeletedAt)
+	return condition.NewPreloadCondition[package1.Package1](package1Conditions.ID)
 }

@@ -5,24 +5,15 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	uintmodel "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/uintmodel"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type uintModelConditions struct {
-	ID        condition.Field[uintmodel.UintModel, model.UIntID]
-	CreatedAt condition.Field[uintmodel.UintModel, time.Time]
-	UpdatedAt condition.Field[uintmodel.UintModel, time.Time]
-	DeletedAt condition.Field[uintmodel.UintModel, time.Time]
+	ID condition.Field[uintmodel.UintModel, model.UIntID]
 }
 
-var UintModel = uintModelConditions{
-	CreatedAt: condition.NewField[uintmodel.UintModel, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[uintmodel.UintModel, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[uintmodel.UintModel, model.UIntID]("ID", "", ""),
-	UpdatedAt: condition.NewField[uintmodel.UintModel, time.Time]("UpdatedAt", "", ""),
-}
+var UintModel = uintModelConditions{ID: condition.NewField[uintmodel.UintModel, model.UIntID]("ID", "", "")}
 
 // Preload allows preloading the UintModel when doing a query
 func (uintModelConditions uintModelConditions) preload() condition.Condition[uintmodel.UintModel] {
-	return condition.NewPreloadCondition[uintmodel.UintModel](uintModelConditions.ID, uintModelConditions.CreatedAt, uintModelConditions.UpdatedAt, uintModelConditions.DeletedAt)
+	return condition.NewPreloadCondition[uintmodel.UintModel](uintModelConditions.ID)
 }

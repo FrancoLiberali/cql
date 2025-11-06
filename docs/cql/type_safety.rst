@@ -53,7 +53,7 @@ In this case, the compilation error will be:
 .. code-block:: none
 
     cannot use conditions.Country.Name.Is().Eq("Paris")
-    (value of type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
+    (value of interface type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
 
 Similarly, conditions are checked when making joins:
 

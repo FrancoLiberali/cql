@@ -109,6 +109,7 @@ func NewUpdate[T model.Model](tx *gorm.DB, conditions []Condition[T]) *Update[T]
 type ISet interface {
 	getField() IField
 	getValue() IValue
+	getModel() model.Model
 }
 
 type Set[T model.Model] struct {
@@ -122,6 +123,10 @@ func (set Set[T]) getField() IField {
 
 func (set Set[T]) getValue() IValue {
 	return set.value
+}
+
+func (set Set[T]) getModel() model.Model {
+	return *new(T)
 }
 
 type FieldSet[TModel model.Model, TAttribute any] struct {

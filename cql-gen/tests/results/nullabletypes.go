@@ -9,36 +9,30 @@ import (
 )
 
 type nullableTypesConditions struct {
-	ID        condition.Field[nullabletypes.NullableTypes, model.UUID]
-	CreatedAt condition.Field[nullabletypes.NullableTypes, time.Time]
-	UpdatedAt condition.Field[nullabletypes.NullableTypes, time.Time]
-	DeletedAt condition.Field[nullabletypes.NullableTypes, time.Time]
-	String    condition.NullableStringField[nullabletypes.NullableTypes]
-	Int64     condition.NullableNumericField[nullabletypes.NullableTypes, int64]
-	Int32     condition.NullableNumericField[nullabletypes.NullableTypes, int32]
-	Int16     condition.NullableNumericField[nullabletypes.NullableTypes, int16]
-	Byte      condition.NullableNumericField[nullabletypes.NullableTypes, int8]
-	Float64   condition.NullableNumericField[nullabletypes.NullableTypes, float64]
-	Bool      condition.NullableBoolField[nullabletypes.NullableTypes]
-	Time      condition.NullableField[nullabletypes.NullableTypes, time.Time]
+	ID      condition.Field[nullabletypes.NullableTypes, model.UUID]
+	String  condition.NullableStringField[nullabletypes.NullableTypes]
+	Int64   condition.NullableNumericField[nullabletypes.NullableTypes, int64]
+	Int32   condition.NullableNumericField[nullabletypes.NullableTypes, int32]
+	Int16   condition.NullableNumericField[nullabletypes.NullableTypes, int16]
+	Byte    condition.NullableNumericField[nullabletypes.NullableTypes, int8]
+	Float64 condition.NullableNumericField[nullabletypes.NullableTypes, float64]
+	Bool    condition.NullableBoolField[nullabletypes.NullableTypes]
+	Time    condition.NullableField[nullabletypes.NullableTypes, time.Time]
 }
 
 var NullableTypes = nullableTypesConditions{
-	Bool:      condition.NewNullableBoolField[nullabletypes.NullableTypes]("Bool", "", ""),
-	Byte:      condition.NewNullableNumericField[nullabletypes.NullableTypes, int8]("Byte", "", ""),
-	CreatedAt: condition.NewField[nullabletypes.NullableTypes, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[nullabletypes.NullableTypes, time.Time]("DeletedAt", "", ""),
-	Float64:   condition.NewNullableNumericField[nullabletypes.NullableTypes, float64]("Float64", "", ""),
-	ID:        condition.NewField[nullabletypes.NullableTypes, model.UUID]("ID", "", ""),
-	Int16:     condition.NewNullableNumericField[nullabletypes.NullableTypes, int16]("Int16", "", ""),
-	Int32:     condition.NewNullableNumericField[nullabletypes.NullableTypes, int32]("Int32", "", ""),
-	Int64:     condition.NewNullableNumericField[nullabletypes.NullableTypes, int64]("Int64", "", ""),
-	String:    condition.NewNullableStringField[nullabletypes.NullableTypes]("String", "", ""),
-	Time:      condition.NewNullableField[nullabletypes.NullableTypes, time.Time]("Time", "", ""),
-	UpdatedAt: condition.NewField[nullabletypes.NullableTypes, time.Time]("UpdatedAt", "", ""),
+	Bool:    condition.NewNullableBoolField[nullabletypes.NullableTypes]("Bool", "", ""),
+	Byte:    condition.NewNullableNumericField[nullabletypes.NullableTypes, int8]("Byte", "", ""),
+	Float64: condition.NewNullableNumericField[nullabletypes.NullableTypes, float64]("Float64", "", ""),
+	ID:      condition.NewField[nullabletypes.NullableTypes, model.UUID]("ID", "", ""),
+	Int16:   condition.NewNullableNumericField[nullabletypes.NullableTypes, int16]("Int16", "", ""),
+	Int32:   condition.NewNullableNumericField[nullabletypes.NullableTypes, int32]("Int32", "", ""),
+	Int64:   condition.NewNullableNumericField[nullabletypes.NullableTypes, int64]("Int64", "", ""),
+	String:  condition.NewNullableStringField[nullabletypes.NullableTypes]("String", "", ""),
+	Time:    condition.NewNullableField[nullabletypes.NullableTypes, time.Time]("Time", "", ""),
 }
 
 // Preload allows preloading the NullableTypes when doing a query
 func (nullableTypesConditions nullableTypesConditions) preload() condition.Condition[nullabletypes.NullableTypes] {
-	return condition.NewPreloadCondition[nullabletypes.NullableTypes](nullableTypesConditions.ID, nullableTypesConditions.CreatedAt, nullableTypesConditions.UpdatedAt, nullableTypesConditions.DeletedAt, nullableTypesConditions.String, nullableTypesConditions.Int64, nullableTypesConditions.Int32, nullableTypesConditions.Int16, nullableTypesConditions.Byte, nullableTypesConditions.Float64, nullableTypesConditions.Bool, nullableTypesConditions.Time)
+	return condition.NewPreloadCondition[nullabletypes.NullableTypes](nullableTypesConditions.ID, nullableTypesConditions.String, nullableTypesConditions.Int64, nullableTypesConditions.Int32, nullableTypesConditions.Int16, nullableTypesConditions.Byte, nullableTypesConditions.Float64, nullableTypesConditions.Bool, nullableTypesConditions.Time)
 }

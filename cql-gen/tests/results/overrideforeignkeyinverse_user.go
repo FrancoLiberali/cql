@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	overrideforeignkeyinverse "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/overrideforeignkeyinverse"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 func (userConditions userConditions) CreditCard(conditions ...condition.Condition[overrideforeignkeyinverse.CreditCard]) condition.JoinCondition[overrideforeignkeyinverse.User] {
@@ -13,20 +12,12 @@ func (userConditions userConditions) CreditCard(conditions ...condition.Conditio
 }
 
 type userConditions struct {
-	ID        condition.Field[overrideforeignkeyinverse.User, model.UUID]
-	CreatedAt condition.Field[overrideforeignkeyinverse.User, time.Time]
-	UpdatedAt condition.Field[overrideforeignkeyinverse.User, time.Time]
-	DeletedAt condition.Field[overrideforeignkeyinverse.User, time.Time]
+	ID condition.Field[overrideforeignkeyinverse.User, model.UUID]
 }
 
-var User = userConditions{
-	CreatedAt: condition.NewField[overrideforeignkeyinverse.User, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[overrideforeignkeyinverse.User, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[overrideforeignkeyinverse.User, model.UUID]("ID", "", ""),
-	UpdatedAt: condition.NewField[overrideforeignkeyinverse.User, time.Time]("UpdatedAt", "", ""),
-}
+var User = userConditions{ID: condition.NewField[overrideforeignkeyinverse.User, model.UUID]("ID", "", "")}
 
 // Preload allows preloading the User when doing a query
 func (userConditions userConditions) preload() condition.Condition[overrideforeignkeyinverse.User] {
-	return condition.NewPreloadCondition[overrideforeignkeyinverse.User](userConditions.ID, userConditions.CreatedAt, userConditions.UpdatedAt, userConditions.DeletedAt)
+	return condition.NewPreloadCondition[overrideforeignkeyinverse.User](userConditions.ID)
 }

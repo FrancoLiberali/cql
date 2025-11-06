@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
-	"time"
 )
 
 func (childConditions childConditions) Parent1(conditions ...condition.Condition[models.Parent1]) condition.JoinCondition[models.Child] {
@@ -17,9 +16,6 @@ func (childConditions childConditions) Parent2(conditions ...condition.Condition
 
 type childConditions struct {
 	ID        condition.Field[models.Child, model.UUID]
-	CreatedAt condition.Field[models.Child, time.Time]
-	UpdatedAt condition.Field[models.Child, time.Time]
-	DeletedAt condition.Field[models.Child, time.Time]
 	Name      condition.StringField[models.Child]
 	Number    condition.NumericField[models.Child, int]
 	Parent1ID condition.UpdatableField[models.Child, model.UUID]
@@ -27,17 +23,14 @@ type childConditions struct {
 }
 
 var Child = childConditions{
-	CreatedAt: condition.NewField[models.Child, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[models.Child, time.Time]("DeletedAt", "", ""),
 	ID:        condition.NewField[models.Child, model.UUID]("ID", "", ""),
 	Name:      condition.NewStringField[models.Child]("Name", "", ""),
 	Number:    condition.NewNumericField[models.Child, int]("Number", "", ""),
 	Parent1ID: condition.NewUpdatableField[models.Child, model.UUID]("Parent1ID", "", ""),
 	Parent2ID: condition.NewUpdatableField[models.Child, model.UUID]("Parent2ID", "", ""),
-	UpdatedAt: condition.NewField[models.Child, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Child when doing a query
 func (childConditions childConditions) preload() condition.Condition[models.Child] {
-	return condition.NewPreloadCondition[models.Child](childConditions.ID, childConditions.CreatedAt, childConditions.UpdatedAt, childConditions.DeletedAt, childConditions.Name, childConditions.Number, childConditions.Parent1ID, childConditions.Parent2ID)
+	return condition.NewPreloadCondition[models.Child](childConditions.ID, childConditions.Name, childConditions.Number, childConditions.Parent1ID, childConditions.Parent2ID)
 }

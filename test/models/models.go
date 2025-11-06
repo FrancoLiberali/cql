@@ -14,13 +14,24 @@ import (
 )
 
 type Company struct {
-	model.UUIDModel
+	model.UUIDModelWithTimestamps
 
 	Name    string
 	Sellers *[]Seller // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
 }
 
 func (m Company) Equal(other Company) bool {
+	return m.ID == other.ID
+}
+
+type CompanyNoTimestamps struct {
+	model.UUIDModel
+
+	Name    string
+	Sellers *[]SellerNoTimestamps // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
+}
+
+func (m CompanyNoTimestamps) Equal(other CompanyNoTimestamps) bool {
 	return m.ID == other.ID
 }
 
@@ -79,7 +90,7 @@ type ToBeGormEmbedded struct {
 }
 
 type Product struct {
-	model.UUIDModel
+	model.UUIDModelWithTimestamps
 
 	String      string `gorm:"column:string_something_else"`
 	Int         int
@@ -96,6 +107,27 @@ type Product struct {
 }
 
 func (m Product) Equal(other Product) bool {
+	return m.ID == other.ID
+}
+
+type ProductNoTimestamps struct {
+	model.UUIDModel
+
+	String      string `gorm:"column:string_something_else"`
+	Int         int
+	IntPointer  *int
+	Float       float64
+	NullFloat   sql.NullFloat64
+	Bool        bool
+	NullBool    sql.NullBool
+	ByteArray   []byte
+	MultiString MultiString
+	ToBeEmbedded
+	GormEmbedded ToBeGormEmbedded `gorm:"embedded;embeddedPrefix:gorm_embedded_"`
+	String2      string
+}
+
+func (m ProductNoTimestamps) Equal(other ProductNoTimestamps) bool {
 	return m.ID == other.ID
 }
 
@@ -120,8 +152,27 @@ type Seller struct {
 	UniversityID *model.UUID
 }
 
-type Sale struct {
+func (m Seller) Equal(other Seller) bool {
+	return m.Name == other.Name
+}
+
+type SellerNoTimestamps struct {
 	model.UUIDModel
+
+	Name                  string
+	CompanyNoTimestamps   *CompanyNoTimestamps
+	CompanyNoTimestampsID *model.UUID // Company HasMany Sellers (Company 0..1 -> 0..* Seller)
+
+	University   *University
+	UniversityID *model.UUID
+}
+
+func (m SellerNoTimestamps) Equal(other SellerNoTimestamps) bool {
+	return m.Name == other.Name
+}
+
+type Sale struct {
+	model.UUIDModelWithTimestamps
 
 	Code        int
 	Description string
@@ -139,8 +190,23 @@ func (m Sale) Equal(other Sale) bool {
 	return m.ID == other.ID
 }
 
-func (m Seller) Equal(other Seller) bool {
-	return m.Name == other.Name
+type SaleNoTimestamps struct {
+	model.UUIDModel
+
+	Code        int
+	Description string
+
+	// Sale belongsTo Product (Sale 0..* -> 1 Product)
+	Product   ProductNoTimestamps
+	ProductID model.UUID
+
+	// Sale belongsTo Seller (Sale 0..* -> 0..1 Seller)
+	Seller   *SellerNoTimestamps
+	SellerID *model.UUID
+}
+
+func (m SaleNoTimestamps) Equal(other SaleNoTimestamps) bool {
+	return m.ID == other.ID
 }
 
 type Country struct {
@@ -200,7 +266,7 @@ func (m Brand) Equal(other Brand) bool {
 }
 
 type Phone struct {
-	model.UIntModel
+	model.UIntModelWithTimestamps
 
 	Name string
 	// Phone belongsTo Brand (Phone 0..* -> 1 Brand)
@@ -209,6 +275,19 @@ type Phone struct {
 }
 
 func (m Phone) Equal(other Phone) bool {
+	return m.Name == other.Name
+}
+
+type PhoneNoTimestamps struct {
+	model.UIntModel
+
+	Name string
+	// Phone belongsTo Brand (Phone 0..* -> 1 Brand)
+	Brand   Brand
+	BrandID uint
+}
+
+func (m PhoneNoTimestamps) Equal(other PhoneNoTimestamps) bool {
 	return m.Name == other.Name
 }
 

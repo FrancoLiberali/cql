@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
-	"time"
 )
 
 func (parent2Conditions parent2Conditions) ParentParent(conditions ...condition.Condition[models.ParentParent]) condition.JoinCondition[models.Parent2] {
@@ -14,21 +13,15 @@ func (parent2Conditions parent2Conditions) ParentParent(conditions ...condition.
 
 type parent2Conditions struct {
 	ID             condition.Field[models.Parent2, model.UUID]
-	CreatedAt      condition.Field[models.Parent2, time.Time]
-	UpdatedAt      condition.Field[models.Parent2, time.Time]
-	DeletedAt      condition.Field[models.Parent2, time.Time]
 	ParentParentID condition.UpdatableField[models.Parent2, model.UUID]
 }
 
 var Parent2 = parent2Conditions{
-	CreatedAt:      condition.NewField[models.Parent2, time.Time]("CreatedAt", "", ""),
-	DeletedAt:      condition.NewField[models.Parent2, time.Time]("DeletedAt", "", ""),
 	ID:             condition.NewField[models.Parent2, model.UUID]("ID", "", ""),
 	ParentParentID: condition.NewUpdatableField[models.Parent2, model.UUID]("ParentParentID", "", ""),
-	UpdatedAt:      condition.NewField[models.Parent2, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Parent2 when doing a query
 func (parent2Conditions parent2Conditions) preload() condition.Condition[models.Parent2] {
-	return condition.NewPreloadCondition[models.Parent2](parent2Conditions.ID, parent2Conditions.CreatedAt, parent2Conditions.UpdatedAt, parent2Conditions.DeletedAt, parent2Conditions.ParentParentID)
+	return condition.NewPreloadCondition[models.Parent2](parent2Conditions.ID, parent2Conditions.ParentParentID)
 }

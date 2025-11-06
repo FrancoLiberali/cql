@@ -5,26 +5,19 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	overridereferencesinverse "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/overridereferencesinverse"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type processorConditions struct {
 	ID           condition.Field[overridereferencesinverse.Processor, model.UUID]
-	CreatedAt    condition.Field[overridereferencesinverse.Processor, time.Time]
-	UpdatedAt    condition.Field[overridereferencesinverse.Processor, time.Time]
-	DeletedAt    condition.Field[overridereferencesinverse.Processor, time.Time]
 	ComputerName condition.StringField[overridereferencesinverse.Processor]
 }
 
 var Processor = processorConditions{
 	ComputerName: condition.NewStringField[overridereferencesinverse.Processor]("ComputerName", "", ""),
-	CreatedAt:    condition.NewField[overridereferencesinverse.Processor, time.Time]("CreatedAt", "", ""),
-	DeletedAt:    condition.NewField[overridereferencesinverse.Processor, time.Time]("DeletedAt", "", ""),
 	ID:           condition.NewField[overridereferencesinverse.Processor, model.UUID]("ID", "", ""),
-	UpdatedAt:    condition.NewField[overridereferencesinverse.Processor, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Processor when doing a query
 func (processorConditions processorConditions) preload() condition.Condition[overridereferencesinverse.Processor] {
-	return condition.NewPreloadCondition[overridereferencesinverse.Processor](processorConditions.ID, processorConditions.CreatedAt, processorConditions.UpdatedAt, processorConditions.DeletedAt, processorConditions.ComputerName)
+	return condition.NewPreloadCondition[overridereferencesinverse.Processor](processorConditions.ID, processorConditions.ComputerName)
 }

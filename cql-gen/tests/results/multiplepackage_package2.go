@@ -5,26 +5,19 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	package2 "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/multiplepackage/package2"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type package2Conditions struct {
 	ID         condition.Field[package2.Package2, model.UUID]
-	CreatedAt  condition.Field[package2.Package2, time.Time]
-	UpdatedAt  condition.Field[package2.Package2, time.Time]
-	DeletedAt  condition.Field[package2.Package2, time.Time]
 	Package1ID condition.UpdatableField[package2.Package2, model.UUID]
 }
 
 var Package2 = package2Conditions{
-	CreatedAt:  condition.NewField[package2.Package2, time.Time]("CreatedAt", "", ""),
-	DeletedAt:  condition.NewField[package2.Package2, time.Time]("DeletedAt", "", ""),
 	ID:         condition.NewField[package2.Package2, model.UUID]("ID", "", ""),
 	Package1ID: condition.NewUpdatableField[package2.Package2, model.UUID]("Package1ID", "", ""),
-	UpdatedAt:  condition.NewField[package2.Package2, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Package2 when doing a query
 func (package2Conditions package2Conditions) preload() condition.Condition[package2.Package2] {
-	return condition.NewPreloadCondition[package2.Package2](package2Conditions.ID, package2Conditions.CreatedAt, package2Conditions.UpdatedAt, package2Conditions.DeletedAt, package2Conditions.Package1ID)
+	return condition.NewPreloadCondition[package2.Package2](package2Conditions.ID, package2Conditions.Package1ID)
 }

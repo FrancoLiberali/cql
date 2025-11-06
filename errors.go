@@ -26,4 +26,6 @@ var (
 
 	ErrOnlyPreloadsAllowed = condition.ErrOnlyPreloadsAllowed
 	ErrRelationNotLoaded   = preload.ErrRelationNotLoaded
+
+	ErrPreloadsInDeleteReturningNotAllowed = condition.ErrPreloadsInDeleteReturningNotAllowed
 )

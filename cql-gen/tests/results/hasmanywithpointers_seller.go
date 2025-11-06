@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	hasmanywithpointers "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/hasmanywithpointers"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 func (sellerInPointersConditions sellerInPointersConditions) Company(conditions ...condition.Condition[hasmanywithpointers.CompanyWithPointers]) condition.JoinCondition[hasmanywithpointers.SellerInPointers] {
@@ -14,21 +13,15 @@ func (sellerInPointersConditions sellerInPointersConditions) Company(conditions 
 
 type sellerInPointersConditions struct {
 	ID        condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]
-	CreatedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
-	UpdatedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
-	DeletedAt condition.Field[hasmanywithpointers.SellerInPointers, time.Time]
 	CompanyID condition.NullableField[hasmanywithpointers.SellerInPointers, model.UUID]
 }
 
 var SellerInPointers = sellerInPointersConditions{
 	CompanyID: condition.NewNullableField[hasmanywithpointers.SellerInPointers, model.UUID]("CompanyID", "", ""),
-	CreatedAt: condition.NewField[hasmanywithpointers.SellerInPointers, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[hasmanywithpointers.SellerInPointers, time.Time]("DeletedAt", "", ""),
 	ID:        condition.NewField[hasmanywithpointers.SellerInPointers, model.UUID]("ID", "", ""),
-	UpdatedAt: condition.NewField[hasmanywithpointers.SellerInPointers, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the SellerInPointers when doing a query
 func (sellerInPointersConditions sellerInPointersConditions) preload() condition.Condition[hasmanywithpointers.SellerInPointers] {
-	return condition.NewPreloadCondition[hasmanywithpointers.SellerInPointers](sellerInPointersConditions.ID, sellerInPointersConditions.CreatedAt, sellerInPointersConditions.UpdatedAt, sellerInPointersConditions.DeletedAt, sellerInPointersConditions.CompanyID)
+	return condition.NewPreloadCondition[hasmanywithpointers.SellerInPointers](sellerInPointersConditions.ID, sellerInPointersConditions.CompanyID)
 }

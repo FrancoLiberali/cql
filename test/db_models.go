@@ -11,9 +11,13 @@ import (
 
 var ListOfTables = []any{
 	models.Product{},
+	models.ProductNoTimestamps{},
 	models.Company{},
+	models.CompanyNoTimestamps{},
 	models.Seller{},
+	models.SellerNoTimestamps{},
 	models.Sale{},
+	models.SaleNoTimestamps{},
 	models.Country{},
 	models.City{},
 	models.Employee{},
@@ -21,6 +25,7 @@ var ListOfTables = []any{
 	models.Bicycle{},
 	models.Brand{},
 	models.Phone{},
+	models.PhoneNoTimestamps{},
 	models.ParentParent{},
 	models.Parent1{},
 	models.Parent2{},

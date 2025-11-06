@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	overrideforeignkey "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/overrideforeignkey"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Condition[overrideforeignkey.Person]) condition.JoinCondition[overrideforeignkey.Bicycle] {
@@ -14,21 +13,15 @@ func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Conditi
 
 type bicycleConditions struct {
 	ID               condition.Field[overrideforeignkey.Bicycle, model.UUID]
-	CreatedAt        condition.Field[overrideforeignkey.Bicycle, time.Time]
-	UpdatedAt        condition.Field[overrideforeignkey.Bicycle, time.Time]
-	DeletedAt        condition.Field[overrideforeignkey.Bicycle, time.Time]
 	OwnerSomethingID condition.StringField[overrideforeignkey.Bicycle]
 }
 
 var Bicycle = bicycleConditions{
-	CreatedAt:        condition.NewField[overrideforeignkey.Bicycle, time.Time]("CreatedAt", "", ""),
-	DeletedAt:        condition.NewField[overrideforeignkey.Bicycle, time.Time]("DeletedAt", "", ""),
 	ID:               condition.NewField[overrideforeignkey.Bicycle, model.UUID]("ID", "", ""),
 	OwnerSomethingID: condition.NewStringField[overrideforeignkey.Bicycle]("OwnerSomethingID", "", ""),
-	UpdatedAt:        condition.NewField[overrideforeignkey.Bicycle, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the Bicycle when doing a query
 func (bicycleConditions bicycleConditions) preload() condition.Condition[overrideforeignkey.Bicycle] {
-	return condition.NewPreloadCondition[overrideforeignkey.Bicycle](bicycleConditions.ID, bicycleConditions.CreatedAt, bicycleConditions.UpdatedAt, bicycleConditions.DeletedAt, bicycleConditions.OwnerSomethingID)
+	return condition.NewPreloadCondition[overrideforeignkey.Bicycle](bicycleConditions.ID, bicycleConditions.OwnerSomethingID)
 }

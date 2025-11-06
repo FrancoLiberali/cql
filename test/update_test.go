@@ -360,7 +360,6 @@ func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNewValue() {
 	ts.Require().NoError(err)
 
 	ts.Equal(seller.ID, sellerReturned.ID)
-	ts.NotEqual(seller.UpdatedAt.UnixMicro(), sellerReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNull() {
@@ -385,7 +384,6 @@ func (ts *UpdateIntTestSuite) TestUpdateRelationIDToNull() {
 	ts.Require().NoError(err)
 
 	ts.Equal(seller.ID, sellerReturned.ID)
-	ts.NotEqual(seller.UpdatedAt.UnixMicro(), sellerReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateDynamic() {
@@ -485,7 +483,6 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithAppearance() {
 
 	ts.Equal(child.ID, childReturned.ID)
 	ts.Equal("franco", childReturned.Name)
-	ts.NotEqual(child.UpdatedAt.UnixMicro(), childReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateUnsafe() {
@@ -717,7 +714,6 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 
 		ts.Equal(brand1.ID, googlePixel.ID)
 		ts.Equal("google pixel", googlePixel.Name)
-		ts.NotEqual(brand1.UpdatedAt.UnixMicro(), googlePixel.UpdatedAt.UnixMicro())
 	}
 }
 
@@ -803,7 +799,6 @@ func (ts *UpdateIntTestSuite) TestUpdateMultipleTablesTableJoinedMultipleTimesAn
 	ts.Require().NoError(err)
 
 	ts.Equal(parentParent2.ID, parentParentReturned.ID)
-	ts.NotEqual(parentParent2.UpdatedAt.UnixMicro(), parentParentReturned.UpdatedAt.UnixMicro())
 }
 
 func (ts *UpdateIntTestSuite) TestUpdateOrderByLimit() {

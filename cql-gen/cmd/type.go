@@ -17,6 +17,8 @@ var (
 	cqlBaseModels = []string{
 		modelPath + "." + uuidModel,
 		modelPath + "." + uIntModel,
+		modelPath + "." + uuidModelWithTimestamps,
+		modelPath + "." + uIntModelWithTimestamps,
 	}
 
 	// database/sql

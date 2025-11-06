@@ -34,8 +34,28 @@ func (ts *testSuite) createProduct(stringV string, intV int, floatV float64, boo
 	})
 }
 
+//nolint:unparam // same params as createProduct
+func (ts *testSuite) createProductNoTimestamps(stringV string, intV int, floatV float64, boolV bool, intP *int) *models.ProductNoTimestamps {
+	return create(ts, &models.ProductNoTimestamps{
+		String:     stringV,
+		Int:        intV,
+		Float:      floatV,
+		Bool:       boolV,
+		IntPointer: intP,
+	})
+}
+
 func (ts *testSuite) createSale(code int, product *models.Product, seller *models.Seller) *models.Sale {
 	return create(ts, &models.Sale{
+		Code:    code,
+		Product: *product,
+		Seller:  seller,
+	})
+}
+
+//nolint:unparam // same params as createSale
+func (ts *testSuite) createSaleNoTimestamps(code int, product *models.ProductNoTimestamps, seller *models.SellerNoTimestamps) *models.SaleNoTimestamps {
+	return create(ts, &models.SaleNoTimestamps{
 		Code:    code,
 		Product: *product,
 		Seller:  seller,
@@ -54,8 +74,26 @@ func (ts *testSuite) createSeller(name string, company *models.Company) *models.
 	})
 }
 
+func (ts *testSuite) createSellerNoTimestamps(name string, company *models.CompanyNoTimestamps) *models.SellerNoTimestamps {
+	var companyID *model.UUID
+	if company != nil {
+		companyID = &company.ID
+	}
+
+	return create(ts, &models.SellerNoTimestamps{
+		Name:                  name,
+		CompanyNoTimestampsID: companyID,
+	})
+}
+
 func (ts *testSuite) createCompany(name string) *models.Company {
 	return create(ts, &models.Company{
+		Name: name,
+	})
+}
+
+func (ts *testSuite) createCompanyNoTimestamps(name string) *models.CompanyNoTimestamps {
+	return create(ts, &models.CompanyNoTimestamps{
 		Name: name,
 	})
 }
@@ -89,6 +127,14 @@ func (ts *testSuite) createBrand(name string) *models.Brand {
 
 func (ts *testSuite) createPhone(name string, brand models.Brand) *models.Phone {
 	return create(ts, &models.Phone{
+		Name:  name,
+		Brand: brand,
+	})
+}
+
+//nolint:unparam // same params as createPhone
+func (ts *testSuite) createPhoneNoTimestamps(name string, brand models.Brand) *models.PhoneNoTimestamps {
+	return create(ts, &models.PhoneNoTimestamps{
 		Name:  name,
 		Brand: brand,
 	})

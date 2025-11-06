@@ -39,7 +39,7 @@ func TestWithLoggerFromContext(t *testing.T) {
 
 	mock.ExpectBegin() // GORM might start a transaction
 	mock.ExpectExec(`INSERT INTO "bicycles"`).
-		WithArgs(sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), sqlmock.AnyArg(), "John Doe", sqlmock.AnyArg()).
+		WithArgs(sqlmock.AnyArg(), "John Doe", sqlmock.AnyArg()).
 		WillReturnResult(sqlmock.NewResult(1, 1))
 	mock.ExpectCommit() // GORM might commit the transaction
 

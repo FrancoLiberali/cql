@@ -5,14 +5,10 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	basicslices "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/basicslices"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 type basicSlicesConditions struct {
 	ID         condition.Field[basicslices.BasicSlices, model.UUID]
-	CreatedAt  condition.Field[basicslices.BasicSlices, time.Time]
-	UpdatedAt  condition.Field[basicslices.BasicSlices, time.Time]
-	DeletedAt  condition.Field[basicslices.BasicSlices, time.Time]
 	Bool       condition.UpdatableField[basicslices.BasicSlices, []bool]
 	Int        condition.UpdatableField[basicslices.BasicSlices, []int]
 	Int8       condition.UpdatableField[basicslices.BasicSlices, []int8]
@@ -38,8 +34,6 @@ var BasicSlices = basicSlicesConditions{
 	Byte:       condition.NewUpdatableField[basicslices.BasicSlices, []uint8]("Byte", "", ""),
 	Complex128: condition.NewUpdatableField[basicslices.BasicSlices, []complex128]("Complex128", "", ""),
 	Complex64:  condition.NewUpdatableField[basicslices.BasicSlices, []complex64]("Complex64", "", ""),
-	CreatedAt:  condition.NewField[basicslices.BasicSlices, time.Time]("CreatedAt", "", ""),
-	DeletedAt:  condition.NewField[basicslices.BasicSlices, time.Time]("DeletedAt", "", ""),
 	Float32:    condition.NewUpdatableField[basicslices.BasicSlices, []float32]("Float32", "", ""),
 	Float64:    condition.NewUpdatableField[basicslices.BasicSlices, []float64]("Float64", "", ""),
 	ID:         condition.NewField[basicslices.BasicSlices, model.UUID]("ID", "", ""),
@@ -55,10 +49,9 @@ var BasicSlices = basicSlicesConditions{
 	UInt64:     condition.NewUpdatableField[basicslices.BasicSlices, []uint64]("UInt64", "", ""),
 	UInt8:      condition.NewUpdatableField[basicslices.BasicSlices, []uint8]("UInt8", "", ""),
 	UIntptr:    condition.NewUpdatableField[basicslices.BasicSlices, []uintptr]("UIntptr", "", ""),
-	UpdatedAt:  condition.NewField[basicslices.BasicSlices, time.Time]("UpdatedAt", "", ""),
 }
 
 // Preload allows preloading the BasicSlices when doing a query
 func (basicSlicesConditions basicSlicesConditions) preload() condition.Condition[basicslices.BasicSlices] {
-	return condition.NewPreloadCondition[basicslices.BasicSlices](basicSlicesConditions.ID, basicSlicesConditions.CreatedAt, basicSlicesConditions.UpdatedAt, basicSlicesConditions.DeletedAt, basicSlicesConditions.Bool, basicSlicesConditions.Int, basicSlicesConditions.Int8, basicSlicesConditions.Int16, basicSlicesConditions.Int32, basicSlicesConditions.Int64, basicSlicesConditions.UInt, basicSlicesConditions.UInt8, basicSlicesConditions.UInt16, basicSlicesConditions.UInt32, basicSlicesConditions.UInt64, basicSlicesConditions.UIntptr, basicSlicesConditions.Float32, basicSlicesConditions.Float64, basicSlicesConditions.Complex64, basicSlicesConditions.Complex128, basicSlicesConditions.String, basicSlicesConditions.Byte)
+	return condition.NewPreloadCondition[basicslices.BasicSlices](basicSlicesConditions.ID, basicSlicesConditions.Bool, basicSlicesConditions.Int, basicSlicesConditions.Int8, basicSlicesConditions.Int16, basicSlicesConditions.Int32, basicSlicesConditions.Int64, basicSlicesConditions.UInt, basicSlicesConditions.UInt8, basicSlicesConditions.UInt16, basicSlicesConditions.UInt32, basicSlicesConditions.UInt64, basicSlicesConditions.UIntptr, basicSlicesConditions.Float32, basicSlicesConditions.Float64, basicSlicesConditions.Complex64, basicSlicesConditions.Complex128, basicSlicesConditions.String, basicSlicesConditions.Byte)
 }

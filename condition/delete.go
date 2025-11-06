@@ -8,6 +8,9 @@ import (
 
 type Delete[T model.Model] struct {
 	OrderLimitReturning[T]
+
+	secondaryQuery       *Query[T]
+	softDeleteColumnName string
 }
 
 // Ascending specify an ascending order when updating models
@@ -41,8 +44,26 @@ func (deleteS *Delete[T]) Limit(limit int) *Delete[T] {
 
 // available for: postgres, sqlite, sqlserver
 //
-// warning: in sqlite preloads are not allowed
+// warning: in mysql preloads are not allowed
 func (deleteS *Delete[T]) Returning(dest *[]T) *Delete[T] {
+	gormDB := deleteS.query.cqlQuery.gormDB
+
+	if deleteS.secondaryQuery != nil {
+		gormDB = deleteS.secondaryQuery.cqlQuery.gormDB
+	}
+
+	if len(gormDB.Statement.Selects) > 1 ||
+		len(gormDB.Statement.Preloads) > 0 {
+		deleteS.query.addError(
+			methodError(
+				ErrPreloadsInDeleteReturningNotAllowed,
+				"Returning",
+			),
+		)
+
+		return deleteS
+	}
+
 	deleteS.OrderLimitReturning.Returning(dest)
 
 	return deleteS
@@ -53,7 +74,13 @@ func (deleteS *Delete[T]) Exec() (int64, error) {
 		return 0, deleteS.query.err
 	}
 
-	return deleteS.query.cqlQuery.Delete()
+	if deleteS.softDeleteColumnName != "" {
+		return deleteS.query.cqlQuery.SoftDelete(deleteS.softDeleteColumnName)
+	}
+
+	return deleteS.query.cqlQuery.Delete(
+		deleteS.secondaryQuery.cqlQuery,
+	)
 }
 
 // Create a Delete to which the conditions are applied inside transaction tx
@@ -64,15 +91,31 @@ func NewDelete[T model.Model](tx *gorm.DB, conditions []Condition[T]) *Delete[T]
 		err = methodError(ErrEmptyConditions, "Delete")
 	}
 
-	query := NewQuery(tx, conditions...)
+	model := *new(T)
+
+	var primaryQuery, secondaryQuery *Query[T]
+
+	softDeleteColumnName := model.SoftDeleteColumnName()
+
+	if softDeleteColumnName != "" {
+		// as soft delete is implemented with UPDATE, conditions can be applied directly to primary query
+		primaryQuery = NewQuery(tx, conditions...)
+	} else {
+		// for DELETE statements, a secondary query is necessary
+		primaryQuery = NewQuery[T](tx)
+		secondaryQuery = NewQuery(tx, conditions...)
+	}
+
 	if err != nil {
-		query.err = err
+		primaryQuery.err = err
 	}
 
 	return &Delete[T]{
 		OrderLimitReturning: OrderLimitReturning[T]{
-			query:         query,
+			query:         primaryQuery,
 			orderByCalled: false,
 		},
+		secondaryQuery:       secondaryQuery,
+		softDeleteColumnName: softDeleteColumnName,
 	}
 }

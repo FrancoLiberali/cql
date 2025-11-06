@@ -7,7 +7,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/elliotchance/pie/v2"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 	"gorm.io/gorm/schema"
@@ -280,7 +279,7 @@ func getTableName(db *gorm.DB, entity any) (string, error) {
 //
 // warning: in sqlite, sqlserver preloads are not allowed
 func (query *CQLQuery) Returning(dest any) error {
-	query.gormDB.Model(dest)
+	query.gormDB = query.gormDB.Model(dest)
 
 	switch query.Dialector() {
 	case sql.Postgres: // support RETURNING from any table
@@ -295,13 +294,13 @@ func (query *CQLQuery) Returning(dest any) error {
 			})
 		}
 
-		query.gormDB.Clauses(clause.Returning{Columns: columns})
+		query.gormDB = query.gormDB.Clauses(clause.Returning{Columns: columns})
 	case sql.SQLite, sql.SQLServer: // supports RETURNING only from main table
 		if len(query.gormDB.Statement.Selects) > 1 {
 			return preloadsInReturningNotAllowed(query.Dialector())
 		}
 
-		query.gormDB.Clauses(clause.Returning{})
+		query.gormDB = query.gormDB.Clauses(clause.Returning{})
 	case sql.MySQL: // RETURNING not supported
 		return ErrUnsupportedByDatabase
 	}
@@ -346,7 +345,7 @@ func (query *CQLQuery) Update(sets []ISet) (int64, error) {
 		}
 
 		setClause := clause.Set{}
-		updatedTables := []Table{}
+		updatedTables := map[Table]model.Model{}
 
 		for _, set := range sets {
 			field := set.getField()
@@ -369,18 +368,23 @@ func (query *CQLQuery) Update(sets []ISet) (int64, error) {
 				Value: updateValue,
 			})
 
-			updatedTables = append(updatedTables, table)
+			updatedTables[table] = set.getModel()
 		}
 
 		now := time.Now()
-		for _, table := range pie.Unique(updatedTables) {
-			setClause = append(setClause, clause.Assignment{
-				Column: clause.Column{
-					Name:  "updated_at",
-					Table: table.SQLName(),
-				},
-				Value: now,
-			})
+
+		for table, model := range updatedTables {
+			updatedAtColumn := model.UpdatedAtColumnName()
+
+			if updatedAtColumn != "" {
+				setClause = append(setClause, clause.Assignment{
+					Column: clause.Column{
+						Name:  updatedAtColumn,
+						Table: table.SQLName(),
+					},
+					Value: now,
+				})
+			}
 		}
 
 		query.gormDB.Clauses(setClause)
@@ -451,7 +455,7 @@ func splitJoin(joinStatement string) (string, string, string) {
 	return tableSplit[0], tableSplit[1], onStatement
 }
 
-func (query *CQLQuery) Delete() (int64, error) {
+func (query *CQLQuery) SoftDelete(softDeleteColumnName string) (int64, error) {
 	switch query.Dialector() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
 		query.joinsToFrom()
@@ -464,7 +468,7 @@ func (query *CQLQuery) Delete() (int64, error) {
 
 		query.gormDB.Clauses(clause.Set{clause.Assignment{
 			Column: clause.Column{
-				Name:  "deleted_at",
+				Name:  softDeleteColumnName,
 				Table: query.initialTable.SQLName(),
 			},
 			Value: time.Now(),
@@ -474,6 +478,35 @@ func (query *CQLQuery) Delete() (int64, error) {
 	query.gormDB.Statement.Selects = []string{}
 
 	deleteTx := query.gormDB.Delete(query.gormDB.Statement.Model)
+
+	return deleteTx.RowsAffected, deleteTx.Error
+}
+
+func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
+	var deleteTx *gorm.DB
+
+	if len(cqlSubQuery.gormDB.Statement.Joins) > 0 {
+		switch query.Dialector() {
+		case sql.Postgres, sql.SQLServer, sql.SQLite: // support DELETE SELECT
+			// there are joins, we must use delete from subquery as gorm does not support delete join
+			deleteTx = query.gormDB.
+				Where(
+					"id IN (?)",
+					cqlSubQuery.gormDB.Select(cqlSubQuery.initialTable.Name+".id"),
+				).
+				Delete(query.gormDB.Statement.Model)
+		case sql.MySQL:
+			return 0,
+				methodError(
+					joinsInDeleteNotAllowed(sql.MySQL),
+					"Delete",
+				)
+		}
+	} else {
+		query.gormDB.Statement.Clauses["WHERE"] = cqlSubQuery.gormDB.Statement.Clauses["WHERE"]
+
+		deleteTx = query.gormDB.Delete(query.gormDB.Statement.Model)
+	}
 
 	return deleteTx.RowsAffected, deleteTx.Error
 }

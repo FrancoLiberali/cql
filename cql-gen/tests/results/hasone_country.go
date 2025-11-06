@@ -5,7 +5,6 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	hasone "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/hasone"
 	model "github.com/FrancoLiberali/cql/model"
-	"time"
 )
 
 func (countryConditions countryConditions) Capital(conditions ...condition.Condition[hasone.City]) condition.JoinCondition[hasone.Country] {
@@ -13,20 +12,12 @@ func (countryConditions countryConditions) Capital(conditions ...condition.Condi
 }
 
 type countryConditions struct {
-	ID        condition.Field[hasone.Country, model.UUID]
-	CreatedAt condition.Field[hasone.Country, time.Time]
-	UpdatedAt condition.Field[hasone.Country, time.Time]
-	DeletedAt condition.Field[hasone.Country, time.Time]
+	ID condition.Field[hasone.Country, model.UUID]
 }
 
-var Country = countryConditions{
-	CreatedAt: condition.NewField[hasone.Country, time.Time]("CreatedAt", "", ""),
-	DeletedAt: condition.NewField[hasone.Country, time.Time]("DeletedAt", "", ""),
-	ID:        condition.NewField[hasone.Country, model.UUID]("ID", "", ""),
-	UpdatedAt: condition.NewField[hasone.Country, time.Time]("UpdatedAt", "", ""),
-}
+var Country = countryConditions{ID: condition.NewField[hasone.Country, model.UUID]("ID", "", "")}
 
 // Preload allows preloading the Country when doing a query
 func (countryConditions countryConditions) preload() condition.Condition[hasone.Country] {
-	return condition.NewPreloadCondition[hasone.Country](countryConditions.ID, countryConditions.CreatedAt, countryConditions.UpdatedAt, countryConditions.DeletedAt)
+	return condition.NewPreloadCondition[hasone.Country](countryConditions.ID)
 }
