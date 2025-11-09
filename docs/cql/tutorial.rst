@@ -68,8 +68,9 @@ In the tutorial_1.go file you will find that we can perform this query as follow
 .. code-block:: go
 
     cities, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
     ).Find()
 
 We can run this tutorial with `make tutorial_1` and we will obtain the following result:
@@ -98,9 +99,10 @@ In the tutorial_2.go file you will find that we can perform this query as follow
     :emphasize-lines: 4
 
     cities, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
-        conditions.City.Population.Is().Gt(1000000),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
+        conditions.City.Population.Is().Gt(cql.Int64(1000000)),
     ).Find()
 
 We can run this tutorial with `make tutorial_2` and we will obtain the following result:
@@ -129,11 +131,12 @@ In the tutorial_3.go file you will find that we can perform this query as follow
     :emphasize-lines: 4,5,6
 
     parisFrance, err := cql.Query[models.City](
-		db,
-		conditions.City.Name.Is().Eq("Paris"),
-	).Descending(
-		conditions.City.Population,
-	).Limit(1).FindOne()
+        context.Background(),
+        db,
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
+    ).Descending(
+        conditions.City.Population,
+    ).Limit(1).FindOne()
 
 We can run this tutorial with `make tutorial_3` and we will obtain the following result:
 
@@ -163,10 +166,11 @@ In the tutorial_4.go file you will find that we can perform this query as follow
     :emphasize-lines: 4,5,6
 
     parisFrance, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
         conditions.City.Country(
-            conditions.Country.Name.Is().Eq("France"),
+            conditions.Country.Name.Is().Eq(cql.String("France")),
         ),
     ).FindOne()
 
@@ -194,8 +198,9 @@ In the tutorial_5.go file you will find that we can perform this query as follow
     :emphasize-lines: 4
 
     cities, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
         conditions.City.Country().Preload(),
     ).Find()
 
@@ -230,8 +235,9 @@ In the tutorial_6.go file you will find that we can perform this query as follow
     :emphasize-lines: 5
 
     cities, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
         conditions.City.Country(
             conditions.Country.CapitalID.IsDynamic().Eq(conditions.City.ID),
         ),
@@ -259,13 +265,14 @@ In the tutorial_7.go file you will find that we can perform this query as follow
 .. code-block:: go
 
     updated, err := cql.Update[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
         conditions.City.Country(
-            conditions.Country.Name.Is().Eq("France"),
+            conditions.Country.Name.Is().Eq(cql.String("France")),
         ),
     ).Returning(&cities).Set(
-        conditions.City.Population.Set().Eq(2102650),
+        conditions.City.Population.Set().Eq(cql.Int64(2102650)),
     )
 
 We can run this tutorial with `make tutorial_7` and we will obtain the following result:
@@ -293,30 +300,30 @@ In the tutorial_8.go file you will find that we can perform this query as follow
     :caption: Create
 
     rennes := models.City{
-        Country:    france,
+        CountryID:  france.ID,
         Name:       "Rennes",
         Population: 215366,
     }
-    if err := db.Create(&rennes).Error; err != nil {
-        log.Panicln(err)
-    }
+
+    inserted, err := cql.Insert(context.Background(), db, &rennes).Exec()
 
 .. code-block:: go
     :caption: Delete
 
     deleted, err := cql.Delete[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Rennes"),
+        conditions.City.Name.Is().Eq(cql.String("Rennes")),
     ).Exec()
 
 We can run this tutorial with `make tutorial_8` and we will obtain the following result:
 
 .. code-block:: none
-
+    Inserted 1 city
     Deleted 1 city
 
-Here, we simply get the number of deleted models through the "deleted" variable returned by the Exec method 
-(according to the number of models that meet the conditions entered in the Delete method).
+Here, we simply get the number of inserted and deleted models through the variable returned by the Exec method
+(according to the number of models that meet the conditions entered in the Insert/Delete method).
 
 In this tutorial we have used create and delete, 
 for more details you can read :doc:`/cql/create` and :doc:`/cql/delete`.
@@ -331,9 +338,10 @@ In the tutorial_9.go file you will find that we can perform a query as follows:
 .. code-block:: go
 
     countries, err := cql.Query[models.Country](
+        context.Background(),
         db,
         conditions.Country.Cities.Any(
-            conditions.City.Name.Is().Eq("Paris"),
+            conditions.City.Name.Is().Eq(cql.String("Paris")),
         ),
     ).Find()
 
@@ -360,8 +368,9 @@ In the tutorial_10.go file you will find that we try to perform a query as follo
 .. code-block:: go
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.Country.Name.Is().Eq("Paris"),
+        conditions.Country.Name.Is().Eq(cql.String("Paris")),
     ).Find()
 
 We can run this tutorial with `make tutorial_10` and we will obtain the following error during compilation:
@@ -369,7 +378,7 @@ We can run this tutorial with `make tutorial_10` and we will obtain the followin
 .. code-block:: none
 
     ./tutorial_10.go:20:3:
-        cannot use conditions.Country.Name.Is().Eq("Paris")
+        cannot use conditions.Country.Name.Is().Eq(cql.String("Paris"))
         (value of interface type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
 
 As you can see, in this tutorial we are trying to put a condition on Country 
