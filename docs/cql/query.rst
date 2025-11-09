@@ -9,7 +9,7 @@ Query creation
 
 To create a query you must use the cql.Query[models.MyModel] method,
 where models.MyModel is the model you expect this query to answer. 
-This function takes as parameters the :ref:`transaction <cql/query:transactions>` 
+This function takes as parameters the db or the :ref:`transaction <cql/query:transactions>` 
 on which to execute the query and the :ref:`cql/query:conditions`.
 
 Transactions
@@ -187,8 +187,50 @@ and <https://pkg.go.dev/github.com/FrancoLiberali/cql/sqlite>.
 
 You can also define your own operators following the condition.Operator interface.
 
-Functions
+Static values
+------------------------
+
+As can be seen in the previous examples, operators can receive another value to perform the comparison.
+These values can be static or :ref:`dynamic <cql/advanced_query:Dynamic operators>`.
+
+For static values, it is necessary to define their type using one of the functions provided by cql:
+
+- Int(value int)
+- Int8(value int8)
+- Int16(value int16)
+- Int32(value int32)
+- Int64(value int64)
+- UInt(value uint)
+- UInt8(value uint8)
+- UInt16(value uint16)
+- UInt32(value uint32)
+- UInt64(value uint64)
+- Float32(value float32)
+- Float64(value float64)
+- Bool(value bool)
+- String(value string)
+- ByteArray(value []byte)
+- Time(value time.Time)
+- UUID(value model.UUID)
+
+This ensures that operations are only performed between compatible types.
+
+Custom types
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In addition to these static values, it is possible to define your own types to be supported by CQL.
+
+For this, the type must implement the ValueOfType[T any] interface, which consists of two methods:
+
+- ToSQL(query *CQLQuery) (string, []any, error):
+    Allows to define how the type is translated to SQL,
+    allowing you to define the SQL statement to be used,
+    the parameters for this statement, and an error.
+- GetValue() T: Allows to define the type with which this type is comparable.
+
+
+Functions
+------------------------
 
 It is also possible to apply functions on the values to be used in the operations.
 
