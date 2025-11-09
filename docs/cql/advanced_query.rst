@@ -29,8 +29,10 @@ cql also allows you to set conditions on a collection of models (one to many or 
     :caption: Query
 
     companies, err := cql.Query[Company](
+        context.Background(),
+        db,
         conditions.Company.Sellers.Any(
-            conditions.Seller.Name.Is().Eq("franco"),
+            conditions.Seller.Name.Is().Eq(cql.String("franco")),
         ),
     ).Find()
 
@@ -47,8 +49,7 @@ In :doc:`/cql/query` we have seen how to use the operators
 to make comparisons between the attributes of a model and static values such as a string, 
 a number, etc. But if we want to make comparisons between two or more attributes of 
 the same type we need to use the dynamic operators. 
-These, instead of a dynamic value, receive a Field, that is, 
-an object that identifies the attribute with which the operation is to be performed.
+These receive a Field, an object that identifies the attribute with which the operation is to be performed.
 
 These identifiers are also generated during the generation of conditions 
 as attributes of the condition model 
@@ -79,9 +80,10 @@ its related MyOtherModel's Name attribute.
     :caption: Query
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
+        context.Background(),
+        db,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.IsDynamic().Eq(conditions.MyModel.Name),
+            conditions.MyOtherModel.Name.Is().Eq(conditions.MyModel.Name),
         ),
     ).Find()
 
@@ -111,19 +113,35 @@ For example:
     :caption: Query
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
-        conditions.MyModel.Name.IsDynamic().Eq(conditions.MyOtherModel.Name),
+        context.Background(),
+        db,
+        conditions.MyModel.Name.Is().Eq(conditions.MyOtherModel.Name),
     ).Find()
 
 will respond cql.ErrFieldModelNotConcerned in err.
 
-All operators supported by cql that receive any value are available in their dynamic version 
-after using the Dynamic() method of the FieldIs object.
+Dynamic functions
+--------------------------------
 
-Functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Functions can also be applied between different attributes:
 
-When using dynamic operators it is also possible to apply functions on the values to be used. 
+.. code-block:: go
+    conditions.MyModel.Attribute1.Divided(conditions.MyModel.Attribute2).Is().Lt(cql.Int64(10))
+
+within dynamic operators:
+
+.. code-block:: go
+    conditions.MyModel.Attribute1.Is().Lt(conditions.MyModel.Attribute2.Minus(cql.Int64(10)))
+
+or both of them:
+
+.. code-block:: go
+    conditions.MyModel.Attribute1.Divided(conditions.MyModel.Attribute2).Is().Lt(
+        conditions.MyModel.Attribute2.Minus(conditions.MyModel.Attribute1),
+    )
+
+In all cases, the attributes to be used in the functions may belong to the same or different entities.
+
 For example, if we seek to obtain the cities whose population represents at least half of the population of their country:
 
 .. code-block:: go
@@ -150,9 +168,10 @@ For example, if we seek to obtain the cities whose population represents at leas
     :emphasize-lines: 5
 
     cities, err := cql.Query[City](
-        gormDB,
+        context.Background(),
+        db,
         conditions.City.Country(
-            conditions.Country.Population.IsDynamic().Lt(
+            conditions.Country.Population.Is().Lt(
                 conditions.City.Population.Times(2),
             ),
         ),
@@ -201,17 +220,18 @@ To do this, you must use the Appearance method of the field, as in the following
 .. code-block:: go
     :caption: Query
     :linenos:
-    :emphasize-lines: 10
+    :emphasize-lines: 11
 
     models, err := cql.Query[Child](
-        gormDB,
+        context.Background(),
+        db,
         conditions.Child.Parent1(
             conditions.Parent1.ParentParent(),
         ),
         conditions.Child.Parent2(
             conditions.Parent2.ParentParent(),
         ),
-        conditions.Child.Name.IsDynamic().Eq(
+        conditions.Child.Name.Is().Eq(
             conditions.ParentParent.Name.Appearance(0), // choose the first (0) appearance (made by conditions.Child.Parent1())
         ),
     ).Find()
@@ -242,7 +262,8 @@ you can always run raw SQL with unsafe.NewCondition, as in the following example
 .. code-block:: go
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
+        context.Background()
+        db,
         unsafe.NewCondition[MyModel]("%s.name = NULL"),
     ).Find()
 

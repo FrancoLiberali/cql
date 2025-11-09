@@ -74,8 +74,9 @@ In this example we query all MyModel that has "a_string" in the Name attribute.
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
-        conditions.MyModel.Name.Is().Eq("a_string"),
+        context.Background(),
+        db,
+        conditions.MyModel.Name.Is().Eq(cql.String("a_string")),
     ).Find()
 
 **Filter by an attribute of a related model**
@@ -98,9 +99,10 @@ In this example we query all MyModels whose related MyOtherModel has "a_string" 
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
+        context.Background(),
+        db,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.Is().Eq("a_string"),
+            conditions.MyOtherModel.Name.Is().Eq(cql.String("a_string")),
         ),
     ).Find()
 
@@ -127,10 +129,11 @@ whose related MyOtherModel has "a_string" in its Name attribute.
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
-        conditions.MyModel.Code.Is().Eq(4),
+        context.Background(),
+        db,
+        conditions.MyModel.Code.Is().Eq(cql.Int64(4)),
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.Is().Eq("a_string"),
+            conditions.MyOtherModel.Name.Is().Eq(cql.String("a_string")),
         ),
     ).Find()
 
@@ -183,3 +186,47 @@ These operators can be found in <https://pkg.go.dev/github.com/FrancoLiberali/cq
 and <https://pkg.go.dev/github.com/FrancoLiberali/cql/sqlite>. 
 
 You can also define your own operators following the condition.Operator interface.
+
+Functions
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+It is also possible to apply functions on the values to be used in the operations.
+
+For example, we can query all MyModels for which half of their Code is less than 10.
+
+.. code-block:: go
+
+    type MyModel struct {
+        model.UUIDModel
+
+        Code int
+    }
+
+    myModels, err := cql.Query[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.Code.Divided(cql.Int64(2)).Is().Lt(cql.Int64(10)),
+    ).Find()
+
+The functions that are applicable depend on the type of attribute.
+
+For numeric attributes:
+
+- Plus(other)
+- Minus(other)
+- Times(other)
+- Divided(other)
+- Modulo(other)
+- Power(other)
+- SquareRoot()
+- Absolute()
+- And(other)
+- Or(other)
+- Xor(other)
+- Not()
+- ShiftLeft(other)
+- ShiftRight(other)
+
+For string values:
+
+- Concat(other)
