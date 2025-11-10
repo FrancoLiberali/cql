@@ -22,6 +22,7 @@ Modifier methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Modifier methods are those that modify the query in a certain way, affecting the results obtained:
+
 - Limit: specifies the number of models to be retrieved.
 - Offset: specifies the number of models to skip before starting to return the results.
 - Ascending: specifies an ascending order when retrieving models.
