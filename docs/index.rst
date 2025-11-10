@@ -35,6 +35,7 @@ For more details see: :doc:`/cql/type_safety`.
    cql/create
    cql/update
    cql/delete
+   cql/transactions
 
 .. toctree::
    :caption: Others

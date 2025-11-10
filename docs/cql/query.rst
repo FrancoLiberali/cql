@@ -9,16 +9,8 @@ Query creation
 
 To create a query you must use the cql.Query[models.MyModel] method,
 where models.MyModel is the model you expect this query to answer. 
-This function takes as parameters the db or the :ref:`transaction <cql/query:transactions>` 
+This function takes as parameters the db or the :ref:`transaction <cql/transactions>` 
 on which to execute the query and the :ref:`cql/query:conditions`.
-
-Transactions
---------------------
-
-To execute transactions, cql provides the function cql.Transaction. 
-The function passed by parameter will be executed inside a gorm transaction 
-(for more information visit https://gorm.io/docs/transactions.html). 
-Using this method will also allow the transaction execution time to be logged.
 
 Query methods
 ------------------------
