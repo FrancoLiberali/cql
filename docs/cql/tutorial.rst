@@ -270,7 +270,7 @@ In the tutorial_7.go file you will find that we can perform this query as follow
         db,
         conditions.City.Name.Is().Eq(cql.String("Paris")),
         conditions.City.Country(
-            conditions.Country.CapitalID.IsDynamic().Eq(conditions.City.ID),
+            conditions.Country.CapitalID.Is().Eq(conditions.City.ID),
         ),
     ).Find()
 
