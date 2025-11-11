@@ -16,7 +16,7 @@ It's built on top of [gorm](https://gorm.io/), a library that actually provides 
 |---|---|
 | SQL | SELECT cities.* FROM cities <br> INNER JOIN countries ON <br>&emsp;&emsp; countries.id = cities.country_id AND <br>&emsp;&emsp; countries.name = "France" <br> WHERE cities.name = "Paris" |
 | GORM | db.Where(<br>&emsp;"cities.name = ?",<br>&emsp;"Paris",<br>).Joins(<br>&emsp;"Country",<br>&emsp;db.Where( <br>&emsp;&emsp; "Country.name = ?", <br>&emsp;&emsp; "France", <br>&emsp; ), <br> ).Find(&cities) |
-| CQL | cql.Query[models.City]( <br>&emsp; db, <br>&emsp; conditions.City.Name.Is().Eq("Paris"), <br>&emsp; conditions.City.Country( <br>&emsp;&emsp; conditions.Country.Name.Is().Eq("France"), <br>&emsp; ), <br> ).FindOne() |
+| CQL | cql.Query[models.City]( <br>&emsp; db, <br>&emsp; conditions.City.Name.Is().Eq(cql.String("Paris")), <br>&emsp; conditions.City.Country( <br>&emsp;&emsp; conditions.Country.Name.Is().Eq(cql.String("France")), <br>&emsp; ), <br> ).FindOne() |
 
 ## Is cql a copy of [gorm-gen](https://gorm.io/gen/)?
 
