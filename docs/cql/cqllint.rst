@@ -59,10 +59,11 @@ with an attribute of a model that is not joined by the query:
 .. code-block:: go
     :caption: example.go
     :class: with-errors
-    :emphasize-lines: 3
+    :emphasize-lines: 4
     :linenos:
 
     _, err := cql.Query[models.Brand](
+        context.Background(),
         db,
         conditions.Brand.Name.Is().Eq(conditions.City.Name),
     ).Find()
@@ -88,15 +89,16 @@ The simplest example this error case is trying to set the value of an attribute 
 .. code-block:: go
     :caption: example.go
     :class: with-errors
-    :emphasize-lines: 5,6
+    :emphasize-lines: 6,7
     :linenos:
 
     _, err := cql.Update[models.Brand](
+        context.Background(),
         db,
-        conditions.Brand.Name.Is().Eq("nike"),
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
     ).Set(
-        conditions.Brand.Name.Set().Eq("adidas"),
-        conditions.Brand.Name.Set().Eq("puma"),
+        conditions.Brand.Name.Set().Eq(cql.String("adidas")),
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
     )
 
 If we execute this query we will obtain an error of type `cql.ErrFieldIsRepeated` with the following message:
@@ -121,10 +123,11 @@ To generate this error we must join the same model more than once and not select
 .. code-block:: go
     :caption: example.go
     :class: with-errors
-    :emphasize-lines: 9
+    :emphasize-lines: 10
     :linenos:
 
     _, err := cql.Query[models.Child](
+        context.Background(),
         db,
         conditions.Child.Parent1(
             conditions.Parent1.ParentParent(),
@@ -156,10 +159,11 @@ To generate this error we must use the Appearance method with a value greater th
 .. code-block:: go
     :caption: example.go
     :class: with-errors
-    :emphasize-lines: 4
+    :emphasize-lines: 5
     :linenos:
 
     _, err := cql.Query[models.Phone](
+        context.Background(),
         db,
         conditions.Phone.Brand(
             conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(1)),
@@ -192,12 +196,13 @@ This case occurs when making a Set of exactly the same value:
 .. code-block:: go
     :caption: example.go
     :class: with-errors
-    :emphasize-lines: 5
+    :emphasize-lines: 6
     :linenos:
 
     _, err := cql.Update[models.Brand](
+        context.Background(),
         db,
-        conditions.Brand.Name.Is().Eq("nike"),
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
     ).Set(
         conditions.Brand.Name.Set().Dynamic(conditions.Brand.Name),
     )
@@ -218,10 +223,11 @@ i.e. when the model appears only once:
 .. code-block:: go
     :caption: example.go
     :class: with-errors
-    :emphasize-lines: 4
+    :emphasize-lines: 5
     :linenos:
 
     _, err := cql.Query[models.Phone](
+        context.Background(),
         db,
         conditions.Phone.Brand(
             conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0)),
