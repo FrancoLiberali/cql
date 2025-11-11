@@ -33,26 +33,28 @@ prohibiting the use of conditions from other models in the wrong place:
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
     ).Find()
 
 .. code-block:: go
     :class: with-errors
     :caption: Incorrect
-    :emphasize-lines: 3
+    :emphasize-lines: 4
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.Country.Name.Is().Eq("Paris"),
+        conditions.Country.Name.Is().Eq(cql.String("Paris")),
     ).Find()
 
 In this case, the compilation error will be:
 
 .. code-block:: none
 
-    cannot use conditions.Country.Name.Is().Eq("Paris")
+    cannot use conditions.Country.Name.Is().Eq(cql.String("Paris"))
     (value of interface type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
 
 Similarly, conditions are checked when making joins:
@@ -62,22 +64,24 @@ Similarly, conditions are checked when making joins:
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
         conditions.City.Country(
-            conditions.Country.Name.Is().Eq("France"),
+            conditions.Country.Name.Is().Eq(cql.String("France")),
         ),
     ).Find()
 
 .. code-block:: go
     :caption: Incorrect
     :class: with-errors
-    :emphasize-lines: 4
+    :emphasize-lines: 5
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
         conditions.City.Country(
-            conditions.City.Name.Is().Eq("France"),
+            conditions.City.Name.Is().Eq(cql.String("France")),
         ),
     ).Find()
 
@@ -92,19 +96,21 @@ the attributes and methods used on it will only allow us to use attributes and o
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
     ).Find()
 
 .. code-block:: go
     :caption: Incorrect
     :class: with-errors
-    :emphasize-lines: 3
+    :emphasize-lines: 4
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Namee.Is().Eq("Paris"),
+        conditions.City.Namee.Is().Eq(cql.String("Paris")),
     ).Find()
 
 In this case, the compilation error will be:
@@ -124,26 +130,28 @@ the value compared to the attribute is of the correct type:
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq("Paris"),
+        conditions.City.Name.Is().Eq(cql.String("Paris")),
     ).Find()
 
 .. code-block:: go
     :caption: Incorrect
     :class: with-errors
-    :emphasize-lines: 3
+    :emphasize-lines: 4
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
-        conditions.City.Name.Is().Eq(100),
+        conditions.City.Name.Is().Eq(cql.Int64(100)),
     ).Find()
 
 In this case, the compilation error will be:
 
 .. code-block:: none
 
-    cannot use 100 (untyped int constant) as string value in argument to conditions.City.Name.Is().Eq
+    cannot use cql.Int64(100) (value of struct type condition.NumericValue[int64]) as condition.ValueOfType[string] value in argument to conditions.City.Name.Is().Eq: condition.NumericValue[int64] does not implement condition.ValueOfType[string] (wrong type for method GetValue)
 
 Type of an attribute (dynamic operator)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -156,22 +164,24 @@ In this case, the type of the two attributes being compared must be the same:
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
         conditions.City.Country(
-            conditions.Country.Name.IsDynamic().Eq(conditions.City.Name),
+            conditions.Country.Name.Is().Eq(conditions.City.Name),
         ),
     ).Find()
 
 .. code-block:: go
     :caption: Incorrect
     :class: with-errors
-    :emphasize-lines: 4
+    :emphasize-lines: 5
     :linenos:
 
     _, err := cql.Query[models.City](
+        context.Background(),
         db,
         conditions.City.Country(
-            conditions.Country.Name.IsDynamic().Eq(conditions.City.Population),
+            conditions.Country.Name.Is().Eq(conditions.City.Population),
         ),
     ).Find()
 
@@ -179,7 +189,7 @@ In this case, the compilation error will be:
 
 .. code-block:: none
 
-    cannot use conditions.City.Population (variable of type condition.UpdatableField[models.City, int]) as condition.FieldOfType[string] value in argument to conditions.Country.Name.IsDynamic().Eq...
+    cannot use conditions.City.Population (variable of type condition.UpdatableField[models.City, int]) as condition.FieldOfType[string] value in argument to conditions.Country.Name.Is().Eq...
 
 Runtime errors
 -------------------------------
@@ -208,12 +218,13 @@ In addition, CQL will add to the error clear information about the problem so th
 .. code-block:: go
     :caption: Query
     :class: with-errors
-    :emphasize-lines: 4
+    :emphasize-lines: 5
     :linenos:
 
     _, err := cql.Query[models.Product](
-        ts.db,
-        conditions.Product.Int.Is().Eq(1),
+        context.Background(),
+        db,
+        conditions.Product.Int.Is().Eq(cql.Int64(1)),
     ).Descending(conditions.Seller.ID).Find()
 
     fmt.Println(err)
