@@ -22,6 +22,8 @@ While there are other libraries that provide an API type safety
 that the generated query is correct, (almost) avoiding runtime errors 
 (to understand why "almost" see :ref:`cql/type_safety:runtime errors`)
 
+.. TODO quizas mover todo esto a query type safety dado que ahora cada metodo tiene su propia seccion
+
 Conditions of the model
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
