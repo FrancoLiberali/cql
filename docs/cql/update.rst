@@ -117,7 +117,7 @@ Dynamic updates
 ------------------------
 
 Updates can also be dynamic, meaning that the set can be a value from the same entity or another entity. 
-:ref:`Functions <cql/query:functions>`  can also be used on the values.
+:ref:`Functions <cql/query:functions>` can also be used on the values.
 
 For example:
 
@@ -143,3 +143,103 @@ Updated at
 
 If your model contains a base model with timestamps (model.UUIDModelWithTimestamps or model.UIntModelWithTimestamps), 
 cql will automatically add ``updated_at = now()`` to entities that are updated.
+
+Type safety
+------------------------
+
+Update uses the same system of compilable conditions as cql.Query, 
+so it shares its features and limitations in terms of type safety at compile time. 
+
+.. TODO actualizar si se mueve
+For more details, see :doc:`/cql/type_safety`.
+
+In addition, Update also provides the same type safety in Set methods, 
+ensuring that the value to be set is of the same type as the attribute to be modified:
+
+.. code-block:: go
+    :caption: Model
+    :linenos:
+
+    type MyModel struct {
+        model.UUIDModel
+
+        ValueInt    int
+        ValueString string
+    }
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyModel.ValueInt.Divided(cql.Int64(2))),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyModel.ValueString),
+    )
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    cannot use conditions.MyModel.ValueString (variable of struct type condition.StringField[MyModel]) as 
+    condition.ValueOfType[float64] value in argument to conditions.MyModel.ValueInt.Set().Eq: 
+    condition.StringField[MyModel] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)
+
+Limitations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Once again, similar to cql.Query, Set is not safe at compile time to determine whether 
+the values used in Eq or used in functions in Eq are joined in the query, as in the following examples:
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyOtherModel.Value1),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyModel.ValueInt.Plus(conditions.MyOtherModel.Value1)),
+    )
+
+Which would generate the following error at runtime:
+
+.. code-block:: none
+
+    field's model is not concerned by the query (not joined); not concerned model: models.MyOtherModel
+
+.. TODO link a la seccion correcta
+These errors can be determined before runtime using :doc:`/cql/cqllint`.

@@ -119,7 +119,6 @@ For more details, see :doc:`/cql/type_safety`.
 As an added bonus, in cql.Delete, the Returning method is also safe at compile time, 
 allowing you to only obtain results in a list of the correct type:
 
-
 .. code-block:: go
     :caption: Correct
     :linenos:
