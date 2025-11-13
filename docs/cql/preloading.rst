@@ -27,7 +27,8 @@ In this example we query all MyModels and preload whose related MyOtherModel.
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
+        context.Background(),
+        db,
         conditions.MyModel.Related().Preload(),
     ).Find()
 
@@ -54,7 +55,8 @@ In this example we query all MyModels and preload whose related MyOtherModel.
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
+        context.Background(),
+        db,
         conditions.MyModel.Related(
             conditions.MyOtherModel.Parent().Preload(),
         ),
@@ -95,6 +97,8 @@ Here is an example of its use:
     }
 
     myModel, err := cql.Query[MyModel](
+        context.Background(),
+        db,
         conditions.MyModel.Related().Preload(),
     ).FindOne()
 
@@ -139,6 +143,8 @@ Model collections can also be preloaded (relations has many or many to many):
     :caption: Query
 
     company, err := cql.Query[Company](
+        context.Background(),
+        db,
         conditions.Company.Sellers.Preload(),
     ).FindOne()
 
@@ -182,6 +188,8 @@ Nested preloads can also be applied to preload model relationships within the co
     :caption: Query
 
     company, err := cql.Query[Company](
+        context.Background(),
+        db,
         conditions.Company.Sellers.Preload(
             conditions.Seller.Office().Preload()
         ),
