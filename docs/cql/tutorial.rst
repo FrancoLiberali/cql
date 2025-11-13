@@ -367,6 +367,7 @@ In this tutorial we want to obtain all the countries that have a city called 'Pa
 In the tutorial_10.go file you will find that we can perform a query as follows:
 
 .. code-block:: go
+    :emphasize-lines: 4,5,6
 
     countries, err := cql.Query[models.Country](
         context.Background(),
@@ -389,14 +390,61 @@ As you can see, again we only get the Paris in France.
 In this tutorial we have used conditions over collections, 
 for more details you can read :ref:`cql/advanced_query:Collections`.
 
-Tutorial 11: Compile type safety
+Tutorial 11: Selection
+-----------------------------------
+In this tutorial, we will also obtain the city called Paris in France, but now we are only interested 
+in obtaining the name of the city and the name of the country as a response, not the rest of the attributes.
+
+In the tutorial_11.go file you will find that once the attributes to be obtained have been defined as follows:
+
+.. code-block:: go
+
+    type CityAndCountryNames struct {
+        CityName    string
+        CountryName string
+    }
+
+we can perform this query as follows:
+
+.. code-block:: go
+    :emphasize-lines: 10,11,12,13,14,15
+
+    results, err := cql.Select(
+        cql.Query[models.City](
+            context.Background(),
+            db,
+            conditions.City.Name.Is().Eq(cql.String("Paris")),
+            conditions.City.Country(
+                conditions.Country.Name.Is().Eq(cql.String("France")),
+            ),
+        ),
+        cql.ValueInto(conditions.City.Name, func(value string, result *CityAndCountryNames) {
+            result.CityName = value
+        }),
+        cql.ValueInto(conditions.Country.Name, func(value string, result *CityAndCountryNames) {
+            result.CountryName = value
+        ),
+    )
+
+We can run this tutorial with `make tutorial_11` and we will obtain the following result:
+
+.. code-block:: none
+    City named 'Paris' in 'France' is: [{CityName:Paris CountryName:France}]
+
+As you can see, again we only get the Paris in France, but now only the selected attributes.
+
+In this tutorial we have used cql.Select, 
+for more details you can read :doc:`/cql/select`.
+
+Tutorial 12: Compile type safety
 -----------------------------------
 
 In this tutorial we want to verify that cql is compile-time safe.
 
-In the tutorial_11.go file you will find that we try to perform a query as follows:
+In the tutorial_12.go file you will find that we try to perform a query as follows:
 
 .. code-block:: go
+    :emphasize-lines: 4
 
     _, err := cql.Query[models.City](
         context.Background(),
@@ -404,11 +452,11 @@ In the tutorial_11.go file you will find that we try to perform a query as follo
         conditions.Country.Name.Is().Eq(cql.String("Paris")),
     ).Find()
 
-We can run this tutorial with `make tutorial_11` and we will obtain the following error during compilation:
+We can run this tutorial with `make tutorial_12` and we will obtain the following error during compilation:
 
 .. code-block:: none
 
-    ./tutorial_11.go:20:3:
+    ./tutorial_12.go:20:3:
         cannot use conditions.Country.Name.Is().Eq(cql.String("Paris"))
         (value of interface type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
 
