@@ -153,6 +153,9 @@ so it shares its features and limitations in terms of type safety at compile tim
 .. TODO actualizar si se mueve
 For more details, see :doc:`/cql/type_safety`.
 
+Set
+^^^^^^^^^^^^^^^^^^^^^^^
+
 In addition, Update also provides the same type safety in Set methods, 
 ensuring that the value to be set is of the same type as the attribute to be modified:
 
@@ -200,6 +203,100 @@ In this case, the compilation error will be:
     cannot use conditions.MyModel.ValueString (variable of struct type condition.StringField[MyModel]) as 
     condition.ValueOfType[float64] value in argument to conditions.MyModel.ValueInt.Set().Eq: 
     condition.StringField[MyModel] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)
+
+Returning
+^^^^^^^^^^^^^^^^^^^^^^^
+
+In cql.Update, the Returning method is also safe at compile time, 
+allowing you to only obtain results in a list of the correct type:
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    myModelsUpdated := []MyModel{}
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Returning(&myModelsUpdated).Set(
+        conditions.MyModel.ValueInt.Set().Eq(cql.Int64(3)),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 1,7
+    :linenos:
+
+    myModelsUpdated := []MyOtherModel{}
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Returning(&myModelsUpdated).Set(
+        conditions.MyModel.ValueInt.Set().Eq(cql.Int64(3)),
+    )
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    cannot use &myModelsUpdated (value of type *[]MyOtherModel) as *[]MyModel value in argument to 
+    cql.Update[MyModel](context.Background(), db, conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2))).Returning
+
+Null update
+^^^^^^^^^^^^^^^^^^^^^^^
+
+For fields that are nullable, such as pointers or null.* types, cql.Update will 
+allow you to safely set their value to null at compile time, i.e., giving a compile-time error 
+if you try to update a non-nullable attribute to null:
+
+.. code-block:: go
+    :caption: Model
+    :linenos:
+
+    type MyModel struct {
+        model.UUIDModel
+
+        ValueInt        int
+        ValueIntPointer *int
+    }
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueIntPointer.Set().Null(),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Null(),
+    )
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    conditions.MyModel.ValueInt.Set().Null undefined 
+    (type condition.FieldSet[MyModel, int] has no field or method Null)
 
 Limitations
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
