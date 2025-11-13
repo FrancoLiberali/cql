@@ -56,7 +56,7 @@ Example
 Joins
 ------------------------
 
-It is also possible to perform joins in the first part of the delete (Delete method):
+It is also possible to perform joins in the first part of the delete (except for MySQL):
 
 .. code-block:: go
 
@@ -105,3 +105,50 @@ Once this is done, cql will automatically take care of:
 
 - Replace DELETE statements with UPDATEs to the deleted_at of the entity.
 - Add the condition ``deleted_at is not null`` to your queries, to avoid receiving entities that have been deleted (unless a condition on deleted_at is part of the query you are performing).
+
+
+Type safety
+------------------------
+
+Delete uses the same system of compilable conditions as cql.Query, 
+so it shares its features and limitations in terms of type safety at compile time. 
+
+.. TODO actualizar si se mueve
+For more details, see :doc:`/cql/type_safety`.
+
+As an added bonus, in cql.Delete, the Returning method is also safe at compile time, 
+allowing you to only obtain results in a list of the correct type:
+
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    myModelsDeleted := []MyModel{}
+
+    deletedCount, err := cql.Delete[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.Name.Is().Eq(cql.String("a_string")),
+    ).Returning(&deletedModels).Exec()
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 1,7
+    :linenos:
+
+    myModelsDeleted := []MyOtherModel{}
+
+    deletedCount, err := cql.Delete[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.Name.Is().Eq(cql.String("a_string")),
+    ).Returning(&myModelsDeleted).Exec()
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    cannot use &myModelsDeleted (value of type *[]MyOtherModel) as *[]MyModel value in argument to 
+    cql.Delete[MyModel](context.Background(), db, conditions.MyModel.Name.Is().Eq(cql.String("a_string"))).Returning
