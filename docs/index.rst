@@ -33,7 +33,7 @@ For more details see: :doc:`/cql/type_safety`.
    cql/advanced_query
    cql/preloading
    cql/select
-   cql/create
+   cql/insert
    cql/update
    cql/delete
    cql/transactions
