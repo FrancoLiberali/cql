@@ -124,7 +124,7 @@ func (insertOnConflict *InsertOnConflict[T]) addPostgresErrorIfNotColumns(msg st
 	}
 }
 
-// UpdateAll will update all model attributes with the values of the models to be inserted.
+// UpdateAll will update all model attributes with the values of the models that already exist.
 func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("UpdateAll after OnConflict")
 
@@ -137,7 +137,7 @@ func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
-// UpdateAll will update the attributes specified by parameter with the values of the models to be inserted.
+// Update will update the attributes specified by parameter with the values of the models that already exist.
 func (insertOnConflict *InsertOnConflict[T]) Update(fields ...FieldOfModel[T]) *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("Update after OnConflict")
 
@@ -185,7 +185,7 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Exec() (int64, error) {
 //
 // WARNING: the value returned may depend on the db engine, for example mysql
 // returns the double of the other ones when there is conflict
-func (insertOnConflictSet *InsertOnConflictSet[T]) ExecInBatches(batchSize int) (int64, error) {
+func (insertOnConflictSet *InsertOnConflictSet[T]) ExecInBatches(batchSize uint) (int64, error) {
 	return insertOnConflictSet.internalExec(func(insert *Insert[T]) (int64, error) {
 		return insert.ExecInBatches(batchSize)
 	})
@@ -282,7 +282,7 @@ func (insertExec *InsertExec[T]) Exec() (int64, error) {
 //
 // WARNING: the value returned may depend on the db engine, for example mysql
 // returns the double of the other ones when there is conflict
-func (insertExec *InsertExec[T]) ExecInBatches(batchSize int) (int64, error) {
+func (insertExec *InsertExec[T]) ExecInBatches(batchSize uint) (int64, error) {
 	return insertExec.insert.ExecInBatches(batchSize)
 }
 
@@ -307,12 +307,12 @@ func (insert *Insert[T]) Exec() (int64, error) {
 //
 // WARNING: the value returned may depend on the db engine, for example mysql
 // returns the double of the other ones when there is conflict
-func (insert *Insert[T]) ExecInBatches(batchSize int) (int64, error) {
+func (insert *Insert[T]) ExecInBatches(batchSize uint) (int64, error) {
 	if insert.err != nil {
 		return 0, insert.err
 	}
 
-	result := insert.tx.Omit(clause.Associations).CreateInBatches(insert.models, batchSize)
+	result := insert.tx.Omit(clause.Associations).CreateInBatches(insert.models, int(batchSize))
 
 	return result.RowsAffected, result.Error
 }

@@ -320,7 +320,7 @@ On the other hand, it is also possible to obtain the information of the updated 
 In this tutorial we have used updates, 
 for more details you can read :doc:`/cql/update`.
 
-Tutorial 9: create and delete
+Tutorial 9: insert and delete
 -------------------------------
 
 In this tutorial we want to create a new city called Rennes and then delete it.
@@ -356,10 +356,10 @@ We can run this tutorial with `make tutorial_9` and we will obtain the following
 Here, we simply get the number of inserted and deleted models through the variable returned by the Exec method
 (according to the number of models that meet the conditions entered in the Insert/Delete method).
 
-In this tutorial we have used create and delete, 
-for more details you can read :doc:`/cql/create` and :doc:`/cql/delete`.
+In this tutorial we have used cql.Insert and cql.Delete, 
+for more details you can read :doc:`/cql/insert` and :doc:`/cql/delete`.
 
-Tutorial 10: Collections
+Tutorial 10: collections
 -------------------------------
 
 In this tutorial we want to obtain all the countries that have a city called 'Paris'
@@ -390,7 +390,7 @@ As you can see, again we only get the Paris in France.
 In this tutorial we have used conditions over collections, 
 for more details you can read :ref:`cql/advanced_query:Collections`.
 
-Tutorial 11: Selection
+Tutorial 11: selection
 -----------------------------------
 In this tutorial, we will also obtain the city called Paris in France, but now we are only interested 
 in obtaining the name of the city and the name of the country as a response, not the rest of the attributes.
@@ -436,7 +436,7 @@ As you can see, again we only get the Paris in France, but now only the selected
 In this tutorial we have used cql.Select, 
 for more details you can read :doc:`/cql/select`.
 
-Tutorial 12: Compile type safety
+Tutorial 12: compile type safety
 -----------------------------------
 
 In this tutorial we want to verify that cql is compile-time safe.
