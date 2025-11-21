@@ -9,9 +9,9 @@ this can be done by using the `cql.Open` method:
 
 .. code-block:: go
 
-  gormDB, err = cql.Open(
+  db, err = cql.Open(
     dialector,
-    &gorm.Config{
+    &cql.Config{
       Logger: logger.Default,
     },
   )
