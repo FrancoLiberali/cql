@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -412,4 +413,34 @@ func (ts *SelectIntTestSuite) TestSelectAggregations() {
 	EqualList(&ts.Suite, []Result{
 		{Int: 4, Aggregation1: 1, Aggregation2: 3},
 	}, results)
+}
+
+func (ts *SelectIntTestSuite) TestSelectAggregationsAndNotAggregations() {
+	// mix of aggregations and not aggregations only supported by sqlite
+	if getDBDialector() == sql.SQLite {
+		ts.createProduct("1", 4, 0, false, nil)
+		ts.createProduct("2", 1, 1, false, nil)
+		ts.createProduct("5", 1, 2, false, nil)
+
+		results, err := cql.Select(
+			cql.Query[models.Product](
+				context.Background(),
+				ts.db,
+			).Descending(conditions.Product.Int),
+			cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
+				result.Int = int(value)
+			}),
+			cql.ValueInto(conditions.Product.Int.Aggregate().Min(), func(value float64, result *Result) {
+				result.Aggregation1 = int(value)
+			}),
+			cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
+				result.Aggregation2 = int(value)
+			}),
+		)
+
+		ts.Require().NoError(err)
+		EqualList(&ts.Suite, []Result{
+			{Int: 1, Aggregation1: 1, Aggregation2: 3},
+		}, results)
+	}
 }
