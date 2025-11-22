@@ -396,7 +396,7 @@ func (ts *SelectIntTestSuite) TestSelectAggregations() {
 		cql.Query[models.Product](
 			context.Background(),
 			ts.db,
-		).Descending(conditions.Product.Int),
+		),
 		cql.ValueInto(conditions.Product.Int.Aggregate().Max(), func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
