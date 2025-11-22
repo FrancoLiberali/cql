@@ -11,6 +11,14 @@ type Query[T model.Model] struct {
 	err      error
 }
 
+func (query *Query[T]) getError() error {
+	return query.err
+}
+
+func (query *Query[T]) getCQLQuery() *CQLQuery {
+	return query.cqlQuery
+}
+
 // Ascending specify an ascending order when retrieving models from database
 func (query *Query[T]) Ascending(field IField) *Query[T] {
 	return query.order(field, false)
@@ -62,9 +70,9 @@ func (query *Query[T]) GroupBy(fields ...IField) *QueryGroup {
 	query.addError(query.cqlQuery.GroupBy(fields))
 
 	return &QueryGroup{
-		gormQuery: query.cqlQuery,
-		err:       query.err,
-		fields:    fields,
+		cqlQuery: query.cqlQuery,
+		err:      query.err,
+		fields:   fields,
 	}
 }
 

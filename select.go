@@ -4,7 +4,6 @@ import (
 	"errors"
 
 	"github.com/FrancoLiberali/cql/condition"
-	"github.com/FrancoLiberali/cql/model"
 )
 
 var errValueTypeIsNotExpectedType = errors.New("type of value is not the expected type")
@@ -63,8 +62,8 @@ func ValueInto[TValue any, TResults any](
 //			result.Code = int(value)
 //		}),
 //	)
-func Select[TModel model.Model, TResults any](
-	query *condition.Query[TModel],
+func Select[TResults any](
+	query condition.IQuery,
 	selections ...condition.Selection[TResults],
 ) ([]TResults, error) {
 	return condition.Select(

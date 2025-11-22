@@ -2,8 +2,6 @@ package condition
 
 import (
 	"strings"
-
-	"github.com/FrancoLiberali/cql/model"
 )
 
 type Selection[T any] interface {
@@ -12,20 +10,27 @@ type Selection[T any] interface {
 	ToSQL(query *CQLQuery) (string, []any, error)
 }
 
-func Select[TResults any, TModel model.Model](
-	query *Query[TModel],
+type IQuery interface {
+	getError() error
+	getCQLQuery() *CQLQuery
+}
+
+func Select[TResults any](
+	query IQuery,
 	selections []Selection[TResults],
 ) ([]TResults, error) {
-	if query.err != nil {
-		return nil, query.err
+	if query.getError() != nil {
+		return nil, query.getError()
 	}
 
 	selectSQLs := make([]string, 0, len(selections))
 
 	var allValues []any
 
+	cqlQuery := query.getCQLQuery()
+
 	for _, selection := range selections {
-		sql, values, err := selection.ToSQL(query.cqlQuery)
+		sql, values, err := selection.ToSQL(cqlQuery)
 		if err != nil {
 			return nil, err
 		}
@@ -37,17 +42,17 @@ func Select[TResults any, TModel model.Model](
 	var extraCols []any
 
 	// add selects that where already in the query, for example for the order
-	if query.cqlQuery.selectClause.SQL != "" {
-		selectSQLs = append(selectSQLs, query.cqlQuery.selectClause.SQL)
-		allValues = append(allValues, query.cqlQuery.selectClause.Vars...)
+	if cqlQuery.selectClause.SQL != "" {
+		selectSQLs = append(selectSQLs, cqlQuery.selectClause.SQL)
+		allValues = append(allValues, cqlQuery.selectClause.Vars...)
 
-		for range len(strings.Split(query.cqlQuery.selectClause.SQL, ",")) {
+		for range len(strings.Split(cqlQuery.selectClause.SQL, ",")) {
 			var anything any
 			extraCols = append(extraCols, &anything)
 		}
 	}
 
-	rows, err := query.cqlQuery.gormDB.Select(
+	rows, err := cqlQuery.gormDB.Select(
 		strings.Join(selectSQLs, ", "),
 		allValues...,
 	).Rows()
