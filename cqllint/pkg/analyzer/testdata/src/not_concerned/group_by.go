@@ -205,158 +205,194 @@ func testGroupByNotJoinedConditionInListWithAppendMultiple() {
 }
 
 func testGroupBySelectSameModel() {
-	cql.Query[models.Brand](
-		context.Background(),
-		db,
-		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		conditions.Brand.Name.Aggregate().Max(), "aggregation1",
+	cql.Select(
+		cql.Query[models.Brand](
+			context.Background(),
+			db,
+			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(conditions.Brand.Name.Aggregate().Max(), func(value string, result *Result) {
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectJoinedModel() {
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Phone.Name,
-	).SelectValue(
-		conditions.Brand.Name.Aggregate().Max(), "aggregation1",
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Phone.Name,
+		),
+		cql.ValueInto(conditions.Brand.Name.Aggregate().Max(), func(value string, result *Result) {
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectNotJoined() {
-	cql.Query[models.Brand](
-		context.Background(),
-		db,
-		conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		conditions.City.Name.Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	cql.Select(
+		cql.Query[models.Brand](
+			context.Background(),
+			db,
+			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(conditions.City.Name.Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectJoinedModelInVariable() {
 	value := conditions.Brand.Name.Aggregate().Max()
 
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		value, "aggregation1",
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(value, func(value string, result *Result) {
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectNotJoinedInVariable() {
-	value := conditions.City.Name.Aggregate().Max() // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	field := conditions.City.Name
 
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		value, "aggregation1",
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(field.Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectJoinedWithFunction() {
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1",
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) {
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectJoinedWithFunctionVariable() {
 	value := conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max()
 
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		value, "aggregation1",
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(value, func(value string, result *Result) {
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectJoinedWithFunctionOverVariable() {
 	value := conditions.Brand.Name
 
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		value.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1",
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(value.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) {
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectNotJoinedWithFunction() {
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectNotJoinedWithFunctionVariable() {
-	value := conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max() // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	value := conditions.City.Name
 
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		value, "aggregation1",
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(value.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectNotJoinedWithFunctionOverVariable() {
 	value := conditions.City.Name
 
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		value.Concat(cql.String("asd")).Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(value.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			result.AggregationString = value
+		}),
 	)
 }
 
 func testGroupBySelectNotJoinedWithTwoFunctions() {
-	cql.Query[models.Phone](
-		context.Background(),
-		db,
-		conditions.Phone.Brand(),
-	).GroupBy(
-		conditions.Brand.Name,
-	).SelectValue(
-		conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd")).Aggregate().Max(), "aggregation1", // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+	cql.Select(
+		cql.Query[models.Phone](
+			context.Background(),
+			db,
+			conditions.Phone.Brand(),
+		).GroupBy(
+			conditions.Brand.Name,
+		),
+		cql.ValueInto(conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+			result.AggregationString = value
+		}),
 	)
 }
 

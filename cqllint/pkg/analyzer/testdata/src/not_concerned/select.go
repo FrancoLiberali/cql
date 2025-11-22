@@ -9,10 +9,12 @@ import (
 	"github.com/FrancoLiberali/cql/test/models"
 )
 
-type Result struct{}
+type Result struct {
+	AggregationString string
+}
 
 func testQueryMainModelInsideSelect() {
-	cql.Select[models.Brand, any](
+	cql.Select[any](
 		cql.Query[models.Brand](
 			context.Background(),
 			db,
@@ -22,7 +24,7 @@ func testQueryMainModelInsideSelect() {
 }
 
 func testQueryJoinedInsideSelect() {
-	cql.Select[models.Phone, any](
+	cql.Select[any](
 		cql.Query[models.Phone](
 			context.Background(),
 			db,
@@ -33,7 +35,7 @@ func testQueryJoinedInsideSelect() {
 }
 
 func testQueryNotJoinedInsideSelect() {
-	cql.Select[models.Brand, any](
+	cql.Select[any](
 		cql.Query[models.Brand](
 			context.Background(),
 			db,
@@ -78,7 +80,7 @@ func testSelectNotJoinedModel() {
 }
 
 func testSelectNotJoinedModelSecond() {
-	cql.Select[models.Brand, Result](
+	cql.Select[Result](
 		cql.Query[models.Brand](
 			context.Background(),
 			db,
@@ -102,7 +104,7 @@ func testSelectJoinedModelWithFunction() {
 }
 
 func testSelectNotJoinedModelWithFunction() {
-	cql.Select[models.Brand, Result](
+	cql.Select[Result](
 		cql.Query[models.Brand](
 			context.Background(),
 			db,
@@ -129,7 +131,7 @@ func testSelectJoinedModelInVar() {
 func testSelectNotJoinedModelInVar() {
 	value := conditions.City.Name
 
-	cql.Select[models.Brand, Result](
+	cql.Select[Result](
 		cql.Query[models.Brand](
 			context.Background(),
 			db,
