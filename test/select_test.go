@@ -386,3 +386,30 @@ func (ts *SelectIntTestSuite) TestSelectFromNotJoinedModelReturnsError() {
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "field's model is not concerned by the query (not joined); not concerned model: models.Product")
 }
+
+func (ts *SelectIntTestSuite) TestSelectAggregations() {
+	ts.createProduct("1", 4, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("5", 1, 2, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			context.Background(),
+			ts.db,
+		).Descending(conditions.Product.Int),
+		cql.ValueInto(conditions.Product.Int.Aggregate().Max(), func(value float64, result *Result) {
+			result.Int = int(value)
+		}),
+		cql.ValueInto(conditions.Product.Int.Aggregate().Min(), func(value float64, result *Result) {
+			result.Aggregation1 = int(value)
+		}),
+		cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
+			result.Aggregation2 = int(value)
+		}),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []Result{
+		{Int: 4, Aggregation1: 1, Aggregation2: 3},
+	}, results)
+}
