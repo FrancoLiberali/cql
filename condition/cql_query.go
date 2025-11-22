@@ -88,8 +88,6 @@ func (query *CQLQuery) GroupBy(fields []IField) error {
 			return err
 		}
 
-		query.AddSelectForAggregation(fieldSQL, nil)
-
 		query.gormDB.Group(fieldSQL)
 	}
 
@@ -142,15 +140,6 @@ func (query *CQLQuery) saveInSelectClause(sql string, values []any) {
 		SQL:  newSQL,
 		Vars: append(query.selectClause.Vars, values...),
 	}
-}
-
-// Select specify fields that you want when doing group bys
-func (query *CQLQuery) AddSelectForAggregation(sql string, values []any) {
-	query.saveInSelectClause(sql, values)
-
-	query.gormDB.Statement.AddClause(clause.Select{
-		Expression: query.selectClause,
-	})
 }
 
 // Select specify fields that you want when querying, creating, updating

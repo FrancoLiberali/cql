@@ -356,43 +356,52 @@ func TestGroupByCompilationErrors(t *testing.T) {
 		{
 			Name: "aggregation do not exist for value type",
 			Code: `
-		_ = cql.Query[models.Product](
-			context.Background(),
-			db,
-		).GroupBy(
-			conditions.Product.Int,
-		).SelectValue(
-			conditions.Product.Int.Aggregate().All(), "aggregation1",
+		_, _ = cql.Select(
+			cql.Query[models.Product](
+				context.Background(),
+				db,
+			).GroupBy(
+				conditions.Product.Int,
+			),
+			cql.ValueInto(conditions.Product.Int.Aggregate().All(), func(value float64, result *Result) {
+				result.Aggregation1 = int(value)
+			}),
 		)`,
 			Error: `conditions.Product.Int.Aggregate().All undefined (type condition.NumericFieldAggregation has no field or method All)`,
 		},
 		{
 			Name: "having not compared with correct type of value",
 			Code: `
-		_ = cql.Query[models.Product](
-			context.Background(),
-			db,
-		).GroupBy(
-			conditions.Product.Int,
-		).Having(
-			conditions.Product.Int.Aggregate().Max().Eq(cql.String("13")),
-		).SelectValue(
-			conditions.Product.Int.Aggregate().Max(), "aggregation1",
+		_, _ = cql.Select(
+			cql.Query[models.Product](
+				context.Background(),
+				db,
+			).GroupBy(
+				conditions.Product.Int,
+			).Having(
+				conditions.Product.Int.Aggregate().Max().Eq(cql.String("13")),
+			),
+			cql.ValueInto(conditions.Product.Int.Aggregate().Max(), func(value float64, result *Result) {
+				result.Aggregation1 = int(value)
+			}),
 		)`,
 			Error: `cannot use cql.String("13") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
 		{
 			Name: "having not compared with correct type of another aggregation",
 			Code: `
-		_ = cql.Query[models.Product](
-			context.Background(),
-			db,
-		).GroupBy(
-			conditions.Product.Int,
-		).Having(
-			conditions.Product.Int.Aggregate().Max().Eq(conditions.Product.String.Aggregate().Min()),
-		).SelectValue(
-			conditions.Product.Int.Aggregate().Max(), "aggregation1",
+		_, _ = cql.Select(
+			cql.Query[models.Product](
+				context.Background(),
+				db,
+			).GroupBy(
+				conditions.Product.Int,
+			).Having(
+				conditions.Product.Int.Aggregate().Max().Eq(conditions.Product.String.Aggregate().Min()),
+			),
+			cql.ValueInto(conditions.Product.Int.Aggregate().Max(), func(value float64, result *Result) {
+				result.Aggregation1 = int(value)
+			}),
 		)`,
 			Error: ` cannot use conditions.Product.String.Aggregate().Min() (value of struct type condition.AggregationResult[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.AggregationResult[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},

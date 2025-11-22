@@ -5,6 +5,7 @@ import (
 	"reflect"
 
 	"github.com/FrancoLiberali/cql"
+	"github.com/FrancoLiberali/cql/sql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -33,13 +34,13 @@ func (ts *SelectIntTestSuite) TestSelectOneSelect() {
 			context.Background(),
 			ts.db,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 0},
 		{Int: 1},
 		{Int: 1},
@@ -56,13 +57,13 @@ func (ts *SelectIntTestSuite) TestSelectWithOrder() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 0},
 		{Int: 1},
 		{Int: 1},
@@ -79,13 +80,13 @@ func (ts *SelectIntTestSuite) TestSelectWithMultipleOrder() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int).Descending(conditions.Product.Bool),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	ts.Assert().True(reflect.DeepEqual(results, []ResultInt{
+	ts.Assert().True(reflect.DeepEqual(results, []Result{
 		{Int: 1},
 		{Int: 1},
 		{Int: 0},
@@ -101,13 +102,13 @@ func (ts *SelectIntTestSuite) TestSelectWithOrderNotSelected() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Bool),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	ts.Assert().True(reflect.DeepEqual(results, []ResultInt{
+	ts.Assert().True(reflect.DeepEqual(results, []Result{
 		{Int: 0},
 		{Int: 1},
 	}))
@@ -123,16 +124,16 @@ func (ts *SelectIntTestSuite) TestTwoSelectSameValue() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Aggregation1 = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 0, Aggregation1: 0},
 		{Int: 1, Aggregation1: 1},
 		{Int: 1, Aggregation1: 1},
@@ -149,16 +150,16 @@ func (ts *SelectIntTestSuite) TestTwoSelectDifferentValue() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
-		cql.ValueInto(conditions.Product.Float, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Float, func(value float64, result *Result) {
 			result.Aggregation1 = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 0, Aggregation1: 2},
 		{Int: 1, Aggregation1: 1},
 		{Int: 2, Aggregation1: 0},
@@ -175,13 +176,13 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionInGo() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value) + 1
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 1},
 		{Int: 2},
 		{Int: 3},
@@ -198,13 +199,13 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionInCQL() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(1)), func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(1)), func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 1},
 		{Int: 2},
 		{Int: 3},
@@ -221,13 +222,13 @@ func (ts *SelectIntTestSuite) TestOneSelectWithFunctionDynamic() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int.Plus(conditions.Product.Float), func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int.Plus(conditions.Product.Float), func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 0},
 		{Int: 2},
 		{Int: 4},
@@ -244,22 +245,22 @@ func (ts *SelectIntTestSuite) TestSelectMultipleWithFunction() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultIntAndFloat) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
-		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(1)), func(value float64, result *ResultIntAndFloat) {
+		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(1)), func(value float64, result *Result) {
 			result.Aggregation1 = int(value)
 		}),
-		cql.ValueInto(conditions.Product.Float.Minus(cql.Float64(1.5)), func(value float64, result *ResultIntAndFloat) {
-			result.Aggregation2 = value
+		cql.ValueInto(conditions.Product.Float.Minus(cql.Float64(1.5)), func(value float64, result *Result) {
+			result.Aggregation3 = value
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultIntAndFloat{
-		{Int: 0, Aggregation1: 1, Aggregation2: -1.5},
-		{Int: 1, Aggregation1: 2, Aggregation2: -0.5},
-		{Int: 2, Aggregation1: 3, Aggregation2: 0.5},
+	EqualList(&ts.Suite, []Result{
+		{Int: 0, Aggregation1: 1, Aggregation3: -1.5},
+		{Int: 1, Aggregation1: 2, Aggregation3: -0.5},
+		{Int: 2, Aggregation1: 3, Aggregation3: 0.5},
 	}, results)
 }
 
@@ -280,13 +281,13 @@ func (ts *SelectIntTestSuite) TestSelectFromJoinedModel() {
 			ts.db,
 			conditions.Sale.Product(),
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 0},
 		{Int: 1},
 		{Int: 1},
@@ -312,13 +313,13 @@ func (ts *SelectIntTestSuite) TestSelectFromMainModelAfterJoin() {
 			ts.db,
 			conditions.Sale.Product(),
 		).Descending(conditions.Sale.Code),
-		cql.ValueInto(conditions.Sale.Code, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Sale.Code, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 1},
 		{Int: 1},
 		{Int: 1},
@@ -344,16 +345,16 @@ func (ts *SelectIntTestSuite) TestSelectFromMainAndJoinedModel() {
 			ts.db,
 			conditions.Sale.Product(),
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
-		cql.ValueInto(conditions.Sale.Code, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Sale.Code, func(value float64, result *Result) {
 			result.Aggregation1 = int(value)
 		}),
 	)
 
 	ts.Require().NoError(err)
-	EqualList(&ts.Suite, []ResultInt{
+	EqualList(&ts.Suite, []Result{
 		{Int: 0, Aggregation1: 1},
 		{Int: 1, Aggregation1: 1},
 		{Int: 1, Aggregation1: 1},
@@ -378,11 +379,68 @@ func (ts *SelectIntTestSuite) TestSelectFromNotJoinedModelReturnsError() {
 			context.Background(),
 			ts.db,
 		).Descending(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
+		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
 			result.Int = int(value)
 		}),
 	)
 
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
 	ts.ErrorContains(err, "field's model is not concerned by the query (not joined); not concerned model: models.Product")
+}
+
+func (ts *SelectIntTestSuite) TestSelectAggregations() {
+	ts.createProduct("1", 4, 0, false, nil)
+	ts.createProduct("2", 1, 1, false, nil)
+	ts.createProduct("5", 1, 2, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			context.Background(),
+			ts.db,
+		),
+		cql.ValueInto(conditions.Product.Int.Aggregate().Max(), func(value float64, result *Result) {
+			result.Int = int(value)
+		}),
+		cql.ValueInto(conditions.Product.Int.Aggregate().Min(), func(value float64, result *Result) {
+			result.Aggregation1 = int(value)
+		}),
+		cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
+			result.Aggregation2 = int(value)
+		}),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []Result{
+		{Int: 4, Aggregation1: 1, Aggregation2: 3},
+	}, results)
+}
+
+func (ts *SelectIntTestSuite) TestSelectAggregationsAndNotAggregations() {
+	// mix of aggregations and not aggregations only supported by sqlite
+	if getDBDialector() == sql.SQLite {
+		ts.createProduct("1", 4, 0, false, nil)
+		ts.createProduct("2", 1, 1, false, nil)
+		ts.createProduct("5", 1, 2, false, nil)
+
+		results, err := cql.Select(
+			cql.Query[models.Product](
+				context.Background(),
+				ts.db,
+			).Descending(conditions.Product.Int),
+			cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
+				result.Int = int(value)
+			}),
+			cql.ValueInto(conditions.Product.Int.Aggregate().Min(), func(value float64, result *Result) {
+				result.Aggregation1 = int(value)
+			}),
+			cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
+				result.Aggregation2 = int(value)
+			}),
+		)
+
+		ts.Require().NoError(err)
+		EqualList(&ts.Suite, []Result{
+			{Int: 1, Aggregation1: 1, Aggregation2: 3},
+		}, results)
+	}
 }
