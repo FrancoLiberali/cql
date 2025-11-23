@@ -177,6 +177,95 @@ For example, if we seek to obtain the cities whose population represents at leas
         ),
     ).Find()
 
+Group by
+-------------------------
+
+Queries created with cql.Query also support the group by statement.
+Grouping actions are defined using two methods on queries:
+
+- GroupBy: allows to define the attributes that are used to create groups.
+- Having: allows filter groups of rows based on conditions involving aggregate functions.
+
+Then, the selection of the fields in the groups is performed using :ref:`cql.Select <cql/select>`.
+
+Example:
+
+.. code-block:: go
+    :caption: Model definition
+
+    type MyModel struct {
+        model.UUIDModel
+
+        Name     string
+        LastName string
+        Status   int
+    }
+
+    type Result struct {
+        Name      string
+        LastName  string
+        SumStatus int
+    }
+
+.. code-block:: go
+    :caption: Group by single attribute
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+        ).GroupBy(
+            conditions.MyModel.Name,
+        ),
+        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
+            result.Name = value
+        }),
+        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
+            result.SumStatus = int(value)
+        }),
+    )
+
+.. code-block:: go
+    :caption: Group by multiple attributes
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+        ).GroupBy(
+            conditions.MyModel.Name,
+            conditions.MyModel.LastName,
+        ),
+        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
+            result.Name = value
+        }),
+        cql.ValueInto(conditions.MyModel.LastName, func(value string, result *Result) {
+            result.LastName = value
+        }),
+        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
+            result.SumStatus = int(value)
+        }),
+    )
+
+.. code-block:: go
+    :caption: Group by having
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+        ).GroupBy(
+            conditions.MyModel.Name,
+        ).Having(
+            conditions.MyModel.Status.Aggregate().Count().Gt(cql.Int(2)),
+        ),
+        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
+            result.Name = value
+        }),
+        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
+            result.SumStatus = int(value)
+        }),
+    )
 
 Appearance
 -------------------------
