@@ -241,6 +241,10 @@ Example:
         }),
     )
 
+.. warning::
+
+    Aggregations and non-aggregations cannot be combined within the same select.
+
 Type safety
 -----------------------
 

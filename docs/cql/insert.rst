@@ -37,7 +37,9 @@ Then the possible actions to be taken are:
 - UpdateAll: will update all model attributes with the values of the models that already exist.
 - Set(sets ...*Set[T]): allows you to configure specific updates to be performed. Its syntax is the same as the :ref:`sets in the cql.Update method <cql/update:Finishing methods>`.
 
-WARNING: in postgres OnConflict can be used only with DoNothing. For UpdateAll, Update and Set, OnConflictOn must be used.
+.. warning::
+
+    In postgres OnConflict can be used only with DoNothing. For UpdateAll, Update and Set, OnConflictOn must be used.
 
 In addition, the action Set allows a third method:
 
