@@ -13,6 +13,7 @@ a function to save that field in the results list.
 Example 1: Select only one field from the main model
 
 .. code-block:: go
+    :caption: Model
 
     type MyModel struct {
         model.UUIDModel
@@ -24,6 +25,8 @@ Example 1: Select only one field from the main model
     type Results struct {
         Value1 int64
     }
+
+.. code-block:: go
 
     results, err := cql.Select(
         cql.Query[MyModel](
@@ -39,6 +42,7 @@ Example 1: Select only one field from the main model
 Example 2: Select more than one field from the main model
 
 .. code-block:: go
+    :caption: Model
 
     type MyModel struct {
         model.UUIDModel
@@ -51,6 +55,8 @@ Example 2: Select more than one field from the main model
         Value1 int64
         Value2 String
     }
+
+.. code-block:: go
 
     results, err := cql.Select(
         cql.Query[MyModel](
@@ -72,6 +78,7 @@ Joins
 It is possible to select different attributes from the different entities joined in the queries:
 
 .. code-block:: go
+    :caption: Model
 
      type MyOtherModel struct {
         model.UUIDModel
@@ -92,6 +99,8 @@ It is possible to select different attributes from the different entities joined
         Value1 int64
         Name String
     }
+
+.. code-block:: go
 
     results, err := cql.Select(
         cql.Query[MyModel](
@@ -119,6 +128,7 @@ Example 1: Function with static value
 In this case, we will add 2 to the values obtained.
 
 .. code-block:: go
+    :caption: Model
 
     type MyModel struct {
         model.UUIDModel
@@ -129,6 +139,8 @@ In this case, we will add 2 to the values obtained.
     type Results struct {
         Value1 int64
     }
+
+.. code-block:: go
 
     results, err := cql.Select(
         cql.Query[MyModel](
@@ -146,6 +158,7 @@ Example 2: Function with other attribute
 In this case, we will add two attributes.
 
 .. code-block:: go
+    :caption: Model
 
     type MyModel struct {
         model.UUIDModel
@@ -158,6 +171,8 @@ In this case, we will add two attributes.
         Value1PlusValue2 int64
     }
 
+.. code-block:: go
+
     results, err := cql.Select(
         cql.Query[MyModel](
             context.Background(),
@@ -166,6 +181,63 @@ In this case, we will add two attributes.
         ),
         cql.ValueInto(conditions.MyModel.Value1.Plus(conditions.MyModel.Value2), func(value float64, result *Results) {
             result.Value1PlusValue2 = int64(value)
+        }),
+    )
+
+Aggregations
+-----------------------
+
+When selecting, it is also possible to perform aggregations on the values. The available aggregations depend on the type of attribute.
+
+The aggregations available for all types are:
+
+- Count: returns the number of values that are not null.
+- Min: returns the minimum value of all values.
+- Max: returns the maximum value of all values.
+
+For numeric attributes, the following aggregations are also available:
+
+- Sum: calculates the summation of all values.
+- Average: calculates the average (arithmetic mean) of all values.
+- And: calculates the bitwise AND of all non-null values (null values are ignored). Not available for: sqlite, sqlserver.
+- Or: calculates the bitwise OR of all non-null values (null values are ignored). Not available for: sqlite, sqlserver.
+
+For boolean attributes, the following aggregations are also available:
+
+- All: returns true if all the values are true.
+- Any: returns true if at least one value is true.
+- None: returns true if all values are false.
+
+Example:
+
+.. code-block:: go
+    :caption: Model
+
+    type MyModel struct {
+        model.UUIDModel
+
+        Value1 int64
+        Value2 int64
+    }
+
+    type Results struct {
+        Value1Sum int64
+        Value2Max int64
+    }
+
+.. code-block:: go
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+            conditions.MyModel.Value1.Is().Eq(cql.Int64(4)),
+        ),
+        cql.ValueInto(conditions.MyModel.Value1.Aggregate().Sum(), func(value float64, result *Results) {
+            result.Value1Sum = int64(value)
+        }),
+        cql.ValueInto(conditions.MyModel.Value2.Aggregate().Max(), func(value float64, result *Results) {
+            result.Value2Max = int64(value)
         }),
     )
 
@@ -346,6 +418,22 @@ the values selected or used in functions are joined in the query, as in the foll
             db,
         ),
         cql.ValueInto(conditions.MyModel.Value1.Plus(conditions.MyOtherModel.Value2), func(value float64, result *Results) {
+            result.Value1 = value
+        }),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+        ),
+        cql.ValueInto(conditions.MyOtherModel.Value1.Aggregate().Sum(), func(value float64, result *Results) {
             result.Value1 = value
         }),
     )
