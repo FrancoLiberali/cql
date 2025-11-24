@@ -298,8 +298,11 @@ In this case, the compilation error will be:
     conditions.MyModel.ValueInt.Set().Null undefined 
     (type condition.FieldSet[MyModel, int] has no field or method Null)
 
-Limitations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Type safety limitations
+------------------------
+
+Dynamic sets
+^^^^^^^^^^^^^^^^^^^^^^^
 
 Once again, similar to cql.Query, Set is not safe at compile time to determine whether 
 the values used in Eq or used in functions in Eq are joined in the query, as in the following examples:
@@ -340,3 +343,92 @@ Which would generate the following error at runtime:
 
 .. TODO link a la seccion correcta
 These errors can be determined before runtime using :doc:`/cql/cqllint`.
+
+Repeated sets
+^^^^^^^^^^^^^^^^^^^^^^^
+
+While databases allow it, cql detects and generates a runtime error when attempting 
+to set more than one value to the same attribute within an update:
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+.. code-block:: go
+    :caption: Incorrect example.go
+    :class: with-errors
+    :emphasize-lines: 6,7
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("adidas")),
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+If we execute this query we will obtain an error of type `cql.ErrFieldIsRepeated` with the following message:
+
+.. code-block:: none
+
+    field is repeated; field: models.Brand.Name; method: Set
+
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:5: conditions.Brand.Name is repeated
+    example.go:6: conditions.Brand.Name is repeated
+
+Limit and order
+^^^^^^^^^^^^^^^^^^^^^^^
+
+As mentioned above, in MySQL it is possible to limit the number of rows updated using the Limit method. 
+For it to work correctly, it is also necessary to add a call to a sorting method:
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Ascending(
+        conditions.Brand.Name,
+    ).Limit(1).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+.. code-block:: go
+    :caption: Incorrect example.go
+    :class: with-errors
+    :emphasize-lines: 6,7
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Limit(1).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+If we execute this query we will obtain an error of type `cql.ErrOrderByMustBeCalled` with the following message:
+
+.. code-block:: none
+
+    order by must be called before limit in an update statement; method: Limit
+
+This error is not yet supported by :doc:`/cql/cqllint`.

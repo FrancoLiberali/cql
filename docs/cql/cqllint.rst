@@ -81,40 +81,6 @@ Now, if we run cqllint we will see the following report:
     $ cqllint ./...
     example.go:3: models.City is not joined by the query
 
-ErrFieldIsRepeated
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-The simplest example this error case is trying to set the value of an attribute twice:
-
-.. code-block:: go
-    :caption: example.go
-    :class: with-errors
-    :emphasize-lines: 6,7
-    :linenos:
-
-    _, err := cql.Update[models.Brand](
-        context.Background(),
-        db,
-        conditions.Brand.Name.Is().Eq(cql.String("nike")),
-    ).Set(
-        conditions.Brand.Name.Set().Eq(cql.String("adidas")),
-        conditions.Brand.Name.Set().Eq(cql.String("puma")),
-    )
-
-If we execute this query we will obtain an error of type `cql.ErrFieldIsRepeated` with the following message:
-
-.. code-block:: none
-
-    field is repeated; field: models.Brand.Name; method: Set
-
-Now, if we run cqllint we will see the following report:
-
-.. code-block:: none
-
-    $ cqllint ./...
-    example.go:5: conditions.Brand.Name is repeated
-    example.go:6: conditions.Brand.Name is repeated
-
 ErrAppearanceMustBeSelected
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

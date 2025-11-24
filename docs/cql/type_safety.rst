@@ -2,9 +2,6 @@
 Type safety
 ==============================
 
-Compile time safety
--------------------------------
-
 One of the most important features of the CQL is
 
 .. code-block:: none
@@ -19,219 +16,37 @@ One of the most important features of the CQL is
 While there are other libraries that provide an API type safety 
 (`gorm-gen <https://gorm.io/gen/>`_, `jooq <https://www.jooq.org/>`_ (Java), 
 `diesel <https://diesel.rs/>`_ (Rust)), CQL is the only one that allows us to be sure 
-that the generated query is correct, (almost) avoiding runtime errors 
-(to understand why "almost" see :ref:`cql/type_safety:runtime errors`)
+that the generated query is correct, avoiding runtime errors.
 
-.. TODO quizas mover todo esto a query type safety dado que ahora cada metodo tiene su propia seccion
+Each of the CQL features is designed to be safe at compile time.
+For details of each feature, see:
 
-Conditions of the model
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+- Query: :doc:`/cql/query_type_safety`
+- Select: :ref:`<cql/select:type_safety>`.
+- Insert: :ref:`<cql/insert:type_safety>`.
+- Update: :ref:`<cql/update:type_safety>`.
+- Delete: :ref:`<cql/delete:type_safety>`.
 
-cql will only allow us to add conditions on the model we are querying, 
-prohibiting the use of conditions from other models in the wrong place:
+In each of these sections, you will see that there are limitations in terms of runtime security, 
+with borderline cases where queries can generate runtime errors even though they compile. 
+For these cases, there is :doc:`/cql/cqllint`, a utility for analyzing our code and finding these cases, 
+to ensure security before runtime.
+
+A runtime error that is common to almost all CQL methods is cql.ErrUnsupportedByDatabase.
+This error is generated when an attempt is made to use a method or function that is not supported by the database engine used. 
+When using cql, you will see many comments about features that certain database engines do not support:
 
 .. code-block:: go
-    :caption: Correct
-    :linenos:
 
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Name.Is().Eq(cql.String("Paris")),
-    ).Find()
+    // SetMultiple allows updating multiple tables in the same query.
+    //
+    // available for: mysql
+    func (update *Update[T]) SetMultiple(sets ...ISet) (int64, error) {
 
-.. code-block:: go
-    :class: with-errors
-    :caption: Incorrect
-    :emphasize-lines: 4
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.Country.Name.Is().Eq(cql.String("Paris")),
-    ).Find()
-
-In this case, the compilation error will be:
+generating the following error when used in another database:
 
 .. code-block:: none
 
-    cannot use conditions.Country.Name.Is().Eq(cql.String("Paris"))
-    (value of interface type condition.WhereCondition[models.Country]) as condition.Condition[models.City]...
+    method not supported by database; method: SetMultiple
 
-Similarly, conditions are checked when making joins:
-
-.. code-block:: go
-    :caption: Correct
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Country(
-            conditions.Country.Name.Is().Eq(cql.String("France")),
-        ),
-    ).Find()
-
-.. code-block:: go
-    :caption: Incorrect
-    :class: with-errors
-    :emphasize-lines: 5
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Country(
-            conditions.City.Name.Is().Eq(cql.String("France")),
-        ),
-    ).Find()
-
-Name of an attribute or operator
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-Since the conditions are made using the auto-generated code, 
-the attributes and methods used on it will only allow us to use attributes and operators that exist:
-
-
-.. code-block:: go
-    :caption: Correct
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Name.Is().Eq(cql.String("Paris")),
-    ).Find()
-
-.. code-block:: go
-    :caption: Incorrect
-    :class: with-errors
-    :emphasize-lines: 4
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Namee.Is().Eq(cql.String("Paris")),
-    ).Find()
-
-In this case, the compilation error will be:
-
-.. code-block:: none
-
-    conditions.City.Namee undefined (type conditions.cityConditions has no field or method Namee)
-
-Type of an attribute
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-cql not only verifies that the attribute used exists but also verifies that 
-the value compared to the attribute is of the correct type:
-
-.. code-block:: go
-    :caption: Correct
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Name.Is().Eq(cql.String("Paris")),
-    ).Find()
-
-.. code-block:: go
-    :caption: Incorrect
-    :class: with-errors
-    :emphasize-lines: 4
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Name.Is().Eq(cql.Int64(100)),
-    ).Find()
-
-In this case, the compilation error will be:
-
-.. code-block:: none
-
-    cannot use cql.Int64(100) (value of struct type condition.NumericValue[int64]) as condition.ValueOfType[string] value in argument to conditions.City.Name.Is().Eq: condition.NumericValue[int64] does not implement condition.ValueOfType[string] (wrong type for method GetValue)
-
-Type of an attribute (dynamic operator)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-cql also checks that the type of the attributes is correct when using dynamic operators. 
-In this case, the type of the two attributes being compared must be the same: 
-
-.. code-block:: go
-    :caption: Correct
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Country(
-            conditions.Country.Name.Is().Eq(conditions.City.Name),
-        ),
-    ).Find()
-
-.. code-block:: go
-    :caption: Incorrect
-    :class: with-errors
-    :emphasize-lines: 5
-    :linenos:
-
-    _, err := cql.Query[models.City](
-        context.Background(),
-        db,
-        conditions.City.Country(
-            conditions.Country.Name.Is().Eq(conditions.City.Population),
-        ),
-    ).Find()
-
-In this case, the compilation error will be:
-
-.. code-block:: none
-
-    cannot use conditions.City.Population (variable of type condition.UpdatableField[models.City, int]) as condition.FieldOfType[string] value in argument to conditions.Country.Name.Is().Eq...
-
-Runtime errors
--------------------------------
-
-Although all the above checks are at compile-time, 
-there are still some possible cases that generate the following run-time errors:
-
-- cql.ErrFieldModelNotConcerned **(1)**: generated when trying to use a model that is not related 
-  to the rest of the query (not joined).
-- cql.ErrAppearanceMustBeSelected **(1)**: generated when you try to use a model that appears 
-  (is joined) more than once in the query without selecting which one you want to use (see :ref:`cql/advanced_query:appearance`).
-- cql.ErrAppearanceOutOfRange **(1)**: generated when you try select an appearance number (with the Appearance method) 
-  greater than the number of appearances of a model. (see :ref:`cql/advanced_query:appearance`).
-- cql.ErrFieldIsRepeated **(1)**: generated when a field is repeated inside a Set call (see :doc:`/cql/update`).
-- cql.ErrOnlyPreloadsAllowed: generated when trying to use conditions within a preload of collections (see :ref:`cql/advanced_query:collections`).
-- cql.ErrUnsupportedByDatabase: generated when an attempt is made to use a method or function that is not supported by the database engine used.
-- cql.ErrOrderByMustBeCalled: generated when in MySQL you try to do a delete/update with Limit but without using OrderBy.
-
-.. note::
-
-    **(1)** errors avoided with :doc:`/cql/cqllint`.
-
-However, these errors are discovered by CQL before the query is executed. 
-In addition, CQL will add to the error clear information about the problem so that it is easy to fix, for example:
-
-.. code-block:: go
-    :caption: Query
-    :class: with-errors
-    :emphasize-lines: 5
-    :linenos:
-
-    _, err := cql.Query[models.Product](
-        context.Background(),
-        db,
-        conditions.Product.Int.Is().Eq(cql.Int64(1)),
-    ).Descending(conditions.Seller.ID).Find()
-
-    fmt.Println(err)
-
-.. code-block:: none
-    :caption: Result
-
-    field's model is not concerned by the query (not joined); not concerned model: models.Seller; method: Descending
+This error is not yet supported by cqllint, so these comments should be reviewed carefully.
