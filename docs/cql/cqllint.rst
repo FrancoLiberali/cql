@@ -69,4 +69,118 @@ The list of each of the detections performed by cqllint can be found at:
 Scope and limitations
 -------------------------
 
-.. TODO poner las limitaciones de dentro de la misma funcion y eso
+cqllint analyzes the entire scope of a CQL method call, 
+so detection works both outside and inside the function call:
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Inside function call
+    :emphasize-lines: 5
+    :linenos:
+
+    _, err := cql.Query[models.City](
+        context.Background(),
+        db,
+        conditions.City.Name.Concat(
+            conditions.Country.Name,
+        ).Is().Eq(cql.String("error")),
+    ).Find()
+
+.. code-block:: go
+    :class: with-errors
+    :caption: In variable
+    :emphasize-lines: 5
+    :linenos:
+
+    countryName := conditions.Country.Name
+
+    _, err := cql.Query[models.City](
+        context.Background(),
+        db,
+        conditions.City.Name.Concat(
+            countryName,
+        ).Is().Eq(cql.String("error")),
+    ).Find()
+
+In these cases the detection will be:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:5: models.Country is not joined by the query
+
+It also works within lists:
+
+.. code-block:: go
+    :class: with-errors
+    :caption: In list
+    :emphasize-lines: 3
+    :linenos:
+
+    conditions := []condition.Condition[models.City]{
+        conditions.City.Name.Is().Eq(
+            conditions.Country.Name,
+        ),
+    }
+
+    _, err := cql.Query[models.City](
+        context.Background(),
+        db,
+        conditions...,
+    ).Find()
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:3: models.Country is not joined by the query
+
+On the contrary, it cannot go beyond the current scope, so, for example, 
+it will not be able to detect parameters that a function receives.
+
+.. code-block:: go
+    :class: with-errors
+    :caption: In parameter
+    :emphasize-lines: 5
+    :linenos:
+
+    countryName := conditions.Country.Name
+
+    func doQuery(conditions []condition.Condition[models.City]) error {
+        _, err := cql.Query[models.City](
+            context.Background(),
+            db,
+            conditions...,
+        ).Find()
+
+        return err
+    }
+
+On the other hand, it also cannot analyze the conditions that our code has on the conditions to be used, 
+considering that every condition present in the code will be used, for example:
+
+.. code-block:: go
+    :class: with-errors
+    :caption: In list
+    :emphasize-lines: 3
+    :linenos:
+
+    conditions := []condition.Condition[models.City]{}
+
+    joinCountry := false
+
+    if joinCountry {
+        conditions := append(conditions, conditions.City.Country())
+    }
+
+    conditions := append(conditions, conditions.City.Name.Is().Eq(
+        conditions.Country.Name,
+    ))
+
+    _, err := cql.Query[models.City](
+        context.Background(),
+        db,
+        conditions...,
+    ).Find()
+
+In this case, since joinCountry is false, at runtime the join with country will not be performed and will result in an error, 
+but cqllint will consider the join to be present.
