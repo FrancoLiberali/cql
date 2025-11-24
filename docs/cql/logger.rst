@@ -2,7 +2,7 @@
 Logger
 ==============================
 
-When connecting to the database, i.e. when creating the `gorm.DB` object, 
+When connecting to the database, i.e. when creating the `cql.DB` object, 
 it is possible to configure the type of logger to use, the logging level, among others. 
 As explained in the :ref:`connection section <cql/connecting_to_a_database:Connection>`, 
 this can be done by using the `cql.Open` method:

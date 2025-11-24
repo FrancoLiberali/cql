@@ -44,6 +44,7 @@ For more details see: :doc:`/cql/type_safety`.
    :hidden:
 
    cql/logger
+   cql/unit_testing
 
 .. toctree::
    :caption: Contributing
