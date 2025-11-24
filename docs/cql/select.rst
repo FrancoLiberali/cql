@@ -388,8 +388,8 @@ In this case, the compilation error will be:
     as condition.ValueOfType[float64] value in argument to conditions.MyModel.Value1.Plus: condition.StringField[MyModel] 
     does not implement condition.ValueOfType[float64] (wrong type for method GetValue)
 
-Limitations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Type safety limitations and cqllint
+------------------------------------------------
 
 Once again, similar to cql.Query, cql.ValueInto is not safe at compile time to determine whether 
 the values selected or used in functions are joined in the query, as in the following examples:
