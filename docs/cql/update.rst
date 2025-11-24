@@ -150,8 +150,7 @@ Type safety
 Update uses the same system of compilable conditions as cql.Query, 
 so it shares its features and limitations in terms of type safety at compile time. 
 
-.. TODO actualizar si se mueve
-For more details, see :doc:`/cql/type_safety`.
+For more details, see :doc:`/cql/query_type_safety`.
 
 Set
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -298,8 +297,8 @@ In this case, the compilation error will be:
     conditions.MyModel.ValueInt.Set().Null undefined 
     (type condition.FieldSet[MyModel, int] has no field or method Null)
 
-Type safety limitations
-------------------------
+Type safety limitations and cqllint
+------------------------------------------------
 
 Dynamic sets
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -341,8 +340,12 @@ Which would generate the following error at runtime:
 
     field's model is not concerned by the query (not joined); not concerned model: models.MyOtherModel
 
-.. TODO link a la seccion correcta
-These errors can be determined before runtime using :doc:`/cql/cqllint`.
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:6: MyOtherModel is not joined by the query
 
 Repeated sets
 ^^^^^^^^^^^^^^^^^^^^^^^
@@ -390,6 +393,33 @@ Now, if we run :doc:`/cql/cqllint` we will see the following report:
     $ cqllint ./...
     example.go:5: conditions.Brand.Name is repeated
     example.go:6: conditions.Brand.Name is repeated
+
+Set the same value
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Although this case does not generate a runtime error, making a Set of exactly the same value 
+is considered misuse and detected by cqllint:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 6
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Set(
+        conditions.Brand.Name.Set().Eq(conditions.Brand.Name),
+    )
+
+If we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:6: conditions.Brand.Name is set to itself
 
 Limit and order
 ^^^^^^^^^^^^^^^^^^^^^^^

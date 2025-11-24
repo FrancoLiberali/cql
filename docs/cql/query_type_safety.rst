@@ -176,11 +176,11 @@ In this case, the compilation error will be:
     cannot use conditions.City.Population (variable of type condition.UpdatableField[models.City, int]) as 
     condition.FieldOfType[string] value in argument to conditions.Country.Name.Is().Eq...
 
-Limitations
--------------------------------
+Type safety limitations and cqllint
+------------------------------------------------
 
 Dynamic operators and functions
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 cql.Query is not safe at compile time to determine whether 
 the values used in dynamic operators or functions, as in the following examples:
@@ -245,10 +245,15 @@ Which would generate the following error of type cql.ErrFieldModelNotConcerned a
 
 .. code-block:: none
 
-    field's model is not concerned by the query (not joined); not concerned model: models.Country
+    field's model is not concerned by the query (not joined); not concerned model: 
+    models.Country; operator: Eq; model: models.City, field: Name
 
-.. TODO link a la seccion correcta
-These errors can be determined before runtime using :doc:`/cql/cqllint`.
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:5: models.Country is not joined by the query
 
 Modifier methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -285,12 +290,103 @@ time to terminate if the fields used are part of the query, as in the following 
 Which would generate the following error of type cql.ErrFieldModelNotConcerned at runtime:
 
 .. code-block:: none
-    :caption: Result
 
     field's model is not concerned by the query (not joined); not concerned model: models.Seller; method: Descending
 
-.. TODO link a la seccion correcta
-This error can be determined before runtime using :doc:`/cql/cqllint`.
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:6: models.Country is not joined by the query
+
+Group by
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Similarly, the GroupBy and Having methods are not safe at compile 
+time to terminate if the fields used are part of the query, as in the following examples:
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+        ).GroupBy(
+            conditions.MyModel.Name,
+        ),
+        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
+            result.Name = value
+        }),
+        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
+            result.SumStatus = int(value)
+        }),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Not joined model in group by
+    :emphasize-lines: 6
+    :linenos:
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+        ).GroupBy(
+            conditions.MyOtherModel.Name,
+        ),
+        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
+            result.Name = value
+        }),
+        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
+            result.SumStatus = int(value)
+        }),
+    )
+
+Which would generate the following error of type cql.ErrFieldModelNotConcerned at runtime:
+
+.. code-block:: none
+
+    field's model is not concerned by the query (not joined); not concerned model: MyOtherModel; method: GroupBy
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Not joined model in having
+    :emphasize-lines: 8
+    :linenos:
+
+    results, err := cql.Select(
+        cql.Query[MyModel](
+            context.Background(),
+            db,
+        ).GroupBy(
+            conditions.MyModel.Name,
+        ).Having(
+            conditions.MyOtherModel.Status.Aggregate().Count().Gt(cql.Int(2)),
+        ),
+        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
+            result.Name = value
+        }),
+        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
+            result.SumStatus = int(value)
+        }),
+    )
+
+Which would generate the following error of type cql.ErrFieldModelNotConcerned at runtime:
+
+.. code-block:: none
+
+    field's model is not concerned by the query (not joined); not concerned model: MyOtherModel; method: Having
+
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:6: MyOtherModel is not joined by the query
 
 Appearance
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -303,6 +399,101 @@ The selection of the :ref:`cql/advanced_query:appearance` can generate two runti
   greater than the number of appearances of a model.
 
 Both errors can be determined before runtime using :doc:`/cql/cqllint`.
+
+ErrAppearanceMustBeSelected
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To generate this error we must join the same model more than once and not select the appearance number:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 10
+    :linenos:
+
+    _, err := cql.Query[models.Child](
+        context.Background(),
+        db,
+        conditions.Child.Parent1(
+            conditions.Parent1.ParentParent(),
+        ),
+        conditions.Child.Parent2(
+            conditions.Parent2.ParentParent(),
+        ),
+        conditions.Child.ID.Is().Eq(conditions.ParentParent.ID),
+    ).Find()
+
+If we execute this query we will obtain an error of type `cql.ErrAppearanceMustBeSelected` with the following message:
+
+.. code-block:: none
+
+    field's model appears more than once, select which one you want to use with Appearance; model: models.ParentParent; operator: Eq; model: models.Child, field: ID
+
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:10: models.ParentParent appears more than once, select which one you want to use with Appearance
+
+ErrAppearanceOutOfRange
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To generate this error we must use the Appearance method with a value greater than the number of appearances of a model:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 5
+    :linenos:
+
+    _, err := cql.Query[models.Phone](
+        context.Background(),
+        db,
+        conditions.Phone.Brand(
+            conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(1)),
+        ),
+    ).Find()
+
+If we execute this query we will obtain an error of type `cql.ErrAppearanceOutOfRange` with the following message:
+
+.. code-block:: none
+
+    selected appearance is bigger than field's model number of appearances; model: models.Phone; operator: Eq; model: models.Brand, field: Name
+
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:5: selected appearance is bigger than models.Phone's number of appearances
+
+Unnecessary Appearance selection
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This is the case when the Appearance method is used without being necessary, 
+i.e. when the model appears only once:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 5
+    :linenos:
+
+    _, err := cql.Query[models.Phone](
+        context.Background(),
+        db,
+        conditions.Phone.Brand(
+            conditions.Brand.Name.Is().Eq(conditions.Phone.Name.Appearance(0)),
+        ),
+    ).Find()
+
+If we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:5: Appearance call not necessary, models.Phone appears only once
 
 Collections preloads
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -448,5 +448,9 @@ Which would generate the following error at runtime:
 
     field's model is not concerned by the query (not joined); not concerned model: models.MyOtherModel
 
-.. TODO link a la seccion correcta
-These errors can be determined before runtime using :doc:`/cql/cqllint`.
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:6: models.MyOtherModel is not joined by the query

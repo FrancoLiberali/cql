@@ -106,15 +106,13 @@ Once this is done, cql will automatically take care of:
 - Replace DELETE statements with UPDATEs to the deleted_at of the entity.
 - Add the condition ``deleted_at is not null`` to your queries, to avoid receiving entities that have been deleted (unless a condition on deleted_at is part of the query you are performing).
 
-
 Type safety
 ------------------------
 
 Delete uses the same system of compilable conditions as cql.Query, 
 so it shares its features and limitations in terms of type safety at compile time. 
 
-.. TODO actualizar si se mueve
-For more details, see :doc:`/cql/type_safety`.
+For more details, see :doc:`/cql/query_type_safety`.
 
 As an added bonus, in cql.Delete, the Returning method is also safe at compile time, 
 allowing you to only obtain results in a list of the correct type:

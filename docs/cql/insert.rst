@@ -199,7 +199,7 @@ Type safety
 ------------------------
 
 OnConflictOn and Update
-^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 In terms of type safety, methods that receive fields (OnConflictOn and Update) only allow fields from the initial model.
 
@@ -278,5 +278,13 @@ Where
 
 In the case of Where, since it is the same system as cql.Query, it shares its features and limitations in terms of type safety at compile time.
 
-.. TODO actualizar si se mueve
-For more details, see :doc:`/cql/type_safety`.
+For more details, see :doc:`/cql/query_type_safety`.
+
+Type safety limitations and cqllint
+------------------------------------------------
+
+The OnConstraint method is not safe at compile time, since CQL has no way of knowing which constraints are defined in the database. 
+If you try to use one that is not defined, the error returned will be the error returned by the database:
+
+.. code-block:: none
+    ERROR: constraint "do_not_exists" for table "cities" does not exist (SQLSTATE 42704)
