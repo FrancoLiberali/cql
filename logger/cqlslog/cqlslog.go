@@ -165,7 +165,7 @@ func (l cqlslog) ParamsFilter(_ context.Context, sql string, params ...any) (str
 }
 
 // Info, Warn, Error or Trace + logAttrs
-const cqlslogStacktraceLen = 2
+const cqlslogStacktraceLen = 1
 
 // log adds context attributes and logs a message with the given slog level
 func (l cqlslog) logAttrs(ctx context.Context, level slog.Level, msg string, attrs ...any) {
