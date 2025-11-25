@@ -65,7 +65,7 @@ func FindLastCaller(skip int) (string, int, int) {
 			return "", 0, 0
 		} else if !strings.Contains(file, gormSourceDir) && !strings.Contains(file, gormForkSourceDir) && !strings.Contains(file, cqlSourceDir) {
 			// file outside cql and gorm
-			return file, line, i - 1 // -1 to remove this function from the stacktrace
+			return file, line, i
 		}
 	}
 
