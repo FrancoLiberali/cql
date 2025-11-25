@@ -31,16 +31,20 @@ For more details see: :doc:`/cql/type_safety`.
 
    cql/query
    cql/advanced_query
+   cql/query_type_safety
    cql/preloading
-   cql/create
+   cql/select
+   cql/insert
    cql/update
    cql/delete
+   cql/transactions
 
 .. toctree::
    :caption: Others
    :hidden:
 
    cql/logger
+   cql/unit_testing
 
 .. toctree::
    :caption: Contributing

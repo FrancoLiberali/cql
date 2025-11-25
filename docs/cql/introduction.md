@@ -2,9 +2,7 @@
 
 ## What is cql?
 
-Originally part of [BaDaaS](https://github.com/ditrit/badaas), CQL allows easy and safe persistence and querying of objects.
-
-It's built on top of [gorm](https://gorm.io/), a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. While gorm does this job well with its automatic migration then performing queries on these objects is somewhat limited, forcing us to write SQL queries directly when they are complex. CQL seeks to address these limitations with a query system that:
+CQL is a SQL query language that allows easy and safe persistence and querying of objects, with the following characteristics:
 
 - Is compile-time safe: queries are validated at compile time to avoid errors such as comparing attributes that are of different types, trying to use attributes or navigate relationships that do not exist, using information from tables that are not included in the query, etc.; ensuring that a runtime error will not be raised.
 - Is easy to use: the use of its query system does not require knowledge of databases, SQL languages or complex concepts. Writing queries only requires programming in Go and the result is easy to read.
@@ -16,7 +14,13 @@ It's built on top of [gorm](https://gorm.io/), a library that actually provides 
 |---|---|
 | SQL | SELECT cities.* FROM cities <br> INNER JOIN countries ON <br>&emsp;&emsp; countries.id = cities.country_id AND <br>&emsp;&emsp; countries.name = "France" <br> WHERE cities.name = "Paris" |
 | GORM | db.Where(<br>&emsp;"cities.name = ?",<br>&emsp;"Paris",<br>).Joins(<br>&emsp;"Country",<br>&emsp;db.Where( <br>&emsp;&emsp; "Country.name = ?", <br>&emsp;&emsp; "France", <br>&emsp; ), <br> ).Find(&cities) |
-| CQL | cql.Query[models.City]( <br>&emsp; db, <br>&emsp; conditions.City.Name.Is().Eq("Paris"), <br>&emsp; conditions.City.Country( <br>&emsp;&emsp; conditions.Country.Name.Is().Eq("France"), <br>&emsp; ), <br> ).FindOne() |
+| CQL | cql.Query[models.City]( <br>&emsp; db, <br>&emsp; conditions.City.Name.Is().Eq(cql.String("Paris")), <br>&emsp; conditions.City.Country( <br>&emsp;&emsp; conditions.Country.Name.Is().Eq(cql.String("France")), <br>&emsp; ), <br> ).FindOne() |
+
+## Is cql an ORM?
+
+CQL built on top of [gorm](https://gorm.io/), a library that actually provides the functionality of an ORM: mapping objects to tables in the SQL database. While gorm does this job well with its automatic migration then performing queries on these objects is somewhat limited, forcing us to write SQL queries directly when they are complex.
+
+CQL uses gorm for connecting to the database, generating queries in SQL format, and mapping values to structures in Go. On this basis, CQL builds a query language rather than an ORM, allowing us to work with both business entities and independent values.
 
 ## Is cql a copy of [gorm-gen](https://gorm.io/gen/)?
 

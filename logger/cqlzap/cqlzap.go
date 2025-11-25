@@ -166,5 +166,5 @@ func (l cqlzap) logger() *zap.Logger {
 		return l.ZapLogger.WithOptions(zap.AddCallerSkip(cqlzapStacktraceLen))
 	}
 
-	return l.ZapLogger.WithOptions(zap.AddCallerSkip(caller - 1)) // -1 because here is how many we want to skip
+	return l.ZapLogger.WithOptions(zap.AddCallerSkip(caller - 1 - 1)) // -1 because here is how many we want to skip, -1 for runtime/proc.go:285
 }

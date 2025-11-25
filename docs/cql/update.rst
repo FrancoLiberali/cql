@@ -24,21 +24,22 @@ Modifier methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Modifier methods are those that modify the query in a certain way, affecting the models updated:
+
 - Limit: specifies the number of models to be updated.
 - Ascending: specifies an ascending order when updating models.
 - Descending: specifies a descending order when updating models.
-- Returning: specifies that the updated models must be fetched from the database after being updated. 
-(not supported by MySQL). Preload of related data is also possible (not supported by SQLite). 
+- Returning: specifies that the updated models must be fetched from the database after being updated (not supported by MySQL). Preload of related data is also possible (not supported by SQLite). 
 
 Finishing methods
 ^^^^^^^^^^^^^^^^^^^^^^^
 
 Finishing methods are those that cause the query to be executed:
 
-- Set: defines the updates to be performed
+- Set: defines the updates to be performed.
+- SetMultiple: (only supported by MySQL) allows updates to be made to different tables at the same time.
 
 Example
-^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 .. code-block:: go
 
@@ -49,10 +50,11 @@ Example
     }
 
     updatedCount, err := cql.Update[MyModel](
-        gormDB,
-        conditions.MyModel.Name.Is().Eq("a_string"),
+        context.Background(),
+        db,
+        conditions.MyModel.Name.Is().Eq(cql.String("a_string")),
     ).Set(
-        conditions.MyModel.Name.Set().Eq("a_string_2"),
+        conditions.MyModel.Name.Set().Eq(cql.String("a_string_2")),
     )
 
 As you can see, the syntax for the Set method is similar to the queries system with 
@@ -61,7 +63,7 @@ the difference that the Set method must be used instead of Is.
 For attributes that allow null (nullable values, pointers, nullable relations) the .Set().Null() method will also be available.
 
 Joins
-^^^^^^^^^^^^^^^^^^^^^^^
+------------------------
 
 It is also possible to perform joins in the first part of the update (Update method):
 
@@ -83,12 +85,13 @@ It is also possible to perform joins in the first part of the update (Update met
     }
 
     updatedCount, err := cql.Update[MyModel](
-        gormDB,
+        context.Background(),
+        db,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.Is().Eq("a_string"),
+            conditions.MyOtherModel.Name.Is().Eq(cql.String("a_string")),
         ),
     ).Set(
-        conditions.MyModel.Name.Set().Eq("a_string_2"),
+        conditions.MyModel.Name.Set().Eq(cql.String("a_string_2")),
     )
 
 Here the only limitation is that in the Set part, only the values of the initial model can be updated 
@@ -100,11 +103,362 @@ which allows multiple tables to be updated at the same time. To do this, you use
 .. code-block:: go
 
     updatedCount, err := cql.Update[MyModel](
-        gormDB,
+        context.Background(),
+        db,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.Is().Eq("a_string"),
+            conditions.MyOtherModel.Name.Is().Eq(cql.String("a_string")),
         ),
     ).SetMultiple(
-        conditions.MyModel.Name.Set().Eq("a_string_2"),
-        conditions.MyOtherModel.Name.Set().Eq("a_string_2"),
+        conditions.MyModel.Name.Set().Eq(cql.String("a_string_2")),
+        conditions.MyOtherModel.Name.Set().Eq(cql.String("a_string_2")),
     )
+
+Dynamic updates
+------------------------
+
+Updates can also be dynamic, meaning that the set can be a value from the same entity or another entity. 
+:ref:`Functions <cql/query:functions>` can also be used on the values.
+
+For example:
+
+.. code-block:: go
+
+    type MyModel struct {
+        model.UUIDModel
+
+        Value1 int
+        Value2 int
+    }
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.Value1.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.Value1.Set().Eq(conditions.MyModel.Value2.Divided(cql.Int64(2))),
+    )
+
+Updated at
+------------------------
+
+If your model contains a base model with timestamps (model.UUIDModelWithTimestamps or model.UIntModelWithTimestamps), 
+cql will automatically add ``updated_at = now()`` to entities that are updated.
+
+Type safety
+------------------------
+
+Update uses the same system of compilable conditions as cql.Query, 
+so it shares its features and limitations in terms of type safety at compile time. 
+
+For more details, see :doc:`/cql/query_type_safety`.
+
+Set
+^^^^^^^^^^^^^^^^^^^^^^^
+
+In addition, Update also provides the same type safety in Set methods, 
+ensuring that the value to be set is of the same type as the attribute to be modified:
+
+.. code-block:: go
+    :caption: Model
+    :linenos:
+
+    type MyModel struct {
+        model.UUIDModel
+
+        ValueInt    int
+        ValueString string
+    }
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyModel.ValueInt.Divided(cql.Int64(2))),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyModel.ValueString),
+    )
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    cannot use conditions.MyModel.ValueString (variable of struct type condition.StringField[MyModel]) as 
+    condition.ValueOfType[float64] value in argument to conditions.MyModel.ValueInt.Set().Eq: 
+    condition.StringField[MyModel] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)
+
+Returning
+^^^^^^^^^^^^^^^^^^^^^^^
+
+In cql.Update, the Returning method is also safe at compile time, 
+allowing you to only obtain results in a list of the correct type:
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    myModelsUpdated := []MyModel{}
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Returning(&myModelsUpdated).Set(
+        conditions.MyModel.ValueInt.Set().Eq(cql.Int64(3)),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 1,7
+    :linenos:
+
+    myModelsUpdated := []MyOtherModel{}
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Returning(&myModelsUpdated).Set(
+        conditions.MyModel.ValueInt.Set().Eq(cql.Int64(3)),
+    )
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    cannot use &myModelsUpdated (value of type *[]MyOtherModel) as *[]MyModel value in argument to 
+    cql.Update[MyModel](context.Background(), db, conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2))).Returning
+
+Null update
+^^^^^^^^^^^^^^^^^^^^^^^
+
+For fields that are nullable, such as pointers or null.* types, cql.Update will 
+allow you to safely set their value to null at compile time, i.e., giving a compile-time error 
+if you try to update a non-nullable attribute to null:
+
+.. code-block:: go
+    :caption: Model
+    :linenos:
+
+    type MyModel struct {
+        model.UUIDModel
+
+        ValueInt        int
+        ValueIntPointer *int
+    }
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueIntPointer.Set().Null(),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Null(),
+    )
+
+In this case, the compilation error will be:
+
+.. code-block:: none
+
+    conditions.MyModel.ValueInt.Set().Null undefined 
+    (type condition.FieldSet[MyModel, int] has no field or method Null)
+
+Type safety limitations and cqllint
+------------------------------------------------
+
+Dynamic sets
+^^^^^^^^^^^^^^^^^^^^^^^
+
+Once again, similar to cql.Query, Set is not safe at compile time to determine whether 
+the values used in Eq or used in functions in Eq are joined in the query, as in the following examples:
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyOtherModel.Value1),
+    )
+
+.. code-block:: go
+    :class: with-errors
+    :caption: Incorrect
+    :emphasize-lines: 6
+    :linenos:
+
+    updatedCount, err := cql.Update[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.ValueInt.Is().Eq(cql.Int64(2)),
+    ).Set(
+        conditions.MyModel.ValueInt.Set().Eq(conditions.MyModel.ValueInt.Plus(conditions.MyOtherModel.Value1)),
+    )
+
+Which would generate the following error at runtime:
+
+.. code-block:: none
+
+    field's model is not concerned by the query (not joined); not concerned model: models.MyOtherModel
+
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:6: MyOtherModel is not joined by the query
+
+Repeated sets
+^^^^^^^^^^^^^^^^^^^^^^^
+
+While databases allow it, cql detects and generates a runtime error when attempting 
+to set more than one value to the same attribute within an update:
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+.. code-block:: go
+    :caption: Incorrect example.go
+    :class: with-errors
+    :emphasize-lines: 6,7
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("adidas")),
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+If we execute this query we will obtain an error of type `cql.ErrFieldIsRepeated` with the following message:
+
+.. code-block:: none
+
+    field is repeated; field: models.Brand.Name; method: Set
+
+Now, if we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:5: conditions.Brand.Name is repeated
+    example.go:6: conditions.Brand.Name is repeated
+
+Set the same value
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Although this case does not generate a runtime error, making a Set of exactly the same value 
+is considered misuse and detected by cqllint:
+
+.. code-block:: go
+    :caption: example.go
+    :class: with-errors
+    :emphasize-lines: 6
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Set(
+        conditions.Brand.Name.Set().Eq(conditions.Brand.Name),
+    )
+
+If we run :doc:`/cql/cqllint` we will see the following report:
+
+.. code-block:: none
+
+    $ cqllint ./...
+    example.go:6: conditions.Brand.Name is set to itself
+
+Limit and order
+^^^^^^^^^^^^^^^^^^^^^^^
+
+As mentioned above, in MySQL it is possible to limit the number of rows updated using the Limit method. 
+For it to work correctly, it is also necessary to add a call to a sorting method:
+
+.. code-block:: go
+    :caption: Correct
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Ascending(
+        conditions.Brand.Name,
+    ).Limit(1).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+.. code-block:: go
+    :caption: Incorrect example.go
+    :class: with-errors
+    :emphasize-lines: 6,7
+    :linenos:
+
+    _, err := cql.Update[models.Brand](
+        context.Background(),
+        db,
+        conditions.Brand.Name.Is().Eq(cql.String("nike")),
+    ).Limit(1).Set(
+        conditions.Brand.Name.Set().Eq(cql.String("puma")),
+    )
+
+If we execute this query we will obtain an error of type `cql.ErrOrderByMustBeCalled` with the following message:
+
+.. code-block:: none
+
+    order by must be called before limit in an update statement; method: Limit
+
+This error is not yet supported by :doc:`/cql/cqllint`.

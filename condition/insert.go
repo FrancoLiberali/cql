@@ -124,7 +124,7 @@ func (insertOnConflict *InsertOnConflict[T]) addPostgresErrorIfNotColumns(msg st
 	}
 }
 
-// UpdateAll will update all model attributes with the values of the models to be inserted.
+// UpdateAll will update all model attributes with the values of the models that already exist.
 func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("UpdateAll after OnConflict")
 
@@ -137,7 +137,7 @@ func (insertOnConflict *InsertOnConflict[T]) UpdateAll() *InsertExec[T] {
 	return &InsertExec[T]{insert: insertOnConflict.insert}
 }
 
-// UpdateAll will update the attributes specified by parameter with the values of the models to be inserted.
+// Update will update the attributes specified by parameter with the values of the models that already exist.
 func (insertOnConflict *InsertOnConflict[T]) Update(fields ...FieldOfModel[T]) *InsertExec[T] {
 	insertOnConflict.addPostgresErrorIfNotColumns("Update after OnConflict")
 

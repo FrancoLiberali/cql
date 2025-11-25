@@ -236,6 +236,26 @@ func (ts *InsertIntTestSuite) TestInsertOneOnConflictIDDoNothingThatConflicts() 
 	}
 }
 
+func (ts *InsertIntTestSuite) TestInsertOneOnConstraintThatDoNotExists() {
+	product := &models.Product{
+		Int: 1,
+	}
+
+	_, err := cql.Insert(
+		context.Background(),
+		ts.db,
+		product,
+	).OnConstraint("do_not_exists").DoNothing().Exec()
+
+	switch getDBDialector() {
+	case sql.MySQL, sql.SQLServer, sql.SQLite:
+		ts.ErrorIs(err, cql.ErrUnsupportedByDatabase)
+		ts.ErrorContains(err, "method: OnConstraint")
+	case sql.Postgres:
+		ts.ErrorContains(err, "ERROR: constraint \"do_not_exists\" for table \"products\" does not exist (SQLSTATE 42704)")
+	}
+}
+
 func (ts *InsertIntTestSuite) TestInsertOneOnConstraintDoNothingThatInserts() {
 	product := &models.Product{
 		Int: 1,

@@ -9,16 +9,8 @@ Query creation
 
 To create a query you must use the cql.Query[models.MyModel] method,
 where models.MyModel is the model you expect this query to answer. 
-This function takes as parameters the :ref:`transaction <cql/query:transactions>` 
+This function takes as parameters the db or the :doc:`/cql/transactions` 
 on which to execute the query and the :ref:`cql/query:conditions`.
-
-Transactions
---------------------
-
-To execute transactions, cql provides the function cql.Transaction. 
-The function passed by parameter will be executed inside a gorm transaction 
-(for more information visit https://gorm.io/docs/transactions.html). 
-Using this method will also allow the transaction execution time to be logged.
 
 Query methods
 ------------------------
@@ -30,6 +22,7 @@ Modifier methods
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Modifier methods are those that modify the query in a certain way, affecting the results obtained:
+
 - Limit: specifies the number of models to be retrieved.
 - Offset: specifies the number of models to skip before starting to return the results.
 - Ascending: specifies an ascending order when retrieving models.
@@ -74,8 +67,9 @@ In this example we query all MyModel that has "a_string" in the Name attribute.
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
-        conditions.MyModel.Name.Is().Eq("a_string"),
+        context.Background(),
+        db,
+        conditions.MyModel.Name.Is().Eq(cql.String("a_string")),
     ).Find()
 
 **Filter by an attribute of a related model**
@@ -98,9 +92,10 @@ In this example we query all MyModels whose related MyOtherModel has "a_string" 
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
+        context.Background(),
+        db,
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.Is().Eq("a_string"),
+            conditions.MyOtherModel.Name.Is().Eq(cql.String("a_string")),
         ),
     ).Find()
 
@@ -127,10 +122,11 @@ whose related MyOtherModel has "a_string" in its Name attribute.
     }
 
     myModels, err := cql.Query[MyModel](
-        gormDB,
-        conditions.MyModel.Code.Is().Eq(4),
+        context.Background(),
+        db,
+        conditions.MyModel.Code.Is().Eq(cql.Int64(4)),
         conditions.MyModel.Related(
-            conditions.MyOtherModel.Name.Is().Eq("a_string"),
+            conditions.MyOtherModel.Name.Is().Eq(cql.String("a_string")),
         ),
     ).Find()
 
@@ -183,3 +179,86 @@ These operators can be found in <https://pkg.go.dev/github.com/FrancoLiberali/cq
 and <https://pkg.go.dev/github.com/FrancoLiberali/cql/sqlite>. 
 
 You can also define your own operators following the condition.Operator interface.
+
+Static values
+------------------------
+
+As can be seen in the previous examples, operators can receive another value to perform the comparison.
+These values can be static or :ref:`dynamic <cql/advanced_query:Dynamic operators>`.
+
+For static values, it is necessary to define their type using one of the functions provided by cql:
+
+- Int(value int)
+- Int8(value int8)
+- Int16(value int16)
+- Int32(value int32)
+- Int64(value int64)
+- UInt(value uint)
+- UInt8(value uint8)
+- UInt16(value uint16)
+- UInt32(value uint32)
+- UInt64(value uint64)
+- Float32(value float32)
+- Float64(value float64)
+- Bool(value bool)
+- String(value string)
+- ByteArray(value []byte)
+- Time(value time.Time)
+- UUID(value model.UUID)
+
+This ensures that operations are only performed between compatible types.
+
+Custom types
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+In addition to these static values, it is possible to define your own types to be supported by CQL.
+
+For this, the type must implement the ValueOfType[T any] interface, which consists of two methods:
+
+- ToSQL(query \*cql.CQLQuery) (string, []any, error): Allows to define how the type is translated to SQL, allowing you to define the SQL statement to be used, the parameters for this statement, and an error.
+- GetValue() T: Allows to define the type with which this type is comparable.
+
+
+Functions
+------------------------
+
+It is also possible to apply functions on the values to be used in the operations.
+
+For example, we can query all MyModels for which half of their Code is less than 10.
+
+.. code-block:: go
+
+    type MyModel struct {
+        model.UUIDModel
+
+        Code int
+    }
+
+    myModels, err := cql.Query[MyModel](
+        context.Background(),
+        db,
+        conditions.MyModel.Code.Divided(cql.Int64(2)).Is().Lt(cql.Int64(10)),
+    ).Find()
+
+The functions that are applicable depend on the type of attribute.
+
+For numeric attributes:
+
+- Plus(other)
+- Minus(other)
+- Times(other)
+- Divided(other)
+- Modulo(other)
+- Power(other)
+- SquareRoot()
+- Absolute()
+- And(other)
+- Or(other)
+- Xor(other)
+- Not()
+- ShiftLeft(other)
+- ShiftRight(other)
+
+For string values:
+
+- Concat(other)
