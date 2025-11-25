@@ -287,4 +287,5 @@ The OnConstraint method is not safe at compile time, since CQL has no way of kno
 If you try to use one that is not defined, the error returned will be the error returned by the database:
 
 .. code-block:: none
+
     ERROR: constraint "do_not_exists" for table "cities" does not exist (SQLSTATE 42704)

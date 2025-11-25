@@ -5,6 +5,7 @@ Transactions
 The cql methods Query, Update, Delete, Insert have as their second parameter:
 
 .. code-block:: go
+
     tx *cql.DB
 
 This, in addition to logically receiving the database where you want to run the query as 

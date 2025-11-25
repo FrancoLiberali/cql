@@ -126,16 +126,19 @@ Dynamic functions
 Functions can also be applied between different attributes:
 
 .. code-block:: go
+
     conditions.MyModel.Attribute1.Divided(conditions.MyModel.Attribute2).Is().Lt(cql.Int64(10))
 
 within dynamic operators:
 
 .. code-block:: go
+
     conditions.MyModel.Attribute1.Is().Lt(conditions.MyModel.Attribute2.Minus(cql.Int64(10)))
 
 or both of them:
 
 .. code-block:: go
+
     conditions.MyModel.Attribute1.Divided(conditions.MyModel.Attribute2).Is().Lt(
         conditions.MyModel.Attribute2.Minus(conditions.MyModel.Attribute1),
     )
@@ -186,7 +189,7 @@ Grouping actions are defined using two methods on queries:
 - GroupBy: allows to define the attributes that are used to create groups.
 - Having: allows filter groups of rows based on conditions involving aggregate functions.
 
-Then, the selection of the fields in the groups is performed using :ref:`cql.Select <cql/select>`.
+Then, the selection of the fields in the groups is performed using :doc:`cql.Select </cql/select>`.
 
 Example:
 

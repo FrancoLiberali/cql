@@ -330,7 +330,7 @@ In this case, the compilation error will be:
 
     cannot use value (variable of type string) as int64 value in assignment
 
-Functions
+ValueInto functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As in cql.Query, the functions applied to the selected values are type-safe.

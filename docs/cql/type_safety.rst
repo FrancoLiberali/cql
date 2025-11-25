@@ -22,10 +22,10 @@ Each of the CQL features is designed to be safe at compile time.
 For details of each feature, see:
 
 - Query: :doc:`/cql/query_type_safety`
-- Select: :ref:`<cql/select:type_safety>`.
-- Insert: :ref:`<cql/insert:type_safety>`.
-- Update: :ref:`<cql/update:type_safety>`.
-- Delete: :ref:`<cql/delete:type_safety>`.
+- Select: :ref:`cql/select:Type safety`.
+- Insert: :ref:`cql/insert:Type safety`.
+- Update: :ref:`cql/update:Type safety`.
+- Delete: :ref:`cql/delete:Type safety`.
 
 In each of these sections, you will see that there are limitations in terms of runtime security, 
 with borderline cases where queries can generate runtime errors even though they compile. 

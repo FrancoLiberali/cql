@@ -68,7 +68,7 @@ Similarly, conditions are checked when making joins:
     ).Find()
 
 Name of an attribute or operator
--------------------------------
+--------------------------------------------------------------
 
 Since the conditions are made using the auto-generated code, 
 the attributes and methods used on it will only allow us to use attributes and operators that exist:
@@ -138,7 +138,7 @@ In this case, the compilation error will be:
     condition.ValueOfType[string] (wrong type for method GetValue)
 
 Type of an attribute (dynamic operator)
--------------------------------
+--------------------------------------------------------------
 
 cql also checks that the type of the attributes is correct when using dynamic operators. 
 In this case, the type of the two attributes being compared must be the same: 

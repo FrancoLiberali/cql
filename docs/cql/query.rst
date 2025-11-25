@@ -9,7 +9,7 @@ Query creation
 
 To create a query you must use the cql.Query[models.MyModel] method,
 where models.MyModel is the model you expect this query to answer. 
-This function takes as parameters the db or the :ref:`transaction <cql/transactions>` 
+This function takes as parameters the db or the :doc:`/cql/transactions` 
 on which to execute the query and the :ref:`cql/query:conditions`.
 
 Query methods
@@ -215,10 +215,7 @@ In addition to these static values, it is possible to define your own types to b
 
 For this, the type must implement the ValueOfType[T any] interface, which consists of two methods:
 
-- ToSQL(query *CQLQuery) (string, []any, error):
-    Allows to define how the type is translated to SQL,
-    allowing you to define the SQL statement to be used,
-    the parameters for this statement, and an error.
+- ToSQL(query \*cql.CQLQuery) (string, []any, error): Allows to define how the type is translated to SQL, allowing you to define the SQL statement to be used, the parameters for this statement, and an error.
 - GetValue() T: Allows to define the type with which this type is comparable.
 
 

@@ -350,6 +350,7 @@ In the tutorial_9.go file you will find that we can perform this query as follow
 We can run this tutorial with `make tutorial_9` and we will obtain the following result:
 
 .. code-block:: none
+
     Inserted 1 city
     Deleted 1 city
 
@@ -429,6 +430,7 @@ we can perform this query as follows:
 We can run this tutorial with `make tutorial_11` and we will obtain the following result:
 
 .. code-block:: none
+
     City named 'Paris' in 'France' is: [{CityName:Paris CountryName:France}]
 
 As you can see, again we only get the Paris in France, but now only the selected attributes.
