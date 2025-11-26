@@ -17,7 +17,7 @@ Once you have started your project with `go init`, you must add the dependency t
 
 .. code-block:: bash
 
-    go get -u github.com/FrancoLiberali/cql
+    go get github.com/FrancoLiberali/cql
 
 Create a package for your :ref:`models <cql/concepts:model>`, for example:
 
@@ -50,7 +50,7 @@ Then, you can generate the conditions running:
 
   go generate ./...
 
-In `main.go` there is a main function that creates a :ref:`gorm.DB <cql/concepts:GormDB>`
+In `main.go` there is a main function that creates a :ref:`cql.DB <cql/concepts:cqlDB>`
 that allows connection with the database and calls the :ref:`AutoMigrate <cql/concepts:auto migration>` 
 method with the models you want to be persisted.
 
