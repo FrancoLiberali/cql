@@ -17,7 +17,7 @@ Once you have started your project with `go init`, you must add the dependency t
 
 .. code-block:: bash
 
-    go get github.com/FrancoLiberali/cql
+    go get github.com/FrancoLiberali/cql@latest
 
 Create a package for your :ref:`models <cql/concepts:model>`, for example:
 
