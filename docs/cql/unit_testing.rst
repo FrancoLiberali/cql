@@ -2,7 +2,7 @@
 Unit testing
 ==============================
 
-Inherited from gorm, cql is compatible with `go-sqlmock <github.com/DATA-DOG/go-sqlmock>` 
+Inherited from gorm, cql is compatible with `go-sqlmock <https://github.com/DATA-DOG/go-sqlmock>` 
 to configure a mock database in order to run unit tests, for example:
 
 .. code-block:: go

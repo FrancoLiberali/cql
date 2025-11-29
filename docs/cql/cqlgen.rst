@@ -65,7 +65,6 @@ This variable is called the condition model and it has:
   which will allow you to perform joins in your queries.
 - Methods for :doc:`/cql/preloading`.
 
-Then, combining these conditions, the Connection Conditions (cql.And, cql.Or, cql.Not) 
-you will be able to make all the queries you need in a safe way.
+Then, combining these conditions you will be able to make all the queries you need in a safe way.
 
 For details about querying, see :doc:`/cql/query`.

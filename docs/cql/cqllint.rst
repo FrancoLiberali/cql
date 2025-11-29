@@ -89,7 +89,7 @@ so detection works both outside and inside the function call:
 .. code-block:: go
     :class: with-errors
     :caption: In variable
-    :emphasize-lines: 5
+    :emphasize-lines: 7
     :linenos:
 
     countryName := conditions.Country.Name
@@ -140,7 +140,7 @@ it will not be able to detect parameters that a function receives.
 .. code-block:: go
     :class: with-errors
     :caption: In parameter
-    :emphasize-lines: 5
+    :emphasize-lines: 7
     :linenos:
 
     countryName := conditions.Country.Name
@@ -155,7 +155,7 @@ it will not be able to detect parameters that a function receives.
         return err
     }
 
-On the other hand, it also cannot analyze the conditions that our code has on the conditions to be used, 
+It also cannot analyze the conditions that our code has on the conditions to be used, 
 considering that every condition present in the code will be used, for example:
 
 .. code-block:: go

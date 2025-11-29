@@ -16,10 +16,17 @@ Base models
 To be considered a model, your structures must have embedded one of the 
 :ref:`base models <cql/concepts:base model>` provided by cql:
 
+Simple models:
+
 - `model.UUIDModel`: Model identified by a model.UUID (Random (Version 4) UUID).
 - `model.UIntModel`: Model identified by a model.UIntID (auto-incremental uint).
 
-Both base models provide date created, updated and `deleted <https://gorm.io/docs/delete.html#Soft-Delete>`_.
+Models with timestamps:
+
+These base models also provide date created, updated and :ref:`deleted <cql/delete:Soft delete>`.
+
+- `model.UUIDModelWithTimestamps`: Model identified by a model.UUID (Random (Version 4) UUID).
+- `model.UIntModelWithTimestamps`: Model identified by a model.UIntID (auto-incremental uint).
 
 To use them, simply embed the desired model in any of your structs:
 

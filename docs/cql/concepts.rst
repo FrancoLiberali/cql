@@ -15,7 +15,7 @@ Base model
 -----------------------------
 
 It is a struct that when embedded allows your structures to become cql models, 
-adding ID, CreatedAt, UpdatedAt and DeletedAt attributes and the possibility to persist, 
+adding ID (and CreatedAt, UpdatedAt and DeletedAt optionally) attributes and the possibility to persist, 
 create conditions and perform queries on these structures.
 
 For details visit :ref:`cql/declaring_models:base models`.
@@ -31,17 +31,25 @@ For details visit :ref:`cql/declaring_models:base models`.
 Auto Migration
 ----------------------------------------------------------
 
-To persist the models it is necessary to migrate the database, 
-so that the structure of the tables corresponds to the definition of the model. 
+To persist the models, the database must have a correctly defined data structure.
+One way to do this is with auto-migration, so that the structure of the tables corresponds to the definition of the model. 
 This migration is performed by gorm through the gormDB.
 
-For details visit :ref:`cql/connecting_to_a_database:migration`.
+For details visit :ref:`cql/connecting_to_a_database:Auto migration`.
+
+cqlDB
+-----------------------------
+
+cqlDB is a cql.DB object that allows communication with the database. 
+This object will be needed as a parameter for the main cql functions (Query, Insert, Update and Delete).
+
+For details visit :ref:`cql/connecting_to_a_database:connection`.
 
 GormDB
 -----------------------------
 
-GormDB is a gorm.DB object that allows communication with the database. 
-This object will be needed as a parameter for the main cql functions (Query, Update and Delete).
+GormDB is a gorm.DB object that which is used internally by cql.DB for connecting and executing queries.
+You can access this attribute to use gorm's features whenever you want.
 
 For details visit :ref:`cql/connecting_to_a_database:connection`.
 
