@@ -8,7 +8,7 @@ import (
 )
 
 func (sellerConditions sellerConditions) Company(conditions ...condition.Condition[hasmany.Company]) condition.JoinCondition[hasmany.Seller] {
-	return condition.NewJoinCondition[hasmany.Seller, hasmany.Company](conditions, "Company", "CompanyID", sellerConditions.preload(), "ID", Company.preload())
+	return condition.NewJoinCondition[hasmany.Seller, hasmany.Company](conditions, "Company", "CompanyID", sellerConditions.preload(), "ID", Company.preload(), sellerCompanyJoinScanner)
 }
 
 type sellerConditions struct {

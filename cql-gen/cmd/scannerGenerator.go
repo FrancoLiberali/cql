@@ -156,6 +156,7 @@ func (sg ScannerGenerator) Into(destPkg, dir string) (bool, error) {
 	scannerVar := strcase.ToCamel(sg.object.Name()) + "Scanner"
 
 	sg.emitScannerVar(file, objectQual, scannerVar, scannerFields)
+	sg.emitRelationScanners(file, destPkg)
 	sg.emitInitRewiring(file, scannerVar)
 
 	if err := file.Save(); err != nil {
@@ -270,11 +271,15 @@ func pathString(f Field) string {
 }
 
 // classifyAll attempts to produce a scannerField for every field. Returns:
-//   - ([]scannerField, nil) on success
+//   - ([]scannerField, nil) on success (one entry per scannable field;
+//     non-scannable fields are skipped silently so the scanner can still
+//     materialize a partial model — relations and unsupported-but-valid
+//     types are left at their zero value, identical to what gorm does
+//     when the user doesn't preload them)
 //   - (nil, *UnsupportedFieldError) if any field has a Go type that no SQL
 //     database can persist (caller should fail the build)
-//   - (nil, nil) if a field is unsupported-but-valid-SQL (caller silently
-//     skips scanner emission for this model; gorm fallback still works)
+//   - (nil, nil) if there are no scannable fields at all (rare; emission
+//     is skipped silently)
 func (sg ScannerGenerator) classifyAll(fields []Field) ([]scannerField, error) {
 	out := make([]scannerField, 0, len(fields))
 
@@ -285,10 +290,17 @@ func (sg ScannerGenerator) classifyAll(fields []Field) ([]scannerField, error) {
 		}
 
 		if !ok {
-			return nil, nil
+			// Field is a relation, an unsupported-but-valid-SQL type, or
+			// otherwise outside fast-scan scope. Skip just this field;
+			// keep going so other fields still get scan cases.
+			continue
 		}
 
 		out = append(out, sf)
+	}
+
+	if len(out) == 0 {
+		return nil, nil
 	}
 
 	return out, nil
@@ -791,6 +803,117 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 	)
 }
 
+// emitRelationScanners emits a `var <model><Relation>JoinScanner = &condition.RelationScanner[Parent, Child]{...}`
+// for each BelongsTo / HasOne relation on the model. The generated
+// JoinCondition builder (emitted by conditionsGenerator.generateJoin)
+// references this var by the convention name from relationScannerVarName,
+// so the runtime can register a fast-scan mounter when the user calls
+// .Preload() on the relation.
+//
+// Skipped silently when:
+//   - the relation's child type isn't a CQL model
+//   - the relation is HasMany (`*[]Seller`-style) — covered by HasMany
+//     loaders in a future phase, not by joined-preload scanners
+func (sg ScannerGenerator) emitRelationScanners(file *File, destPkg string) {
+	fields, err := getFields(sg.objectType)
+	if err != nil {
+		return
+	}
+
+	for _, f := range fields {
+		// Walk through embeddings to find any top-level relation fields.
+		// Embedded structs (UUIDModel) don't carry relations.
+		if f.Embedded {
+			continue
+		}
+
+		sg.emitRelationScannerForField(file, destPkg, f)
+	}
+}
+
+// emitRelationScannerForField inspects one field and emits the relation
+// scanner if it's a BelongsTo / HasOne to another CQL model.
+func (sg ScannerGenerator) emitRelationScannerForField(file *File, destPkg string, field Field) {
+	// Unwrap pointer to get to a possible named type.
+	isPointer := false
+
+	ft := field.Type.Type
+	if ptr, ok := ft.(*types.Pointer); ok {
+		isPointer = true
+		ft = ptr.Elem()
+	}
+
+	named, ok := ft.(*types.Named)
+	if !ok {
+		return
+	}
+
+	childType := Type{Type: named}
+	if _, err := childType.CQLModelStruct(); err != nil {
+		return // not a CQL model — not a relation
+	}
+
+	parentQual := jen.Qual(
+		getRelativePackagePath(destPkg, sg.objectType),
+		sg.objectType.Name(),
+	)
+	childQual := jen.Qual(
+		getRelativePackagePath(destPkg, childType),
+		childType.Name(),
+	)
+
+	varName := relationScannerVarName(sg.object.Name(), field.Name)
+	childScannerVar := strcase.ToCamel(childType.Name()) + "Scanner"
+
+	// Mount/SetNil bodies differ for pointer vs value relations.
+	var mountBody, setNilBody []jen.Code
+
+	if isPointer {
+		// pointer: assign the child pointer; nil on reset.
+		mountBody = []jen.Code{jen.Id("p").Dot(field.Name).Op("=").Id("c")}
+		setNilBody = []jen.Code{jen.Id("p").Dot(field.Name).Op("=").Nil()}
+	} else {
+		// value: dereference the child; SetNil is a no-op since the
+		// zero-valued struct already matches gorm's LEFT-JOIN-miss
+		// behavior (probed in TestProbe_ValueRelationNoMatch).
+		mountBody = []jen.Code{jen.Id("p").Dot(field.Name).Op("=").Op("*").Id("c")}
+		setNilBody = nil
+	}
+
+	mountFn := jen.Func().Params(
+		jen.Id("p").Op("*").Add(parentQual.Clone()),
+		jen.Id("c").Op("*").Add(childQual.Clone()),
+	).Block(mountBody...)
+
+	values := jen.Dict{
+		jen.Id("RelationField"): jen.Lit(field.Name),
+		jen.Id("ChildScanner"):  jen.Id(childScannerVar),
+		jen.Id("Mount"):         mountFn,
+	}
+
+	if setNilBody != nil {
+		setNilFn := jen.Func().Params(
+			jen.Id("p").Op("*").Add(parentQual.Clone()),
+		).Block(setNilBody...)
+		values[jen.Id("SetNil")] = setNilFn
+	}
+
+	file.Add(
+		jen.Var().Id(varName).Op("=").Op("&").Qual(conditionPath, "RelationScanner").Types(
+			parentQual.Clone(),
+			childQual.Clone(),
+		).Values(values),
+	)
+}
+
+// relationScannerVarName is the convention used by both ScannerGenerator
+// (to emit the var) and ConditionsGenerator (to reference it from the
+// generated JoinCondition builder). e.g. relationScannerVarName("Phone",
+// "Brand") => "phoneBrandJoinScanner".
+func relationScannerVarName(modelName, relationName string) string {
+	return strcase.ToCamel(modelName) + strcase.ToPascal(relationName) + "JoinScanner"
+}
+
 // emitInitRewiring writes an init() that overwrites each Field on the model's
 // conditions struct with a scanner-aware constructor call. This piggybacks on
 // the existing conditionsGenerator output: we look up the var name (the model
@@ -874,6 +997,20 @@ func (sg ScannerGenerator) flattenConditionBindings(destPkg string, field Field,
 	// NullableXField slot and the build fails.
 	unwrapped := unwrapPointerLeaf(field)
 
+	// Relation fields (cql model named types) are NOT emitted as Fields
+	// on the conditions struct — they're handled via a builder method
+	// (e.g. owned.Owner(...)). Skip them here so init() doesn't try to
+	// rewire a non-existent struct field.
+	if _, err := unwrapped.Type.CQLModelStruct(); err == nil {
+		return nil
+	}
+
+	// Slices of cql models (`Sellers *[]Seller`) are HasMany collections,
+	// also handled via a separate Collection (not a Field). Skip.
+	if sliceOfCQLModel(field.Type.Type) {
+		return nil
+	}
+
 	param := NewJenParam()
 	classifyParam(unwrapped, param)
 
@@ -883,6 +1020,33 @@ func (sg ScannerGenerator) flattenConditionBindings(destPkg string, field Field,
 		columnPrefix: columnPrefix,
 		param:        param,
 	}}
+}
+
+// sliceOfCQLModel reports whether t is a slice (or pointer-to-slice) whose
+// element type is itself a cql model struct. Used to skip HasMany relation
+// fields during init()-rewiring.
+func sliceOfCQLModel(t types.Type) bool {
+	if ptr, ok := t.(*types.Pointer); ok {
+		t = ptr.Elem()
+	}
+
+	slice, ok := t.(*types.Slice)
+	if !ok {
+		return false
+	}
+
+	elem := slice.Elem()
+	if ptr, ok := elem.(*types.Pointer); ok {
+		elem = ptr.Elem()
+	}
+
+	if _, ok := elem.(*types.Named); !ok {
+		return false
+	}
+
+	_, err := (Type{Type: elem}).CQLModelStruct()
+
+	return err == nil
 }
 
 // unwrapPointerLeaf walks *T -> T at the leaf, marking wasPointer so

@@ -8,7 +8,7 @@ import (
 )
 
 func (phoneNoTimestampsConditions phoneNoTimestampsConditions) Brand(conditions ...condition.Condition[models.Brand]) condition.JoinCondition[models.PhoneNoTimestamps] {
-	return condition.NewJoinCondition[models.PhoneNoTimestamps, models.Brand](conditions, "Brand", "BrandID", phoneNoTimestampsConditions.preload(), "ID", Brand.preload())
+	return condition.NewJoinCondition[models.PhoneNoTimestamps, models.Brand](conditions, "Brand", "BrandID", phoneNoTimestampsConditions.preload(), "ID", Brand.preload(), phoneNoTimestampsBrandJoinScanner)
 }
 
 type phoneNoTimestampsConditions struct {

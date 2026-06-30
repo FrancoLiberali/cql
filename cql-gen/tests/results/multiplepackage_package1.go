@@ -9,7 +9,7 @@ import (
 )
 
 func (package1Conditions package1Conditions) Package2(conditions ...condition.Condition[package2.Package2]) condition.JoinCondition[package1.Package1] {
-	return condition.NewJoinCondition[package1.Package1, package2.Package2](conditions, "Package2", "ID", package1Conditions.preload(), "Package1ID", Package2.preload())
+	return condition.NewJoinCondition[package1.Package1, package2.Package2](conditions, "Package2", "ID", package1Conditions.preload(), "Package1ID", Package2.preload(), package1Package2JoinScanner)
 }
 
 type package1Conditions struct {

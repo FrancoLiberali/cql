@@ -21,11 +21,16 @@ type CQLQuery struct {
 	initialTable    Table
 	selectClause    clause.Expr
 	// hasJoinedSelects is set when AddSelectField runs for a non-initial
-	// table, i.e. a joined preload pulled columns from a related table.
-	// Fast-scan disables itself in that case because those columns are
-	// meant to populate a relation field on T, which the per-model Scanner
-	// doesn't know about.
+	// table — i.e. a joined preload pulled columns from a related table.
+	// On its own this disables the fast path; activeJoins lifts that gate
+	// for relations that registered a RelationScanner.
 	hasJoinedSelects bool
+	// activeJoins is the runtime registry of join scanners (one per
+	// preloaded relation alias). Populated by joinConditionImpl.applyTo
+	// when a generated builder passes its RelationScanner through. Used
+	// by findWith to dispatch joined columns through generated mounters
+	// instead of falling back to gorm's reflective scan.
+	activeJoins []*activeJoin
 }
 
 // Order specify order when retrieving models from database.

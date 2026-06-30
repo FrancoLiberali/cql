@@ -288,81 +288,176 @@ func TestNullableTypes(t *testing.T) {
 
 func TestBelongsTo(t *testing.T) {
 	doTest(t, "./belongsto", []Comparison{
-		{Have: "owner_conditions.go", Expected: "./results/belongsto_owner.go"},
-		{Have: "owned_conditions.go", Expected: "./results/belongsto_owned.go"},
+		{
+			Have:            "owner_conditions.go",
+			Expected:        "./results/belongsto_owner.go",
+			ScannerHave:     "owner_scanner.go",
+			ScannerExpected: "./results/belongsto_owner_scanner.go",
+		},
+		{
+			Have:            "owned_conditions.go",
+			Expected:        "./results/belongsto_owned.go",
+			ScannerHave:     "owned_scanner.go",
+			ScannerExpected: "./results/belongsto_owned_scanner.go",
+		},
 		{Have: "./belongsto/cql.go", Expected: "./belongsto/cql_result.go"},
 	})
 }
 
 func TestHasOne(t *testing.T) {
 	doTest(t, "./hasone", []Comparison{
-		{Have: "country_conditions.go", Expected: "./results/hasone_country.go"},
-		{Have: "city_conditions.go", Expected: "./results/hasone_city.go"},
+		{
+			Have:            "country_conditions.go",
+			Expected:        "./results/hasone_country.go",
+			ScannerHave:     "country_scanner.go",
+			ScannerExpected: "./results/hasone_country_scanner.go",
+		},
+		{
+			Have:            "city_conditions.go",
+			Expected:        "./results/hasone_city.go",
+			ScannerHave:     "city_scanner.go",
+			ScannerExpected: "./results/hasone_city_scanner.go",
+		},
 		{Have: "./hasone/cql.go", Expected: "./hasone/cql_result.go"},
 	})
 }
 
 func TestHasMany(t *testing.T) {
 	doTest(t, "./hasmany", []Comparison{
-		{Have: "company_conditions.go", Expected: "./results/hasmany_company.go"},
-		{Have: "seller_conditions.go", Expected: "./results/hasmany_seller.go"},
+		{
+			Have:            "company_conditions.go",
+			Expected:        "./results/hasmany_company.go",
+			ScannerHave:     "company_scanner.go",
+			ScannerExpected: "./results/hasmany_company_scanner.go",
+		},
+		{
+			Have:            "seller_conditions.go",
+			Expected:        "./results/hasmany_seller.go",
+			ScannerHave:     "seller_scanner.go",
+			ScannerExpected: "./results/hasmany_seller_scanner.go",
+		},
 		{Have: "./hasmany/cql.go", Expected: "./hasmany/cql_result.go"},
 	})
 }
 
 func TestHasManyWithPointers(t *testing.T) {
 	doTest(t, "./hasmanywithpointers", []Comparison{
-		{Have: "company_with_pointers_conditions.go", Expected: "./results/hasmanywithpointers_company.go"},
-		{Have: "seller_in_pointers_conditions.go", Expected: "./results/hasmanywithpointers_seller.go"},
+		{
+			Have:            "company_with_pointers_conditions.go",
+			Expected:        "./results/hasmanywithpointers_company.go",
+			ScannerHave:     "company_with_pointers_scanner.go",
+			ScannerExpected: "./results/hasmanywithpointers_company_scanner.go",
+		},
+		{
+			Have:            "seller_in_pointers_conditions.go",
+			Expected:        "./results/hasmanywithpointers_seller.go",
+			ScannerHave:     "seller_in_pointers_scanner.go",
+			ScannerExpected: "./results/hasmanywithpointers_seller_scanner.go",
+		},
 		{Have: "./hasmanywithpointers/cql.go", Expected: "./hasmanywithpointers/cql_result.go"},
 	})
 }
 
 func TestSelfReferential(t *testing.T) {
 	doTest(t, "./selfreferential", []Comparison{
-		{Have: "employee_conditions.go", Expected: "./results/selfreferential.go"},
+		{
+			Have:            "employee_conditions.go",
+			Expected:        "./results/selfreferential.go",
+			ScannerHave:     "employee_scanner.go",
+			ScannerExpected: "./results/selfreferential_scanner.go",
+		},
 		{Have: "./selfreferential/cql.go", Expected: "./selfreferential/cql_result.go"},
 	})
 }
 
 func TestMultiplePackage(t *testing.T) {
 	doTest(t, "./multiplepackage/package1", []Comparison{
-		{Have: "package1_conditions.go", Expected: "./results/multiplepackage_package1.go"},
+		{
+			Have:            "package1_conditions.go",
+			Expected:        "./results/multiplepackage_package1.go",
+			ScannerHave:     "package1_scanner.go",
+			ScannerExpected: "./results/multiplepackage_package1_scanner.go",
+		},
 		{Have: "./multiplepackage/package1/cql.go", Expected: "./multiplepackage/package1/cql_result.go"},
 	})
 	doTest(t, "./multiplepackage/package2", []Comparison{
-		{Have: "package2_conditions.go", Expected: "./results/multiplepackage_package2.go"},
+		{
+			Have:            "package2_conditions.go",
+			Expected:        "./results/multiplepackage_package2.go",
+			ScannerHave:     "package2_scanner.go",
+			ScannerExpected: "./results/multiplepackage_package2_scanner.go",
+		},
 	})
 }
 
 func TestOverrideForeignKey(t *testing.T) {
 	doTest(t, "./overrideforeignkey", []Comparison{
-		{Have: "bicycle_conditions.go", Expected: "./results/overrideforeignkey_bicycle.go"},
-		{Have: "person_conditions.go", Expected: "./results/overrideforeignkey_person.go"},
+		{
+			Have:            "bicycle_conditions.go",
+			Expected:        "./results/overrideforeignkey_bicycle.go",
+			ScannerHave:     "bicycle_scanner.go",
+			ScannerExpected: "./results/overrideforeignkey_bicycle_scanner.go",
+		},
+		{
+			Have:            "person_conditions.go",
+			Expected:        "./results/overrideforeignkey_person.go",
+			ScannerHave:     "person_scanner.go",
+			ScannerExpected: "./results/overrideforeignkey_person_scanner.go",
+		},
 		{Have: "./overrideforeignkey/cql.go", Expected: "./overrideforeignkey/cql_result.go"},
 	})
 }
 
 func TestOverrideReferences(t *testing.T) {
 	doTest(t, "./overridereferences", []Comparison{
-		{Have: "phone_conditions.go", Expected: "./results/overridereferences_phone.go"},
-		{Have: "brand_conditions.go", Expected: "./results/overridereferences_brand.go"},
+		{
+			Have:            "phone_conditions.go",
+			Expected:        "./results/overridereferences_phone.go",
+			ScannerHave:     "phone_scanner.go",
+			ScannerExpected: "./results/overridereferences_phone_scanner.go",
+		},
+		{
+			Have:            "brand_conditions.go",
+			Expected:        "./results/overridereferences_brand.go",
+			ScannerHave:     "brand_scanner.go",
+			ScannerExpected: "./results/overridereferences_brand_scanner.go",
+		},
 		{Have: "./overridereferences/cql.go", Expected: "./overridereferences/cql_result.go"},
 	})
 }
 
 func TestOverrideForeignKeyInverse(t *testing.T) {
 	doTest(t, "./overrideforeignkeyinverse", []Comparison{
-		{Have: "user_conditions.go", Expected: "./results/overrideforeignkeyinverse_user.go"},
-		{Have: "credit_card_conditions.go", Expected: "./results/overrideforeignkeyinverse_credit_card.go"},
+		{
+			Have:            "user_conditions.go",
+			Expected:        "./results/overrideforeignkeyinverse_user.go",
+			ScannerHave:     "user_scanner.go",
+			ScannerExpected: "./results/overrideforeignkeyinverse_user_scanner.go",
+		},
+		{
+			Have:            "credit_card_conditions.go",
+			Expected:        "./results/overrideforeignkeyinverse_credit_card.go",
+			ScannerHave:     "credit_card_scanner.go",
+			ScannerExpected: "./results/overrideforeignkeyinverse_credit_card_scanner.go",
+		},
 		{Have: "./overrideforeignkeyinverse/cql.go", Expected: "./overrideforeignkeyinverse/cql_result.go"},
 	})
 }
 
 func TestOverrideReferencesInverse(t *testing.T) {
 	doTest(t, "./overridereferencesinverse", []Comparison{
-		{Have: "computer_conditions.go", Expected: "./results/overridereferencesinverse_computer.go"},
-		{Have: "processor_conditions.go", Expected: "./results/overridereferencesinverse_processor.go"},
+		{
+			Have:            "computer_conditions.go",
+			Expected:        "./results/overridereferencesinverse_computer.go",
+			ScannerHave:     "computer_scanner.go",
+			ScannerExpected: "./results/overridereferencesinverse_computer_scanner.go",
+		},
+		{
+			Have:            "processor_conditions.go",
+			Expected:        "./results/overridereferencesinverse_processor.go",
+			ScannerHave:     "processor_scanner.go",
+			ScannerExpected: "./results/overridereferencesinverse_processor_scanner.go",
+		},
 		{Have: "./overridereferencesinverse/cql.go", Expected: "./overridereferencesinverse/cql_result.go"},
 	})
 }

@@ -331,6 +331,11 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 		t1, t2,
 	)
 
+	// Reference the per-relation scanner var that scannerGenerator emits
+	// alongside this file. Both generators agree on the naming convention
+	// in scannerGenerator.relationScannerVarName.
+	relationScannerRef := jen.Id(relationScannerVarName(objectType.Name(), field.Name))
+
 	condition.ConditionMethod = createMethod(condition.modelType, conditionName).Params(
 		jen.Id("conditions").Op("...").Add(ormT2Condition),
 	).Add(
@@ -344,6 +349,7 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 				jen.Id(condition.modelType).Dot(preloadMethod).Call(),
 				jen.Lit(t2Field),
 				jen.Id(field.Type.Name()).Dot(preloadMethod).Call(),
+				relationScannerRef,
 			),
 		),
 	)

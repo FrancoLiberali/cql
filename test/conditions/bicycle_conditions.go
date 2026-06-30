@@ -8,7 +8,7 @@ import (
 )
 
 func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Condition[models.Person]) condition.JoinCondition[models.Bicycle] {
-	return condition.NewJoinCondition[models.Bicycle, models.Person](conditions, "Owner", "OwnerName", bicycleConditions.preload(), "Name", Person.preload())
+	return condition.NewJoinCondition[models.Bicycle, models.Person](conditions, "Owner", "OwnerName", bicycleConditions.preload(), "Name", Person.preload(), bicycleOwnerJoinScanner)
 }
 
 type bicycleConditions struct {

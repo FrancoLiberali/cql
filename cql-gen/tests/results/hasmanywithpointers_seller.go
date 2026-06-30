@@ -8,7 +8,7 @@ import (
 )
 
 func (sellerInPointersConditions sellerInPointersConditions) Company(conditions ...condition.Condition[hasmanywithpointers.CompanyWithPointers]) condition.JoinCondition[hasmanywithpointers.SellerInPointers] {
-	return condition.NewJoinCondition[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers](conditions, "Company", "CompanyID", sellerInPointersConditions.preload(), "ID", CompanyWithPointers.preload())
+	return condition.NewJoinCondition[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers](conditions, "Company", "CompanyID", sellerInPointersConditions.preload(), "ID", CompanyWithPointers.preload(), sellerInPointersCompanyJoinScanner)
 }
 
 type sellerInPointersConditions struct {

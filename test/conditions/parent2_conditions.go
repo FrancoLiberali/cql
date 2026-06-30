@@ -8,7 +8,7 @@ import (
 )
 
 func (parent2Conditions parent2Conditions) ParentParent(conditions ...condition.Condition[models.ParentParent]) condition.JoinCondition[models.Parent2] {
-	return condition.NewJoinCondition[models.Parent2, models.ParentParent](conditions, "ParentParent", "ParentParentID", parent2Conditions.preload(), "ID", ParentParent.preload())
+	return condition.NewJoinCondition[models.Parent2, models.ParentParent](conditions, "ParentParent", "ParentParentID", parent2Conditions.preload(), "ID", ParentParent.preload(), parent2ParentParentJoinScanner)
 }
 
 type parent2Conditions struct {

@@ -8,10 +8,10 @@ import (
 )
 
 func (saleNoTimestampsConditions saleNoTimestampsConditions) Product(conditions ...condition.Condition[models.ProductNoTimestamps]) condition.JoinCondition[models.SaleNoTimestamps] {
-	return condition.NewJoinCondition[models.SaleNoTimestamps, models.ProductNoTimestamps](conditions, "Product", "ProductID", saleNoTimestampsConditions.preload(), "ID", ProductNoTimestamps.preload())
+	return condition.NewJoinCondition[models.SaleNoTimestamps, models.ProductNoTimestamps](conditions, "Product", "ProductID", saleNoTimestampsConditions.preload(), "ID", ProductNoTimestamps.preload(), saleNoTimestampsProductJoinScanner)
 }
 func (saleNoTimestampsConditions saleNoTimestampsConditions) Seller(conditions ...condition.Condition[models.SellerNoTimestamps]) condition.JoinCondition[models.SaleNoTimestamps] {
-	return condition.NewJoinCondition[models.SaleNoTimestamps, models.SellerNoTimestamps](conditions, "Seller", "SellerID", saleNoTimestampsConditions.preload(), "ID", SellerNoTimestamps.preload())
+	return condition.NewJoinCondition[models.SaleNoTimestamps, models.SellerNoTimestamps](conditions, "Seller", "SellerID", saleNoTimestampsConditions.preload(), "ID", SellerNoTimestamps.preload(), saleNoTimestampsSellerJoinScanner)
 }
 
 type saleNoTimestampsConditions struct {

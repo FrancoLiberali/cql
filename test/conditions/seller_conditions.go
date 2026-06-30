@@ -8,10 +8,10 @@ import (
 )
 
 func (sellerConditions sellerConditions) Company(conditions ...condition.Condition[models.Company]) condition.JoinCondition[models.Seller] {
-	return condition.NewJoinCondition[models.Seller, models.Company](conditions, "Company", "CompanyID", sellerConditions.preload(), "ID", Company.preload())
+	return condition.NewJoinCondition[models.Seller, models.Company](conditions, "Company", "CompanyID", sellerConditions.preload(), "ID", Company.preload(), sellerCompanyJoinScanner)
 }
 func (sellerConditions sellerConditions) University(conditions ...condition.Condition[models.University]) condition.JoinCondition[models.Seller] {
-	return condition.NewJoinCondition[models.Seller, models.University](conditions, "University", "UniversityID", sellerConditions.preload(), "ID", University.preload())
+	return condition.NewJoinCondition[models.Seller, models.University](conditions, "University", "UniversityID", sellerConditions.preload(), "ID", University.preload(), sellerUniversityJoinScanner)
 }
 
 type sellerConditions struct {
