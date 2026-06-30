@@ -113,6 +113,48 @@ func TestJoinedPreloadFastScan_LeftJoinNoMatch(t *testing.T) {
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 
+// TestJoinedPreloadFastScan_PreloadPlusFilterOnChild combines two patterns
+// that share joinConditionImpl.applyTo: WHERE on the joined child (which
+// makes the JOIN inner-style and goes into the ON clause) AND .Preload()
+// (which selects the child columns and triggers mounting). Both must
+// behave correctly together.
+func TestJoinedPreloadFastScan_PreloadPlusFilterOnChild(t *testing.T) {
+	db, mock, cleanup := joinedPreloadDB(t)
+	defer cleanup()
+
+	// INNER JOIN (CQL switches to inner when WHERE on child) + joined cols.
+	mock.ExpectQuery(`SELECT phones\.\*,.*Brand__id.*FROM "phones" INNER JOIN brands`).
+		WillReturnRows(
+			sqlmock.NewRows([]string{
+				"id", "created_at", "updated_at", "deleted_at",
+				"name", "brand_id",
+				"Brand__id", "Brand__name",
+			}).AddRow(
+				1, nil, nil, nil,
+				"p1", 7,
+				7, "acme",
+			),
+		)
+
+	phones, err := Query[models.Phone](
+		context.Background(),
+		db,
+		phoneBrandJoin(
+			conditions.Brand.Name.Is().Eq(String("acme")),
+		).Preload(),
+	).Find()
+
+	require.NoError(t, err)
+	require.Len(t, phones, 1)
+	assert.EqualValues(t, 1, phones[0].ID)
+	assert.Equal(t, "p1", phones[0].Name)
+	// Both the WHERE-matched filter AND the preload mount fired.
+	assert.EqualValues(t, 7, phones[0].Brand.ID)
+	assert.Equal(t, "acme", phones[0].Brand.Name)
+
+	assert.NoError(t, mock.ExpectationsWereMet())
+}
+
 // TestJoinedPreloadFastScan_Nested materializes a 2-level preload:
 // Sale → Seller → Company. Exercises:
 //   - longest-prefix alias matching ("Seller__Company__id" must reach
