@@ -36,6 +36,15 @@ func (condition containerCondition[T]) affectsDeletedAt() bool {
 	return condition.ConnectionCondition.affectsDeletedAt()
 }
 
+// getScannerErased delegates to the wrapped condition.
+func (condition containerCondition[T]) getScannerErased() any {
+	if sp, ok := condition.ConnectionCondition.(scannerProvider); ok {
+		return sp.getScannerErased()
+	}
+
+	return nil
+}
+
 // Condition that contains a internal condition.
 // Example: NOT (internal condition)
 func NewContainerCondition[T model.Model](prefix sql.Operator, conditions []WhereCondition[T]) WhereCondition[T] {

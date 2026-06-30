@@ -22,6 +22,18 @@ func (condition preloadCondition[T]) applyTo(query *CQLQuery, table Table) error
 	return nil
 }
 
+// getScannerErased returns the scanner from any of the fields. They all
+// share the same pointer, so the first non-nil one wins.
+func (condition preloadCondition[T]) getScannerErased() any {
+	for _, fieldID := range condition.Fields {
+		if s := fieldID.getScannerErased(); s != nil {
+			return s
+		}
+	}
+
+	return nil
+}
+
 // Condition used to the preload the attributes of a model
 func NewPreloadCondition[T model.Model](fields ...IField) Condition[T] {
 	return preloadCondition[T]{

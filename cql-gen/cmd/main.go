@@ -98,6 +98,15 @@ func generateConditionsForObject(destPkg string, object types.Object) {
 		strcase.ToSnake(object.Name())+"_conditions.go",
 	)
 
+	// Run scanner validation FIRST: if the model has a fatal issue
+	// (unsupported Go type, duplicate column) we want to fail BEFORE
+	// writing the conditions file. Otherwise a panic mid-generation leaves
+	// a stale partial file on disk that breaks subsequent runs.
+	sg := NewScannerGenerator(object)
+	if _, err := sg.Validate(); err != nil {
+		panic(err)
+	}
+
 	err := NewConditionsGenerator(object).Into(file)
 	if err != nil {
 		// object is not a cql model, do not generate conditions
@@ -106,6 +115,13 @@ func generateConditionsForObject(destPkg string, object types.Object) {
 
 	err = file.Save()
 	if err != nil {
+		panic(err)
+	}
+
+	// Emit the per-model fast scanner alongside the conditions file.
+	// Validation already ran above; this call should only fail on I/O.
+	dir := filepath.Dir(file.name)
+	if _, err := sg.Into(destPkg, dir); err != nil {
 		panic(err)
 	}
 }

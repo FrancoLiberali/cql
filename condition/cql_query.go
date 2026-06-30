@@ -20,6 +20,12 @@ type CQLQuery struct {
 	concernedModels map[reflect.Type][]Table
 	initialTable    Table
 	selectClause    clause.Expr
+	// hasJoinedSelects is set when AddSelectField runs for a non-initial
+	// table, i.e. a joined preload pulled columns from a related table.
+	// Fast-scan disables itself in that case because those columns are
+	// meant to populate a relation field on T, which the per-model Scanner
+	// doesn't know about.
+	hasJoinedSelects bool
 }
 
 // Order specify order when retrieving models from database.
@@ -160,6 +166,10 @@ func (query *CQLQuery) AddSelectField(table Table, fieldID IField, addAs bool) {
 	}
 
 	query.AddSelect(columnName)
+
+	if !table.IsInitial() {
+		query.hasJoinedSelects = true
+	}
 }
 
 func (query *CQLQuery) getSelectAlias(table Table, fieldID IField) string {

@@ -8,6 +8,7 @@ import (
 
 type Query[T model.Model] struct {
 	cqlQuery *CQLQuery
+	scanner  *Scanner[T]
 	err      error
 }
 
@@ -94,6 +95,12 @@ func (query *Query[T]) First() (*T, error) {
 		return nil, query.err
 	}
 
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var model *T
+
+		return model, firstWith[T](query.cqlQuery, &model, query.scanner)
+	}
+
 	var model *T
 
 	return model, query.cqlQuery.First(&model)
@@ -106,6 +113,12 @@ func (query *Query[T]) Take() (*T, error) {
 		return nil, query.err
 	}
 
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var model *T
+
+		return model, takeWith[T](query.cqlQuery, &model, query.scanner)
+	}
+
 	var model *T
 
 	return model, query.cqlQuery.Take(&model)
@@ -116,6 +129,12 @@ func (query *Query[T]) Take() (*T, error) {
 func (query *Query[T]) Last() (*T, error) {
 	if query.err != nil {
 		return nil, query.err
+	}
+
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var model *T
+
+		return model, lastWith[T](query.cqlQuery, &model, query.scanner)
 	}
 
 	var model *T
@@ -147,6 +166,12 @@ func (query *Query[T]) Find() ([]*T, error) {
 		return nil, query.err
 	}
 
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var models []*T
+
+		return models, findWith[T](query.cqlQuery, &models, query.scanner)
+	}
+
 	var models []*T
 
 	return models, query.cqlQuery.Find(&models)
@@ -164,6 +189,26 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Query[T] 
 
 	return &Query[T]{
 		cqlQuery: gormQuery,
+		scanner:  resolveScanner[T](conditions),
 		err:      err,
 	}
+}
+
+// resolveScanner walks the conditions once at query construction looking for
+// the first one that carries a *Scanner[T]. All conditions built from the
+// generated conditions struct share the same scanner pointer, so the first
+// match is enough.
+func resolveScanner[T model.Model](conditions []Condition[T]) *Scanner[T] {
+	for _, c := range conditions {
+		sp, ok := c.(scannerProvider)
+		if !ok {
+			continue
+		}
+
+		if s, ok := sp.getScannerErased().(*Scanner[T]); ok && s != nil {
+			return s
+		}
+	}
+
+	return nil
 }

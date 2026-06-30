@@ -8,50 +8,44 @@ import (
 )
 
 type basicTypesConditions struct {
-	ID         condition.Field[basictypes.BasicTypes, model.UUID]
-	Bool       condition.BoolField[basictypes.BasicTypes]
-	Int        condition.NumericField[basictypes.BasicTypes, int]
-	Int8       condition.NumericField[basictypes.BasicTypes, int8]
-	Int16      condition.NumericField[basictypes.BasicTypes, int16]
-	Int32      condition.NumericField[basictypes.BasicTypes, int32]
-	Int64      condition.NumericField[basictypes.BasicTypes, int64]
-	UInt       condition.NumericField[basictypes.BasicTypes, uint]
-	UInt8      condition.NumericField[basictypes.BasicTypes, uint8]
-	UInt16     condition.NumericField[basictypes.BasicTypes, uint16]
-	UInt32     condition.NumericField[basictypes.BasicTypes, uint32]
-	UInt64     condition.NumericField[basictypes.BasicTypes, uint64]
-	UIntptr    condition.UpdatableField[basictypes.BasicTypes, uintptr]
-	Float32    condition.NumericField[basictypes.BasicTypes, float32]
-	Float64    condition.NumericField[basictypes.BasicTypes, float64]
-	Complex64  condition.UpdatableField[basictypes.BasicTypes, complex64]
-	Complex128 condition.UpdatableField[basictypes.BasicTypes, complex128]
-	String     condition.StringField[basictypes.BasicTypes]
-	Byte       condition.NumericField[basictypes.BasicTypes, uint8]
+	ID      condition.Field[basictypes.BasicTypes, model.UUID]
+	Bool    condition.BoolField[basictypes.BasicTypes]
+	Int     condition.NumericField[basictypes.BasicTypes, int]
+	Int8    condition.NumericField[basictypes.BasicTypes, int8]
+	Int16   condition.NumericField[basictypes.BasicTypes, int16]
+	Int32   condition.NumericField[basictypes.BasicTypes, int32]
+	Int64   condition.NumericField[basictypes.BasicTypes, int64]
+	UInt    condition.NumericField[basictypes.BasicTypes, uint]
+	UInt8   condition.NumericField[basictypes.BasicTypes, uint8]
+	UInt16  condition.NumericField[basictypes.BasicTypes, uint16]
+	UInt32  condition.NumericField[basictypes.BasicTypes, uint32]
+	UInt64  condition.NumericField[basictypes.BasicTypes, uint64]
+	Float32 condition.NumericField[basictypes.BasicTypes, float32]
+	Float64 condition.NumericField[basictypes.BasicTypes, float64]
+	String  condition.StringField[basictypes.BasicTypes]
+	Byte    condition.NumericField[basictypes.BasicTypes, uint8]
 }
 
 var BasicTypes = basicTypesConditions{
-	Bool:       condition.NewBoolField[basictypes.BasicTypes]("Bool", "", ""),
-	Byte:       condition.NewNumericField[basictypes.BasicTypes, uint8]("Byte", "", ""),
-	Complex128: condition.NewUpdatableField[basictypes.BasicTypes, complex128]("Complex128", "", ""),
-	Complex64:  condition.NewUpdatableField[basictypes.BasicTypes, complex64]("Complex64", "", ""),
-	Float32:    condition.NewNumericField[basictypes.BasicTypes, float32]("Float32", "", ""),
-	Float64:    condition.NewNumericField[basictypes.BasicTypes, float64]("Float64", "", ""),
-	ID:         condition.NewField[basictypes.BasicTypes, model.UUID]("ID", "", ""),
-	Int:        condition.NewNumericField[basictypes.BasicTypes, int]("Int", "", ""),
-	Int16:      condition.NewNumericField[basictypes.BasicTypes, int16]("Int16", "", ""),
-	Int32:      condition.NewNumericField[basictypes.BasicTypes, int32]("Int32", "", ""),
-	Int64:      condition.NewNumericField[basictypes.BasicTypes, int64]("Int64", "", ""),
-	Int8:       condition.NewNumericField[basictypes.BasicTypes, int8]("Int8", "", ""),
-	String:     condition.NewStringField[basictypes.BasicTypes]("String", "", ""),
-	UInt:       condition.NewNumericField[basictypes.BasicTypes, uint]("UInt", "", ""),
-	UInt16:     condition.NewNumericField[basictypes.BasicTypes, uint16]("UInt16", "", ""),
-	UInt32:     condition.NewNumericField[basictypes.BasicTypes, uint32]("UInt32", "", ""),
-	UInt64:     condition.NewNumericField[basictypes.BasicTypes, uint64]("UInt64", "", ""),
-	UInt8:      condition.NewNumericField[basictypes.BasicTypes, uint8]("UInt8", "", ""),
-	UIntptr:    condition.NewUpdatableField[basictypes.BasicTypes, uintptr]("UIntptr", "", ""),
+	Bool:    condition.NewBoolField[basictypes.BasicTypes]("Bool", "", ""),
+	Byte:    condition.NewNumericField[basictypes.BasicTypes, uint8]("Byte", "", ""),
+	Float32: condition.NewNumericField[basictypes.BasicTypes, float32]("Float32", "", ""),
+	Float64: condition.NewNumericField[basictypes.BasicTypes, float64]("Float64", "", ""),
+	ID:      condition.NewField[basictypes.BasicTypes, model.UUID]("ID", "", ""),
+	Int:     condition.NewNumericField[basictypes.BasicTypes, int]("Int", "", ""),
+	Int16:   condition.NewNumericField[basictypes.BasicTypes, int16]("Int16", "", ""),
+	Int32:   condition.NewNumericField[basictypes.BasicTypes, int32]("Int32", "", ""),
+	Int64:   condition.NewNumericField[basictypes.BasicTypes, int64]("Int64", "", ""),
+	Int8:    condition.NewNumericField[basictypes.BasicTypes, int8]("Int8", "", ""),
+	String:  condition.NewStringField[basictypes.BasicTypes]("String", "", ""),
+	UInt:    condition.NewNumericField[basictypes.BasicTypes, uint]("UInt", "", ""),
+	UInt16:  condition.NewNumericField[basictypes.BasicTypes, uint16]("UInt16", "", ""),
+	UInt32:  condition.NewNumericField[basictypes.BasicTypes, uint32]("UInt32", "", ""),
+	UInt64:  condition.NewNumericField[basictypes.BasicTypes, uint64]("UInt64", "", ""),
+	UInt8:   condition.NewNumericField[basictypes.BasicTypes, uint8]("UInt8", "", ""),
 }
 
 // Preload allows preloading the BasicTypes when doing a query
 func (basicTypesConditions basicTypesConditions) preload() condition.Condition[basictypes.BasicTypes] {
-	return condition.NewPreloadCondition[basictypes.BasicTypes](basicTypesConditions.ID, basicTypesConditions.Bool, basicTypesConditions.Int, basicTypesConditions.Int8, basicTypesConditions.Int16, basicTypesConditions.Int32, basicTypesConditions.Int64, basicTypesConditions.UInt, basicTypesConditions.UInt8, basicTypesConditions.UInt16, basicTypesConditions.UInt32, basicTypesConditions.UInt64, basicTypesConditions.UIntptr, basicTypesConditions.Float32, basicTypesConditions.Float64, basicTypesConditions.Complex64, basicTypesConditions.Complex128, basicTypesConditions.String, basicTypesConditions.Byte)
+	return condition.NewPreloadCondition[basictypes.BasicTypes](basicTypesConditions.ID, basicTypesConditions.Bool, basicTypesConditions.Int, basicTypesConditions.Int8, basicTypesConditions.Int16, basicTypesConditions.Int32, basicTypesConditions.Int64, basicTypesConditions.UInt, basicTypesConditions.UInt8, basicTypesConditions.UInt16, basicTypesConditions.UInt32, basicTypesConditions.UInt64, basicTypesConditions.Float32, basicTypesConditions.Float64, basicTypesConditions.String, basicTypesConditions.Byte)
 }

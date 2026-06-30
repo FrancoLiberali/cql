@@ -62,6 +62,19 @@ func (condition connectionCondition[T]) affectsDeletedAt() bool {
 	})
 }
 
+// getScannerErased walks children, returning the first scanner found.
+func (condition connectionCondition[T]) getScannerErased() any {
+	for _, c := range condition.Conditions {
+		if sp, ok := c.(scannerProvider); ok {
+			if s := sp.getScannerErased(); s != nil {
+				return s
+			}
+		}
+	}
+
+	return nil
+}
+
 // Condition that connects multiple conditions.
 // Example: condition1 AND condition2
 func NewConnectionCondition[T model.Model](connector sql.Operator, conditions []WhereCondition[T]) WhereCondition[T] {

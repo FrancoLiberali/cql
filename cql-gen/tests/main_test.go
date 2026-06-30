@@ -16,51 +16,138 @@ const chunkSize = 100000
 
 func TestUIntModel(t *testing.T) {
 	doTest(t, "./uintmodel", []Comparison{
-		{Have: "uint_model_conditions.go", Expected: "./results/uintmodel.go"},
+		{
+			Have:            "uint_model_conditions.go",
+			Expected:        "./results/uintmodel.go",
+			ScannerHave:     "uint_model_scanner.go",
+			ScannerExpected: "./results/uintmodel_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./uintmodel/cql.go")
 }
 
 func TestUIntModelWithTimestamp(t *testing.T) {
 	doTest(t, "./uintmodelwithtimestamp", []Comparison{
-		{Have: "u_int_model_with_timestamp_conditions.go", Expected: "./results/uintmodelwithtimestamp.go"},
+		{
+			Have:            "u_int_model_with_timestamp_conditions.go",
+			Expected:        "./results/uintmodelwithtimestamp.go",
+			ScannerHave:     "u_int_model_with_timestamp_scanner.go",
+			ScannerExpected: "./results/uintmodelwithtimestamp_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./uintmodelwithtimestamp/cql.go")
 }
 
 func TestUIntModelWithTimestamps(t *testing.T) {
 	doTest(t, "./uintmodelwithtimestamps", []Comparison{
-		{Have: "u_int_model_with_timestamps_conditions.go", Expected: "./results/uintmodelwithtimestamps.go"},
+		{
+			Have:            "u_int_model_with_timestamps_conditions.go",
+			Expected:        "./results/uintmodelwithtimestamps.go",
+			ScannerHave:     "u_int_model_with_timestamps_scanner.go",
+			ScannerExpected: "./results/uintmodelwithtimestamps_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./uintmodelwithtimestamps/cql.go")
 }
 
 func TestUUIDModel(t *testing.T) {
 	doTest(t, "./uuidmodel", []Comparison{
-		{Have: "uuid_model_conditions.go", Expected: "./results/uuidmodel.go"},
+		{
+			Have:            "uuid_model_conditions.go",
+			Expected:        "./results/uuidmodel.go",
+			ScannerHave:     "uuid_model_scanner.go",
+			ScannerExpected: "./results/uuidmodel_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./uuidmodel/cql.go")
 }
 
 func TestUUIDModelWithTimestamp(t *testing.T) {
 	doTest(t, "./uuidmodelwithtimestamp", []Comparison{
-		{Have: "uuid_model_with_timestamp_conditions.go", Expected: "./results/uuidmodelwithtimestamp.go"},
+		{
+			Have:            "uuid_model_with_timestamp_conditions.go",
+			Expected:        "./results/uuidmodelwithtimestamp.go",
+			ScannerHave:     "uuid_model_with_timestamp_scanner.go",
+			ScannerExpected: "./results/uuidmodelwithtimestamp_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./uuidmodelwithtimestamp/cql.go")
 }
 
 func TestUUIDModelWithTimestamps(t *testing.T) {
 	doTest(t, "./uuidmodelwithtimestamps", []Comparison{
-		{Have: "uuid_model_with_timestamps_conditions.go", Expected: "./results/uuidmodelwithtimestamps.go"},
+		{
+			Have:            "uuid_model_with_timestamps_conditions.go",
+			Expected:        "./results/uuidmodelwithtimestamps.go",
+			ScannerHave:     "uuid_model_with_timestamps_scanner.go",
+			ScannerExpected: "./results/uuidmodelwithtimestamps_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./uuidmodelwithtimestamps/cql.go")
 }
 
+// BasicTypes is the happy-path fixture for every Go basic type that
+// round-trips through SQL via gorm. Both conditions and scanner are emitted
+// and compared against goldens.
 func TestBasicTypes(t *testing.T) {
 	doTest(t, "./basictypes", []Comparison{
-		{Have: "basic_types_conditions.go", Expected: "./results/basictypes.go"},
+		{
+			Have:            "basic_types_conditions.go",
+			Expected:        "./results/basictypes.go",
+			ScannerHave:     "basic_types_scanner.go",
+			ScannerExpected: "./results/basictypes_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./basictypes/cql.go")
+}
+
+// UnsupportedBasicTypes is the negative-path fixture: a model containing
+// only Go basic types that no SQL database can persist (uintptr, complex*).
+// Verified by the gorm probe in /condition/scanner_gorm_probe_test.go that
+// gorm itself rejects these at AutoMigrate, so cql-gen fails loudly at
+// codegen rather than letting the error surface at first DB call.
+//
+// Users who genuinely need complex-shaped columns can define a wrapper
+// implementing sql.Scanner + driver.Valuer (see TestCustomType) — that path
+// bypasses this check.
+func TestUnsupportedBasicTypes(t *testing.T) {
+	defer func() {
+		// Scanner validation runs before conditions are written, so no
+		// stale file should be on disk — but defensively clean up if
+		// behavior ever changes.
+		RemoveFile("unsupported_basic_types_conditions.go")
+
+		r := recover()
+		if r == nil {
+			t.Fatal("expected cql-gen to panic on UnsupportedBasicTypes")
+		}
+
+		err, _ := r.(error)
+		if err == nil {
+			t.Fatalf("expected error panic, got %T: %v", r, r)
+		}
+
+		// The first field in the model is UIntptr, so the panic should
+		// name it (panics on the first offending field encountered).
+		const want = "field UIntptr"
+		if !containsSub(err.Error(), want) {
+			t.Fatalf("panic message %q should contain %q", err.Error(), want)
+		}
+	}()
+
+	doTest(t, "./unsupportedbasictypes", nil)
+}
+
+// containsSub is strings.Contains spelled out to avoid reshuffling this
+// file's import block. Used by TestUnsupportedBasicTypes' panic check.
+func containsSub(s, sub string) bool {
+	for i := 0; i+len(sub) <= len(s); i++ {
+		if s[i:i+len(sub)] == sub {
+			return true
+		}
+	}
+
+	return false
 }
 
 func TestBasicPointers(t *testing.T) {
@@ -84,37 +171,117 @@ func TestBasicSlicesPointer(t *testing.T) {
 	CheckFileNotExists(t, "./basicslicespointer/cql.go")
 }
 
+// TestGoEmbedded covers the negative case for Go-style anonymous embeds:
+// both top-level Int and ToBeEmbedded.Int resolve to column "int". cql-gen's
+// scanner generator refuses to emit because the duplicate switch case
+// wouldn't compile AND gorm would reject the table at AutoMigrate. The
+// conditions file is still emitted (cql-gen historically accepts ambiguous
+// models there).
 func TestGoEmbedded(t *testing.T) {
+	defer func() {
+		RemoveFile("go_embedded_conditions.go")
+
+		r := recover()
+		if r == nil {
+			t.Fatal("expected cql-gen to panic on GoEmbedded (column \"int\" collision)")
+		}
+
+		err, _ := r.(error)
+		if err == nil {
+			t.Fatalf("expected error panic, got %T: %v", r, r)
+		}
+
+		const want = "column \"int\""
+		if !containsSub(err.Error(), want) {
+			t.Fatalf("panic message %q should contain %q", err.Error(), want)
+		}
+	}()
+
 	doTest(t, "./goembedded", []Comparison{
 		{Have: "go_embedded_conditions.go", Expected: "./results/goembedded.go"},
 	})
-	CheckFileNotExists(t, "./goembedded/cql.go")
 }
 
+// TestGormEmbedded covers the negative case for gorm:"embedded": two fields
+// (top-level Int and GormEmbeddedNoPrefix.Int with no prefix) resolve to the
+// same column "int". cql-gen now refuses to generate the scanner for such a
+// model because (a) the duplicate case wouldn't compile and (b) gorm itself
+// would reject the table at AutoMigrate. The conditions file is still
+// emitted (cql-gen historically accepts ambiguous models there).
 func TestGormEmbedded(t *testing.T) {
+	defer func() {
+		RemoveFile("gorm_embedded_conditions.go")
+
+		r := recover()
+		if r == nil {
+			t.Fatal("expected cql-gen to panic on GormEmbedded (column \"int\" collision)")
+		}
+
+		err, _ := r.(error)
+		if err == nil {
+			t.Fatalf("expected error panic, got %T: %v", r, r)
+		}
+
+		const want = "column \"int\""
+		if !containsSub(err.Error(), want) {
+			t.Fatalf("panic message %q should contain %q", err.Error(), want)
+		}
+	}()
+
 	doTest(t, "./gormembedded", []Comparison{
 		{Have: "gorm_embedded_conditions.go", Expected: "./results/gormembedded.go"},
 	})
-	CheckFileNotExists(t, "./gormembedded/cql.go")
+}
+
+// TestGormEmbeddedScan exercises the happy path for gorm:"embedded": two
+// embedded fields use distinct prefixes so no column collides, and the
+// scanner emits assignments through the right Go access path
+// (dest.Foo.Int / dest.Bar.Int / dest.Top). Regression for the bug where
+// embedded leaves were misrouted to dest.Int.
+func TestGormEmbeddedScan(t *testing.T) {
+	doTest(t, "./gormembeddedscan", []Comparison{
+		{
+			Have:            "gorm_embedded_scan_conditions.go",
+			Expected:        "./results/gormembeddedscan.go",
+			ScannerHave:     "gorm_embedded_scan_scanner.go",
+			ScannerExpected: "./results/gormembeddedscan_scanner.go",
+		},
+	})
+	CheckFileNotExists(t, "./gormembeddedscan/cql.go")
 }
 
 func TestCustomType(t *testing.T) {
 	doTest(t, "./customtype", []Comparison{
-		{Have: "custom_type_conditions.go", Expected: "./results/customtype.go"},
+		{
+			Have:            "custom_type_conditions.go",
+			Expected:        "./results/customtype.go",
+			ScannerHave:     "custom_type_scanner.go",
+			ScannerExpected: "./results/customtype_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./customtype/cql.go")
 }
 
 func TestColumnDefinition(t *testing.T) {
 	doTest(t, "./columndefinition", []Comparison{
-		{Have: "column_definition_conditions.go", Expected: "./results/columndefinition.go"},
+		{
+			Have:            "column_definition_conditions.go",
+			Expected:        "./results/columndefinition.go",
+			ScannerHave:     "column_definition_scanner.go",
+			ScannerExpected: "./results/columndefinition_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./columndefinition/cql.go")
 }
 
 func TestNullableTypes(t *testing.T) {
 	doTest(t, "./nullabletypes", []Comparison{
-		{Have: "nullable_types_conditions.go", Expected: "./results/nullabletypes.go"},
+		{
+			Have:            "nullable_types_conditions.go",
+			Expected:        "./results/nullabletypes.go",
+			ScannerHave:     "nullable_types_scanner.go",
+			ScannerExpected: "./results/nullabletypes_scanner.go",
+		},
 	})
 	CheckFileNotExists(t, "./nullabletypes/cql.go")
 }
@@ -203,14 +370,59 @@ func TestOverrideReferencesInverse(t *testing.T) {
 type Comparison struct {
 	Have     string
 	Expected string
+
+	// ScannerHave is the path of the generated scanner file (e.g.
+	// "uint_model_scanner.go"). When set, the test asserts on the scanner:
+	//   - if ScannerExpected is non-empty, files must match
+	//   - if ScannerExpected is empty AND ExpectNoScanner is true, the
+	//     scanner file must NOT exist (the model has fields the scanner
+	//     generator can't yet support, so it silently skipped emission).
+	// Leave both ScannerHave and ExpectNoScanner unset to opt out of
+	// scanner-level assertions for this comparison.
+	ScannerHave     string
+	ScannerExpected string
+	ExpectNoScanner bool
 }
 
 func doTest(t *testing.T, sourcePkg string, comparisons []Comparison) {
 	viper.Set(cmd.DestPackageKey, "conditions")
+
+	defer cleanupGeneratedScanners(comparisons)
+
 	cmd.GenerateConditions(nil, []string{sourcePkg})
 
 	for _, comparison := range comparisons {
 		checkFilesEqual(t, comparison.Have, comparison.Expected)
+
+		switch {
+		case comparison.ScannerHave != "" && comparison.ScannerExpected != "":
+			checkFilesEqual(t, comparison.ScannerHave, comparison.ScannerExpected)
+		case comparison.ScannerHave != "" && comparison.ExpectNoScanner:
+			CheckFileNotExists(t, comparison.ScannerHave)
+		}
+	}
+}
+
+// cleanupGeneratedScanners removes per-model scanner files cql-gen wrote that
+// weren't explicitly compared. checkFilesEqual deletes the Have file after
+// success, but the scanner file is sibling-output that may not be claimed by
+// the test (e.g. relation tests like TestBelongsTo). Leaving them behind
+// breaks the next test run because the directory holds the tests package and
+// a stray "package conditions" file conflicts.
+func cleanupGeneratedScanners(comparisons []Comparison) {
+	for _, c := range comparisons {
+		if c.ScannerHave != "" {
+			RemoveFile(c.ScannerHave) // safe if file doesn't exist
+			continue
+		}
+
+		// Derive the scanner filename from the conditions filename:
+		// foo_conditions.go -> foo_scanner.go
+		const condSuffix = "_conditions.go"
+		if len(c.Have) > len(condSuffix) && c.Have[len(c.Have)-len(condSuffix):] == condSuffix {
+			scanner := c.Have[:len(c.Have)-len(condSuffix)] + "_scanner.go"
+			RemoveFile(scanner)
+		}
 	}
 }
 

@@ -25,6 +25,24 @@ type Field struct {
 	Embedded     bool
 	Tags         GormTags
 	ColumnPrefix string
+
+	// GoAnonymous is true for Go-style embedded struct fields (the field
+	// has no name, only a type — e.g. `model.UUIDModelWithTimestamps` in a
+	// struct literal). Inner fields of such embeds are PROMOTED, so they
+	// are accessible directly as dest.X. Distinguished from `Embedded`,
+	// which is set for ANY embedding including named gorm-tagged fields
+	// like `GormEmbedded ToBeGormEmbedded `gorm:"embedded"`` where the
+	// inner field is accessed as dest.GormEmbedded.X.
+	GoAnonymous bool
+
+	// AccessPath is the chain of Go field names from the model root to
+	// this leaf. Top-level fields have AccessPath == [Field.Name].
+	// Fields under a Go-anonymous embed inherit the parent's path
+	// unchanged (promotion). Fields under a named gorm-embedded struct
+	// prepend the parent's Go name. The scanner generator uses this to
+	// emit dest.A.B.C-style assignments — without it, gorm-embedded
+	// columns silently land on the wrong field.
+	AccessPath []string
 }
 
 func (field Field) CompleteName() string {
@@ -141,10 +159,11 @@ func getStructFields(structType *types.Struct) ([]Field, error) {
 		fieldObject := structType.Field(i)
 		gormTags := getGormTags(structType.Tag(i))
 		fields = append(fields, Field{
-			Name:     fieldObject.Name(),
-			Type:     Type{Type: fieldObject.Type()},
-			Embedded: fieldObject.Embedded() || gormTags.hasEmbedded(),
-			Tags:     gormTags,
+			Name:        fieldObject.Name(),
+			Type:        Type{Type: fieldObject.Type()},
+			Embedded:    fieldObject.Embedded() || gormTags.hasEmbedded(),
+			GoAnonymous: fieldObject.Embedded(),
+			Tags:        gormTags,
 		})
 	}
 
