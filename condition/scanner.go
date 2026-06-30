@@ -210,10 +210,16 @@ func allValuesNull(values []any) bool {
 			// custom scanners; we have no .Valid to inspect, so be
 			// conservative: treat as non-null.
 			return false
+		case *model.UUID:
+			// CQL convention: NilUUID is the sentinel for "no value".
+			// Generated scanners scan a UUID column directly into
+			// model.UUID; a LEFT-JOIN-no-match leaves it at NilUUID.
+			if *t != model.NilUUID {
+				return false
+			}
 		default:
-			// unknown type (custom scanner direct, UUID, etc.) — be
-			// conservative: assume any non-Null-wrapped value means
-			// the row had data.
+			// unknown type (custom scanner direct, gorm types, etc.) —
+			// be conservative: assume non-Null-wrapped values had data.
 			return false
 		}
 	}
