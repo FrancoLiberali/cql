@@ -6,6 +6,7 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	hasmany "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/hasmany"
 	model "github.com/FrancoLiberali/cql/model"
+	gorm "gorm.io/gorm"
 )
 
 var companyScanner = &condition.Scanner[hasmany.Company]{
@@ -35,7 +36,35 @@ var companyScanner = &condition.Scanner[hasmany.Company]{
 		return values, nil
 	},
 }
+var companySellersHasManyLoader = &condition.HasManyLoader[hasmany.Company, hasmany.Seller]{
+	BuildQuery: func(tx *gorm.DB, parentIDs []any, nested []condition.Condition[hasmany.Seller]) (*condition.Query[hasmany.Seller], error) {
+		typedIDs := make([]condition.ValueOfType[model.UUID], len(parentIDs))
+		for i, id := range parentIDs {
+			typedIDs[i] = condition.UUID(id.(model.UUID))
+		}
+		conds := append([]condition.Condition[hasmany.Seller]{Seller.CompanyID.Is().In(typedIDs...)}, nested...)
+		return condition.NewQuery[hasmany.Seller](tx, conds...), nil
+	},
+	ChildFK: func(c *hasmany.Seller) any {
+		if c.CompanyID == nil {
+			return model.NilUUID
+		}
+		return *c.CompanyID
+	},
+	CollectionField: "Sellers",
+	Mount: func(p *hasmany.Company, children []*hasmany.Seller) {
+		values := make([]hasmany.Seller, len(children))
+		for i, c := range children {
+			values[i] = *c
+		}
+		p.Sellers = &values
+	},
+	ParentID: func(p *hasmany.Company) any {
+		return p.ID
+	},
+}
 
 func init() {
 	Company.ID = condition.NewField[hasmany.Company, model.UUID]("ID", "", "", companyScanner)
+	Company.Sellers = Company.Sellers.WithParentScanner(companyScanner)
 }

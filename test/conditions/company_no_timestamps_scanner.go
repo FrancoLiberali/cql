@@ -7,6 +7,7 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
 	models "github.com/FrancoLiberali/cql/test/models"
+	gorm "gorm.io/gorm"
 )
 
 var companyNoTimestampsScanner = &condition.Scanner[models.CompanyNoTimestamps]{
@@ -46,8 +47,36 @@ var companyNoTimestampsScanner = &condition.Scanner[models.CompanyNoTimestamps]{
 		return values, nil
 	},
 }
+var companyNoTimestampsSellersHasManyLoader = &condition.HasManyLoader[models.CompanyNoTimestamps, models.SellerNoTimestamps]{
+	BuildQuery: func(tx *gorm.DB, parentIDs []any, nested []condition.Condition[models.SellerNoTimestamps]) (*condition.Query[models.SellerNoTimestamps], error) {
+		typedIDs := make([]condition.ValueOfType[model.UUID], len(parentIDs))
+		for i, id := range parentIDs {
+			typedIDs[i] = condition.UUID(id.(model.UUID))
+		}
+		conds := append([]condition.Condition[models.SellerNoTimestamps]{SellerNoTimestamps.CompanyNoTimestampsID.Is().In(typedIDs...)}, nested...)
+		return condition.NewQuery[models.SellerNoTimestamps](tx, conds...), nil
+	},
+	ChildFK: func(c *models.SellerNoTimestamps) any {
+		if c.CompanyNoTimestampsID == nil {
+			return model.NilUUID
+		}
+		return *c.CompanyNoTimestampsID
+	},
+	CollectionField: "Sellers",
+	Mount: func(p *models.CompanyNoTimestamps, children []*models.SellerNoTimestamps) {
+		values := make([]models.SellerNoTimestamps, len(children))
+		for i, c := range children {
+			values[i] = *c
+		}
+		p.Sellers = &values
+	},
+	ParentID: func(p *models.CompanyNoTimestamps) any {
+		return p.ID
+	},
+}
 
 func init() {
 	CompanyNoTimestamps.ID = condition.NewField[models.CompanyNoTimestamps, model.UUID]("ID", "", "", companyNoTimestampsScanner)
 	CompanyNoTimestamps.Name = condition.NewStringField[models.CompanyNoTimestamps]("Name", "", "", companyNoTimestampsScanner)
+	CompanyNoTimestamps.Sellers = CompanyNoTimestamps.Sellers.WithParentScanner(companyNoTimestampsScanner)
 }

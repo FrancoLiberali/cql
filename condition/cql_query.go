@@ -31,6 +31,12 @@ type CQLQuery struct {
 	// by findWith to dispatch joined columns through generated mounters
 	// instead of falling back to gorm's reflective scan.
 	activeJoins []*activeJoin
+	// activeHasMany is the runtime registry of HasMany loaders.
+	// Populated by collectionPreloadCondition.applyTo when a generated
+	// Collection passes its HasManyLoader through. Each loader runs ONE
+	// SELECT child WHERE fk IN (parent_ids) after the main scan and
+	// mounts the grouped children onto their parents.
+	activeHasMany []*activeHasMany
 }
 
 // Order specify order when retrieving models from database.

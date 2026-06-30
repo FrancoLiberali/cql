@@ -16,7 +16,7 @@ type companyNoTimestampsConditions struct {
 var CompanyNoTimestamps = companyNoTimestampsConditions{
 	ID:      condition.NewField[models.CompanyNoTimestamps, model.UUID]("ID", "", ""),
 	Name:    condition.NewStringField[models.CompanyNoTimestamps]("Name", "", ""),
-	Sellers: condition.NewCollection[models.CompanyNoTimestamps, models.SellerNoTimestamps]("Sellers", "ID", "CompanyNoTimestampsID"),
+	Sellers: condition.NewCollection[models.CompanyNoTimestamps, models.SellerNoTimestamps]("Sellers", "ID", "CompanyNoTimestampsID", companyNoTimestampsSellersHasManyLoader),
 }
 
 // Preload allows preloading the CompanyNoTimestamps when doing a query

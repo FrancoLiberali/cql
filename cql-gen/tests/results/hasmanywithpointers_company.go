@@ -14,7 +14,7 @@ type companyWithPointersConditions struct {
 
 var CompanyWithPointers = companyWithPointersConditions{
 	ID:      condition.NewField[hasmanywithpointers.CompanyWithPointers, model.UUID]("ID", "", ""),
-	Sellers: condition.NewCollection[hasmanywithpointers.CompanyWithPointers, hasmanywithpointers.SellerInPointers]("Sellers", "ID", "CompanyWithPointersID"),
+	Sellers: condition.NewCollection[hasmanywithpointers.CompanyWithPointers, hasmanywithpointers.SellerInPointers]("Sellers", "ID", "CompanyWithPointersID", companyWithPointersSellersHasManyLoader),
 }
 
 // Preload allows preloading the CompanyWithPointers when doing a query

@@ -65,6 +65,17 @@ var saleScanner = &condition.Scanner[models.Sale]{
 					return fmt.Errorf("cql scanner product_id: bad type %T", values[i])
 				}
 				dest.ProductID = *v
+			case "seller_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner seller_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.SellerID = nil
+				} else {
+					tmp := *v
+					dest.SellerID = &tmp
+				}
 			}
 		}
 		return nil
@@ -86,6 +97,8 @@ var saleScanner = &condition.Scanner[models.Sale]{
 			case "description":
 				values[i] = new(sql.NullString)
 			case "product_id":
+				values[i] = new(model.UUID)
+			case "seller_id":
 				values[i] = new(model.UUID)
 			default:
 				values[i] = new(condition.NullSink)

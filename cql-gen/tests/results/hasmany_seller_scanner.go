@@ -18,6 +18,17 @@ var sellerScanner = &condition.Scanner[hasmany.Seller]{
 					return fmt.Errorf("cql scanner id: bad type %T", values[i])
 				}
 				dest.ID = *v
+			case "company_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner company_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.CompanyID = nil
+				} else {
+					tmp := *v
+					dest.CompanyID = &tmp
+				}
 			}
 		}
 		return nil
@@ -27,6 +38,8 @@ var sellerScanner = &condition.Scanner[hasmany.Seller]{
 		for i, c := range columns {
 			switch c {
 			case "id":
+				values[i] = new(model.UUID)
+			case "company_id":
 				values[i] = new(model.UUID)
 			default:
 				values[i] = new(condition.NullSink)

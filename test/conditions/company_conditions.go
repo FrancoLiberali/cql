@@ -22,7 +22,7 @@ var Company = companyConditions{
 	DeletedAt: condition.NewField[models.Company, time.Time]("DeletedAt", "", ""),
 	ID:        condition.NewField[models.Company, model.UUID]("ID", "", ""),
 	Name:      condition.NewStringField[models.Company]("Name", "", ""),
-	Sellers:   condition.NewCollection[models.Company, models.Seller]("Sellers", "ID", "CompanyID"),
+	Sellers:   condition.NewCollection[models.Company, models.Seller]("Sellers", "ID", "CompanyID", companySellersHasManyLoader),
 	UpdatedAt: condition.NewField[models.Company, time.Time]("UpdatedAt", "", ""),
 }
 

@@ -18,6 +18,17 @@ var cityScanner = &condition.Scanner[hasone.City]{
 					return fmt.Errorf("cql scanner id: bad type %T", values[i])
 				}
 				dest.ID = *v
+			case "country_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner country_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.CountryID = nil
+				} else {
+					tmp := *v
+					dest.CountryID = &tmp
+				}
 			}
 		}
 		return nil
@@ -27,6 +38,8 @@ var cityScanner = &condition.Scanner[hasone.City]{
 		for i, c := range columns {
 			switch c {
 			case "id":
+				values[i] = new(model.UUID)
+			case "country_id":
 				values[i] = new(model.UUID)
 			default:
 				values[i] = new(condition.NullSink)

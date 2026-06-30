@@ -18,6 +18,17 @@ var employeeScanner = &condition.Scanner[selfreferential.Employee]{
 					return fmt.Errorf("cql scanner id: bad type %T", values[i])
 				}
 				dest.ID = *v
+			case "boss_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner boss_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.BossID = nil
+				} else {
+					tmp := *v
+					dest.BossID = &tmp
+				}
 			}
 		}
 		return nil
@@ -27,6 +38,8 @@ var employeeScanner = &condition.Scanner[selfreferential.Employee]{
 		for i, c := range columns {
 			switch c {
 			case "id":
+				values[i] = new(model.UUID)
+			case "boss_id":
 				values[i] = new(model.UUID)
 			default:
 				values[i] = new(condition.NullSink)

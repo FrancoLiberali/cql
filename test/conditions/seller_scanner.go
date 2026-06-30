@@ -27,6 +27,28 @@ var sellerScanner = &condition.Scanner[models.Seller]{
 				if v.Valid {
 					dest.Name = v.String
 				}
+			case "company_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner company_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.CompanyID = nil
+				} else {
+					tmp := *v
+					dest.CompanyID = &tmp
+				}
+			case "university_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner university_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.UniversityID = nil
+				} else {
+					tmp := *v
+					dest.UniversityID = &tmp
+				}
 			}
 		}
 		return nil
@@ -39,6 +61,10 @@ var sellerScanner = &condition.Scanner[models.Seller]{
 				values[i] = new(model.UUID)
 			case "name":
 				values[i] = new(sql.NullString)
+			case "company_id":
+				values[i] = new(model.UUID)
+			case "university_id":
+				values[i] = new(model.UUID)
 			default:
 				values[i] = new(condition.NullSink)
 			}

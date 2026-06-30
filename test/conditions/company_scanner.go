@@ -76,6 +76,33 @@ var companyScanner = &condition.Scanner[models.Company]{
 		return values, nil
 	},
 }
+var companySellersHasManyLoader = &condition.HasManyLoader[models.Company, models.Seller]{
+	BuildQuery: func(tx *gorm.DB, parentIDs []any, nested []condition.Condition[models.Seller]) (*condition.Query[models.Seller], error) {
+		typedIDs := make([]condition.ValueOfType[model.UUID], len(parentIDs))
+		for i, id := range parentIDs {
+			typedIDs[i] = condition.UUID(id.(model.UUID))
+		}
+		conds := append([]condition.Condition[models.Seller]{Seller.CompanyID.Is().In(typedIDs...)}, nested...)
+		return condition.NewQuery[models.Seller](tx, conds...), nil
+	},
+	ChildFK: func(c *models.Seller) any {
+		if c.CompanyID == nil {
+			return model.NilUUID
+		}
+		return *c.CompanyID
+	},
+	CollectionField: "Sellers",
+	Mount: func(p *models.Company, children []*models.Seller) {
+		values := make([]models.Seller, len(children))
+		for i, c := range children {
+			values[i] = *c
+		}
+		p.Sellers = &values
+	},
+	ParentID: func(p *models.Company) any {
+		return p.ID
+	},
+}
 
 func init() {
 	Company.ID = condition.NewField[models.Company, model.UUID]("ID", "", "", companyScanner)
@@ -83,4 +110,5 @@ func init() {
 	Company.UpdatedAt = condition.NewField[models.Company, time.Time]("UpdatedAt", "", "", companyScanner)
 	Company.DeletedAt = condition.NewField[models.Company, time.Time]("DeletedAt", "", "", companyScanner)
 	Company.Name = condition.NewStringField[models.Company]("Name", "", "", companyScanner)
+	Company.Sellers = Company.Sellers.WithParentScanner(companyScanner)
 }

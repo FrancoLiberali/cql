@@ -6,6 +6,7 @@ import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	hasmanywithpointers "github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests/hasmanywithpointers"
 	model "github.com/FrancoLiberali/cql/model"
+	gorm "gorm.io/gorm"
 )
 
 var companyWithPointersScanner = &condition.Scanner[hasmanywithpointers.CompanyWithPointers]{
@@ -35,7 +36,28 @@ var companyWithPointersScanner = &condition.Scanner[hasmanywithpointers.CompanyW
 		return values, nil
 	},
 }
+var companyWithPointersSellersHasManyLoader = &condition.HasManyLoader[hasmanywithpointers.CompanyWithPointers, hasmanywithpointers.SellerInPointers]{
+	BuildQuery: func(tx *gorm.DB, parentIDs []any, nested []condition.Condition[hasmanywithpointers.SellerInPointers]) (*condition.Query[hasmanywithpointers.SellerInPointers], error) {
+		typedIDs := make([]condition.ValueOfType[model.UUID], len(parentIDs))
+		for i, id := range parentIDs {
+			typedIDs[i] = condition.UUID(id.(model.UUID))
+		}
+		conds := append([]condition.Condition[hasmanywithpointers.SellerInPointers]{SellerInPointers.CompanyWithPointersID.Is().In(typedIDs...)}, nested...)
+		return condition.NewQuery[hasmanywithpointers.SellerInPointers](tx, conds...), nil
+	},
+	ChildFK: func(c *hasmanywithpointers.SellerInPointers) any {
+		return nil
+	},
+	CollectionField: "Sellers",
+	Mount: func(p *hasmanywithpointers.CompanyWithPointers, children []*hasmanywithpointers.SellerInPointers) {
+		p.Sellers = &children
+	},
+	ParentID: func(p *hasmanywithpointers.CompanyWithPointers) any {
+		return p.ID
+	},
+}
 
 func init() {
 	CompanyWithPointers.ID = condition.NewField[hasmanywithpointers.CompanyWithPointers, model.UUID]("ID", "", "", companyWithPointersScanner)
+	CompanyWithPointers.Sellers = CompanyWithPointers.Sellers.WithParentScanner(companyWithPointersScanner)
 }

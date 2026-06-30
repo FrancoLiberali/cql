@@ -27,6 +27,17 @@ var employeeScanner = &condition.Scanner[models.Employee]{
 				if v.Valid {
 					dest.Name = v.String
 				}
+			case "boss_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner boss_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.BossID = nil
+				} else {
+					tmp := *v
+					dest.BossID = &tmp
+				}
 			}
 		}
 		return nil
@@ -39,6 +50,8 @@ var employeeScanner = &condition.Scanner[models.Employee]{
 				values[i] = new(model.UUID)
 			case "name":
 				values[i] = new(sql.NullString)
+			case "boss_id":
+				values[i] = new(model.UUID)
 			default:
 				values[i] = new(condition.NullSink)
 			}

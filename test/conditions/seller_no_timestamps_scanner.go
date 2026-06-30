@@ -27,6 +27,28 @@ var sellerNoTimestampsScanner = &condition.Scanner[models.SellerNoTimestamps]{
 				if v.Valid {
 					dest.Name = v.String
 				}
+			case "company_no_timestamps_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner company_no_timestamps_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.CompanyNoTimestampsID = nil
+				} else {
+					tmp := *v
+					dest.CompanyNoTimestampsID = &tmp
+				}
+			case "university_id":
+				v, ok := values[i].(*model.UUID)
+				if !ok {
+					return fmt.Errorf("cql scanner university_id: bad type %T", values[i])
+				}
+				if *v == model.NilUUID {
+					dest.UniversityID = nil
+				} else {
+					tmp := *v
+					dest.UniversityID = &tmp
+				}
 			}
 		}
 		return nil
@@ -39,6 +61,10 @@ var sellerNoTimestampsScanner = &condition.Scanner[models.SellerNoTimestamps]{
 				values[i] = new(model.UUID)
 			case "name":
 				values[i] = new(sql.NullString)
+			case "company_no_timestamps_id":
+				values[i] = new(model.UUID)
+			case "university_id":
+				values[i] = new(model.UUID)
 			default:
 				values[i] = new(condition.NullSink)
 			}

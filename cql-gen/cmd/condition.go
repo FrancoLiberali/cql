@@ -375,6 +375,11 @@ func (condition *Condition) createCollection(objectType Type, field Field) {
 		),
 	)
 
+	// Reference the per-relation HasMany loader var emitted alongside this
+	// file by ScannerGenerator. Naming convention shared via
+	// hasManyLoaderVarName.
+	loaderRef := jen.Id(hasManyLoaderVarName(objectType.Name(), field.Name))
+
 	condition.FieldDefinition = jen.Qual(
 		conditionPath, cqlNewCollection,
 	).Types(
@@ -384,6 +389,7 @@ func (condition *Condition) createCollection(objectType Type, field Field) {
 		jen.Lit(field.Name),
 		jen.Lit(field.getFKReferencesAttribute()),
 		jen.Lit(field.getRelatedTypeFKAttribute(objectType.Name())),
+		loaderRef,
 	)
 
 	condition.FieldIsCollection = true

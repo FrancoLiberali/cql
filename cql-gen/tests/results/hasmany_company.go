@@ -14,7 +14,7 @@ type companyConditions struct {
 
 var Company = companyConditions{
 	ID:      condition.NewField[hasmany.Company, model.UUID]("ID", "", ""),
-	Sellers: condition.NewCollection[hasmany.Company, hasmany.Seller]("Sellers", "ID", "CompanyID"),
+	Sellers: condition.NewCollection[hasmany.Company, hasmany.Seller]("Sellers", "ID", "CompanyID", companySellersHasManyLoader),
 }
 
 // Preload allows preloading the Company when doing a query

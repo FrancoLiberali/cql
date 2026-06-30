@@ -6,6 +6,8 @@ import (
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+
+	"github.com/FrancoLiberali/cql/model"
 )
 
 // Scanner is a code-generated row materializer for model type T. It avoids
@@ -219,6 +221,143 @@ func allValuesNull(values []any) bool {
 	return true
 }
 
+// HasManyLoader is a code-generated post-scan mounter for a HasMany
+// relation. After the main query materializes parents, the runtime walks
+// every registered loader exactly once:
+//
+//   - collect parent PK values via ParentID
+//   - build a Query[Child] (which gets all the fast-path goodies, including
+//     a nested fast scanner for Child) via BuildQuery and run Find
+//   - group results by ChildFK
+//   - call Mount(parent, groupedChildren) per parent
+//
+// Generated code constructs one HasManyLoader per HasMany relation on each
+// parent model, with all the typed accessors baked in. The cost is one
+// extra SQL round-trip per HasMany relation per query (same shape gorm's
+// reflective preload uses).
+type HasManyLoader[Parent, Child model.Model] struct {
+	// CollectionField is the Go field name on Parent that holds the
+	// children (e.g. "Sellers"). Used for diagnostic output.
+	CollectionField string
+	// ParentID extracts the PK value from a parent. Compared against
+	// ChildFK to group children with their parent.
+	ParentID func(*Parent) any
+	// ChildFK extracts the foreign-key value from a child (e.g. its
+	// CompanyID for a Seller→Company relation).
+	ChildFK func(*Child) any
+	// Mount writes the grouped children onto parent. Pointer slices
+	// (`*[]Seller`) and value slices (`[]Seller`) both use Mount —
+	// generated code adapts.
+	Mount func(parent *Parent, children []*Child)
+	// BuildQuery constructs the SELECT-children-WHERE-fk-IN(...) query.
+	// Generated code uses the child's conditions struct so nested
+	// preloads/joins/filters compose naturally:
+	//   func(tx *gorm.DB, ids []any, nested []Condition[Seller]) (*Query[Seller], error) {
+	//       conds := append(
+	//         []Condition[Seller]{ conditions.Seller.CompanyID.IsUnsafe().In(ids) },
+	//         nested...,
+	//       )
+	//       return NewQuery[Seller](tx, conds...), nil
+	//   }
+	BuildQuery func(tx *gorm.DB, parentIDs []any, nested []Condition[Child]) (*Query[Child], error)
+}
+
+// activeHasMany is the type-erased runtime form of a HasManyLoader bound
+// to its registered nested preloads. CQLQuery accumulates these when
+// collectionPreloadCondition.applyTo runs.
+type activeHasMany struct {
+	// collectionField is the Go field name on the parent model that
+	// receives the children — purely for error messages.
+	collectionField string
+	// run executes the loader against the given parents. parents is
+	// []*Parent type-erased to []any (so the runtime doesn't have to
+	// be generic in Parent here).
+	run func(tx *gorm.DB, parents []any) error
+}
+
+// registerHasManyLoader wraps a HasManyLoader into the type-erased
+// activeHasMany form and registers it on the query. Called from
+// collectionPreloadCondition.applyTo when generated code supplied a
+// loader. nested are the JoinConditions passed to .Preload(nested...) so
+// the child query can preload its own relations in turn.
+func registerHasManyLoader[Parent, Child model.Model](
+	q *CQLQuery,
+	loader *HasManyLoader[Parent, Child],
+	nested []Condition[Child],
+) {
+	q.activeHasMany = append(q.activeHasMany, &activeHasMany{
+		collectionField: loader.CollectionField,
+		run: func(tx *gorm.DB, parents []any) error {
+			if len(parents) == 0 {
+				return nil
+			}
+
+			ids := make([]any, 0, len(parents))
+
+			for _, p := range parents {
+				pp, ok := p.(*Parent)
+				if !ok {
+					return fmt.Errorf("cql hasmany %q: expected *%T parent, got %T",
+						loader.CollectionField, *new(Parent), p)
+				}
+
+				ids = append(ids, loader.ParentID(pp))
+			}
+
+			// Fresh session: otherwise the child query inherits the
+			// parent query's FROM clause + WHERE conditions, producing
+			// nonsense SQL like `SELECT sellers.* FROM companies WHERE
+			// companies.deleted_at IS NULL AND sellers.company_id IN (...)`.
+			childTx := tx.Session(&gorm.Session{NewDB: true, Context: tx.Statement.Context})
+
+			childQuery, err := loader.BuildQuery(childTx, ids, nested)
+			if err != nil {
+				return err
+			}
+
+			children, err := childQuery.Find()
+			if err != nil {
+				return err
+			}
+
+			groups := make(map[any][]*Child, len(parents))
+			for _, c := range children {
+				fk := loader.ChildFK(c)
+				groups[fk] = append(groups[fk], c)
+			}
+
+			for _, p := range parents {
+				pp := p.(*Parent)
+				loader.Mount(pp, groups[loader.ParentID(pp)])
+			}
+
+			return nil
+		},
+	})
+}
+
+// runHasManyLoaders is called by findWith / scanOne after the main rows
+// are materialized. Type-erases the typed *T list into []any for each
+// registered loader.
+func runHasManyLoaders[T any](q *CQLQuery, parents []*T) error {
+	if len(q.activeHasMany) == 0 {
+		return nil
+	}
+
+	asAny := make([]any, len(parents))
+	for i, p := range parents {
+		asAny[i] = p
+	}
+
+	for _, hm := range q.activeHasMany {
+		if err := hm.run(q.gormDB, asAny); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // scannerProvider is the optional interface implemented by Conditions that
 // can surface a scanner. Field-backed conditions return the scanner stored
 // on their field; combinators (AND/OR/NOT) delegate to their children.
@@ -228,16 +367,18 @@ type scannerProvider interface {
 
 // canUseFastScan reports whether the query is safe to materialize via the
 // generated Scanner(s). Bails when:
-//   - gorm Preload is in use (separate queries that populate relation slices
-//     for HasMany; outside the joined-preload fast-path scope)
+//   - gorm Preload is in use AND no activeHasMany loader covers it (HasMany
+//     without a generated loader falls back to gorm; with loader, findWith
+//     strips Preloads before executing the main query and runs the loader
+//     post-scan)
 //   - the query added joined selects but no RelationScanner was registered
-//     for any of them — the scanner would silently drop relation data
+//     for any of them
 func canUseFastScan(q *CQLQuery) bool {
 	if q == nil || q.gormDB == nil || q.gormDB.Statement == nil {
 		return false
 	}
 
-	if len(q.gormDB.Statement.Preloads) > 0 {
+	if len(q.gormDB.Statement.Preloads) > 0 && len(q.activeHasMany) == 0 {
 		return false
 	}
 
@@ -251,10 +392,32 @@ func canUseFastScan(q *CQLQuery) bool {
 	return true
 }
 
+// stripGormPreloads removes any gorm preloads from the statement before
+// the main SELECT runs — the activeHasMany loaders will populate the
+// relation slices post-scan instead, avoiding a duplicate gorm-driven
+// child query. The Preloads stay registered for non-Find paths (UPDATE
+// RETURNING etc.) that don't go through findWith.
+func stripGormPreloads(q *CQLQuery) {
+	if q == nil || q.gormDB == nil || q.gormDB.Statement == nil {
+		return
+	}
+
+	q.gormDB.Statement.Preloads = nil
+}
+
 // findWith materializes every matching row into *dest using scanner. Caller
 // must have validated that the fast path applies (scanner != nil and
-// canUseFastScan(q) == true).
+// canUseFastScan(q) == true). After the main scan, runs registered
+// HasMany loaders (one extra SELECT per relation) and mounts the grouped
+// children onto each parent.
 func findWith[T any](q *CQLQuery, dest *[]*T, scanner *Scanner[T]) error {
+	// HasMany loaders own the child fetch; if gorm Preloads are also
+	// registered (kept alive for non-Find paths) strip them here so gorm
+	// doesn't duplicate the work + override the loader's mount.
+	if len(q.activeHasMany) > 0 {
+		stripGormPreloads(q)
+	}
+
 	rows, err := q.gormDB.Rows()
 	if err != nil {
 		return err
@@ -280,27 +443,37 @@ func findWith[T any](q *CQLQuery, dest *[]*T, scanner *Scanner[T]) error {
 		*dest = append(*dest, m)
 	}
 
-	return rows.Err()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	return runHasManyLoaders[T](q, *dest)
 }
 
 // firstWith materializes the first row (primary-key ordered) into dest.
 // Returns gorm.ErrRecordNotFound when no row matches, matching the gorm
 // fallback path's contract.
 func firstWith[T any](q *CQLQuery, dest **T, scanner *Scanner[T]) error {
-	return scanOne(q.gormDB.Order(clause.OrderByColumn{Column: clause.PrimaryColumn}), dest, scanner, q.activeJoins)
+	return scanOne(q, q.gormDB.Order(clause.OrderByColumn{Column: clause.PrimaryColumn}), dest, scanner)
 }
 
 // takeWith materializes any one matching row (no ordering) into dest.
 func takeWith[T any](q *CQLQuery, dest **T, scanner *Scanner[T]) error {
-	return scanOne(q.gormDB, dest, scanner, q.activeJoins)
+	return scanOne(q, q.gormDB, dest, scanner)
 }
 
 // lastWith materializes the last row (primary-key DESC) into dest.
 func lastWith[T any](q *CQLQuery, dest **T, scanner *Scanner[T]) error {
-	return scanOne(q.gormDB.Order(clause.OrderByColumn{Column: clause.PrimaryColumn, Desc: true}), dest, scanner, q.activeJoins)
+	return scanOne(q, q.gormDB.Order(clause.OrderByColumn{Column: clause.PrimaryColumn, Desc: true}), dest, scanner)
 }
 
-func scanOne[T any](db *gorm.DB, dest **T, scanner *Scanner[T], joins []*activeJoin) error {
+// scanOne materializes a single row + runs registered HasMany loaders
+// against the singleton parent.
+func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) error {
+	if len(q.activeHasMany) > 0 {
+		stripGormPreloads(q)
+	}
+
 	rows, err := db.Limit(1).Rows()
 	if err != nil {
 		return err
@@ -320,7 +493,7 @@ func scanOne[T any](db *gorm.DB, dest **T, scanner *Scanner[T], joins []*activeJ
 		return err
 	}
 
-	plan, err := buildScanPlan(columns, joins)
+	plan, err := buildScanPlan(columns, q.activeJoins)
 	if err != nil {
 		return err
 	}
@@ -332,7 +505,11 @@ func scanOne[T any](db *gorm.DB, dest **T, scanner *Scanner[T], joins []*activeJ
 
 	*dest = m
 
-	return rows.Err()
+	if err := rows.Err(); err != nil {
+		return err
+	}
+
+	return runHasManyLoaders[T](q, []*T{m})
 }
 
 // scanPlan precomputes per-column routing once (instead of doing prefix

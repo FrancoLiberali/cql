@@ -344,16 +344,29 @@ func (sg ScannerGenerator) classifyField(field Field) (scannerField, bool, error
 
 		return sf, ok, nil
 	case *types.Pointer:
-		// Pointer-to-T: scan into T's nullable form, assign pointer when
-		// valid. Only support pointer-to-basic for now.
-		basic, ok := t.Elem().(*types.Basic)
-		if !ok {
-			return scannerField{}, false, nil
+		// Pointer-to-basic: scan into the matching sql.Null* wrapper,
+		// assign pointer when valid, nil otherwise.
+		if basic, ok := t.Elem().(*types.Basic); ok {
+			sf, ok := classifyPointerToBasic(colName, dest, basic)
+
+			return sf, ok, nil
 		}
 
-		sf, ok := classifyPointerToBasic(colName, dest, basic)
+		// Pointer-to-named (most commonly *model.UUID or *model.UIntID
+		// for nullable foreign keys): scan into the named type itself,
+		// then assign nil-or-pointer based on a zero-value sentinel.
+		if named, ok := t.Elem().(*types.Named); ok {
+			named := Type{Type: named}
+			switch named.String() {
+			case modelPath + "." + uuid:
+				return pointerUUIDField(colName, dest), true, nil
+			case modelPath + "." + uIntID:
+				return pointerUIntIDField(colName, dest), true, nil
+			}
+			// Unknown pointer-to-named — skip (gorm fallback handles).
+		}
 
-		return sf, ok, nil
+		return scannerField{}, false, nil
 	case *types.Slice:
 		if elem, ok := t.Elem().(*types.Basic); ok && elem.Kind() == types.Uint8 {
 			return classifyByteSlice(colName, dest), true, nil
@@ -632,6 +645,63 @@ func uintIDField(col string, dest *jen.Statement) scannerField {
 	}
 }
 
+// pointerUUIDField handles `*model.UUID` (nullable FK). Scans into
+// model.UUID directly; treats NilUUID as the "no value" sentinel so a
+// NULL column maps to a nil pointer on the destination.
+func pointerUUIDField(col string, dest *jen.Statement) scannerField {
+	return scannerField{
+		columnName: col,
+		valueExpr:  jen.New(jen.Qual(modelPath, uuid)),
+		assignFn: func(idx string) []jen.Code {
+			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual(modelPath, uuid)),
+			)
+			notOk := jen.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(jen.Qual("fmt", "Errorf").Call(
+					jen.Lit("cql scanner "+col+": bad type %T"),
+					jen.Id("values").Index(jen.Id(idx)),
+				)),
+			)
+			branch := jen.If(jen.Op("*").Id("v").Op("==").Qual(modelPath, "NilUUID")).Block(
+				dest.Clone().Op("=").Nil(),
+			).Else().Block(
+				jen.Id("tmp").Op(":=").Op("*").Id("v"),
+				dest.Clone().Op("=").Op("&").Id("tmp"),
+			)
+
+			return []jen.Code{vAssertion, notOk, branch}
+		},
+	}
+}
+
+// pointerUIntIDField handles `*model.UIntID` (nullable FK). Scans into
+// sql.NullInt64 since model.UIntID has no Scanner interface itself.
+func pointerUIntIDField(col string, dest *jen.Statement) scannerField {
+	return scannerField{
+		columnName: col,
+		valueExpr:  jen.New(jen.Qual("database/sql", "NullInt64")),
+		assignFn: func(idx string) []jen.Code {
+			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual("database/sql", "NullInt64")),
+			)
+			notOk := jen.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(jen.Qual("fmt", "Errorf").Call(
+					jen.Lit("cql scanner "+col+": bad type %T"),
+					jen.Id("values").Index(jen.Id(idx)),
+				)),
+			)
+			branch := jen.If(jen.Id("v").Dot("Valid")).Block(
+				jen.Id("tmp").Op(":=").Qual(modelPath, uIntID).Call(jen.Id("v").Dot("Int64")), //nolint:gosec
+				dest.Clone().Op("=").Op("&").Id("tmp"),
+			).Else().Block(
+				dest.Clone().Op("=").Nil(),
+			)
+
+			return []jen.Code{vAssertion, notOk, branch}
+		},
+	}
+}
+
 func uuidField(col string, dest *jen.Statement) scannerField {
 	return scannerField{
 		columnName: col,
@@ -832,9 +902,17 @@ func (sg ScannerGenerator) emitRelationScanners(file *File, destPkg string) {
 }
 
 // emitRelationScannerForField inspects one field and emits the relation
-// scanner if it's a BelongsTo / HasOne to another CQL model.
+// scanner if it's a BelongsTo / HasOne to another CQL model, or a HasMany
+// loader if the field is a (pointer-to-)slice of CQL models.
 func (sg ScannerGenerator) emitRelationScannerForField(file *File, destPkg string, field Field) {
-	// Unwrap pointer to get to a possible named type.
+	// HasMany: (*)[]Child or (*)[]*Child where Child is a CQL model.
+	if hasManyChild, ok := hasManyChildType(field.Type.Type); ok {
+		sg.emitHasManyLoader(file, destPkg, field, hasManyChild)
+
+		return
+	}
+
+	// BelongsTo / HasOne: (*)Child where Child is a CQL model.
 	isPointer := false
 
 	ft := field.Type.Type
@@ -914,6 +992,281 @@ func relationScannerVarName(modelName, relationName string) string {
 	return strcase.ToCamel(modelName) + strcase.ToPascal(relationName) + "JoinScanner"
 }
 
+// hasManyLoaderVarName matches the convention used by ScannerGenerator
+// (to emit the var) and ConditionsGenerator (to reference it from
+// createCollection). e.g. hasManyLoaderVarName("Company", "Sellers") =>
+// "companySellersHasManyLoader".
+func hasManyLoaderVarName(modelName, relationName string) string {
+	return strcase.ToCamel(modelName) + strcase.ToPascal(relationName) + "HasManyLoader"
+}
+
+// hasManyChildType reports whether t is a slice (possibly pointer-wrapped)
+// of a CQL model — i.e. a HasMany relation field. Returns the child's
+// Type when so.
+func hasManyChildType(t types.Type) (Type, bool) {
+	if ptr, ok := t.(*types.Pointer); ok {
+		t = ptr.Elem()
+	}
+
+	slice, ok := t.(*types.Slice)
+	if !ok {
+		return Type{}, false
+	}
+
+	elem := slice.Elem()
+	if ptr, ok := elem.(*types.Pointer); ok {
+		elem = ptr.Elem()
+	}
+
+	if _, ok := elem.(*types.Named); !ok {
+		return Type{}, false
+	}
+
+	childType := Type{Type: elem}
+	if _, err := childType.CQLModelStruct(); err != nil {
+		return Type{}, false
+	}
+
+	return childType, true
+}
+
+// emitHasManyLoader writes a HasManyLoader[Parent, Child] var. Generated
+// code wires:
+//   - ParentID: extract parent's primary key (assumes embedded UUIDModel /
+//     UIntModel — pulls dest.ID)
+//   - ChildFK: extract child's FK to parent, with nullable-pointer
+//     dereferencing for `*model.UUID` / `*model.UIntID` foreign keys
+//   - Mount: assign the slice onto the parent's collection field
+//     (handles `*[]Child` / `[]Child` / `*[]*Child` / `[]*Child` shapes)
+//   - BuildQuery: SELECT children WHERE fk IN (parent_ids), with nested
+//     conditions appended for nested preload chains
+func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field Field, childType Type) {
+	parentQual := jen.Qual(
+		getRelativePackagePath(destPkg, sg.objectType),
+		sg.objectType.Name(),
+	)
+	childQual := jen.Qual(
+		getRelativePackagePath(destPkg, childType),
+		childType.Name(),
+	)
+
+	varName := hasManyLoaderVarName(sg.object.Name(), field.Name)
+
+	// Detect parent PK type (UUID or UIntID) from the parent's embedded
+	// base model. Used to type the IN-list values.
+	parentIsUUID := sg.parentPKIsUUID()
+
+	// FK column on the child Go field (e.g. "CompanyID"). gorm convention
+	// is <ParentName>ID unless overridden by the foreignKey tag. cql-gen
+	// already resolves this for Collection emission via
+	// field.getRelatedTypeFKAttribute — we use the same value.
+	fkGoField := field.getRelatedTypeFKAttribute(sg.objectType.Name())
+
+	// IN-list builder: typed value of model.UUID or model.UIntID per id.
+	var idTypedValueCall *jen.Statement
+
+	var valueOfType *jen.Statement
+
+	if parentIsUUID {
+		idTypedValueCall = jen.Qual(conditionPath, "UUID")
+		valueOfType = jen.Qual(conditionPath, "ValueOfType").Types(jen.Qual(modelPath, uuid))
+	} else {
+		idTypedValueCall = jen.Qual(conditionPath, "UIntID")
+		valueOfType = jen.Qual(conditionPath, "ValueOfType").Types(jen.Qual(modelPath, uIntID))
+	}
+
+	// Determine whether the slice is by-value or by-pointer, and whether
+	// the field is a pointer-to-slice. The Mount body needs to know:
+	//   `Sellers *[]Seller`        → p.Sellers = &valuesSlice
+	//   `Sellers []Seller`         →  p.Sellers = valuesSlice
+	//   `Sellers *[]*Seller`       → p.Sellers = &childrenPtrs
+	//   `Sellers []*Seller`        →  p.Sellers = childrenPtrs
+	fieldType := field.Type.Type
+
+	sliceIsPointer := false
+	if ptr, ok := fieldType.(*types.Pointer); ok {
+		sliceIsPointer = true
+		fieldType = ptr.Elem()
+	}
+
+	slice, _ := fieldType.(*types.Slice)
+	elemIsPointer := false
+
+	if _, ok := slice.Elem().(*types.Pointer); ok {
+		elemIsPointer = true
+	}
+
+	// Mount body.
+	mountBody := []jen.Code{}
+	if elemIsPointer {
+		// children IS []*Child — assign directly (or take address).
+		if sliceIsPointer {
+			mountBody = append(mountBody,
+				jen.Id("p").Dot(field.Name).Op("=").Op("&").Id("children"),
+			)
+		} else {
+			mountBody = append(mountBody,
+				jen.Id("p").Dot(field.Name).Op("=").Id("children"),
+			)
+		}
+	} else {
+		// Need to deref children []*Child into a []Child.
+		mountBody = append(mountBody,
+			jen.Id("values").Op(":=").Make(jen.Index().Add(childQual.Clone()), jen.Len(jen.Id("children"))),
+			jen.For(jen.List(jen.Id("i"), jen.Id("c")).Op(":=").Range().Id("children")).Block(
+				jen.Id("values").Index(jen.Id("i")).Op("=").Op("*").Id("c"),
+			),
+		)
+
+		if sliceIsPointer {
+			mountBody = append(mountBody,
+				jen.Id("p").Dot(field.Name).Op("=").Op("&").Id("values"),
+			)
+		} else {
+			mountBody = append(mountBody,
+				jen.Id("p").Dot(field.Name).Op("=").Id("values"),
+			)
+		}
+	}
+
+	// ChildFK body — depends on whether child FK is a pointer.
+	childFKBody := childFKExtractor(childType, fkGoField, parentIsUUID)
+
+	// ParentID body — emit `return p.ID` (assumes embedded base model).
+	parentIDFn := jen.Func().Params(jen.Id("p").Op("*").Add(parentQual.Clone())).
+		Params(jen.Any()).Block(
+		jen.Return(jen.Id("p").Dot("ID")),
+	)
+
+	childFKFn := jen.Func().Params(jen.Id("c").Op("*").Add(childQual.Clone())).
+		Params(jen.Any()).Block(childFKBody...)
+
+	mountFn := jen.Func().Params(
+		jen.Id("p").Op("*").Add(parentQual.Clone()),
+		jen.Id("children").Index().Op("*").Add(childQual.Clone()),
+	).Block(mountBody...)
+
+	// BuildQuery body — typed IN-list + NewQuery[Child].
+	buildQueryFn := jen.Func().Params(
+		jen.Id("tx").Op("*").Qual("gorm.io/gorm", "DB"),
+		jen.Id("parentIDs").Index().Any(),
+		jen.Id("nested").Index().Qual(conditionPath, cqlCondition).Types(childQual.Clone()),
+	).Params(
+		jen.Op("*").Qual(conditionPath, "Query").Types(childQual.Clone()),
+		jen.Error(),
+	).Block(
+		jen.Id("typedIDs").Op(":=").Make(jen.Index().Add(valueOfType.Clone()), jen.Len(jen.Id("parentIDs"))),
+		jen.For(jen.List(jen.Id("i"), jen.Id("id")).Op(":=").Range().Id("parentIDs")).Block(
+			jen.Id("typedIDs").Index(jen.Id("i")).Op("=").Add(idTypedValueCall.Clone()).Call(
+				jen.Id("id").Assert(jen.Qual(modelPath, parentPKTypeName(parentIsUUID))),
+			),
+		),
+		jen.Id("conds").Op(":=").Append(
+			jen.Index().Qual(conditionPath, cqlCondition).Types(childQual.Clone()).Values(
+				jen.Id(strcase.ToPascal(childType.Name())).Dot(fkGoField).Dot("Is").Call().Dot("In").Call(jen.Id("typedIDs").Op("...")),
+			),
+			jen.Id("nested").Op("..."),
+		),
+		jen.Return(
+			jen.Qual(conditionPath, "NewQuery").Types(childQual.Clone()).Call(
+				jen.Id("tx"), jen.Id("conds").Op("..."),
+			),
+			jen.Nil(),
+		),
+	)
+
+	values := jen.Dict{
+		jen.Id("CollectionField"): jen.Lit(field.Name),
+		jen.Id("ParentID"):        parentIDFn,
+		jen.Id("ChildFK"):         childFKFn,
+		jen.Id("Mount"):           mountFn,
+		jen.Id("BuildQuery"):      buildQueryFn,
+	}
+
+	file.Add(
+		jen.Var().Id(varName).Op("=").Op("&").Qual(conditionPath, "HasManyLoader").Types(
+			parentQual.Clone(),
+			childQual.Clone(),
+		).Values(values),
+	)
+}
+
+// parentPKTypeName returns the model.<Type> for the parent's PK.
+func parentPKTypeName(isUUID bool) string {
+	if isUUID {
+		return uuid
+	}
+
+	return uIntID
+}
+
+// parentPKIsUUID returns true when the parent's embedded base model uses
+// UUID as its primary key.
+func (sg ScannerGenerator) parentPKIsUUID() bool {
+	fields, err := getFields(sg.objectType)
+	if err != nil {
+		return false
+	}
+
+	for _, f := range fields {
+		if !f.Embedded {
+			continue
+		}
+
+		switch f.TypeString() {
+		case modelPath + "." + uuidModel, modelPath + "." + uuidModelWithTimestamps:
+			return true
+		case modelPath + "." + uIntModel, modelPath + "." + uIntModelWithTimestamps:
+			return false
+		}
+	}
+
+	return true // default to UUID
+}
+
+// childFKExtractor builds the ChildFK function body. For a pointer FK
+// (e.g. `*model.UUID`), returns nil sentinel when nil; else dereferences.
+// For a value FK (e.g. `model.UUID`), returns directly.
+func childFKExtractor(childType Type, fkGoField string, parentIsUUID bool) []jen.Code {
+	// Inspect the child struct to find the FK field's exact type.
+	childStruct, err := childType.CQLModelStruct()
+	if err != nil {
+		return []jen.Code{jen.Return(jen.Nil())}
+	}
+
+	for i := 0; i < childStruct.NumFields(); i++ {
+		f := childStruct.Field(i)
+		if f.Name() != fkGoField {
+			continue
+		}
+
+		ft := f.Type()
+		if ptr, ok := ft.(*types.Pointer); ok {
+			// Nullable FK — guard against nil.
+			_ = ptr
+
+			var nilSentinel *jen.Statement
+			if parentIsUUID {
+				nilSentinel = jen.Qual(modelPath, "NilUUID")
+			} else {
+				nilSentinel = jen.Qual(modelPath, "NilUIntID")
+			}
+
+			return []jen.Code{
+				jen.If(jen.Id("c").Dot(fkGoField).Op("==").Nil()).Block(
+					jen.Return(nilSentinel),
+				),
+				jen.Return(jen.Op("*").Id("c").Dot(fkGoField)),
+			}
+		}
+
+		// Value FK — non-nullable, return directly.
+		return []jen.Code{jen.Return(jen.Id("c").Dot(fkGoField))}
+	}
+
+	return []jen.Code{jen.Return(jen.Nil())}
+}
+
 // emitInitRewiring writes an init() that overwrites each Field on the model's
 // conditions struct with a scanner-aware constructor call. This piggybacks on
 // the existing conditionsGenerator output: we look up the var name (the model
@@ -941,6 +1294,25 @@ func (sg ScannerGenerator) emitInitRewiring(file *File, scannerVar string) {
 
 	for _, b := range flatConditions {
 		stmts = append(stmts, b.rebindStmt(file.destPkg, sg.objectType, scannerVar))
+	}
+
+	// Wire parent scanner onto each HasMany Collection so a query whose
+	// only condition is Collection.Preload() can still take the fast
+	// path (the resolveScanner walk needs SOMETHING to ask for a scanner;
+	// the Collection's wrapping condition is the only candidate).
+	for _, f := range fields {
+		if f.Embedded {
+			continue
+		}
+
+		if _, ok := hasManyChildType(f.Type.Type); !ok {
+			continue
+		}
+
+		stmts = append(stmts,
+			jen.Id(sg.objectType.Name()).Dot(f.Name).Op("=").
+				Id(sg.objectType.Name()).Dot(f.Name).Dot("WithParentScanner").Call(jen.Id(scannerVar)),
+		)
 	}
 
 	file.Add(jen.Func().Id("init").Params().Block(stmts...))
