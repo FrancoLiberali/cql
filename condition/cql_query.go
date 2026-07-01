@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"sync"
 	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
-	"gorm.io/gorm/schema"
 
 	"github.com/FrancoLiberali/cql/model"
 	"github.com/FrancoLiberali/cql/sql"
@@ -275,14 +273,20 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *CQ
 
 // Get the name of the table in "db" in which the data for "entity" is saved
 // returns error is table name can not be found by gorm,
-// probably because the type of "entity" is not registered using AddModel
+// probably because the type of "entity" is not registered using AddModel.
+//
+// Delegates to gorm's Statement.Parse so the parsed schema hits
+// db.cacheStore — the same sync.Map gorm's own callbacks reuse. The
+// previous implementation passed a throwaway &sync.Map{} per call, which
+// forced a fresh regex-heavy inflection.Plural pass on every query
+// (~10% of CPU on 1-row Find loops).
 func getTableName(db *gorm.DB, entity any) (string, error) {
-	schemaName, err := schema.Parse(entity, &sync.Map{}, db.NamingStrategy)
-	if err != nil {
+	stmt := &gorm.Statement{DB: db}
+	if err := stmt.Parse(entity); err != nil {
 		return "", err
 	}
 
-	return schemaName.Table, nil
+	return stmt.Schema.Table, nil
 }
 
 // available for: postgres, sqlite, sqlserver
