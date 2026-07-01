@@ -425,6 +425,48 @@ func stripGormPreloads(q *CQLQuery) {
 	q.gormDB.Statement.Preloads = nil
 }
 
+// prepopulateSelectAndFromForFind stuffs the SELECT + FROM clauses into
+// gorm's Clauses map ahead of BuildQuerySQL so the callback's
+// `make([]clause.Column, ...)` + `AddClauseIfNotExists(clause.From{}) /
+// AddClauseIfNotExists(clauseSelect)` trio become no-ops (map lookup +
+// present-so-skip).
+//
+// FROM is always safe on the Find/Take/First code path: only Rows-style
+// query callbacks reach here, so UPDATE/DELETE's alternate SQL builders
+// (which would trip over a leftover FROM clause) are never involved. When
+// gorm needs to inject JOINs into FROM, GenJoinClauses' caller overrides
+// via AddClause anyway.
+//
+// SELECT is safe only when CQL isn't tracking joined selects. For joined
+// preloads, CQL appends `alias.column AS "alias__column"` fragments onto
+// Statement.Selects via AddSelectField. If we pre-populate SELECT before
+// BuildQuerySQL runs, its `AddClauseIfNotExists(clauseSelect)` no-ops and
+// those joined columns never make it into the rendered SQL. In that case
+// we let gorm handle SELECT and keep just the FROM win.
+func prepopulateSelectAndFromForFind(q *CQLQuery) {
+	stmt := q.gormDB.Statement
+
+	if _, has := stmt.Clauses["FROM"]; !has {
+		fc := clause.Clause{Name: "FROM"}
+		clause.From{}.MergeClause(&fc)
+		stmt.Clauses["FROM"] = fc
+	}
+
+	if q.hasJoinedSelects || len(q.activeJoins) > 0 {
+		return
+	}
+
+	if _, has := stmt.Clauses["SELECT"]; !has {
+		sc := clause.Clause{Name: "SELECT"}
+		clause.Select{Columns: []clause.Column{{Name: q.initialTable.Name + ".*", Raw: true}}}.MergeClause(&sc)
+		stmt.Clauses["SELECT"] = sc
+		// Nil out Selects so BuildQuerySQL doesn't re-enter its
+		// per-column loop and re-allocate a clause.Column slice that
+		// AddClauseIfNotExists then drops anyway.
+		stmt.Selects = nil
+	}
+}
+
 // findWith materializes every matching row into *dest using scanner. Caller
 // must have validated that the fast path applies (scanner != nil and
 // canUseFastScan(q) == true). After the main scan, runs registered
@@ -439,6 +481,15 @@ func findWith[T any](q *CQLQuery, dest *[]*T, scanner *Scanner[T]) error {
 	if len(q.activeHasMany) > 0 {
 		stripGormPreloads(q)
 	}
+
+	// Skip BuildQuerySQL's SELECT/FROM merge dance when there are no
+	// JOINs (neither user-added nor joined-preload). Pre-populating the
+	// two clauses here is safe: with no JOINs, GenJoinClauses never runs
+	// and never needs to append columns to the SELECT that would be lost
+	// to AddClauseIfNotExists' skip-when-present rule. Update/Delete
+	// paths never enter this function, so their SQL builders aren't
+	// affected. Saves ~5 allocs per query on the flat path.
+	prepopulateSelectAndFromForFind(q)
 
 	rows, err := q.gormDB.Rows()
 	if err != nil {
@@ -525,6 +576,8 @@ func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) err
 	if len(q.activeHasMany) > 0 {
 		stripGormPreloads(q)
 	}
+
+	prepopulateSelectAndFromForFind(q)
 
 	rows, err := db.Limit(1).Rows()
 	if err != nil {

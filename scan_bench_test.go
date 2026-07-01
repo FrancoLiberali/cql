@@ -9,7 +9,6 @@ import (
 	"gorm.io/gorm"
 	gormlogger "gorm.io/gorm/logger"
 
-	"github.com/FrancoLiberali/cql/condition"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -116,7 +115,7 @@ func benchFindBrandsCql(b *testing.B, n int) {
 
 	for i := 0; i < b.N; i++ {
 		out, err := Query[models.Brand](ctx, db,
-			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope")),
+			conditions.Brand.Name.Is().NotEq(String("___nope")),
 		).Find()
 		if err != nil {
 			b.Fatal(err)
@@ -171,11 +170,11 @@ func benchFindBrands5WhereCql(b *testing.B, n int) {
 
 	for i := 0; i < b.N; i++ {
 		out, err := Query[models.Brand](ctx, db,
-			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope1")),
-			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope2")),
-			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope3")),
-			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope4")),
-			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope5")),
+			conditions.Brand.Name.Is().NotEq(String("___nope1")),
+			conditions.Brand.Name.Is().NotEq(String("___nope2")),
+			conditions.Brand.Name.Is().NotEq(String("___nope3")),
+			conditions.Brand.Name.Is().NotEq(String("___nope4")),
+			conditions.Brand.Name.Is().NotEq(String("___nope5")),
 		).Find()
 		if err != nil {
 			b.Fatal(err)
@@ -230,7 +229,7 @@ func BenchmarkScan_First_Cql(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		if _, err := Query[models.Brand](ctx, db,
-			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope")),
+			conditions.Brand.Name.Is().NotEq(String("___nope")),
 		).First(); err != nil {
 			b.Fatal(err)
 		}
@@ -315,7 +314,7 @@ func BenchmarkScan_Phone_NoPreload_1K_Cql(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		out, err := Query[models.Phone](ctx, db,
-			conditions.Phone.Name.IsUnsafe().NotEq(condition.String("___nope")),
+			conditions.Phone.Name.Is().NotEq(String("___nope")),
 		).Find()
 		if err != nil {
 			b.Fatal(err)

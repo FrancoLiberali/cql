@@ -2,6 +2,7 @@ package condition
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/FrancoLiberali/cql/model"
 	"github.com/FrancoLiberali/cql/sql"
@@ -103,6 +104,33 @@ func (field Field[TModel, TAttribute]) fieldName() string {
 
 // Returns the name of the column in which the field is saved in the table
 func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) string {
+	if field.column == "" && table.Schema != nil {
+		// Fast path: gorm's parsed schema already has DBName precomputed
+		// with any embedded-prefix applied. Skip the per-call
+		// NamingStrategy allocations (strings.Split + Replacer.Replace)
+		// and return the DBName directly. Note: columnPrefix is already
+		// baked into DBName by gorm, so we must NOT prepend it again.
+		if field.columnPrefix == "" {
+			// No prefix — top-level field. LookUpField prefers FieldsByName
+			// and gorm keeps the first-registered entry when Go names
+			// collide (e.g. embedded struct with the same field name), so
+			// this always returns the top-level Field.
+			if f := table.Schema.LookUpField(field.name); f != nil && len(f.BindNames) == 1 {
+				return f.DBName
+			}
+		} else {
+			// Prefixed — the field lives inside an embedded struct. Iterate
+			// to find the schema Field with matching Go name whose DBName
+			// starts with the CQL columnPrefix. Embedded structs typically
+			// have few fields, so the scan is cheap.
+			for _, f := range table.Schema.Fields {
+				if f.Name == field.name && strings.HasPrefix(f.DBName, field.columnPrefix) {
+					return f.DBName
+				}
+			}
+		}
+	}
+
 	columnName := field.column
 	if columnName == "" {
 		columnName = query.ColumnName(table, field.name)
