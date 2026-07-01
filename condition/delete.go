@@ -46,9 +46,13 @@ func (deleteS *Delete[T]) Limit(limit int) *Delete[T] {
 //
 // warning: in mysql preloads are not allowed
 func (deleteS *Delete[T]) Returning(dest *[]T) *Delete[T] {
+	deleteS.query.cqlQuery.flushPending()
+
 	gormDB := deleteS.query.cqlQuery.gormDB
 
 	if deleteS.secondaryQuery != nil {
+		deleteS.secondaryQuery.cqlQuery.flushPending()
+
 		gormDB = deleteS.secondaryQuery.cqlQuery.gormDB
 	}
 

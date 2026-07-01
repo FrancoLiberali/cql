@@ -223,6 +223,10 @@ func (insertOnConflictSet *InsertOnConflictSet[T]) Where(conditions ...Condition
 		insert.err = err
 	}
 
+	// The WHERE clauses have been accumulated in pendingWhereExprs; push
+	// them into Statement so the read below sees them.
+	insert.query.flushPending()
+
 	where, isWhere := insert.query.gormDB.Statement.Clauses["WHERE"].Expression.(clause.Where)
 	if isWhere {
 		onConflictClause.Where = where

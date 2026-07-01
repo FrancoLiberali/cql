@@ -431,6 +431,8 @@ func stripGormPreloads(q *CQLQuery) {
 // HasMany loaders (one extra SELECT per relation) and mounts the grouped
 // children onto each parent.
 func findWith[T any](q *CQLQuery, dest *[]*T, scanner *Scanner[T]) error {
+	q.flushPending()
+
 	// HasMany loaders own the child fetch; if gorm Preloads are also
 	// registered (kept alive for non-Find paths) strip them here so gorm
 	// doesn't duplicate the work + override the loader's mount.
@@ -518,6 +520,8 @@ func lastWith[T any](q *CQLQuery, dest **T, scanner *Scanner[T]) error {
 // scanOne materializes a single row + runs registered HasMany loaders
 // against the singleton parent.
 func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) error {
+	q.flushPending()
+
 	if len(q.activeHasMany) > 0 {
 		stripGormPreloads(q)
 	}

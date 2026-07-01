@@ -155,6 +155,67 @@ func BenchmarkScan_Find_1KRows_Cql(b *testing.B)   { benchFindBrandsCql(b, 1000)
 func BenchmarkScan_Find_1KRows_Gorm(b *testing.B)  { benchFindBrandsGorm(b, 1000, nil) }
 
 // ---------------------------------------------------------------------------
+// Multi-condition Find: exercises the per-condition WHERE dispatch path
+// where CQL's local WHERE accumulation vs gorm's per-chainable AddClause
+// would show up. Each condition adds another append+AddClause round-trip.
+// ---------------------------------------------------------------------------
+
+func benchFindBrands5WhereCql(b *testing.B, n int) {
+	db, gdb := benchOpenDB(b)
+	seedBrands(b, gdb, n)
+
+	ctx := context.Background()
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		out, err := Query[models.Brand](ctx, db,
+			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope1")),
+			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope2")),
+			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope3")),
+			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope4")),
+			conditions.Brand.Name.IsUnsafe().NotEq(condition.String("___nope5")),
+		).Find()
+		if err != nil {
+			b.Fatal(err)
+		}
+		if len(out) != n {
+			b.Fatalf("expected %d rows, got %d", n, len(out))
+		}
+	}
+}
+
+func benchFindBrands5WhereGorm(b *testing.B, n int) {
+	_, gdb := benchOpenDB(b)
+	seedBrands(b, gdb, n)
+
+	b.ResetTimer()
+	b.ReportAllocs()
+
+	for i := 0; i < b.N; i++ {
+		var out []*models.Brand
+		if err := gdb.
+			Where("name != ?", "___nope1").
+			Where("name != ?", "___nope2").
+			Where("name != ?", "___nope3").
+			Where("name != ?", "___nope4").
+			Where("name != ?", "___nope5").
+			Find(&out).Error; err != nil {
+			b.Fatal(err)
+		}
+		if len(out) != n {
+			b.Fatalf("expected %d rows, got %d", n, len(out))
+		}
+	}
+}
+
+func BenchmarkScan_Find_5Where_1Row_Cql(b *testing.B)   { benchFindBrands5WhereCql(b, 1) }
+func BenchmarkScan_Find_5Where_1Row_Gorm(b *testing.B)  { benchFindBrands5WhereGorm(b, 1) }
+func BenchmarkScan_Find_5Where_100Rows_Cql(b *testing.B)  { benchFindBrands5WhereCql(b, 100) }
+func BenchmarkScan_Find_5Where_100Rows_Gorm(b *testing.B) { benchFindBrands5WhereGorm(b, 100) }
+
+// ---------------------------------------------------------------------------
 // First: single row.
 // ---------------------------------------------------------------------------
 

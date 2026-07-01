@@ -28,10 +28,10 @@ func ApplyWhereCondition[T model.Model](condition WhereCondition[T], query *CQLQ
 		query.Unscoped()
 	}
 
-	query.Where(
-		sql,
-		values...,
-	)
+	// Fast path: sql is already a plain string and values is already a
+	// []any, so bypass Where's variadic-to-slice conversion + gorm's
+	// interface{} type-dispatch in BuildCondition.
+	query.WhereRaw(sql, values)
 
 	return nil
 }
