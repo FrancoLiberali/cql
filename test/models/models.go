@@ -261,6 +261,7 @@ type Brand struct {
 	Name string
 }
 
+
 func (m Brand) Equal(other Brand) bool {
 	return m.Name == other.Name
 }

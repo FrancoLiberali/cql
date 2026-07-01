@@ -77,3 +77,7 @@ func Time(value time.Time) Value[time.Time] {
 func UUID(value model.UUID) Value[model.UUID] {
 	return Value[model.UUID]{Value: value}
 }
+
+func UIntID(value model.UIntID) Value[model.UIntID] {
+	return Value[model.UIntID]{Value: value}
+}
