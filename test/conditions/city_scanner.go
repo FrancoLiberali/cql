@@ -37,18 +37,40 @@ var cityScanner = &condition.Scanner[models.City]{
 		}
 		return nil
 	},
+	ReleaseValues: func(columns []string, values []any) {
+		for i, c := range columns {
+			switch c {
+			case "id":
+				if v, ok := values[i].(*model.UUID); ok {
+					condition.ReleaseUUID(v)
+				}
+			case "name":
+				if v, ok := values[i].(*sql.NullString); ok {
+					condition.ReleaseNullString(v)
+				}
+			case "country_id":
+				if v, ok := values[i].(*model.UUID); ok {
+					condition.ReleaseUUID(v)
+				}
+			default:
+				if v, ok := values[i].(*condition.NullSink); ok {
+					condition.ReleaseNullSink(v)
+				}
+			}
+		}
+	},
 	ScanValues: func(columns []string) ([]any, error) {
 		values := make([]any, len(columns))
 		for i, c := range columns {
 			switch c {
 			case "id":
-				values[i] = new(model.UUID)
+				values[i] = condition.AcquireUUID()
 			case "name":
-				values[i] = new(sql.NullString)
+				values[i] = condition.AcquireNullString()
 			case "country_id":
-				values[i] = new(model.UUID)
+				values[i] = condition.AcquireUUID()
 			default:
-				values[i] = new(condition.NullSink)
+				values[i] = condition.AcquireNullSink()
 			}
 		}
 		return values, nil

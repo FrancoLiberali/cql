@@ -47,20 +47,46 @@ var uIntModelWithTimestampsScanner = &condition.Scanner[uintmodelwithtimestamps.
 		}
 		return nil
 	},
+	ReleaseValues: func(columns []string, values []any) {
+		for i, c := range columns {
+			switch c {
+			case "id":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "created_at":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			case "updated_at":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			case "deleted_at":
+				if v, ok := values[i].(*gorm.DeletedAt); ok {
+					condition.ReleaseDeletedAt(v)
+				}
+			default:
+				if v, ok := values[i].(*condition.NullSink); ok {
+					condition.ReleaseNullSink(v)
+				}
+			}
+		}
+	},
 	ScanValues: func(columns []string) ([]any, error) {
 		values := make([]any, len(columns))
 		for i, c := range columns {
 			switch c {
 			case "id":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "created_at":
-				values[i] = new(sql.NullTime)
+				values[i] = condition.AcquireNullTime()
 			case "updated_at":
-				values[i] = new(sql.NullTime)
+				values[i] = condition.AcquireNullTime()
 			case "deleted_at":
-				values[i] = new(gorm.DeletedAt)
+				values[i] = condition.AcquireDeletedAt()
 			default:
-				values[i] = new(condition.NullSink)
+				values[i] = condition.AcquireNullSink()
 			}
 		}
 		return values, nil

@@ -47,20 +47,46 @@ var gormEmbeddedScanScanner = &condition.Scanner[gormembeddedscan.GormEmbeddedSc
 		}
 		return nil
 	},
+	ReleaseValues: func(columns []string, values []any) {
+		for i, c := range columns {
+			switch c {
+			case "id":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "top":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "foo_int":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "bar_int":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			default:
+				if v, ok := values[i].(*condition.NullSink); ok {
+					condition.ReleaseNullSink(v)
+				}
+			}
+		}
+	},
 	ScanValues: func(columns []string) ([]any, error) {
 		values := make([]any, len(columns))
 		for i, c := range columns {
 			switch c {
 			case "id":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "top":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "foo_int":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "bar_int":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			default:
-				values[i] = new(condition.NullSink)
+				values[i] = condition.AcquireNullSink()
 			}
 		}
 		return values, nil

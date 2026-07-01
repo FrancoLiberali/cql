@@ -142,44 +142,110 @@ var productScanner = &condition.Scanner[models.Product]{
 		}
 		return nil
 	},
+	ReleaseValues: func(columns []string, values []any) {
+		for i, c := range columns {
+			switch c {
+			case "id":
+				if v, ok := values[i].(*model.UUID); ok {
+					condition.ReleaseUUID(v)
+				}
+			case "created_at":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			case "updated_at":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			case "deleted_at":
+				if v, ok := values[i].(*gorm.DeletedAt); ok {
+					condition.ReleaseDeletedAt(v)
+				}
+			case "string_something_else":
+				if v, ok := values[i].(*sql.NullString); ok {
+					condition.ReleaseNullString(v)
+				}
+			case "int":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "int_pointer":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "float":
+				if v, ok := values[i].(*sql.NullFloat64); ok {
+					condition.ReleaseNullFloat64(v)
+				}
+			case "null_float":
+				if v, ok := values[i].(*sql.NullFloat64); ok {
+					condition.ReleaseNullFloat64(v)
+				}
+			case "bool":
+				if v, ok := values[i].(*sql.NullBool); ok {
+					condition.ReleaseNullBool(v)
+				}
+			case "null_bool":
+				if v, ok := values[i].(*sql.NullBool); ok {
+					condition.ReleaseNullBool(v)
+				}
+			case "embedded_int":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "gorm_embedded_int":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "string2":
+				if v, ok := values[i].(*sql.NullString); ok {
+					condition.ReleaseNullString(v)
+				}
+			default:
+				if v, ok := values[i].(*condition.NullSink); ok {
+					condition.ReleaseNullSink(v)
+				}
+			}
+		}
+	},
 	ScanValues: func(columns []string) ([]any, error) {
 		values := make([]any, len(columns))
 		for i, c := range columns {
 			switch c {
 			case "id":
-				values[i] = new(model.UUID)
+				values[i] = condition.AcquireUUID()
 			case "created_at":
-				values[i] = new(sql.NullTime)
+				values[i] = condition.AcquireNullTime()
 			case "updated_at":
-				values[i] = new(sql.NullTime)
+				values[i] = condition.AcquireNullTime()
 			case "deleted_at":
-				values[i] = new(gorm.DeletedAt)
+				values[i] = condition.AcquireDeletedAt()
 			case "string_something_else":
-				values[i] = new(sql.NullString)
+				values[i] = condition.AcquireNullString()
 			case "int":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "int_pointer":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "float":
-				values[i] = new(sql.NullFloat64)
+				values[i] = condition.AcquireNullFloat64()
 			case "null_float":
-				values[i] = new(sql.NullFloat64)
+				values[i] = condition.AcquireNullFloat64()
 			case "bool":
-				values[i] = new(sql.NullBool)
+				values[i] = condition.AcquireNullBool()
 			case "null_bool":
-				values[i] = new(sql.NullBool)
+				values[i] = condition.AcquireNullBool()
 			case "byte_array":
 				values[i] = new([]byte)
 			case "multi_string":
 				values[i] = &condition.NullableScanner{Inner: new(models.MultiString)}
 			case "embedded_int":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "gorm_embedded_int":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "string2":
-				values[i] = new(sql.NullString)
+				values[i] = condition.AcquireNullString()
 			default:
-				values[i] = new(condition.NullSink)
+				values[i] = condition.AcquireNullSink()
 			}
 		}
 		return values, nil

@@ -143,44 +143,118 @@ var basicTypesScanner = &condition.Scanner[basictypes.BasicTypes]{
 		}
 		return nil
 	},
+	ReleaseValues: func(columns []string, values []any) {
+		for i, c := range columns {
+			switch c {
+			case "id":
+				if v, ok := values[i].(*model.UUID); ok {
+					condition.ReleaseUUID(v)
+				}
+			case "bool":
+				if v, ok := values[i].(*sql.NullBool); ok {
+					condition.ReleaseNullBool(v)
+				}
+			case "int":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "int8":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "int16":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "int32":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "int64":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "u_int":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "u_int8":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "u_int16":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "u_int32":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "u_int64":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "float32":
+				if v, ok := values[i].(*sql.NullFloat64); ok {
+					condition.ReleaseNullFloat64(v)
+				}
+			case "float64":
+				if v, ok := values[i].(*sql.NullFloat64); ok {
+					condition.ReleaseNullFloat64(v)
+				}
+			case "string":
+				if v, ok := values[i].(*sql.NullString); ok {
+					condition.ReleaseNullString(v)
+				}
+			case "byte":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			default:
+				if v, ok := values[i].(*condition.NullSink); ok {
+					condition.ReleaseNullSink(v)
+				}
+			}
+		}
+	},
 	ScanValues: func(columns []string) ([]any, error) {
 		values := make([]any, len(columns))
 		for i, c := range columns {
 			switch c {
 			case "id":
-				values[i] = new(model.UUID)
+				values[i] = condition.AcquireUUID()
 			case "bool":
-				values[i] = new(sql.NullBool)
+				values[i] = condition.AcquireNullBool()
 			case "int":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "int8":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "int16":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "int32":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "int64":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "u_int":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "u_int8":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "u_int16":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "u_int32":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "u_int64":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "float32":
-				values[i] = new(sql.NullFloat64)
+				values[i] = condition.AcquireNullFloat64()
 			case "float64":
-				values[i] = new(sql.NullFloat64)
+				values[i] = condition.AcquireNullFloat64()
 			case "string":
-				values[i] = new(sql.NullString)
+				values[i] = condition.AcquireNullString()
 			case "byte":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			default:
-				values[i] = new(condition.NullSink)
+				values[i] = condition.AcquireNullSink()
 			}
 		}
 		return values, nil

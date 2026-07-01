@@ -32,16 +32,34 @@ var uIntModelWithTimestampScanner = &condition.Scanner[uintmodelwithtimestamp.UI
 		}
 		return nil
 	},
+	ReleaseValues: func(columns []string, values []any) {
+		for i, c := range columns {
+			switch c {
+			case "id":
+				if v, ok := values[i].(*sql.NullInt64); ok {
+					condition.ReleaseNullInt64(v)
+				}
+			case "created_at":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			default:
+				if v, ok := values[i].(*condition.NullSink); ok {
+					condition.ReleaseNullSink(v)
+				}
+			}
+		}
+	},
 	ScanValues: func(columns []string) ([]any, error) {
 		values := make([]any, len(columns))
 		for i, c := range columns {
 			switch c {
 			case "id":
-				values[i] = new(sql.NullInt64)
+				values[i] = condition.AcquireNullInt64()
 			case "created_at":
-				values[i] = new(sql.NullTime)
+				values[i] = condition.AcquireNullTime()
 			default:
-				values[i] = new(condition.NullSink)
+				values[i] = condition.AcquireNullSink()
 			}
 		}
 		return values, nil

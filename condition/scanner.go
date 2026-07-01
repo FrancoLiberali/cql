@@ -23,6 +23,13 @@ import (
 type Scanner[T any] struct {
 	ScanValues   func(columns []string) ([]any, error)
 	AssignValues func(dest *T, columns []string, values []any) error
+	// ReleaseValues returns each scanned cell to its sync.Pool. Optional;
+	// when nil the runtime just drops the values for GC. Generated code
+	// emits this alongside ScanValues so cells acquired from the per-type
+	// pools (see scanner_pool.go) are returned after AssignValues has
+	// copied the data into dest. Mirrors gorm's per-Field NewValuePool
+	// usage in scan.go.
+	ReleaseValues func(columns []string, values []any)
 }
 
 // NullSink is a sql.Scanner that discards any value. Generated ScanValues
@@ -104,6 +111,8 @@ type activeJoin struct {
 	// instance. parent is the typed-erased pointer (*MainT for direct
 	// joins, the child instance of another activeJoin for nested).
 	mount func(parent any, child any, allNull bool) error
+	// release returns scanned cells to their per-type pools.
+	release func(cols []string, vals []any)
 }
 
 // registerActiveJoin attaches an activeJoin to the query so findWith picks
@@ -157,6 +166,11 @@ func registerActiveJoin[Parent, Child any](
 			rs.Mount(p, c)
 
 			return nil
+		},
+		release: func(cols []string, vals []any) {
+			if rs.ChildScanner != nil && rs.ChildScanner.ReleaseValues != nil {
+				rs.ChildScanner.ReleaseValues(cols, vals)
+			}
 		},
 	})
 }
@@ -440,8 +454,13 @@ func findWith[T any](q *CQLQuery, dest *[]*T, scanner *Scanner[T]) error {
 		return err
 	}
 
+	// Allocate scratch once per query; reused across rows. The Acquire/
+	// Release cell pool refills the inner slots per row, so the outer
+	// slices never carry stale pool-held pointers across iterations.
+	scratch := newRowScratch(len(columns), len(plan.joins))
+
 	for rows.Next() {
-		m, err := scanOneRow[T](rows, plan, columns, scanner)
+		m, err := scanOneRow[T](rows, plan, scanner, scratch)
 		if err != nil {
 			return err
 		}
@@ -454,6 +473,29 @@ func findWith[T any](q *CQLQuery, dest *[]*T, scanner *Scanner[T]) error {
 	}
 
 	return runHasManyLoaders[T](q, *dest)
+}
+
+// rowScratch holds per-query (not per-row) work buffers reused across the
+// findWith hot loop. Saves nRows × 4 slice allocations vs the previous
+// "allocate-per-row" approach.
+type rowScratch struct {
+	values       []any
+	joinChildren []any
+	joinVals     [][]any
+	joinAllNull  []bool
+}
+
+func newRowScratch(totalCols, nJoins int) *rowScratch {
+	s := &rowScratch{
+		values: make([]any, totalCols),
+	}
+	if nJoins > 0 {
+		s.joinChildren = make([]any, nJoins)
+		s.joinVals = make([][]any, nJoins)
+		s.joinAllNull = make([]bool, nJoins)
+	}
+
+	return s
 }
 
 // firstWith materializes the first row (primary-key ordered) into dest.
@@ -504,7 +546,9 @@ func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) err
 		return err
 	}
 
-	m, err := scanOneRow[T](rows, plan, columns, scanner)
+	scratch := newRowScratch(len(columns), len(plan.joins))
+
+	m, err := scanOneRow[T](rows, plan, scanner, scratch)
 	if err != nil {
 		return err
 	}
@@ -518,17 +562,24 @@ func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) err
 	return runHasManyLoaders[T](q, []*T{m})
 }
 
-// scanPlan precomputes per-column routing once (instead of doing prefix
-// matching per row × per column). For each column in the result set,
-// columnOwner records which active join (-1 = main) owns it, and joinCols /
-// mainCols hold the per-owner column subset in order so each scanner sees
-// the same column slice across all rows.
+// scanPlan precomputes per-column routing AND per-join mount sequencing once
+// (instead of doing prefix matching + alias-map lookups per row × per
+// column). Built once per query in buildScanPlan; consumed by scanOneRow
+// for every row.
 type scanPlan struct {
-	mainColsIdx []int                 // result indices owned by the main scanner
-	mainCols    []string              // names of main columns, parallel to mainColsIdx
-	joins       []*activeJoin         // sorted parent-first (top-level → nested)
-	joinColsIdx [][]int               // per-join result indices
-	joinCols    [][]string            // per-join column names
+	mainColsIdx []int         // result indices owned by the main scanner
+	mainCols    []string      // names of main columns, parallel to mainColsIdx
+	joins       []*activeJoin // registration order (top-level → nested)
+	joinColsIdx [][]int       // per-join result indices
+	joinCols    [][]string    // per-join column names
+	// parentIdx is the join index of each join's parent, or -1 for top-
+	// level joins (mount onto the main row). Avoids the per-row
+	// childByAlias map lookup.
+	parentIdx []int
+	// mountOrder is the join indices sorted by alias depth descending so
+	// nested children mount onto their parents before the parents mount
+	// onto theirs. Precomputed once instead of re-sorting per row.
+	mountOrder []int
 }
 
 // buildScanPlan inspects the row's columns once and produces a routing plan.
@@ -582,14 +633,45 @@ func buildScanPlan(columns []string, joins []*activeJoin) (*scanPlan, error) {
 		}
 	}
 
+	// Precompute parentIdx + mountOrder once. Both used per row in
+	// scanOneRow to avoid map allocations + sort work in the hot path.
+	aliasToIdx := make(map[string]int, len(joins))
+	for i, j := range joins {
+		aliasToIdx[j.alias] = i
+	}
+
+	plan.parentIdx = make([]int, len(joins))
+	for i, j := range joins {
+		if j.parentAlias == "" {
+			plan.parentIdx[i] = -1
+		} else if pi, ok := aliasToIdx[j.parentAlias]; ok {
+			plan.parentIdx[i] = pi
+		} else {
+			plan.parentIdx[i] = -1 // parent not registered; mount onto main
+		}
+	}
+
+	plan.mountOrder = make([]int, len(joins))
+	for i := range plan.mountOrder {
+		plan.mountOrder[i] = i
+	}
+
+	for i := 1; i < len(plan.mountOrder); i++ {
+		for k := i; k > 0 && joinDepth(joins[plan.mountOrder[k]].alias) > joinDepth(joins[plan.mountOrder[k-1]].alias); k-- {
+			plan.mountOrder[k], plan.mountOrder[k-1] = plan.mountOrder[k-1], plan.mountOrder[k]
+		}
+	}
+
 	return plan, nil
 }
 
-// scanOneRow allocates per-owner value slots, runs rows.Scan, then walks
-// the plan: assigns main columns, builds each child, and mounts children
-// onto their parents. Returns the populated main instance.
-func scanOneRow[T any](rows *sql.Rows, plan *scanPlan, columns []string, scanner *Scanner[T]) (*T, error) {
-	values := make([]any, len(columns))
+// scanOneRow allocates per-row scan destinations into the caller-provided
+// scratch (reused across rows by findWith), runs rows.Scan, then walks
+// the precomputed plan to assign + mount. Per-row hot path stays
+// allocation-light: the only allocs are pool-Acquired cell wrappers (via
+// ScanValues), the child structs, and the result *T.
+func scanOneRow[T any](rows *sql.Rows, plan *scanPlan, scanner *Scanner[T], scratch *rowScratch) (*T, error) {
+	values := scratch.values
 
 	mainVals, err := scanner.ScanValues(plan.mainCols)
 	if err != nil {
@@ -600,20 +682,22 @@ func scanOneRow[T any](rows *sql.Rows, plan *scanPlan, columns []string, scanner
 		values[ci] = mainVals[i]
 	}
 
-	// Allocate per-join child + values.
-	type joinScratch struct {
-		child   any
-		vals    []any
-	}
+	// Per-join children + their scanned values. Reused from scratch — no
+	// per-row alloc of the outer slices.
+	joinChildren := scratch.joinChildren
+	joinVals := scratch.joinVals
+	joinAllNull := scratch.joinAllNull
 
-	scratch := make([]joinScratch, len(plan.joins))
 	for ji, j := range plan.joins {
 		child, vals, err := j.alloc(plan.joinCols[ji])
 		if err != nil {
 			return nil, err
 		}
 
-		scratch[ji] = joinScratch{child: child, vals: vals}
+		joinChildren[ji] = child
+		joinVals[ji] = vals
+		joinAllNull[ji] = false
+
 		for i, ci := range plan.joinColsIdx[ji] {
 			values[ci] = vals[i]
 		}
@@ -623,57 +707,50 @@ func scanOneRow[T any](rows *sql.Rows, plan *scanPlan, columns []string, scanner
 		return nil, err
 	}
 
-	// Materialize the main row.
 	var m T
 	if err := scanner.AssignValues(&m, plan.mainCols, mainVals); err != nil {
 		return nil, err
 	}
 
-	// Materialize each child + detect all-null.
-	allNullByAlias := make(map[string]bool, len(plan.joins))
-	childByAlias := make(map[string]any, len(plan.joins))
+	if scanner.ReleaseValues != nil {
+		scanner.ReleaseValues(plan.mainCols, mainVals)
+	}
 
 	for ji, j := range plan.joins {
-		allNull, err := j.assign(scratch[ji].child, plan.joinCols[ji], scratch[ji].vals)
+		allNull, err := j.assign(joinChildren[ji], plan.joinCols[ji], joinVals[ji])
 		if err != nil {
 			return nil, err
 		}
 
-		allNullByAlias[j.alias] = allNull
-		childByAlias[j.alias] = scratch[ji].child
-	}
-
-	// Mount children onto their parents. Process deepest first so a
-	// nested child is already populated when its parent gets mounted.
-	// Plan join order is registration order; we sort by alias depth here.
-	order := make([]int, len(plan.joins))
-	for i := range order {
-		order[i] = i
-	}
-
-	for i := 1; i < len(order); i++ {
-		for k := i; k > 0 && joinDepth(plan.joins[order[k]].alias) > joinDepth(plan.joins[order[k-1]].alias); k-- {
-			order[k], order[k-1] = order[k-1], order[k]
+		joinAllNull[ji] = allNull
+		// Return joined cells to their pools as soon as the child is
+		// materialized — mirrors gorm's per-row Put at scan.go:111.
+		if j.release != nil {
+			j.release(plan.joinCols[ji], joinVals[ji])
 		}
 	}
 
-	for _, oi := range order {
-		j := plan.joins[oi]
+	// Mount in precomputed depth-descending order. parentIdx[i] = -1
+	// means "mount onto the main row"; otherwise it's the index of the
+	// parent join's child in joinChildren.
+	for _, ji := range plan.mountOrder {
+		j := plan.joins[ji]
+		parentJoinIdx := plan.parentIdx[ji]
 
-		var parent any
-		if j.parentAlias == "" {
-			parent = &m
-		} else {
-			parent = childByAlias[j.parentAlias]
-		}
-
-		// If the parent itself is all-null (LEFT JOIN miss), skip mounting
-		// — the nested child has nothing to attach to.
-		if j.parentAlias != "" && allNullByAlias[j.parentAlias] {
+		// Skip if the parent join was a LEFT-JOIN-no-match: there's no
+		// child instance to mount onto.
+		if parentJoinIdx >= 0 && joinAllNull[parentJoinIdx] {
 			continue
 		}
 
-		if err := j.mount(parent, childByAlias[j.alias], allNullByAlias[j.alias]); err != nil {
+		var parent any
+		if parentJoinIdx < 0 {
+			parent = &m
+		} else {
+			parent = joinChildren[parentJoinIdx]
+		}
+
+		if err := j.mount(parent, joinChildren[ji], joinAllNull[ji]); err != nil {
 			return nil, err
 		}
 	}

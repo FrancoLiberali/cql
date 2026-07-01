@@ -55,22 +55,52 @@ var companyScanner = &condition.Scanner[models.Company]{
 		}
 		return nil
 	},
+	ReleaseValues: func(columns []string, values []any) {
+		for i, c := range columns {
+			switch c {
+			case "id":
+				if v, ok := values[i].(*model.UUID); ok {
+					condition.ReleaseUUID(v)
+				}
+			case "created_at":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			case "updated_at":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			case "deleted_at":
+				if v, ok := values[i].(*gorm.DeletedAt); ok {
+					condition.ReleaseDeletedAt(v)
+				}
+			case "name":
+				if v, ok := values[i].(*sql.NullString); ok {
+					condition.ReleaseNullString(v)
+				}
+			default:
+				if v, ok := values[i].(*condition.NullSink); ok {
+					condition.ReleaseNullSink(v)
+				}
+			}
+		}
+	},
 	ScanValues: func(columns []string) ([]any, error) {
 		values := make([]any, len(columns))
 		for i, c := range columns {
 			switch c {
 			case "id":
-				values[i] = new(model.UUID)
+				values[i] = condition.AcquireUUID()
 			case "created_at":
-				values[i] = new(sql.NullTime)
+				values[i] = condition.AcquireNullTime()
 			case "updated_at":
-				values[i] = new(sql.NullTime)
+				values[i] = condition.AcquireNullTime()
 			case "deleted_at":
-				values[i] = new(gorm.DeletedAt)
+				values[i] = condition.AcquireDeletedAt()
 			case "name":
-				values[i] = new(sql.NullString)
+				values[i] = condition.AcquireNullString()
 			default:
-				values[i] = new(condition.NullSink)
+				values[i] = condition.AcquireNullSink()
 			}
 		}
 		return values, nil

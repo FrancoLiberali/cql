@@ -66,15 +66,20 @@ func NewScannerGenerator(object types.Object) *ScannerGenerator {
 	}
 }
 
-// scannerField describes one column's worth of scan/assign code for a single
-// model field. valueExpr is the expression used inside ScanValues to allocate
-// the per-row destination cell (e.g. `new(sql.NullInt64)`); assignBlock is the
-// statements that copy the scanned cell into the model field inside
-// AssignValues.
+// scannerField describes one column's worth of scan/assign/release code
+// for a single model field. valueExpr is what ScanValues emits to obtain
+// the per-row destination cell (a pooled `condition.AcquireNullX()` call
+// where possible; falls back to `new(sql.NullX)` for unpooled types).
+// releaseFn is the body of one case in the generated ReleaseValues method
+// — it returns the cell to its sync.Pool after AssignValues has copied
+// the data out. Mirrors gorm's per-cell `field.NewValuePool.Put` at
+// scan.go:111. May be nil for cells that aren't pooled (e.g. custom
+// scanner types wrapped in NullableScanner).
 type scannerField struct {
-	columnName string         // final SQL column name (snake_case + any prefix override)
-	valueExpr  *jen.Statement // ScanValues cell allocator
+	columnName string             // final SQL column name (snake_case + any prefix override)
+	valueExpr  *jen.Statement     // ScanValues cell allocator (Acquire call when pooled)
 	assignFn   scannerAssignFunc  // AssignValues body for this column's case
+	releaseFn  scannerAssignFunc  // ReleaseValues body for this column's case; nil = no-op
 }
 
 // scannerAssignFunc receives the case index variable name and the values slice
@@ -466,6 +471,9 @@ func castFn(typeName string) func(inner *jen.Statement) *jen.Statement {
 // sql.Null* wrappers. cast wraps the .X access (e.g. v.Int64) before the
 // assignment; pass nil to assign the raw value. dest is the prebuilt
 // `dest.X.Y.Z` chain so embedded gorm-tagged fields land in the right slot.
+//
+// Cells are pooled via condition.AcquireNullX / ReleaseNullX so per-row
+// allocation cost amortizes across the result set.
 func nullValueField(
 	col string, dest *jen.Statement,
 	nullType, valueAccessor string,
@@ -473,7 +481,7 @@ func nullValueField(
 ) scannerField {
 	return scannerField{
 		columnName: col,
-		valueExpr:  jen.New(jen.Qual("database/sql", nullType)),
+		valueExpr:  jen.Qual(conditionPath, "Acquire"+nullType).Call(),
 		assignFn: func(idx string) []jen.Code {
 			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
 				jen.Id("values").Index(jen.Id(idx)).Assert(
@@ -497,6 +505,26 @@ func nullValueField(
 
 			return []jen.Code{vAssertion, notOk, validGuard}
 		},
+		releaseFn: releaseNullFn(col, nullType),
+	}
+}
+
+// releaseNullFn emits the body of one case in ReleaseValues for a pooled
+// sql.Null* cell. Type-asserts and calls condition.ReleaseNullX.
+func releaseNullFn(col, nullType string) scannerAssignFunc {
+	return func(idx string) []jen.Code {
+		return []jen.Code{
+			jen.If(
+				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+					jen.Id("values").Index(jen.Id(idx)).Assert(
+						jen.Op("*").Qual("database/sql", nullType),
+					),
+				),
+				jen.Id("ok"),
+			).Block(
+				jen.Qual(conditionPath, "Release"+nullType).Call(jen.Id("v")),
+			),
+		}
 	}
 }
 
@@ -549,6 +577,7 @@ func classifyPointerToBasic(col string, dest *jen.Statement, t *types.Basic) (sc
 
 		return []jen.Code{vAssertion, notOk, validBranch}
 	}
+	sf.releaseFn = releaseNullFn(col, nullType)
 
 	return sf, true
 }
@@ -625,7 +654,7 @@ func (sg ScannerGenerator) classifyNamed(col string, dest *jen.Statement, field 
 func uintIDField(col string, dest *jen.Statement) scannerField {
 	return scannerField{
 		columnName: col,
-		valueExpr:  jen.New(jen.Qual("database/sql", "NullInt64")),
+		valueExpr:  jen.Qual(conditionPath, "AcquireNullInt64").Call(),
 		assignFn: func(idx string) []jen.Code {
 			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
 				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual("database/sql", "NullInt64")),
@@ -642,6 +671,7 @@ func uintIDField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, assign}
 		},
+		releaseFn: releaseNullFn(col, "NullInt64"),
 	}
 }
 
@@ -651,7 +681,7 @@ func uintIDField(col string, dest *jen.Statement) scannerField {
 func pointerUUIDField(col string, dest *jen.Statement) scannerField {
 	return scannerField{
 		columnName: col,
-		valueExpr:  jen.New(jen.Qual(modelPath, uuid)),
+		valueExpr:  jen.Qual(conditionPath, "AcquireUUID").Call(),
 		assignFn: func(idx string) []jen.Code {
 			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
 				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual(modelPath, uuid)),
@@ -671,6 +701,7 @@ func pointerUUIDField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, branch}
 		},
+		releaseFn: releaseUUIDFn(col),
 	}
 }
 
@@ -679,7 +710,7 @@ func pointerUUIDField(col string, dest *jen.Statement) scannerField {
 func pointerUIntIDField(col string, dest *jen.Statement) scannerField {
 	return scannerField{
 		columnName: col,
-		valueExpr:  jen.New(jen.Qual("database/sql", "NullInt64")),
+		valueExpr:  jen.Qual(conditionPath, "AcquireNullInt64").Call(),
 		assignFn: func(idx string) []jen.Code {
 			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
 				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual("database/sql", "NullInt64")),
@@ -699,13 +730,14 @@ func pointerUIntIDField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, branch}
 		},
+		releaseFn: releaseNullFn(col, "NullInt64"),
 	}
 }
 
 func uuidField(col string, dest *jen.Statement) scannerField {
 	return scannerField{
 		columnName: col,
-		valueExpr:  jen.New(jen.Qual(modelPath, uuid)),
+		valueExpr:  jen.Qual(conditionPath, "AcquireUUID").Call(),
 		assignFn: func(idx string) []jen.Code {
 			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
 				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual(modelPath, uuid)),
@@ -720,13 +752,33 @@ func uuidField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, assign}
 		},
+		releaseFn: releaseUUIDFn(col),
+	}
+}
+
+// releaseUUIDFn emits the body of one case in ReleaseValues for a pooled
+// *model.UUID cell.
+func releaseUUIDFn(col string) scannerAssignFunc {
+	return func(idx string) []jen.Code {
+		return []jen.Code{
+			jen.If(
+				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+					jen.Id("values").Index(jen.Id(idx)).Assert(
+						jen.Op("*").Qual(modelPath, uuid),
+					),
+				),
+				jen.Id("ok"),
+			).Block(
+				jen.Qual(conditionPath, "ReleaseUUID").Call(jen.Id("v")),
+			),
+		}
 	}
 }
 
 func timeField(col string, dest *jen.Statement) scannerField {
 	return scannerField{
 		columnName: col,
-		valueExpr:  jen.New(jen.Qual("database/sql", "NullTime")),
+		valueExpr:  jen.Qual(conditionPath, "AcquireNullTime").Call(),
 		assignFn: func(idx string) []jen.Code {
 			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
 				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual("database/sql", "NullTime")),
@@ -743,15 +795,28 @@ func timeField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, validGuard}
 		},
+		releaseFn: releaseNullFn(col, "NullTime"),
 	}
 }
 
 func nullableTypeField(col string, dest *jen.Statement, typeV Type) scannerField {
 	typeQual := jen.Qual(typeV.Pkg().Path(), typeV.Name())
 
+	// Use the pooled Acquire helper for the well-known nullable types.
+	// gorm.DeletedAt and the sql.Null* family all have helpers in
+	// condition/scanner_pool.go. Fall back to plain `new(T)` for anything
+	// else (rare — non-Null custom-nullable types).
+	acquireFn := poolAcquireFor(typeV)
+	releaseFn := poolReleaseFor(typeV)
+
+	valueExpr := jen.New(typeQual.Clone())
+	if acquireFn != "" {
+		valueExpr = jen.Qual(conditionPath, acquireFn).Call()
+	}
+
 	return scannerField{
 		columnName: col,
-		valueExpr:  jen.New(typeQual.Clone()),
+		valueExpr:  valueExpr,
 		assignFn: func(idx string) []jen.Code {
 			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
 				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Add(typeQual.Clone())),
@@ -766,6 +831,79 @@ func nullableTypeField(col string, dest *jen.Statement, typeV Type) scannerField
 
 			return []jen.Code{vAssertion, notOk, assign}
 		},
+		releaseFn: releaseFn,
+	}
+}
+
+// poolAcquireFor returns the name of the condition.AcquireX function for a
+// well-known nullable type, or "" if no pool exists. The map matches
+// scanner_pool.go.
+func poolAcquireFor(typeV Type) string {
+	switch typeV.String() {
+	case "database/sql.NullBool":
+		return "AcquireNullBool"
+	case "database/sql.NullString":
+		return "AcquireNullString"
+	case "database/sql.NullInt16":
+		return "AcquireNullInt16"
+	case "database/sql.NullInt32":
+		return "AcquireNullInt32"
+	case "database/sql.NullInt64":
+		return "AcquireNullInt64"
+	case "database/sql.NullByte":
+		return "AcquireNullByte"
+	case "database/sql.NullFloat64":
+		return "AcquireNullFloat64"
+	case "database/sql.NullTime":
+		return "AcquireNullTime"
+	case "gorm.io/gorm.DeletedAt":
+		return "AcquireDeletedAt"
+	}
+
+	return ""
+}
+
+func poolReleaseFor(typeV Type) scannerAssignFunc {
+	releaseName := ""
+
+	switch typeV.String() {
+	case "database/sql.NullBool":
+		releaseName = "ReleaseNullBool"
+	case "database/sql.NullString":
+		releaseName = "ReleaseNullString"
+	case "database/sql.NullInt16":
+		releaseName = "ReleaseNullInt16"
+	case "database/sql.NullInt32":
+		releaseName = "ReleaseNullInt32"
+	case "database/sql.NullInt64":
+		releaseName = "ReleaseNullInt64"
+	case "database/sql.NullByte":
+		releaseName = "ReleaseNullByte"
+	case "database/sql.NullFloat64":
+		releaseName = "ReleaseNullFloat64"
+	case "database/sql.NullTime":
+		releaseName = "ReleaseNullTime"
+	case "gorm.io/gorm.DeletedAt":
+		releaseName = "ReleaseDeletedAt"
+	default:
+		return nil
+	}
+
+	typeQual := jen.Qual(typeV.Pkg().Path(), typeV.Name())
+
+	return func(idx string) []jen.Code {
+		return []jen.Code{
+			jen.If(
+				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+					jen.Id("values").Index(jen.Id(idx)).Assert(
+						jen.Op("*").Add(typeQual.Clone()),
+					),
+				),
+				jen.Id("ok"),
+			).Block(
+				jen.Qual(conditionPath, releaseName).Call(jen.Id("v")),
+			),
+		}
 	}
 }
 
@@ -825,9 +963,7 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 
 	scanCases = append(scanCases,
 		jen.Default().Block(
-			jen.Id("values").Index(jen.Id("i")).Op("=").New(
-				jen.Qual(conditionPath, "NullSink"),
-			),
+			jen.Id("values").Index(jen.Id("i")).Op("=").Qual(conditionPath, "AcquireNullSink").Call(),
 		),
 	)
 
@@ -863,11 +999,49 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 		jen.Return(jen.Nil()),
 	)
 
+	// Build ReleaseValues body — returns pooled cells. Skips fields that
+	// have no releaseFn (custom Scanner types, []byte, etc.).
+	releaseCases := make([]jen.Code, 0, len(fields)+1)
+
+	for _, f := range fields {
+		if f.releaseFn == nil {
+			continue
+		}
+
+		releaseCases = append(releaseCases,
+			jen.Case(jen.Lit(f.columnName)).Block(f.releaseFn("i")...),
+		)
+	}
+
+	// Always release the NullSink default-case cells.
+	releaseCases = append(releaseCases,
+		jen.Default().Block(
+			jen.If(
+				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+					jen.Id("values").Index(jen.Id("i")).Assert(jen.Op("*").Qual(conditionPath, "NullSink")),
+				),
+				jen.Id("ok"),
+			).Block(
+				jen.Qual(conditionPath, "ReleaseNullSink").Call(jen.Id("v")),
+			),
+		),
+	)
+
+	releaseValuesFn := jen.Func().Params(
+		jen.Id("columns").Index().String(),
+		jen.Id("values").Index().Any(),
+	).Block(
+		jen.For(jen.List(jen.Id("i"), jen.Id("c")).Op(":=").Range().Id("columns")).Block(
+			jen.Switch(jen.Id("c")).Block(releaseCases...),
+		),
+	)
+
 	file.Add(
 		jen.Var().Id(varName).Op("=").Op("&").Qual(conditionPath, "Scanner").Types(objectQual.Clone()).Values(
 			jen.Dict{
-				jen.Id("ScanValues"):   scanValuesFn,
-				jen.Id("AssignValues"): assignValuesFn,
+				jen.Id("ScanValues"):    scanValuesFn,
+				jen.Id("AssignValues"):  assignValuesFn,
+				jen.Id("ReleaseValues"): releaseValuesFn,
 			},
 		),
 	)
