@@ -258,6 +258,30 @@ func (query *CQLQuery) flushPending() {
 		})
 		query.pendingWhereExprs = nil
 	}
+
+	// Pre-grow the SQL builder based on what we know about the query
+	// shape. Upstream BuildQuerySQL does Grow(100) but a typical CQL
+	// query is well over that (SELECT t.* FROM t + soft-delete WHERE +
+	// ORDER BY + LIMIT is ~110 chars alone), which forces the
+	// strings.Builder to reallocate mid-render. Estimating avoids the
+	// realloc for the common shapes and stays close to actual size on
+	// larger ones — over-shooting by a bit is cheap; a realloc is not.
+	//
+	// Coefficients: base covers "SELECT t.* FROM `t`" + basic clauses
+	// (~100), each WHERE fragment averages ~40 chars once the table
+	// qualifier, operator and placeholder are folded in, and each raw
+	// JOIN string is ~120 chars with the ON-clause and soft-delete tail.
+	stmt := query.gormDB.Statement
+	if stmt.SQL.Len() == 0 && stmt.SQL.Cap() == 0 {
+		estimate := 100
+		if c, ok := stmt.Clauses["WHERE"]; ok {
+			if w, ok := c.Expression.(clause.Where); ok {
+				estimate += len(w.Exprs) * 40
+			}
+		}
+		estimate += len(stmt.Joins) * 120
+		stmt.SQL.Grow(estimate)
+	}
 }
 
 func (query *CQLQuery) Joins(joinQuery string, isLeftJoin bool, args ...interface{}) {
