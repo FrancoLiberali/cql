@@ -551,11 +551,39 @@ func newRowScratch(totalCols, nJoins int) *rowScratch {
 	return s
 }
 
+// Precomputed clause.Clause values reused across queries to skip the
+// alloc-heavy DB.Order / DB.Limit paths — each of which allocates via
+// `getInstance + type-switch/variadic + AddClause` on every call. The
+// clause.Clause struct is copied into Statement.Clauses by value, and
+// each Expression's MergeClause reads from — never mutates — the
+// stored value, so sharing these package-level clauses across queries
+// is safe. Name is empty on the LIMIT variant because Limit.Build
+// already writes the "LIMIT " prefix itself (see clause.Clause.Build).
+var (
+	firstOrderByClause = clause.Clause{
+		Name: "ORDER BY",
+		Expression: clause.OrderBy{
+			Columns: []clause.OrderByColumn{{Column: clause.PrimaryColumn}},
+		},
+	}
+	lastOrderByClause = clause.Clause{
+		Name: "ORDER BY",
+		Expression: clause.OrderBy{
+			Columns: []clause.OrderByColumn{{Column: clause.PrimaryColumn, Desc: true}},
+		},
+	}
+	limitOneValue  = 1
+	limitOneClause = clause.Clause{
+		Expression: clause.Limit{Limit: &limitOneValue},
+	}
+)
+
 // firstWith materializes the first row (primary-key ordered) into dest.
 // Returns gorm.ErrRecordNotFound when no row matches, matching the gorm
 // fallback path's contract.
 func firstWith[T any](q *CQLQuery, dest **T, scanner *Scanner[T]) error {
-	return scanOne(q, q.gormDB.Order(clause.OrderByColumn{Column: clause.PrimaryColumn}), dest, scanner)
+	q.gormDB.Statement.Clauses["ORDER BY"] = firstOrderByClause
+	return scanOne(q, q.gormDB, dest, scanner)
 }
 
 // takeWith materializes any one matching row (no ordering) into dest.
@@ -565,7 +593,8 @@ func takeWith[T any](q *CQLQuery, dest **T, scanner *Scanner[T]) error {
 
 // lastWith materializes the last row (primary-key DESC) into dest.
 func lastWith[T any](q *CQLQuery, dest **T, scanner *Scanner[T]) error {
-	return scanOne(q, q.gormDB.Order(clause.OrderByColumn{Column: clause.PrimaryColumn, Desc: true}), dest, scanner)
+	q.gormDB.Statement.Clauses["ORDER BY"] = lastOrderByClause
+	return scanOne(q, q.gormDB, dest, scanner)
 }
 
 // scanOne materializes a single row + runs registered HasMany loaders
@@ -579,7 +608,11 @@ func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) err
 
 	prepopulateSelectAndFromForFind(q)
 
-	rows, err := db.Limit(1).Rows()
+	// Directly install a shared LIMIT 1 clause instead of db.Limit(1)
+	// (getInstance + type-switch + AddClause allocs).
+	db.Statement.Clauses["LIMIT"] = limitOneClause
+
+	rows, err := db.Rows()
 	if err != nil {
 		return err
 	}
