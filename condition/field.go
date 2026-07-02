@@ -111,11 +111,17 @@ func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) 
 		// and return the DBName directly. Note: columnPrefix is already
 		// baked into DBName by gorm, so we must NOT prepend it again.
 		if field.columnPrefix == "" {
-			// No prefix — top-level field. LookUpField prefers FieldsByName
-			// and gorm keeps the first-registered entry when Go names
-			// collide (e.g. embedded struct with the same field name), so
-			// this always returns the top-level Field.
-			if f := table.Schema.LookUpField(field.name); f != nil && len(f.BindNames) == 1 {
+			// No prefix — top-level field OR field promoted from an
+			// anonymous embed (e.g. User.ID coming from an anonymously-
+			// embedded model.UIntModelWithTimestamps). Gorm distinguishes
+			// these via EmbeddedBindNames: only NAMED embeds
+			// (`X SomeType `gorm:"embedded"``) prepend the outer name;
+			// anonymous embeds keep EmbeddedBindNames at length 1. So
+			// EmbeddedBindNames == 1 is the right guard — it accepts
+			// promoted embedded fields whose DBName is unprefixed (matches
+			// what our fallback would compute) and rejects prefixed
+			// embeds where DBName has a prefix we must not miss.
+			if f := table.Schema.LookUpField(field.name); f != nil && len(f.EmbeddedBindNames) == 1 {
 				return f.DBName
 			}
 		} else {
