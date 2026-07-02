@@ -50,7 +50,7 @@ func openDB(b *testing.B) *cql.DB {
 		b.Fatalf("open db: %v", err)
 	}
 
-	if err := db.GormDB.AutoMigrate(&models.User{}); err != nil {
+	if err := db.GormDB.AutoMigrate(&models.User{}, &models.Account{}, &models.Pet{}); err != nil {
 		b.Fatalf("migrate: %v", err)
 	}
 
