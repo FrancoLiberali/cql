@@ -41,6 +41,13 @@ type CQLQuery struct {
 	// call otherwise pays for AddClause's map lookup + merge logic; by
 	// batching we do that work exactly once, right before Rows() runs.
 	pendingWhereExprs []clause.Expression
+	// softDeleteColumnName is the initial model's soft-delete column
+	// (empty if the model has no soft delete). flushPending bakes
+	// `<table>.<col> IS NULL` into the WHERE unless Statement.Unscoped
+	// is set — meaning either the caller opted out via Unscoped() or a
+	// user condition already filtered on DeletedAt (see
+	// ApplyWhereCondition, which calls Unscoped() in that case).
+	softDeleteColumnName string
 }
 
 // Order specify order when retrieving models from database.
@@ -223,12 +230,28 @@ func (query *CQLQuery) WhereRaw(sql string, args []any) {
 		clause.Expr{SQL: sql, Vars: args})
 }
 
-// flushPending pushes accumulated pending state (currently just WHEREs)
-// into the underlying gorm Statement. Called by findWith / scanOne right
-// before executing the query. Since StartQuery already produced a clean
-// gormDB with clone == 0, mutating its Statement directly is safe and
-// skips a getInstance + AddClause round-trip per condition.
+// flushPending pushes accumulated pending state (WHEREs + the model's
+// soft-delete filter) into the underlying gorm Statement. Called by
+// findWith / scanOne right before executing the query. Since
+// StartQuery already produced a clean gormDB with clone == 0, mutating
+// its Statement directly is safe and skips a getInstance + AddClause
+// round-trip per condition.
 func (query *CQLQuery) flushPending() {
+	// Bake the initial model's soft-delete filter now (deferred from
+	// NewGormQuery so we can consult Statement.Unscoped, which
+	// ApplyWhereCondition sets when a user condition already targets
+	// DeletedAt). Setting the soft_delete_enabled marker lets gorm's
+	// SoftDeleteQueryClause.ModifyStatement skip its own OR-conditions
+	// walk + clause.Eq/clause.Column/sql.NullString allocs + a
+	// separate AddClause on every query — the biggest single
+	// contributor to per-query allocs on the alloc profile.
+	if query.softDeleteColumnName != "" && !query.gormDB.Statement.Unscoped {
+		query.pendingWhereExprs = append(query.pendingWhereExprs, clause.Expr{
+			SQL: query.initialTable.Alias + "." + query.softDeleteColumnName + " IS NULL",
+		})
+		query.gormDB.Statement.Clauses["soft_delete_enabled"] = clause.Clause{}
+	}
+
 	if len(query.pendingWhereExprs) > 0 {
 		query.gormDB.Statement.AddClause(clause.Where{
 			Exprs: query.pendingWhereExprs,
@@ -306,6 +329,16 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *CQ
 	}
 
 	query.AddConcernedModel(initialModel, initialTable)
+
+	// Remember the initial model's soft-delete column so flushPending
+	// can bake `<table>.<col> IS NULL` into our WHERE right before
+	// executing (unless the caller went Unscoped or a condition already
+	// filtered on DeletedAt — both signalled via Statement.Unscoped).
+	// Baking it locally + setting the `soft_delete_enabled` marker on
+	// gorm's Statement lets us skip gorm's SoftDeleteQueryClause.
+	// ModifyStatement entirely — that callback was the heaviest single
+	// contributor to per-query allocs on the profile (~6% flat + cum).
+	query.softDeleteColumnName = initialModel.SoftDeleteColumnName()
 
 	return query
 }
