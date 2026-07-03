@@ -531,21 +531,35 @@ func (query *CQLQuery) joinsToFrom() {
 	query.gormDB.Statement.Joins = nil
 }
 
+// rawScalarValuer is implemented by simple Value types (Value[T],
+// NumericValue[T], BoolValue) that always return "" for the SQL part
+// and a single element in ToSQL's []any. Bypassing ToSQL for them
+// skips the per-call []any{v} slice allocation — one saved alloc per
+// column on the Update hot path.
+type rawScalarValuer interface {
+	RawScalarValue() any
+}
+
 func getUpdateValue(query *CQLQuery, set ISet) (any, error) {
-	if value := set.getValue(); value != nil {
-		valueSQL, valueValues, err := set.getValue().ToSQL(query)
-		if err != nil {
-			return nil, err
-		}
-
-		if valueSQL != "" {
-			return gorm.Expr(valueSQL, valueValues...), nil
-		}
-
-		return valueValues[0], nil
+	value := set.getValue()
+	if value == nil {
+		return nil, nil //nolint:nilnil // is necessary
 	}
 
-	return nil, nil //nolint:nilnil // is necessary
+	if scalar, ok := value.(rawScalarValuer); ok {
+		return scalar.RawScalarValue(), nil
+	}
+
+	valueSQL, valueValues, err := value.ToSQL(query)
+	if err != nil {
+		return nil, err
+	}
+
+	if valueSQL != "" {
+		return gorm.Expr(valueSQL, valueValues...), nil
+	}
+
+	return valueValues[0], nil
 }
 
 // Splits a JOIN statement into the table name, table alias and ON statement

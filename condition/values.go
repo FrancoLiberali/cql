@@ -40,6 +40,9 @@ func (numericValue NumericValue[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
 	return "", []any{numericValue.Value}, nil
 }
 
+// RawScalarValue — see Value[T].RawScalarValue.
+func (numericValue NumericValue[T]) RawScalarValue() any { return numericValue.Value }
+
 type BoolValue struct {
 	Value bool
 }
@@ -52,6 +55,9 @@ func (boolValue BoolValue) ToSQL(_ *CQLQuery) (string, []any, error) {
 	return "", []any{boolValue.Value}, nil
 }
 
+// RawScalarValue — see Value[T].RawScalarValue.
+func (boolValue BoolValue) RawScalarValue() any { return boolValue.Value }
+
 type Value[T any] struct {
 	Value T
 }
@@ -63,6 +69,11 @@ func (value Value[T]) GetValue() T {
 func (value Value[T]) ToSQL(_ *CQLQuery) (string, []any, error) {
 	return "", []any{value.Value}, nil
 }
+
+// RawScalarValue exposes the underlying Go value for callers (e.g.
+// getUpdateValue) that only need the scalar and want to avoid ToSQL's
+// per-call []any{v} slice allocation.
+func (value Value[T]) RawScalarValue() any { return value.Value }
 
 type unsafeValue struct {
 	Value IValue
