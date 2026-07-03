@@ -681,6 +681,13 @@ func buildScanPlan(columns []string, joins []*activeJoin) (*scanPlan, error) {
 		joins:       joins,
 		joinColsIdx: make([][]int, len(joins)),
 		joinCols:    make([][]string, len(joins)),
+		// Pre-size main-column slices: they can never exceed len(columns)
+		// (join-owned columns are removed from the main pool). Skipping
+		// the growth reallocations here saves ~3 allocs per query on the
+		// common no-join Read path — the biggest single contributor to
+		// CQL's DSL-setup alloc overhead on the profile.
+		mainColsIdx: make([]int, 0, len(columns)),
+		mainCols:    make([]string, 0, len(columns)),
 	}
 
 	// Build (idx, prefix) pairs sorted by prefix length descending so
