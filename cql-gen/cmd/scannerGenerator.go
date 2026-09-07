@@ -1338,6 +1338,7 @@ func buildHasManyMountBody(field Field, childQual *jen.Statement, sliceIsPointer
 	if !elemIsPointer {
 		// Deref []*Child into []Child.
 		source = "values"
+
 		body = append(body,
 			jen.Id("values").Op(":=").Make(jen.Index().Add(childQual.Clone()), jen.Len(jen.Id("children"))),
 			jen.For(jen.List(jen.Id("i"), jen.Id("c")).Op(":=").Range().Id("children")).Block(
