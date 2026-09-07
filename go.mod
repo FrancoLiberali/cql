@@ -41,6 +41,6 @@ require (
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
 
-replace gorm.io/gorm => github.com/FrancoLiberali/gorm v1.31.1
+replace gorm.io/gorm => github.com/FrancoLiberali/gorm v1.31.2-0.20260907194333-9213b097b3bf
 
 // replace gorm.io/gorm => ../gorm
