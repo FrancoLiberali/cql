@@ -104,37 +104,8 @@ func (field Field[TModel, TAttribute]) fieldName() string {
 
 // Returns the name of the column in which the field is saved in the table
 func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) string {
-	if field.column == "" && table.Schema != nil {
-		// Fast path: gorm's parsed schema already has DBName precomputed
-		// with any embedded-prefix applied. Skip the per-call
-		// NamingStrategy allocations (strings.Split + Replacer.Replace)
-		// and return the DBName directly. Note: columnPrefix is already
-		// baked into DBName by gorm, so we must NOT prepend it again.
-		if field.columnPrefix == "" {
-			// No prefix — top-level field OR field promoted from an
-			// anonymous embed (e.g. User.ID coming from an anonymously-
-			// embedded model.UIntModelWithTimestamps). Gorm distinguishes
-			// these via EmbeddedBindNames: only NAMED embeds
-			// (`X SomeType `gorm:"embedded"``) prepend the outer name;
-			// anonymous embeds keep EmbeddedBindNames at length 1. So
-			// EmbeddedBindNames == 1 is the right guard — it accepts
-			// promoted embedded fields whose DBName is unprefixed (matches
-			// what our fallback would compute) and rejects prefixed
-			// embeds where DBName has a prefix we must not miss.
-			if f := table.Schema.LookUpField(field.name); f != nil && len(f.EmbeddedBindNames) == 1 {
-				return f.DBName
-			}
-		} else {
-			// Prefixed — the field lives inside an embedded struct. Iterate
-			// to find the schema Field with matching Go name whose DBName
-			// starts with the CQL columnPrefix. Embedded structs typically
-			// have few fields, so the scan is cheap.
-			for _, f := range table.Schema.Fields {
-				if f.Name == field.name && strings.HasPrefix(f.DBName, field.columnPrefix) {
-					return f.DBName
-				}
-			}
-		}
+	if name, ok := field.schemaColumnName(table); ok {
+		return name
 	}
 
 	columnName := field.column
@@ -144,6 +115,47 @@ func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) 
 
 	// add column prefix and table name once we know the column name
 	return field.columnPrefix + columnName
+}
+
+// schemaColumnName resolves the column name directly from gorm's parsed
+// schema when available, returning (name, true) on a hit. This is a fast
+// path: gorm's DBName is precomputed with any embedded-prefix applied, so it
+// skips the per-call NamingStrategy allocations (strings.Split +
+// Replacer.Replace). columnPrefix is already baked into DBName by gorm, so we
+// must NOT prepend it again.
+func (field Field[TModel, TAttribute]) schemaColumnName(table Table) (string, bool) {
+	if field.column != "" || table.Schema == nil {
+		return "", false
+	}
+
+	if field.columnPrefix == "" {
+		// No prefix — top-level field OR field promoted from an anonymous
+		// embed (e.g. User.ID coming from an anonymously-embedded
+		// model.UIntModelWithTimestamps). Gorm distinguishes these via
+		// EmbeddedBindNames: only NAMED embeds (`X SomeType `gorm:"embedded"``)
+		// prepend the outer name; anonymous embeds keep EmbeddedBindNames at
+		// length 1. So EmbeddedBindNames == 1 is the right guard — it accepts
+		// promoted embedded fields whose DBName is unprefixed (matches what our
+		// fallback would compute) and rejects prefixed embeds where DBName has
+		// a prefix we must not miss.
+		if f := table.Schema.LookUpField(field.name); f != nil && len(f.EmbeddedBindNames) == 1 {
+			return f.DBName, true
+		}
+
+		return "", false
+	}
+
+	// Prefixed — the field lives inside an embedded struct. Iterate to find
+	// the schema Field with matching Go name whose DBName starts with the CQL
+	// columnPrefix. Embedded structs typically have few fields, so the scan is
+	// cheap.
+	for _, f := range table.Schema.Fields {
+		if f.Name == field.name && strings.HasPrefix(f.DBName, field.columnPrefix) {
+			return f.DBName, true
+		}
+	}
+
+	return "", false
 }
 
 // Returns the SQL to get the value of the field in the table

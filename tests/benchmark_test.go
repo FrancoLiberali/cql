@@ -17,13 +17,13 @@
 //
 //	gorm/tests/benchmark_test.go       cql/tests/benchmark_test.go
 //	--------------------------------   --------------------------------
-//	BenchmarkCreate                    BenchmarkCreate
+//	BenchmarkCreate
 //	BenchmarkFind (PK, 1 row)          BenchmarkFind
 //	BenchmarkScan (raw SQL, 1 row)     BenchmarkScan (uses CQL DSL — see note)
 //	BenchmarkScanSlice (10K rows)      BenchmarkScanSlice
-//	BenchmarkScanSlicePointer          BenchmarkScanSlicePointer
-//	BenchmarkUpdate                    BenchmarkUpdate
-//	BenchmarkDelete                    BenchmarkDelete
+//	BenchmarkScanSlicePointer
+//	BenchmarkUpdate
+//	BenchmarkDelete
 package tests_test
 
 import (
@@ -62,6 +62,7 @@ func openDB(b *testing.B) *cql.DB {
 // stable across Insert/Find round trips.
 func newUser(name string) *models.User {
 	birthday := time.Now().Round(time.Second)
+
 	return &models.User{
 		Name:     name,
 		Age:      18,
@@ -99,7 +100,7 @@ func BenchmarkCreate(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		user.ID = 0
 		if _, err := cql.Insert(ctx, db, user).Exec(); err != nil {
 			b.Fatal(err)
@@ -121,7 +122,7 @@ func BenchmarkFind(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		_, err := cql.Query[models.User](ctx, db,
 			conditions.User.ID.Is().Eq(cql.UIntID(uint(user.ID))),
 		).First()
@@ -149,7 +150,7 @@ func BenchmarkScan(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		got, err := cql.Query[models.User](ctx, db,
 			conditions.User.ID.Is().Eq(cql.UIntID(uint(user.ID))),
 		).First()
@@ -167,16 +168,18 @@ func BenchmarkScan(b *testing.B) {
 func BenchmarkScanSlice(b *testing.B) {
 	db := openDB(b)
 	seedBenchUsers(b, db, 10_000)
+
 	ctx := context.Background()
 
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		out, err := cql.Query[models.User](ctx, db).Find()
 		if err != nil {
 			b.Fatal(err)
 		}
+
 		if len(out) != 10_000 {
 			b.Fatalf("expected 10000 rows, got %d", len(out))
 		}
@@ -189,16 +192,18 @@ func BenchmarkScanSlice(b *testing.B) {
 func BenchmarkScanSlicePointer(b *testing.B) {
 	db := openDB(b)
 	seedBenchUsers(b, db, 10_000)
+
 	ctx := context.Background()
 
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		out, err := cql.Query[models.User](ctx, db).Find()
 		if err != nil {
 			b.Fatal(err)
 		}
+
 		if len(out) != 10_000 {
 			b.Fatalf("expected 10000 rows, got %d", len(out))
 		}
@@ -218,7 +223,7 @@ func BenchmarkUpdate(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for i := range b.N {
 		_, err := cql.Update[models.User](ctx, db,
 			conditions.User.ID.Is().Eq(cql.UIntID(uint(user.ID))),
 		).Set(
@@ -240,12 +245,14 @@ func BenchmarkDelete(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		b.StopTimer()
+
 		user.ID = 0
 		if _, err := cql.Insert(ctx, db, user).Exec(); err != nil {
 			b.Fatal(err)
 		}
+
 		b.StartTimer()
 
 		if _, err := cql.Delete[models.User](ctx, db,

@@ -23,7 +23,7 @@ import (
 )
 
 type probeBrand struct {
-	ID   uint   `gorm:"primarykey"`
+	ID   uint `gorm:"primarykey"`
 	Name string
 }
 
@@ -38,7 +38,7 @@ type probePhone struct {
 
 func (probePhone) TableName() string { return "phones" }
 
-func openProbe(t *testing.T) (*gorm.DB, *recordingLogger) {
+func openProbe(t *testing.T) *gorm.DB {
 	t.Helper()
 
 	rec := &recordingLogger{Interface: logger.Default.LogMode(logger.Silent)}
@@ -47,13 +47,14 @@ func openProbe(t *testing.T) (*gorm.DB, *recordingLogger) {
 	require.NoError(t, err)
 	require.NoError(t, db.AutoMigrate(&probeBrand{}, &probePhone{}))
 
-	return db, rec
+	return db
 }
 
 // recordingLogger captures the last SQL gorm executed so the probe can
 // inspect it without parsing test output.
 type recordingLogger struct {
 	logger.Interface
+
 	last string
 }
 
@@ -70,7 +71,7 @@ func (r *recordingLogger) Trace(_ context.Context, _ time.Time, fc func() (strin
 // produces today via JoinCondition.Preload + AddSelectField (alias format
 // `"<TableAlias>__<column>"`, e.g. `"Brand__id"`).
 func TestProbe_DirectPreloadColumns(t *testing.T) {
-	db, _ := openProbe(t)
+	db := openProbe(t)
 
 	brand := &probeBrand{Name: "acme"}
 	require.NoError(t, db.Create(brand).Error)
@@ -87,12 +88,14 @@ func TestProbe_DirectPreloadColumns(t *testing.T) {
 		  LEFT JOIN brands AS Brand ON Brand.id = phones.brand_id
 	`).Rows()
 	require.NoError(t, err)
+
 	defer rows.Close()
 
 	cols, err := rows.Columns()
 	require.NoError(t, err)
 
 	t.Logf("[ALIAS SPEC] cols=%v", cols)
+
 	for i, c := range cols {
 		t.Logf("  col[%d] = %q", i, c)
 	}
@@ -102,7 +105,7 @@ func TestProbe_DirectPreloadColumns(t *testing.T) {
 // matching child row — every joined column comes back NULL. This is the
 // signal the scanner uses to skip mounting the child onto the parent.
 func TestProbe_LeftJoinNoMatch(t *testing.T) {
-	db, _ := openProbe(t)
+	db := openProbe(t)
 
 	// Phone with no Brand row matching brand_id (use BrandID = 0 so no
 	// brand satisfies the join condition).
@@ -116,15 +119,16 @@ func TestProbe_LeftJoinNoMatch(t *testing.T) {
 		  LEFT JOIN brands AS Brand ON Brand.id = phones.brand_id
 	`).Rows()
 	require.NoError(t, err)
+
 	defer rows.Close()
 
 	for rows.Next() {
 		var (
-			pid       uint
-			pname     string
-			pbrand    uint
-			bidVal    interface{}
-			bnameVal  interface{}
+			pid      uint
+			pname    string
+			pbrand   uint
+			bidVal   any
+			bnameVal any
 		)
 
 		require.NoError(t, rows.Scan(&pid, &pname, &pbrand, &bidVal, &bnameVal))
@@ -167,7 +171,7 @@ type probeSale struct {
 func (probeSale) TableName() string { return "sales" }
 
 func TestProbe_NestedPreloadColumns(t *testing.T) {
-	db, _ := openProbe(t)
+	db := openProbe(t)
 	require.NoError(t, db.AutoMigrate(&probeCompany{}, &probeSeller{}, &probeSale{}))
 
 	co := &probeCompany{Name: "ditrit"}
@@ -190,12 +194,14 @@ func TestProbe_NestedPreloadColumns(t *testing.T) {
 		  LEFT JOIN companies AS Seller__Company ON Seller__Company.id = Seller.company_id
 	`).Rows()
 	require.NoError(t, err)
+
 	defer rows.Close()
 
 	cols, err := rows.Columns()
 	require.NoError(t, err)
 
 	t.Logf("[NESTED ALIAS SPEC] cols=%v", cols)
+
 	for i, c := range cols {
 		t.Logf("  col[%d] = %q", i, c)
 	}
@@ -233,7 +239,7 @@ type probePhoneValueRelation struct {
 func (probePhoneValueRelation) TableName() string { return "phones_value" }
 
 func TestProbe_ValueRelationNoMatch(t *testing.T) {
-	db, _ := openProbe(t)
+	db := openProbe(t)
 	require.NoError(t, db.AutoMigrate(&probeBrandValue{}, &probePhoneValueRelation{}))
 
 	require.NoError(t, db.Create(&probePhoneValueRelation{Name: "no_brand", BrandID: 999}).Error)

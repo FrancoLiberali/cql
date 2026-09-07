@@ -116,6 +116,7 @@ linters:
           - goconst
           - mnd
           - noctx
+          - unqueryvet # probe tests build raw SELECT * on purpose
         path: _test\.go$|^test/
       - linters:
           - err113

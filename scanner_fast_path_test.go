@@ -102,7 +102,7 @@ func TestScannerFastPath_FirstReturnsErrRecordNotFound(t *testing.T) {
 		conditions.Brand.Name.Is().Eq(String("missing")),
 	).First()
 
-	assert.ErrorIs(t, err, gorm.ErrRecordNotFound)
+	require.ErrorIs(t, err, gorm.ErrRecordNotFound)
 	assert.NoError(t, mock.ExpectationsWereMet())
 }
 

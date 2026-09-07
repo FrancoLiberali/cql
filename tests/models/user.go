@@ -1,9 +1,10 @@
-// Package models hosts the bench-only model graph that mirrors gorm's
+// This file hosts the bench-only model graph that mirrors gorm's
 // utils/tests.User schema verbatim (User + its associations). Kept in
 // its own package so the type names (User, Account, Pet, Toy, Tools,
 // Company, Language) don't collide with the existing cql/test/models
 // integration-test types, and so cql-gen can produce bench-only
 // conditions alongside without touching the main test suite.
+
 package models
 
 import (
@@ -55,4 +56,3 @@ type Pet struct {
 	UserID *model.UIntID
 	Name   string
 }
-

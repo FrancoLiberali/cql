@@ -2,12 +2,20 @@ package condition
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"slices"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
 
 	"github.com/FrancoLiberali/cql/model"
+)
+
+var (
+	errJoinScanType  = errors.New("cql join scan: unexpected scan type")
+	errJoinMountType = errors.New("cql join mount: unexpected mount type")
+	errHasManyType   = errors.New("cql hasmany: unexpected parent type")
 )
 
 // Scanner is a code-generated row materializer for model type T. It avoids
@@ -135,7 +143,7 @@ func registerActiveJoin[Parent, Child any](
 		assign: func(child any, cols []string, vals []any) (bool, error) {
 			c, ok := child.(*Child)
 			if !ok {
-				return false, fmt.Errorf("cql join scan: expected *%T", *new(Child))
+				return false, fmt.Errorf("%w: expected *%T", errJoinScanType, *new(Child))
 			}
 
 			if err := rs.ChildScanner.AssignValues(c, cols, vals); err != nil {
@@ -147,7 +155,7 @@ func registerActiveJoin[Parent, Child any](
 		mount: func(parent any, child any, allNull bool) error {
 			p, ok := parent.(*Parent)
 			if !ok {
-				return fmt.Errorf("cql join mount: expected *%T parent, got %T", *new(Parent), parent)
+				return fmt.Errorf("%w: expected *%T parent, got %T", errJoinMountType, *new(Parent), parent)
 			}
 
 			if allNull {
@@ -160,7 +168,7 @@ func registerActiveJoin[Parent, Child any](
 
 			c, ok := child.(*Child)
 			if !ok {
-				return fmt.Errorf("cql join mount: expected *%T child, got %T", *new(Child), child)
+				return fmt.Errorf("%w: expected *%T child, got %T", errJoinMountType, *new(Child), child)
 			}
 
 			rs.Mount(p, c)
@@ -180,65 +188,49 @@ func registerActiveJoin[Parent, Child any](
 // is a non-Valid sql.Null* or is nil. Used to detect LEFT-JOIN-no-match
 // rows so we don't mount a zero-valued child.
 func allValuesNull(values []any) bool {
-	for _, v := range values {
-		switch t := v.(type) {
-		case *sql.NullBool:
-			if t.Valid {
-				return false
-			}
-		case *sql.NullString:
-			if t.Valid {
-				return false
-			}
-		case *sql.NullInt64:
-			if t.Valid {
-				return false
-			}
-		case *sql.NullInt32:
-			if t.Valid {
-				return false
-			}
-		case *sql.NullInt16:
-			if t.Valid {
-				return false
-			}
-		case *sql.NullByte:
-			if t.Valid {
-				return false
-			}
-		case *sql.NullFloat64:
-			if t.Valid {
-				return false
-			}
-		case *sql.NullTime:
-			if t.Valid {
-				return false
-			}
-		case *gorm.DeletedAt:
-			if t.Valid {
-				return false
-			}
-		case *NullSink:
-			// always "null" sentinel — ignore
-		case *NullableScanner:
-			// custom scanners; we have no .Valid to inspect, so be
-			// conservative: treat as non-null.
-			return false
-		case *model.UUID:
-			// CQL convention: NilUUID is the sentinel for "no value".
-			// Generated scanners scan a UUID column directly into
-			// model.UUID; a LEFT-JOIN-no-match leaves it at NilUUID.
-			if *t != model.NilUUID {
-				return false
-			}
-		default:
-			// unknown type (custom scanner direct, gorm types, etc.) —
-			// be conservative: assume non-Null-wrapped values had data.
-			return false
-		}
-	}
+	return !slices.ContainsFunc(values, valueHasData)
+}
 
-	return true
+// valueHasData reports whether a single scanned cell holds a real (non-NULL)
+// value. allValuesNull uses it to detect LEFT-JOIN-no-match rows (every cell
+// NULL) so they aren't mounted as zero-valued children.
+func valueHasData(v any) bool {
+	switch t := v.(type) {
+	case *sql.NullBool:
+		return t.Valid
+	case *sql.NullString:
+		return t.Valid
+	case *sql.NullInt64:
+		return t.Valid
+	case *sql.NullInt32:
+		return t.Valid
+	case *sql.NullInt16:
+		return t.Valid
+	case *sql.NullByte:
+		return t.Valid
+	case *sql.NullFloat64:
+		return t.Valid
+	case *sql.NullTime:
+		return t.Valid
+	case *gorm.DeletedAt:
+		return t.Valid
+	case *NullSink:
+		// always the "null" sentinel
+		return false
+	case *NullableScanner:
+		// custom scanners; we have no .Valid to inspect, so be
+		// conservative: treat as having data.
+		return true
+	case *model.UUID:
+		// CQL convention: NilUUID is the sentinel for "no value". Generated
+		// scanners scan a UUID column directly into model.UUID; a
+		// LEFT-JOIN-no-match leaves it at NilUUID.
+		return *t != model.NilUUID
+	default:
+		// unknown type (custom scanner direct, gorm types, etc.) — be
+		// conservative: assume non-Null-wrapped values had data.
+		return true
+	}
 }
 
 // HasManyLoader is a code-generated post-scan mounter for a HasMany
@@ -317,8 +309,8 @@ func registerHasManyLoader[Parent, Child model.Model](
 			for _, p := range parents {
 				pp, ok := p.(*Parent)
 				if !ok {
-					return fmt.Errorf("cql hasmany %q: expected *%T parent, got %T",
-						loader.CollectionField, *new(Parent), p)
+					return fmt.Errorf("%w: %q expected *%T parent, got %T",
+						errHasManyType, loader.CollectionField, *new(Parent), p)
 				}
 
 				ids = append(ids, loader.ParentID(pp))
@@ -341,13 +333,14 @@ func registerHasManyLoader[Parent, Child model.Model](
 			}
 
 			groups := make(map[any][]*Child, len(parents))
+
 			for _, c := range children {
 				fk := loader.ChildFK(c)
 				groups[fk] = append(groups[fk], c)
 			}
 
 			for _, p := range parents {
-				pp := p.(*Parent)
+				pp, _ := p.(*Parent)
 				loader.Mount(pp, groups[loader.ParentID(pp)])
 			}
 
@@ -502,10 +495,7 @@ func findWith[T any](q *CQLQuery, dest *[]*T, scanner *Scanner[T]) error {
 		return err
 	}
 
-	plan, err := buildScanPlan(columns, q.activeJoins)
-	if err != nil {
-		return err
-	}
+	plan := buildScanPlan(columns, q.activeJoins)
 
 	// Allocate scratch once per query; reused across rows. The Acquire/
 	// Release cell pool refills the inner slots per row, so the outer
@@ -619,8 +609,8 @@ func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) err
 	defer rows.Close()
 
 	if !rows.Next() {
-		if err := rows.Err(); err != nil {
-			return err
+		if rowsErr := rows.Err(); rowsErr != nil {
+			return rowsErr
 		}
 
 		return gorm.ErrRecordNotFound
@@ -631,10 +621,7 @@ func scanOne[T any](q *CQLQuery, db *gorm.DB, dest **T, scanner *Scanner[T]) err
 		return err
 	}
 
-	plan, err := buildScanPlan(columns, q.activeJoins)
-	if err != nil {
-		return err
-	}
+	plan := buildScanPlan(columns, q.activeJoins)
 
 	scratch := newRowScratch(len(columns), len(plan.joins))
 
@@ -676,7 +663,7 @@ type scanPlan struct {
 // Joined columns must be assigned to the deepest matching alias (so
 // "Seller__Company__id" goes to the nested join, not the parent), which is
 // achieved by sorting alias prefixes longest-first when matching.
-func buildScanPlan(columns []string, joins []*activeJoin) (*scanPlan, error) {
+func buildScanPlan(columns []string, joins []*activeJoin) *scanPlan {
 	plan := &scanPlan{
 		joins:       joins,
 		joinColsIdx: make([][]int, len(joins)),
@@ -759,7 +746,7 @@ func buildScanPlan(columns []string, joins []*activeJoin) (*scanPlan, error) {
 		}
 	}
 
-	return plan, nil
+	return plan
 }
 
 // scanOneRow allocates per-row scan destinations into the caller-provided
@@ -827,38 +814,46 @@ func scanOneRow[T any](rows *sql.Rows, plan *scanPlan, scanner *Scanner[T], scra
 		}
 	}
 
-	// Mount in precomputed depth-descending order. parentIdx[i] = -1
-	// means "mount onto the main row"; otherwise it's the index of the
-	// parent join's child in joinChildren.
+	if err := mountJoins(&m, plan, joinChildren, joinAllNull); err != nil {
+		return nil, err
+	}
+
+	return &m, nil
+}
+
+// mountJoins mounts each scanned join child onto its parent — the main row
+// (parentIdx == -1) or a shallower join child — in the plan's precomputed
+// depth-descending order, skipping any child whose parent join was a
+// LEFT-JOIN-no-match (no instance to mount onto).
+func mountJoins[T any](m *T, plan *scanPlan, joinChildren []any, joinAllNull []bool) error {
 	for _, ji := range plan.mountOrder {
 		j := plan.joins[ji]
 		parentJoinIdx := plan.parentIdx[ji]
 
-		// Skip if the parent join was a LEFT-JOIN-no-match: there's no
-		// child instance to mount onto.
 		if parentJoinIdx >= 0 && joinAllNull[parentJoinIdx] {
 			continue
 		}
 
 		var parent any
 		if parentJoinIdx < 0 {
-			parent = &m
+			parent = m
 		} else {
 			parent = joinChildren[parentJoinIdx]
 		}
 
 		if err := j.mount(parent, joinChildren[ji], joinAllNull[ji]); err != nil {
-			return nil, err
+			return err
 		}
 	}
 
-	return &m, nil
+	return nil
 }
 
 // joinDepth counts alias segments separated by "__" (e.g. "Seller__Company"
 // is depth 2). Used to mount nested children before their parents.
 func joinDepth(alias string) int {
 	depth := 1
+
 	for i := 0; i+1 < len(alias); i++ {
 		if alias[i] == '_' && alias[i+1] == '_' {
 			depth++
@@ -868,4 +863,3 @@ func joinDepth(alias string) int {
 
 	return depth
 }
-

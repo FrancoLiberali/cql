@@ -961,8 +961,21 @@ func customScannerField(col string, dest *jen.Statement, typeV Type) scannerFiel
 
 // emitScannerVar writes the package-level var <Model>Scanner with ScanValues
 // and AssignValues closures.
-func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement, varName string, fields []scannerField) { //nolint:funlen
-	// Build ScanValues body: a switch with one case per column.
+func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement, varName string, fields []scannerField) {
+	file.Add(
+		jen.Var().Id(varName).Op("=").Op("&").Qual(conditionPath, "Scanner").Types(objectQual.Clone()).Values(
+			jen.Dict{
+				jen.Id("ScanValues"):    buildScanValuesFn(fields),
+				jen.Id("AssignValues"):  buildAssignValuesFn(objectQual, fields),
+				jen.Id("ReleaseValues"): buildReleaseValuesFn(fields),
+			},
+		),
+	)
+}
+
+// buildScanValuesFn emits the ScanValues closure: a per-column switch that
+// acquires the right pooled cell wrapper for each column (NullSink default).
+func buildScanValuesFn(fields []scannerField) *jen.Statement {
 	scanCases := make([]jen.Code, 0, len(fields)+1)
 	for _, f := range fields {
 		scanCases = append(scanCases,
@@ -978,7 +991,7 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 		),
 	)
 
-	scanValuesFn := jen.Func().Params(
+	return jen.Func().Params(
 		jen.Id("columns").Index().String(),
 	).Params(
 		jen.Index().Any(),
@@ -990,8 +1003,11 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 		),
 		jen.Return(jen.Id("values"), jen.Nil()),
 	)
+}
 
-	// Build AssignValues body.
+// buildAssignValuesFn emits the AssignValues closure: a per-column switch that
+// copies each scanned cell into the destination model field.
+func buildAssignValuesFn(objectQual *jen.Statement, fields []scannerField) *jen.Statement {
 	assignCases := make([]jen.Code, 0, len(fields))
 	for _, f := range fields {
 		assignCases = append(assignCases,
@@ -999,7 +1015,7 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 		)
 	}
 
-	assignValuesFn := jen.Func().Params(
+	return jen.Func().Params(
 		jen.Id("dest").Op("*").Add(objectQual.Clone()),
 		jen.Id("columns").Index().String(),
 		jen.Id("values").Index().Any(),
@@ -1009,9 +1025,13 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 		),
 		jen.Return(jen.Nil()),
 	)
+}
 
-	// Build ReleaseValues body — returns pooled cells. Skips fields that
-	// have no releaseFn (custom Scanner types, []byte, etc.).
+// buildReleaseValuesFn emits the ReleaseValues closure: a per-column switch
+// that returns each pooled cell. Fields with no releaseFn (custom Scanner
+// types, []byte, etc.) are skipped; the NullSink default cells are always
+// released.
+func buildReleaseValuesFn(fields []scannerField) *jen.Statement {
 	releaseCases := make([]jen.Code, 0, len(fields)+1)
 
 	for _, f := range fields {
@@ -1024,7 +1044,6 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 		)
 	}
 
-	// Always release the NullSink default-case cells.
 	releaseCases = append(releaseCases,
 		jen.Default().Block(
 			jen.If(
@@ -1038,22 +1057,12 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 		),
 	)
 
-	releaseValuesFn := jen.Func().Params(
+	return jen.Func().Params(
 		jen.Id("columns").Index().String(),
 		jen.Id("values").Index().Any(),
 	).Block(
 		jen.For(jen.List(jen.Id("i"), jen.Id("c")).Op(":=").Range().Id("columns")).Block(
 			jen.Switch(jen.Id("c")).Block(releaseCases...),
-		),
-	)
-
-	file.Add(
-		jen.Var().Id(varName).Op("=").Op("&").Qual(conditionPath, "Scanner").Types(objectQual.Clone()).Values(
-			jen.Dict{
-				jen.Id("ScanValues"):    scanValuesFn,
-				jen.Id("AssignValues"):  assignValuesFn,
-				jen.Id("ReleaseValues"): releaseValuesFn,
-			},
 		),
 	)
 }
@@ -1225,7 +1234,7 @@ func hasManyChildType(t types.Type) (Type, bool) {
 //     (handles `*[]Child` / `[]Child` / `*[]*Child` / `[]*Child` shapes)
 //   - BuildQuery: SELECT children WHERE fk IN (parent_ids), with nested
 //     conditions appended for nested preload chains
-func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field Field, childType Type) { //nolint:funlen
+func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field Field, childType Type) {
 	parentQual := jen.Qual(
 		getRelativePackagePath(destPkg, sg.objectType),
 		sg.objectType.Name(),
@@ -1281,39 +1290,7 @@ func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field F
 		elemIsPointer = true
 	}
 
-	// Mount body.
-	mountBody := []jen.Code{}
-
-	if elemIsPointer { //nolint:nestif // flat branching over the elem/slice pointer matrix; extracting helpers would obscure the emitted code
-		// children IS []*Child — assign directly (or take address).
-		if sliceIsPointer {
-			mountBody = append(mountBody,
-				jen.Id("p").Dot(field.Name).Op("=").Op("&").Id("children"),
-			)
-		} else {
-			mountBody = append(mountBody,
-				jen.Id("p").Dot(field.Name).Op("=").Id("children"),
-			)
-		}
-	} else {
-		// Need to deref children []*Child into a []Child.
-		mountBody = append(mountBody,
-			jen.Id("values").Op(":=").Make(jen.Index().Add(childQual.Clone()), jen.Len(jen.Id("children"))),
-			jen.For(jen.List(jen.Id("i"), jen.Id("c")).Op(":=").Range().Id("children")).Block(
-				jen.Id("values").Index(jen.Id("i")).Op("=").Op("*").Id("c"),
-			),
-		)
-
-		if sliceIsPointer {
-			mountBody = append(mountBody,
-				jen.Id("p").Dot(field.Name).Op("=").Op("&").Id("values"),
-			)
-		} else {
-			mountBody = append(mountBody,
-				jen.Id("p").Dot(field.Name).Op("=").Id("values"),
-			)
-		}
-	}
+	mountBody := buildHasManyMountBody(field, childQual, sliceIsPointer, elemIsPointer)
 
 	// ChildFK body — depends on whether child FK is a pointer.
 	childFKBody := childFKExtractor(childType, fkGoField, parentIsUUID)
@@ -1332,8 +1309,56 @@ func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field F
 		jen.Id("children").Index().Op("*").Add(childQual.Clone()),
 	).Block(mountBody...)
 
-	// BuildQuery body — typed IN-list + NewQuery[Child].
-	buildQueryFn := jen.Func().Params(
+	buildQueryFn := buildHasManyQueryFn(childQual, valueOfType, idTypedValueCall, fkGoField, childType, parentIsUUID)
+
+	values := jen.Dict{
+		jen.Id("CollectionField"): jen.Lit(field.Name),
+		jen.Id("ParentID"):        parentIDFn,
+		jen.Id("ChildFK"):         childFKFn,
+		jen.Id("Mount"):           mountFn,
+		jen.Id("BuildQuery"):      buildQueryFn,
+	}
+
+	file.Add(
+		jen.Var().Id(varName).Op("=").Op("&").Qual(conditionPath, "HasManyLoader").Types(
+			parentQual.Clone(),
+			childQual.Clone(),
+		).Values(values),
+	)
+}
+
+// buildHasManyMountBody emits the Mount closure body that assigns the scanned
+// []*Child onto the parent's collection field, handling the by-value vs
+// by-pointer slice and element combinations. When the element is by-value it
+// first derefs []*Child into []Child.
+func buildHasManyMountBody(field Field, childQual *jen.Statement, sliceIsPointer, elemIsPointer bool) []jen.Code {
+	body := []jen.Code{}
+	source := "children"
+
+	if !elemIsPointer {
+		// Deref []*Child into []Child.
+		source = "values"
+		body = append(body,
+			jen.Id("values").Op(":=").Make(jen.Index().Add(childQual.Clone()), jen.Len(jen.Id("children"))),
+			jen.For(jen.List(jen.Id("i"), jen.Id("c")).Op(":=").Range().Id("children")).Block(
+				jen.Id("values").Index(jen.Id("i")).Op("=").Op("*").Id("c"),
+			),
+		)
+	}
+
+	assign := jen.Id("p").Dot(field.Name).Op("=")
+	if sliceIsPointer {
+		assign.Op("&")
+	}
+
+	return append(body, assign.Id(source))
+}
+
+// buildHasManyQueryFn emits the BuildQuery closure: it converts the parent IDs
+// to typed model IDs, builds an IN condition on the child FK, appends the
+// caller's nested conditions, and returns a NewQuery[Child].
+func buildHasManyQueryFn(childQual, valueOfType, idTypedValueCall *jen.Statement, fkGoField string, childType Type, parentIsUUID bool) *jen.Statement {
+	return jen.Func().Params(
 		jen.Id("tx").Op("*").Qual("gorm.io/gorm", "DB"),
 		jen.Id("parentIDs").Index().Any(),
 		jen.Id("nested").Index().Qual(conditionPath, cqlCondition).Types(childQual.Clone()),
@@ -1359,21 +1384,6 @@ func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field F
 			),
 			jen.Nil(),
 		),
-	)
-
-	values := jen.Dict{
-		jen.Id("CollectionField"): jen.Lit(field.Name),
-		jen.Id("ParentID"):        parentIDFn,
-		jen.Id("ChildFK"):         childFKFn,
-		jen.Id("Mount"):           mountFn,
-		jen.Id("BuildQuery"):      buildQueryFn,
-	}
-
-	file.Add(
-		jen.Var().Id(varName).Op("=").Op("&").Qual(conditionPath, "HasManyLoader").Types(
-			parentQual.Clone(),
-			childQual.Clone(),
-		).Values(values),
 	)
 }
 

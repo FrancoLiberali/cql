@@ -55,10 +55,12 @@ func seedUsersWithPets(b *testing.B, db *cql.DB, nParents, nChildren int) {
 	users := make([]*models.User, nParents)
 	for i := range users {
 		u := newUser(fmt.Sprintf("pu-%d", i))
+
 		u.Pets = make([]*models.Pet, nChildren)
 		for j := range u.Pets {
 			u.Pets[j] = &models.Pet{Name: fmt.Sprintf("pet-%d-%d", i, j)}
 		}
+
 		users[i] = u
 	}
 
@@ -72,12 +74,13 @@ func seedUsersWithPets(b *testing.B, db *cql.DB, nParents, nChildren int) {
 func benchFindUsers5Where(b *testing.B, n int) {
 	db := openDB(b)
 	seedBenchUsers(b, db, n)
+
 	ctx := context.Background()
 
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		out, err := cql.Query[models.User](ctx, db,
 			conditions.User.Name.Is().NotEq(cql.String("nope1")),
 			conditions.User.Name.Is().NotEq(cql.String("nope2")),
@@ -88,6 +91,7 @@ func benchFindUsers5Where(b *testing.B, n int) {
 		if err != nil {
 			b.Fatal(err)
 		}
+
 		if len(out) != n {
 			b.Fatalf("expected %d rows, got %d", n, len(out))
 		}
@@ -114,7 +118,7 @@ func BenchmarkFirst(b *testing.B) {
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		_, err := cql.Query[models.User](ctx, db,
 			conditions.User.ID.Is().Eq(cql.UIntID(uint(u.ID))),
 		).First()
@@ -129,18 +133,20 @@ func BenchmarkFirst(b *testing.B) {
 func benchJoinedPreload(b *testing.B, n int) {
 	db := openDB(b)
 	seedUsersWithAccount(b, db, n)
+
 	ctx := context.Background()
 
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		out, err := cql.Query[models.User](ctx, db,
 			conditions.User.Account().Preload(),
 		).Find()
 		if err != nil {
 			b.Fatal(err)
 		}
+
 		if len(out) != n {
 			b.Fatalf("expected %d rows, got %d", n, len(out))
 		}
@@ -158,18 +164,20 @@ func BenchmarkJoinedPreload_1K(b *testing.B)  { benchJoinedPreload(b, 1000) }
 func BenchmarkHasMany_50x4(b *testing.B) {
 	db := openDB(b)
 	seedUsersWithPets(b, db, 50, 4)
+
 	ctx := context.Background()
 
 	b.ResetTimer()
 	b.ReportAllocs()
 
-	for i := 0; i < b.N; i++ {
+	for range b.N {
 		out, err := cql.Query[models.User](ctx, db,
 			conditions.User.Pets.Preload(),
 		).Find()
 		if err != nil {
 			b.Fatal(err)
 		}
+
 		if len(out) != 50 {
 			b.Fatalf("expected 50 users, got %d", len(out))
 		}

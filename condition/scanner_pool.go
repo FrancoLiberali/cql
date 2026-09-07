@@ -34,7 +34,7 @@ var (
 // AcquireNullBool returns a zeroed *sql.NullBool from the pool. Generated
 // ScanValues calls this in place of `new(sql.NullBool)`.
 func AcquireNullBool() *sql.NullBool {
-	v := nullBoolPool.Get().(*sql.NullBool)
+	v, _ := nullBoolPool.Get().(*sql.NullBool)
 	*v = sql.NullBool{}
 
 	return v
@@ -47,7 +47,7 @@ func AcquireNullBool() *sql.NullBool {
 func ReleaseNullBool(v *sql.NullBool) { nullBoolPool.Put(v) }
 
 func AcquireNullString() *sql.NullString {
-	v := nullStringPool.Get().(*sql.NullString)
+	v, _ := nullStringPool.Get().(*sql.NullString)
 	*v = sql.NullString{}
 
 	return v
@@ -56,7 +56,7 @@ func AcquireNullString() *sql.NullString {
 func ReleaseNullString(v *sql.NullString) { nullStringPool.Put(v) }
 
 func AcquireNullInt16() *sql.NullInt16 {
-	v := nullInt16Pool.Get().(*sql.NullInt16)
+	v, _ := nullInt16Pool.Get().(*sql.NullInt16)
 	*v = sql.NullInt16{}
 
 	return v
@@ -65,7 +65,7 @@ func AcquireNullInt16() *sql.NullInt16 {
 func ReleaseNullInt16(v *sql.NullInt16) { nullInt16Pool.Put(v) }
 
 func AcquireNullInt32() *sql.NullInt32 {
-	v := nullInt32Pool.Get().(*sql.NullInt32)
+	v, _ := nullInt32Pool.Get().(*sql.NullInt32)
 	*v = sql.NullInt32{}
 
 	return v
@@ -74,7 +74,7 @@ func AcquireNullInt32() *sql.NullInt32 {
 func ReleaseNullInt32(v *sql.NullInt32) { nullInt32Pool.Put(v) }
 
 func AcquireNullInt64() *sql.NullInt64 {
-	v := nullInt64Pool.Get().(*sql.NullInt64)
+	v, _ := nullInt64Pool.Get().(*sql.NullInt64)
 	*v = sql.NullInt64{}
 
 	return v
@@ -83,7 +83,7 @@ func AcquireNullInt64() *sql.NullInt64 {
 func ReleaseNullInt64(v *sql.NullInt64) { nullInt64Pool.Put(v) }
 
 func AcquireNullByte() *sql.NullByte {
-	v := nullBytePool.Get().(*sql.NullByte)
+	v, _ := nullBytePool.Get().(*sql.NullByte)
 	*v = sql.NullByte{}
 
 	return v
@@ -92,7 +92,7 @@ func AcquireNullByte() *sql.NullByte {
 func ReleaseNullByte(v *sql.NullByte) { nullBytePool.Put(v) }
 
 func AcquireNullFloat64() *sql.NullFloat64 {
-	v := nullFloat64Pool.Get().(*sql.NullFloat64)
+	v, _ := nullFloat64Pool.Get().(*sql.NullFloat64)
 	*v = sql.NullFloat64{}
 
 	return v
@@ -101,7 +101,7 @@ func AcquireNullFloat64() *sql.NullFloat64 {
 func ReleaseNullFloat64(v *sql.NullFloat64) { nullFloat64Pool.Put(v) }
 
 func AcquireNullTime() *sql.NullTime {
-	v := nullTimePool.Get().(*sql.NullTime)
+	v, _ := nullTimePool.Get().(*sql.NullTime)
 	*v = sql.NullTime{}
 
 	return v
@@ -110,7 +110,7 @@ func AcquireNullTime() *sql.NullTime {
 func ReleaseNullTime(v *sql.NullTime) { nullTimePool.Put(v) }
 
 func AcquireUUID() *model.UUID {
-	v := uuidPool.Get().(*model.UUID)
+	v, _ := uuidPool.Get().(*model.UUID)
 	*v = model.NilUUID
 
 	return v
@@ -123,7 +123,7 @@ func ReleaseUUID(v *model.UUID) { uuidPool.Put(v) }
 // AcquireDeletedAt returns a zeroed *gorm.DeletedAt. NOTE: gorm.DeletedAt
 // contains a Time and a Valid bool — pure value, safe to pool.
 func AcquireDeletedAt() *gorm.DeletedAt {
-	v := deletedAtPool.Get().(*gorm.DeletedAt)
+	v, _ := deletedAtPool.Get().(*gorm.DeletedAt)
 	*v = gorm.DeletedAt{}
 
 	return v
@@ -132,7 +132,10 @@ func AcquireDeletedAt() *gorm.DeletedAt {
 func ReleaseDeletedAt(v *gorm.DeletedAt) { deletedAtPool.Put(v) }
 
 // AcquireNullSink returns a NullSink (stateless — no reset needed).
-func AcquireNullSink() *NullSink { return nullSinkPool.Get().(*NullSink) }
+func AcquireNullSink() *NullSink {
+	v, _ := nullSinkPool.Get().(*NullSink)
+	return v
+}
 
 // ReleaseNullSink returns the sink to its pool.
 func ReleaseNullSink(v *NullSink) { nullSinkPool.Put(v) }

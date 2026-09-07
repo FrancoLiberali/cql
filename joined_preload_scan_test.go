@@ -108,7 +108,7 @@ func TestJoinedPreloadFastScan_LeftJoinNoMatch(t *testing.T) {
 	assert.Equal(t, "orphan", phones[0].Name)
 	// Value relation: zero-valued Brand struct on no-match.
 	assert.EqualValues(t, 0, phones[0].Brand.ID)
-	assert.Equal(t, "", phones[0].Brand.Name)
+	assert.Empty(t, phones[0].Brand.Name)
 
 	assert.NoError(t, mock.ExpectationsWereMet())
 }

@@ -13,7 +13,7 @@ package condition_test
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -59,6 +59,7 @@ func TestGormProbe_Uintptr(t *testing.T) {
 	t.Logf("uintptr Create err: %v", createErr)
 
 	var out uintptrModel
+
 	findErr := db.First(&out).Error
 	t.Logf("uintptr First err: %v, val: %v", findErr, out.Val)
 
@@ -77,7 +78,7 @@ func TestGormProbe_Complex64(t *testing.T) {
 	t.Logf("complex64 AutoMigrate err: %v", migrateErr)
 
 	if migrateErr != nil {
-		assert.Error(t, migrateErr, "expected migrate to fail for complex64")
+		require.Error(t, migrateErr, "expected migrate to fail for complex64")
 		t.Log("VERDICT complex64: gorm rejects at AutoMigrate")
 
 		return
@@ -87,6 +88,7 @@ func TestGormProbe_Complex64(t *testing.T) {
 	t.Logf("complex64 Create err: %v", createErr)
 
 	var out complex64Model
+
 	findErr := db.First(&out).Error
 	t.Logf("complex64 First err: %v, val: %v", findErr, out.Val)
 
@@ -104,7 +106,7 @@ func TestGormProbe_Complex128(t *testing.T) {
 	t.Logf("complex128 AutoMigrate err: %v", migrateErr)
 
 	if migrateErr != nil {
-		assert.Error(t, migrateErr, "expected migrate to fail for complex128")
+		require.Error(t, migrateErr, "expected migrate to fail for complex128")
 		t.Log("VERDICT complex128: gorm rejects at AutoMigrate")
 
 		return
@@ -114,6 +116,7 @@ func TestGormProbe_Complex128(t *testing.T) {
 	t.Logf("complex128 Create err: %v", createErr)
 
 	var out complex128Model
+
 	findErr := db.First(&out).Error
 	t.Logf("complex128 First err: %v, val: %v", findErr, out.Val)
 

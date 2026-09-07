@@ -116,7 +116,7 @@ func (condition collectionPreloadCondition[T1, T2]) applyGormPreloadWithNested(q
 	)
 }
 
-// Condition used to the preload a collection of models of a model.
+// NewCollectionPreloadCondition builds a condition used to preload a collection of models of a model.
 //
 // The optional hasManyLoader (variadic for back-compat with hand-written
 // callers) is the generated fast-scan mounter. When supplied AND the user

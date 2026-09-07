@@ -230,12 +230,21 @@ func (query *CQLQuery) WhereRaw(sql string, args []any) {
 		clause.Expr{SQL: sql, Vars: args})
 }
 
+// SQL-builder pre-grow coefficients used by flushPending's size estimate.
+const (
+	sqlGrowBaseBytes     = 100
+	sqlGrowBytesPerWhere = 40
+	sqlGrowBytesPerJoin  = 120
+)
+
 // flushPending pushes accumulated pending state (WHEREs + the model's
 // soft-delete filter) into the underlying gorm Statement. Called by
 // findWith / scanOne right before executing the query. Since
 // StartQuery already produced a clean gormDB with clone == 0, mutating
 // its Statement directly is safe and skips a getInstance + AddClause
 // round-trip per condition.
+//
+//nolint:funcorder // kept next to the WhereRaw accumulation helpers it flushes
 func (query *CQLQuery) flushPending() {
 	// Bake the initial model's soft-delete filter now (deferred from
 	// NewGormQuery so we can consult Statement.Unscoped, which
@@ -273,13 +282,15 @@ func (query *CQLQuery) flushPending() {
 	// JOIN string is ~120 chars with the ON-clause and soft-delete tail.
 	stmt := query.gormDB.Statement
 	if stmt.SQL.Len() == 0 && stmt.SQL.Cap() == 0 {
-		estimate := 100
+		estimate := sqlGrowBaseBytes
+
 		if c, ok := stmt.Clauses["WHERE"]; ok {
 			if w, ok := c.Expression.(clause.Where); ok {
-				estimate += len(w.Exprs) * 40
+				estimate += len(w.Exprs) * sqlGrowBytesPerWhere
 			}
 		}
-		estimate += len(stmt.Joins) * 120
+
+		estimate += len(stmt.Joins) * sqlGrowBytesPerJoin
 		stmt.SQL.Grow(estimate)
 	}
 }
@@ -357,7 +368,7 @@ func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *CQ
 	// Remember the initial model's soft-delete column so flushPending
 	// can bake `<table>.<col> IS NULL` into our WHERE right before
 	// executing (unless the caller went Unscoped or a condition already
-	// filtered on DeletedAt — both signalled via Statement.Unscoped).
+	// filtered on DeletedAt — both signaled via Statement.Unscoped).
 	// Baking it locally + setting the `soft_delete_enabled` marker on
 	// gorm's Statement lets us skip gorm's SoftDeleteQueryClause.
 	// ModifyStatement entirely — that callback was the heaviest single

@@ -15,8 +15,8 @@ import (
 // TestHasManyPreloadFastScan_Basic exercises the simplest HasMany preload
 // case: Company.Sellers.Preload(). Mocks both queries:
 //
-//   1) SELECT companies.* FROM "companies" WHERE ...
-//   2) SELECT sellers.* FROM "sellers" WHERE sellers.company_id IN (?, ?)
+//  1. SELECT companies.* FROM "companies" WHERE ...
+//  2. SELECT sellers.* FROM "sellers" WHERE sellers.company_id IN (?, ?)
 //
 // and asserts that the second query's results are grouped by company_id
 // and mounted onto the right Company via the hand-written
