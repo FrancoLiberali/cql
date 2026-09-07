@@ -55,6 +55,7 @@ jobs:
     needs: [check-style]
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         db: [postgresql, cockroachdb, mysql, sqlite, sqlserver]
     steps:
@@ -94,7 +95,10 @@ jobs:
             }
           export_to: env
       - name: Run test
-        run:  DB=${{ env.dialector }} gotestsum --junitfile tests-${{ matrix.db }}.xml ./... -tags=${{ matrix.db }} -coverpkg=./... -coverprofile=coverage_${{ matrix.db }}.out
+        # GODEBUG=x509negativeserial=1: the sqlserver container's self-signed
+        # cert has a negative serial number, which Go 1.23+ rejects by default
+        # (matches the Makefile's test_sqlserver target). No-op for other DBs.
+        run:  GODEBUG=x509negativeserial=1 DB=${{ env.dialector }} gotestsum --junitfile tests-${{ matrix.db }}.xml ./... -tags=${{ matrix.db }} -coverpkg=./... -coverprofile=coverage_${{ matrix.db }}.out
       - name: Test Report
         uses: dorny/test-reporter@v1
         if: always() # run this step even if previous steps failed
