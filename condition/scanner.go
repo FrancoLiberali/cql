@@ -445,7 +445,12 @@ func prepopulateSelectAndFromForFind(q *CQLQuery) {
 		stmt.Clauses["FROM"] = fc
 	}
 
-	if q.hasJoinedSelects || len(q.activeJoins) > 0 {
+	// Extra selects beyond the base "<table>.*" (len > 1) mean gorm must
+	// build the SELECT itself: e.g. postgres ORDER BY adds a
+	// "<table>.<col> AS \"<table>__<col>\"" alias to Statement.Selects on
+	// the initial table (so hasJoinedSelects stays false), and clobbering
+	// it here would drop that column and break the ORDER BY.
+	if q.hasJoinedSelects || len(q.activeJoins) > 0 || len(stmt.Selects) > 1 {
 		return
 	}
 
