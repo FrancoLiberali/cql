@@ -155,7 +155,7 @@ func getStructFields(structType *types.Struct) ([]Field, error) {
 	fields := []Field{}
 
 	// Iterate over struct fields
-	for i := 0; i < numFields; i++ {
+	for i := range numFields {
 		fieldObject := structType.Field(i)
 		gormTags := getGormTags(structType.Tag(i))
 		fields = append(fields, Field{

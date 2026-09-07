@@ -54,8 +54,8 @@ func getGormTags(tag string) GormTags {
 		return tagMap
 	}
 
-	gormTags := strings.Split(gormTag.Name, ";")
-	for _, tag := range gormTags {
+	gormTags := strings.SplitSeq(gormTag.Name, ";")
+	for tag := range gormTags {
 		splitted := strings.Split(tag, ":")
 		tagName := GormTag(splitted[0])
 

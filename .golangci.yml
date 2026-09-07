@@ -1,228 +1,161 @@
-# based on
-# - https://github.com/istio/common-files/blob/master/files/common/config/.golangci.yml
-# - https://gist.github.com/maratori/47a4d00457a92aa426dbd48a18776322
-
-run:
-  # timeout for analysis, e.g. 30s, 5m, default is 1m
-  timeout: 3m
-  # which dirs to skip: they won't be analyzed;
-  # can use regexp here: generated.*, regexp is applied on full path;
-  # default value is empty list, but next dirs are always skipped independently
-  # from this option's value:
-  #   vendor$, third_party$, testdata$, examples$, Godeps$, builtin$
-
+version: "2"
 linters:
-  enable-all: true
+  default: all
   disable:
-    - dogsled # [sometimes necessary] checks assignments with too many blank identifiers (e.g. x, _, _, _, := f())
-    - exhaustruct # [make it easier to construct structs] checks if all structure fields are initialized
-    - gochecknoglobals # [we use them] checks that no global variables exist
-    - gochecknoinits # [we use them] checks that no init functions are present in Go code
-    - godot # [not necessary] checks if comments end in a period
-    - godox # [we use them] detects FIXME, TODO and other comment keywords
-    - ireturn # [useful for mocks generation] accept interfaces, return concrete types
-    - nlreturn # [too strict and mostly code is not more readable] checks for a new line before return and branch statements to increase code clarity
-    - nonamedreturns # [are util sometimes] reports all named returns
-    - paralleltest # [too many false positives] detects missing usage of t.Parallel() method in your Go test
-    - testpackage # [doesn't allow white box tests] makes you use a separate _test package
-    - thelper # [not the expected result by us] detects golang test helpers without t.Helper() call and checks the consistency of test helpers
-    - varnamelen # [great idea, but too many false positives] checks that the length of a variable's name matches its scope
-    - tenv # [deprecated] (since v1.64.0) due to: Duplicate feature in another linter. Replaced by usetesting.
-    - recvcheck # [too strict] checks for receiver type consistency.
-  # deprecated
-  # can be util in the future for better errors
-    - wrapcheck # [too strict] checks that errors returned from external packages are wrapped
-  fast: false
-
-# All possible options can be found here https://github.com/golangci/golangci-lint/blob/master/.golangci.reference.yml
-linters-settings:
-  cyclop:
-    # The maximal code complexity to report.
-    # Default: 10
-    max-complexity: 20
-    # The maximal average package complexity.
-    # If it's higher than 0.0 (float) the check is enabled
-    # Default: 0.0
-    package-average: 0.0
-  depguard:
-    rules:
-      main:
-        deny:
-          - pkg: "github.com/gogo/protobuf"
-            desc: gogo/protobuf is deprecated, use golang/protobuf
-  errcheck:
-    # report about not checking of errors in type assetions: `a := b.(MyStruct)`;
-    # default is false: such cases aren't reported by default.
-    check-type-assertions: true
-    # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
-    # default is false: such cases aren't reported by default.
-    check-blank: false
-  exhaustive:
-    # Program elements to check for exhaustiveness.
-    # Default: [ switch ]
-    check:
-      - switch
-      - map
-  funlen:
-    # Checks the number of lines in a function.
-    # If lower than 0, disable the check.
-    # Default: 60
-    lines: 80
-    # Checks the number of statements in a function.
-    # If lower than 0, disable the check.
-    # Default: 40
-    statements: 40
-  gci:
-    sections:
-      - standard # Captures all standard packages if they do not match another section.
-      - default # Contains all imports that could not be matched to another section type.
-      - prefix(github.com/FrancoLiberali/) # Groups all imports with the specified Prefix.
-  gocritic:
-    # Settings passed to gocritic.
-    # The settings key is the name of a supported gocritic checker.
-    # The list of supported checkers can be find in https://go-critic.github.io/overview.
-    settings:
-      captLocal:
-        # Whether to restrict checker to params only.
-        # Default: true
-        paramsOnly: false
-      underef:
-        # Whether to skip (*x).method() calls where x is a pointer receiver.
-        # Default: true
-        skipRecvDeref: false
-  goimports:
-    # put imports beginning with prefix after 3rd-party packages;
-    # it's a comma-separated list of prefixes
-    local-prefixes: github.com/FrancoLiberali/
-  gomoddirectives:
-    # List of allowed `replace` directives.
-    # Default: []
-    replace-allow-list:
-      - gorm.io/gorm
-  gomodguard:
-    blocked:
-      # List of blocked modules.
-      # Default: []
-      modules:
-        - github.com/golang/protobuf:
-            recommendations:
-              - google.golang.org/protobuf
-            reason: "see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules"
-        - github.com/satori/go.uuid:
-            recommendations:
-              - github.com/google/uuid
-            reason: "satori's package is not maintained"
-        - github.com/gofrs/uuid:
-            recommendations:
-              - github.com/google/uuid
-            reason: "gofrs' package is not go module"
-  govet:
-    # Enable all analyzers.
-    # Default: false
-    enable-all: true
-    # Disable analyzers by name.
-    # Run `go tool vet help` to see all analyzers.
-    # Default: []
-    disable:
-      - fieldalignment # too strict
-    # Settings per analyzer.
-    settings:
-      shadow:
-        # Whether to be strict about shadowing; can be noisy.
-        # Default: false
-        strict: false
-  lll:
-    # max line length, lines longer will be reported. Default is 120.
-    # '\t' is counted as 1 character by default, and can be changed with the tab-width option
-    line-length: 160
-    # tab width in spaces. Default to 1.
-    tab-width: 1
-  misspell:
-    # Correct spellings using locale preferences for US or UK.
-    # Default is to use a neutral variety of English.
-    # Setting locale to US will correct the British spelling of 'colour' to 'color'.
-    locale: US
-    ignore-words:
-      - cancelled
-  nolintlint:
-    # Exclude following linters from requiring an explanation.
-    # Default: []
-    allow-no-explanation: [ funlen, gocognit, lll ]
-    # Enable to require an explanation of nonzero length after each nolint directive.
-    # Default: false
-    require-explanation: true
-    # Enable to require nolint directives to mention the specific linter being suppressed.
-    # Default: false
-    require-specific: true
-  rowserrcheck:
-    # database/sql is always checked
-    # Default: []
-    packages:
-      - github.com/jmoiron/sqlx
-  unparam:
-    # Inspect exported functions, default is false. Set to true if no external program/library imports your code.
-    # XXX: if you enable this setting, unparam will report a lot of false-positives in text editors:
-    # if it's called for subdir of a project it can't find external interfaces. All text editor integrations
-    # with golangci-lint call it on a directory with the changed file.
-    check-exported: false
-  tenv:
-    # The option `all` will run against whole test files (`_test.go`) regardless of method/function signatures.
-    # Otherwise, only methods that take `*testing.T`, `*testing.B`, and `testing.TB` as arguments are checked.
-    # Default: false
-    all: true
-  gosec:
-    config:
-      # Globals are applicable to all rules.
-      global:
-        # If true, ignore #nosec in comments (and an alternative as well).
-        # Default: false
-        nosec: true
-        # Audit mode enables addition checks that for normal code analysis might be too nosy.
-        # Default: false
-        audit: true
-
-issues:
-  # List of regexps of issue texts to exclude, empty list by default.
-  # But independently from this option we use default exclude patterns,
-  # it can be disabled by `exclude-use-default: false`. To list all
-  # excluded by default patterns execute `golangci-lint run --help`
-  exclude:
-    - composite literal uses unkeyed fields
-  exclude-rules:
-    # Exclude some linters from running on test files.
-    - path: compilation_test\.go$
-      linters:
-        - lll
-    - path: _test\.go$|^test/
-      linters:
-        - errcheck
-        - forcetypeassert
+    - dogsled
+    - exhaustruct
+    - gochecknoglobals
+    - gochecknoinits
+    - godot
+    - godox
+    - gomodguard # deprecated (v2.12), replaced by gomodguard_v2 below
+    - ireturn
+    - nlreturn
+    - noinlineerr # inline error handling (if err := ...; err != nil) is idiomatic across this repo
+    - nonamedreturns
+    - paralleltest
+    - recvcheck
+    - testpackage
+    - thelper
+    - varnamelen
+    - wrapcheck
+    - wsl # deprecated (v2.2), replaced by wsl_v5
+  settings:
+    cyclop:
+      max-complexity: 20
+      package-average: 0
+    depguard:
+      rules:
+        main:
+          deny:
+            - pkg: github.com/gogo/protobuf
+              desc: gogo/protobuf is deprecated, use golang/protobuf
+    errcheck:
+      check-type-assertions: true
+      check-blank: false
+    exhaustive:
+      check:
+        - switch
+        - map
+    funlen:
+      lines: 80
+      statements: 40
+    gocritic:
+      settings:
+        captLocal:
+          paramsOnly: false
+        underef:
+          skipRecvDeref: false
+    gomoddirectives:
+      replace-allow-list:
+        - gorm.io/gorm
+    gomodguard_v2:
+      blocked:
+        - module: github.com/golang/protobuf
+          recommendations:
+            - google.golang.org/protobuf
+          reason: see https://developers.google.com/protocol-buffers/docs/reference/go/faq#modules
+        - module: github.com/satori/go.uuid
+          recommendations:
+            - github.com/google/uuid
+          reason: satori's package is not maintained
+        - module: github.com/gofrs/uuid
+          recommendations:
+            - github.com/google/uuid
+          reason: gofrs' package is not go module
+    gosec:
+      config:
+        global:
+          audit: true
+          nosec: true
+    govet:
+      disable:
+        - fieldalignment
+      enable-all: true
+      settings:
+        shadow:
+          strict: false
+    lll:
+      line-length: 160
+      tab-width: 1
+    misspell:
+      locale: US
+      ignore-rules:
+        - cancelled
+    nolintlint:
+      require-explanation: true
+      require-specific: true
+      allow-no-explanation:
         - funlen
-        - goconst
-        - noctx
-        - gomnd
-        - exhaustive
-        - dupl
-        - err113
-    - path: ^cmd/|^cql-gen/cmd/
-      linters:
-        - err113
-    - path: ^pkg/analyzer/|^cqllint/pkg/analyzer/
-      linters:
-        - errcheck
-        - forcetypeassert
-        - err113
-    # We need to use the deprecated module since the jsonpb replacement is not backwards compatible.
-    - linters:
-        - staticcheck
-      text: "SA1019: package github.com/golang/protobuf/jsonpb"
-    - linters:
-        - staticcheck
-      text: 'SA1019: "github.com/golang/protobuf/jsonpb"'
-  # Independently from option `exclude` we use default exclude patterns,
-  # it can be disabled by this option. To list all
-  # excluded by default patterns execute `golangci-lint run --help`.
-  # Default value for this option is true.
-  exclude-use-default: true
-  # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
+        - gocognit
+        - lll
+    rowserrcheck:
+      packages:
+        - github.com/jmoiron/sqlx
+    unparam:
+      check-exported: false
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    rules:
+      - linters:
+          - lll
+        path: compilation_test\.go$
+      - linters:
+          - dupl
+          - err113
+          - errcheck
+          - exhaustive
+          - forcetypeassert
+          - funlen
+          - goconst
+          - mnd
+          - noctx
+        path: _test\.go$|^test/
+      - linters:
+          - err113
+        path: ^cmd/|^cql-gen/cmd/
+      - linters:
+          - err113
+          - errcheck
+          - forcetypeassert
+        path: ^pkg/analyzer/|^cqllint/pkg/analyzer/
+      - linters:
+          - staticcheck
+        text: 'SA1019: package github.com/golang/protobuf/jsonpb'
+      - linters:
+          - staticcheck
+        text: 'SA1019: "github.com/golang/protobuf/jsonpb"'
+      - path: (.+)\.go$
+        text: composite literal uses unkeyed fields
+    paths:
+      - third_party$
+      - builtin$
+      - examples$
+issues:
   max-same-issues: 0
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gci:
+      sections:
+        - standard
+        - default
+        - prefix(github.com/FrancoLiberali/)
+    goimports:
+      local-prefixes:
+        - github.com/FrancoLiberali/
+  exclusions:
+    generated: lax
+    paths:
+      - third_party$
+      - builtin$
+      - examples$

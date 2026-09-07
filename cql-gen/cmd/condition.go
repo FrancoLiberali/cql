@@ -37,6 +37,8 @@ const (
 	uuidModelWithTimestamps = "UUIDModelWithTimestamps"
 	uIntModel               = "UIntModel"
 	uIntModelWithTimestamps = "UIntModelWithTimestamps"
+	// go stdlib
+	timeType = "time.Time"
 )
 
 const preloadMethod = "preload"
@@ -145,7 +147,7 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 			objectType,
 			field,
 		)
-	case field.Type.IsGormCustomType() || field.TypeString() == "time.Time" || field.IsModelID():
+	case field.Type.IsGormCustomType() || field.TypeString() == timeType || field.IsModelID():
 		// field is a Gorm Custom type (implements Scanner and Valuer interfaces)
 		// or a named type supported by gorm (time.Time)
 		// or a cql id (uuid or uintid)

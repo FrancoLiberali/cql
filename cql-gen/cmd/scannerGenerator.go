@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"go/types"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/ettle/strcase"
@@ -34,10 +36,10 @@ func (e *UnsupportedFieldError) Error() string {
 // at AutoMigrate, and the scanner can't disambiguate which field a value
 // belongs to. Fail at codegen.
 type DuplicateColumnError struct {
-	Model   string
-	Column  string
-	FieldA  string
-	FieldB  string
+	Model  string
+	Column string
+	FieldA string
+	FieldB string
 }
 
 func (e *DuplicateColumnError) Error() string {
@@ -76,10 +78,10 @@ func NewScannerGenerator(object types.Object) *ScannerGenerator {
 // scan.go:111. May be nil for cells that aren't pooled (e.g. custom
 // scanner types wrapped in NullableScanner).
 type scannerField struct {
-	columnName string             // final SQL column name (snake_case + any prefix override)
-	valueExpr  *jen.Statement     // ScanValues cell allocator (Acquire call when pooled)
-	assignFn   scannerAssignFunc  // AssignValues body for this column's case
-	releaseFn  scannerAssignFunc  // ReleaseValues body for this column's case; nil = no-op
+	columnName string            // final SQL column name (snake_case + any prefix override)
+	valueExpr  *jen.Statement    // ScanValues cell allocator (Acquire call when pooled)
+	assignFn   scannerAssignFunc // AssignValues body for this column's case
+	releaseFn  scannerAssignFunc // ReleaseValues body for this column's case; nil = no-op
 }
 
 // scannerAssignFunc receives the case index variable name and the values slice
@@ -200,7 +202,7 @@ func (sg ScannerGenerator) flattenFields() ([]Field, error) {
 // Access-path rules:
 //   - Go-anonymous embed (`SomeType` with no field name): fields are
 //     promoted — child path inherits parent's path unchanged.
-//   - Named gorm-tagged embed (`Foo SomeType `gorm:"embedded"``): child
+//   - Named gorm-tagged embed (`Foo SomeType `gorm:"embedded"“): child
 //     path prepends the parent's Go field name.
 func (sg ScannerGenerator) flattenOne(f Field, parentColumnPrefix string, parentAccessPath []string) []Field {
 	if !f.Embedded {
@@ -267,12 +269,7 @@ func pathString(f Field) string {
 		return f.Name
 	}
 
-	out := f.AccessPath[0]
-	for _, p := range f.AccessPath[1:] {
-		out += "." + p
-	}
-
-	return out
+	return strings.Join(f.AccessPath, ".")
 }
 
 // classifyAll attempts to produce a scannerField for every field. Returns:
@@ -335,7 +332,8 @@ func (sg ScannerGenerator) classifyField(field Field) (scannerField, bool, error
 		if err != nil {
 			// Annotate with the owning model so the error message points
 			// at User.Foo, not just the bare field.
-			if ufe, isUFE := err.(*UnsupportedFieldError); isUFE && ufe.Model == "" {
+			ufe := &UnsupportedFieldError{}
+			if errors.As(err, &ufe) {
 				ufe.Model = sg.object.Name()
 				ufe.Field = field.Name
 			}
@@ -427,9 +425,14 @@ func classifyBasic(col string, dest *jen.Statement, t *types.Basic) (scannerFiel
 		// with "unsupported data type". Fail at codegen so the user finds
 		// out now instead of at the first DB call.
 		return scannerField{}, false, &UnsupportedFieldError{Type: t.Name()}
-	default:
+	case types.Invalid, types.UnsafePointer,
+		types.UntypedBool, types.UntypedInt, types.UntypedRune,
+		types.UntypedFloat, types.UntypedComplex, types.UntypedString, types.UntypedNil:
+		// not a scannable column type
 		return scannerField{}, false, nil
 	}
+
+	return scannerField{}, false, nil
 }
 
 func basicKindName(k types.BasicKind) string {
@@ -454,9 +457,22 @@ func basicKindName(k types.BasicKind) string {
 		return "uint32"
 	case types.Uint64:
 		return "uint64"
-	default:
+	case types.Bool:
+		return "bool"
+	case types.String:
+		return "string"
+	case types.Float32:
+		return "float32"
+	case types.Float64:
+		return "float64"
+	case types.Invalid, types.Uintptr,
+		types.Complex64, types.Complex128, types.UnsafePointer,
+		types.UntypedBool, types.UntypedInt, types.UntypedRune,
+		types.UntypedFloat, types.UntypedComplex, types.UntypedString, types.UntypedNil:
 		return ""
 	}
+
+	return ""
 }
 
 // castFn wraps the scanned value with a type conversion (e.g. int(v.Int64)).
@@ -494,6 +510,7 @@ func nullValueField(
 					jen.Id("values").Index(jen.Id(idx)),
 				)),
 			)
+
 			rhs := jen.Id("v").Dot(valueAccessor)
 			if cast != nil {
 				rhs = cast(rhs)
@@ -505,13 +522,13 @@ func nullValueField(
 
 			return []jen.Code{vAssertion, notOk, validGuard}
 		},
-		releaseFn: releaseNullFn(col, nullType),
+		releaseFn: releaseNullFn(nullType),
 	}
 }
 
 // releaseNullFn emits the body of one case in ReleaseValues for a pooled
 // sql.Null* cell. Type-asserts and calls condition.ReleaseNullX.
-func releaseNullFn(col, nullType string) scannerAssignFunc {
+func releaseNullFn(nullType string) scannerAssignFunc {
 	return func(idx string) []jen.Code {
 		return []jen.Code{
 			jen.If(
@@ -537,18 +554,7 @@ func classifyPointerToBasic(col string, dest *jen.Statement, t *types.Basic) (sc
 	// Override the assign to set a pointer to the value when valid, nil otherwise.
 	innerKind := basicKindName(t.Kind())
 	if innerKind == "" {
-		switch t.Kind() {
-		case types.Bool:
-			innerKind = "bool"
-		case types.String:
-			innerKind = "string"
-		case types.Float32:
-			innerKind = "float32"
-		case types.Float64:
-			innerKind = "float64"
-		default:
-			return scannerField{}, false
-		}
+		return scannerField{}, false
 	}
 
 	nullType, valueAccessor := nullTypeFor(t.Kind())
@@ -577,7 +583,7 @@ func classifyPointerToBasic(col string, dest *jen.Statement, t *types.Basic) (sc
 
 		return []jen.Code{vAssertion, notOk, validBranch}
 	}
-	sf.releaseFn = releaseNullFn(col, nullType)
+	sf.releaseFn = releaseNullFn(nullType)
 
 	return sf, true
 }
@@ -593,9 +599,14 @@ func nullTypeFor(k types.BasicKind) (string, string) {
 	case types.Int, types.Int8, types.Int16, types.Int32, types.Int64,
 		types.Uint, types.Uint8, types.Uint16, types.Uint32, types.Uint64:
 		return "NullInt64", "Int64"
-	default:
+	case types.Invalid, types.Uintptr,
+		types.Complex64, types.Complex128, types.UnsafePointer,
+		types.UntypedBool, types.UntypedInt, types.UntypedRune,
+		types.UntypedFloat, types.UntypedComplex, types.UntypedString, types.UntypedNil:
 		return "", ""
 	}
+
+	return "", ""
 }
 
 func classifyByteSlice(col string, dest *jen.Statement) scannerField {
@@ -636,7 +647,7 @@ func (sg ScannerGenerator) classifyNamed(col string, dest *jen.Statement, field 
 		return uintIDField(col, dest), true
 	case modelPath + "." + uuid:
 		return uuidField(col, dest), true
-	case "time.Time":
+	case timeType:
 		return timeField(col, dest), true
 	}
 
@@ -666,12 +677,12 @@ func uintIDField(col string, dest *jen.Statement) scannerField {
 				)),
 			)
 			assign := dest.Clone().Op("=").Add(
-				jen.Qual(modelPath, uIntID).Call(jen.Id("v").Dot("Int64")), //nolint:gosec
+				jen.Qual(modelPath, uIntID).Call(jen.Id("v").Dot("Int64")),
 			)
 
 			return []jen.Code{vAssertion, notOk, assign}
 		},
-		releaseFn: releaseNullFn(col, "NullInt64"),
+		releaseFn: releaseNullFn("NullInt64"),
 	}
 }
 
@@ -701,7 +712,7 @@ func pointerUUIDField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, branch}
 		},
-		releaseFn: releaseUUIDFn(col),
+		releaseFn: releaseUUIDFn(),
 	}
 }
 
@@ -722,7 +733,7 @@ func pointerUIntIDField(col string, dest *jen.Statement) scannerField {
 				)),
 			)
 			branch := jen.If(jen.Id("v").Dot("Valid")).Block(
-				jen.Id("tmp").Op(":=").Qual(modelPath, uIntID).Call(jen.Id("v").Dot("Int64")), //nolint:gosec
+				jen.Id("tmp").Op(":=").Qual(modelPath, uIntID).Call(jen.Id("v").Dot("Int64")),
 				dest.Clone().Op("=").Op("&").Id("tmp"),
 			).Else().Block(
 				dest.Clone().Op("=").Nil(),
@@ -730,7 +741,7 @@ func pointerUIntIDField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, branch}
 		},
-		releaseFn: releaseNullFn(col, "NullInt64"),
+		releaseFn: releaseNullFn("NullInt64"),
 	}
 }
 
@@ -752,13 +763,13 @@ func uuidField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, assign}
 		},
-		releaseFn: releaseUUIDFn(col),
+		releaseFn: releaseUUIDFn(),
 	}
 }
 
 // releaseUUIDFn emits the body of one case in ReleaseValues for a pooled
 // *model.UUID cell.
-func releaseUUIDFn(col string) scannerAssignFunc {
+func releaseUUIDFn() scannerAssignFunc {
 	return func(idx string) []jen.Code {
 		return []jen.Code{
 			jen.If(
@@ -795,7 +806,7 @@ func timeField(col string, dest *jen.Statement) scannerField {
 
 			return []jen.Code{vAssertion, notOk, validGuard}
 		},
-		releaseFn: releaseNullFn(col, "NullTime"),
+		releaseFn: releaseNullFn("NullTime"),
 	}
 }
 
@@ -950,7 +961,7 @@ func customScannerField(col string, dest *jen.Statement, typeV Type) scannerFiel
 
 // emitScannerVar writes the package-level var <Model>Scanner with ScanValues
 // and AssignValues closures.
-func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement, varName string, fields []scannerField) {
+func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement, varName string, fields []scannerField) { //nolint:funlen
 	// Build ScanValues body: a switch with one case per column.
 	scanCases := make([]jen.Code, 0, len(fields)+1)
 	for _, f := range fields {
@@ -1214,7 +1225,7 @@ func hasManyChildType(t types.Type) (Type, bool) {
 //     (handles `*[]Child` / `[]Child` / `*[]*Child` / `[]*Child` shapes)
 //   - BuildQuery: SELECT children WHERE fk IN (parent_ids), with nested
 //     conditions appended for nested preload chains
-func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field Field, childType Type) {
+func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field Field, childType Type) { //nolint:funlen
 	parentQual := jen.Qual(
 		getRelativePackagePath(destPkg, sg.objectType),
 		sg.objectType.Name(),
@@ -1272,7 +1283,8 @@ func (sg ScannerGenerator) emitHasManyLoader(file *File, destPkg string, field F
 
 	// Mount body.
 	mountBody := []jen.Code{}
-	if elemIsPointer {
+
+	if elemIsPointer { //nolint:nestif // flat branching over the elem/slice pointer matrix; extracting helpers would obscure the emitted code
 		// children IS []*Child — assign directly (or take address).
 		if sliceIsPointer {
 			mountBody = append(mountBody,
@@ -1408,8 +1420,7 @@ func childFKExtractor(childType Type, fkGoField string, parentIsUUID bool) []jen
 		return []jen.Code{jen.Return(jen.Nil())}
 	}
 
-	for i := 0; i < childStruct.NumFields(); i++ {
-		f := childStruct.Field(i)
+	for f := range childStruct.Fields() {
 		if f.Name() != fkGoField {
 			continue
 		}
@@ -1461,7 +1472,7 @@ func (sg ScannerGenerator) emitInitRewiring(file *File, scannerVar string) {
 	flatConditions := []condBinding{}
 
 	for _, f := range fields {
-		flatConditions = append(flatConditions, sg.flattenConditionBindings(file.destPkg, f, "", "")...)
+		flatConditions = append(flatConditions, sg.flattenConditionBindings(f, "", "")...)
 	}
 
 	stmts := []jen.Code{}
@@ -1501,7 +1512,7 @@ type condBinding struct {
 	param        *JenParam
 }
 
-func (sg ScannerGenerator) flattenConditionBindings(destPkg string, field Field, namePrefix, columnPrefix string) []condBinding {
+func (sg ScannerGenerator) flattenConditionBindings(field Field, namePrefix, columnPrefix string) []condBinding {
 	if field.Embedded {
 		embeddedStruct, ok := field.Type.Underlying().(*types.Struct)
 		if !ok {
@@ -1520,7 +1531,7 @@ func (sg ScannerGenerator) flattenConditionBindings(destPkg string, field Field,
 			out := []condBinding{}
 
 			for _, sub := range subFields {
-				out = append(out, sg.flattenConditionBindings(destPkg, sub, newNamePrefix, newColumnPrefix)...)
+				out = append(out, sg.flattenConditionBindings(sub, newNamePrefix, newColumnPrefix)...)
 			}
 
 			return out
@@ -1529,7 +1540,7 @@ func (sg ScannerGenerator) flattenConditionBindings(destPkg string, field Field,
 		// Base model — sub fields carry no prefix.
 		out := []condBinding{}
 		for _, sub := range subFields {
-			out = append(out, sg.flattenConditionBindings(destPkg, sub, namePrefix, columnPrefix)...)
+			out = append(out, sg.flattenConditionBindings(sub, namePrefix, columnPrefix)...)
 		}
 
 		return out
@@ -1675,7 +1686,7 @@ func classifyParam(field Field, param *JenParam) {
 		switch {
 		case field.Type.IsSQLNullableType():
 			param.SQLToBasicType(field.Type)
-		case field.Type.IsGormCustomType() || field.TypeString() == "time.Time" || field.IsModelID():
+		case field.Type.IsGormCustomType() || field.TypeString() == timeType || field.IsModelID():
 			param.ToCustomType("", field.Type)
 		}
 	case *types.Slice:

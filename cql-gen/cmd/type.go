@@ -78,9 +78,7 @@ func (t Type) CQLModelStruct() (*types.Struct, error) {
 
 // Returns true if the type is a cql model
 func isCQLModel(structType *types.Struct) bool {
-	for i := 0; i < structType.NumFields(); i++ {
-		field := structType.Field(i)
-
+	for field := range structType.Fields() {
 		if field.Embedded() && isBaseModel(field.Type().String()) {
 			return true
 		}
@@ -127,8 +125,8 @@ func (t Type) IsGormCustomType() bool {
 	hasScanMethod := false
 	hasValueMethod := false
 
-	for i := 0; i < typeNamed.NumMethods(); i++ {
-		methodSignature := typeNamed.Method(i).String()
+	for method := range typeNamed.Methods() {
+		methodSignature := method.String()
 
 		if !hasScanMethod && scanMethod.MatchString(methodSignature) {
 			hasScanMethod = true
