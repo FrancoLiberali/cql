@@ -4,6 +4,7 @@ linters:
   disable:
     - dogsled
     - exhaustruct
+    - exhaustruct_v5 # deprecated exhaustruct's v2.13 replacement; keep disabled too
     - gochecknoglobals
     - gochecknoinits
     - godot
