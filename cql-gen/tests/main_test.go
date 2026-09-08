@@ -462,20 +462,35 @@ func TestOverrideReferencesInverse(t *testing.T) {
 	})
 }
 
-// TestNamedScalarFallsBackToGorm asserts the safety net: a model with a column
-// type the fast scanner can't classify (a named scalar) gets conditions but NO
-// scanner, so its queries fall back to gorm instead of silently dropping the
-// column.
-func TestNamedScalarFallsBackToGorm(t *testing.T) {
+// TestNamedScalarIsFastScanned asserts a named scalar (`type Color int`, no
+// custom Scan/Value) takes the fast path: cql-gen emits both conditions (typed
+// by the named type) and a scanner covering the value and pointer variants.
+func TestNamedScalarIsFastScanned(t *testing.T) {
 	doTest(t, "./namedscalar", []Comparison{
 		{
 			Have:            "with_named_scalar_conditions.go",
 			Expected:        "./results/namedscalar.go",
 			ScannerHave:     "with_named_scalar_scanner.go",
-			ExpectNoScanner: true,
+			ScannerExpected: "./results/namedscalar_scanner.go",
 		},
 	})
 	CheckFileNotExists(t, "./namedscalar/cql.go")
+}
+
+// TestUnsupportedColumnFallsBackToGorm asserts the safety net: a model with a
+// column the fast scanner genuinely can't classify (a []string via gorm's json
+// serializer) gets conditions but NO scanner, so its queries fall back to gorm
+// instead of silently dropping the column.
+func TestUnsupportedColumnFallsBackToGorm(t *testing.T) {
+	doTest(t, "./unsupportedcolumn", []Comparison{
+		{
+			Have:            "with_unsupported_column_conditions.go",
+			Expected:        "./results/unsupportedcolumn.go",
+			ScannerHave:     "with_unsupported_column_scanner.go",
+			ExpectNoScanner: true,
+		},
+	})
+	CheckFileNotExists(t, "./unsupportedcolumn/cql.go")
 }
 
 type Comparison struct {

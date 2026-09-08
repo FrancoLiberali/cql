@@ -157,6 +157,16 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 			field,
 		)
 	default:
+		// a named scalar (e.g. `type Color int`) with no custom Scan/Value:
+		// gorm stores it as its underlying kind, so we expose a condition
+		// field typed by that kind (numeric named scalars keep the named type).
+		if underlying, ok := field.Type.Underlying().(*types.Basic); ok &&
+			condition.param.ToNamedScalar(condition.destPkg, field.Type, underlying) {
+			condition.createField(objectType, field)
+
+			return
+		}
+
 		log.Logger.Debugf("struct field type not handled: %s", field.TypeString())
 	}
 }

@@ -10,14 +10,16 @@ import (
 type withUnsupportedColumnConditions struct {
 	ID   condition.Field[models.WithUnsupportedColumn, model.UUID]
 	Name condition.StringField[models.WithUnsupportedColumn]
+	Tags condition.UpdatableField[models.WithUnsupportedColumn, []string]
 }
 
 var WithUnsupportedColumn = withUnsupportedColumnConditions{
 	ID:   condition.NewField[models.WithUnsupportedColumn, model.UUID]("ID", "", ""),
 	Name: condition.NewStringField[models.WithUnsupportedColumn]("Name", "", ""),
+	Tags: condition.NewUpdatableField[models.WithUnsupportedColumn, []string]("Tags", "", ""),
 }
 
 // Preload allows preloading the WithUnsupportedColumn when doing a query
 func (withUnsupportedColumnConditions withUnsupportedColumnConditions) preload() condition.Condition[models.WithUnsupportedColumn] {
-	return condition.NewPreloadCondition[models.WithUnsupportedColumn](withUnsupportedColumnConditions.ID, withUnsupportedColumnConditions.Name)
+	return condition.NewPreloadCondition[models.WithUnsupportedColumn](withUnsupportedColumnConditions.ID, withUnsupportedColumnConditions.Name, withUnsupportedColumnConditions.Tags)
 }

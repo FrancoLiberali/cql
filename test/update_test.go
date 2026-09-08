@@ -3,6 +3,7 @@ package test
 import (
 	"context"
 	"database/sql"
+	"time"
 
 	"gotest.tools/assert"
 
@@ -931,4 +932,36 @@ func (ts *UpdateIntTestSuite) TestUpdateDynamicWithFunctionDynamic() {
 		ts.Equal(2, productReturned.Int)
 		ts.NotEqual(product1.UpdatedAt.UnixMicro(), productReturned.UpdatedAt.UnixMicro())
 	}
+}
+
+// TestSetOverNamedScalarType exercises an UPDATE Set built on a named-scalar
+// column (models.Color). cql-gen generates a NumericField[AllTypes, Color] for
+// it, so it must be usable to update rows by Color value end-to-end.
+func (ts *UpdateIntTestSuite) TestSetOverNamedScalarType() {
+	// a non-pointer time.Time must be valid: mysql strict mode rejects the
+	// zero time ('0000-00-00') on insert.
+	validTime := time.Date(2021, 3, 14, 15, 9, 26, 0, time.UTC)
+
+	create(&ts.testSuite, &models.AllTypes{ValString: "red-row", ValTime: validTime, Favorite: models.ColorRed})
+
+	// recolor every red row to green through the named-scalar condition.
+	updated, err := cql.Update[models.AllTypes](
+		context.Background(),
+		ts.db,
+		conditions.AllTypes.Favorite.Is().Eq(cql.Int(int(models.ColorRed))),
+	).Set(
+		conditions.AllTypes.Favorite.Set().Eq(cql.Int(int(models.ColorGreen))),
+	)
+	ts.Require().NoError(err)
+	ts.Equal(int64(1), updated)
+
+	// the recolored row now reads back as green.
+	green, err := cql.Query[models.AllTypes](
+		context.Background(),
+		ts.db,
+		conditions.AllTypes.Favorite.Is().Eq(cql.Int(int(models.ColorGreen))),
+	).First()
+	ts.Require().NoError(err)
+	ts.Equal("red-row", green.ValString)
+	ts.Equal(models.ColorGreen, green.Favorite)
 }

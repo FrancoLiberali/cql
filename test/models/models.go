@@ -176,11 +176,18 @@ type AllTypes struct {
 	NullInt16 sql.NullInt16
 	NullInt32 sql.NullInt32
 	NullByte  sql.NullByte
+
+	// named scalars (underlying int): stored as their underlying kind, so the
+	// scanner reads them via NullInt64 and casts back to Color — value and
+	// nullable-pointer variants.
+	Favorite Color
+	PtrColor *Color
 }
 
-// Color is a named scalar type the fast scanner can't classify (it's not a
-// model ID, time.Time, sql.Null* wrapper, or gorm custom type). A model with
-// such a column must fall back to gorm rather than silently drop it.
+// Color is a named scalar type: no custom Scan/Value, so gorm stores it as its
+// underlying int. The fast scanner classifies it via its underlying kind and
+// casts the scanned value back to Color, so a plain named scalar takes the
+// fast path (no gorm fallback).
 type Color int
 
 const (
@@ -189,15 +196,16 @@ const (
 	ColorBlue
 )
 
-// WithUnsupportedColumn holds a named-scalar (Color) column that the fast
-// scanner doesn't support, so no scanner is generated for it and its queries
-// fall back to gorm's reflective scan — exercised by
-// TestUnsupportedColumnFallsBackToGorm.
+// WithUnsupportedColumn holds a column the fast scanner genuinely can't
+// classify: a []string persisted through gorm's json serializer. There's no
+// static Scan/Value and the value lives in a JSON text column, so no scanner
+// is generated and its queries fall back to gorm's reflective scan — the
+// safety net exercised by TestUnsupportedColumnFallsBackToGorm.
 type WithUnsupportedColumn struct {
 	model.UUIDModel
 
-	Name     string
-	Favorite Color
+	Name string
+	Tags []string `gorm:"serializer:json"`
 }
 
 type University struct {

@@ -40,6 +40,7 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsEveryScalarTypeWithVal
 	bp := true
 	sp := "ptr"
 	tp := valTime
+	cp := models.ColorGreen
 
 	in := &models.AllTypes{
 		ValInt:     -42,
@@ -77,6 +78,10 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsEveryScalarTypeWithVal
 		NullInt16: sql.NullInt16{Int16: 1616, Valid: true},
 		NullInt32: sql.NullInt32{Int32: 323232, Valid: true},
 		NullByte:  sql.NullByte{Byte: 200, Valid: true},
+
+		// named scalar (underlying int), value + non-nil pointer
+		Favorite: models.ColorBlue,
+		PtrColor: &cp,
 	}
 
 	create(&ts.testSuite, in)
@@ -142,6 +147,11 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsEveryScalarTypeWithVal
 	ts.Equal(in.NullInt16, got.NullInt16)
 	ts.Equal(in.NullInt32, got.NullInt32)
 	ts.Equal(in.NullByte, got.NullByte)
+
+	// named scalar value + pointer round-trip via NullInt64 with a Color cast
+	ts.Equal(models.ColorBlue, got.Favorite)
+	ts.Require().NotNil(got.PtrColor)
+	ts.Equal(models.ColorGreen, *got.PtrColor)
 }
 
 // TestFastScanRoundTripsNilPointers inserts a row whose every pointer field is
@@ -185,6 +195,10 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsNilPointers() {
 	ts.Nil(got.PtrBool)
 	ts.Nil(got.PtrString)
 	ts.Nil(got.PtrTime)
+	ts.Nil(got.PtrColor)
+
+	// a zero named-scalar value stays zero
+	ts.Equal(models.Color(0), got.Favorite)
 
 	// zero sql.Null* wrappers round-trip as NULL (Valid == false)
 	ts.False(got.NullInt16.Valid)
@@ -193,14 +207,14 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsNilPointers() {
 }
 
 // TestUnsupportedColumnFallsBackToGorm is the safety net for the fast scanner:
-// models.WithUnsupportedColumn has a column type the scanner can't classify
-// (models.Color, a named scalar), so no scanner is generated and the query
-// must fall back to gorm. The unsupported column must round-trip — a partial
-// fast scanner would silently drop it (leaving the zero value).
+// models.WithUnsupportedColumn has a column the scanner can't classify (a
+// []string persisted via gorm's json serializer), so no scanner is generated
+// and the query must fall back to gorm. The unsupported column must
+// round-trip — a partial fast scanner would silently drop it (leaving nil).
 func (ts *ScannerTypesIntTestSuite) TestUnsupportedColumnFallsBackToGorm() {
 	in := &models.WithUnsupportedColumn{
-		Name:     "acme",
-		Favorite: models.ColorBlue,
+		Name: "acme",
+		Tags: []string{"red", "green", "blue"},
 	}
 
 	create(&ts.testSuite, in)
@@ -212,5 +226,5 @@ func (ts *ScannerTypesIntTestSuite) TestUnsupportedColumnFallsBackToGorm() {
 	ts.Require().NoError(err)
 
 	ts.Equal("acme", got.Name)
-	ts.Equal(models.ColorBlue, got.Favorite)
+	ts.Equal([]string{"red", "green", "blue"}, got.Tags)
 }

@@ -8,16 +8,20 @@ import (
 )
 
 type withNamedScalarConditions struct {
-	ID   condition.Field[namedscalar.WithNamedScalar, model.UUID]
-	Name condition.StringField[namedscalar.WithNamedScalar]
+	ID       condition.Field[namedscalar.WithNamedScalar, model.UUID]
+	Name     condition.StringField[namedscalar.WithNamedScalar]
+	Favorite condition.NumericField[namedscalar.WithNamedScalar, namedscalar.Color]
+	Second   condition.NullableNumericField[namedscalar.WithNamedScalar, namedscalar.Color]
 }
 
 var WithNamedScalar = withNamedScalarConditions{
-	ID:   condition.NewField[namedscalar.WithNamedScalar, model.UUID]("ID", "", ""),
-	Name: condition.NewStringField[namedscalar.WithNamedScalar]("Name", "", ""),
+	Favorite: condition.NewNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Favorite", "", ""),
+	ID:       condition.NewField[namedscalar.WithNamedScalar, model.UUID]("ID", "", ""),
+	Name:     condition.NewStringField[namedscalar.WithNamedScalar]("Name", "", ""),
+	Second:   condition.NewNullableNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Second", "", ""),
 }
 
 // Preload allows preloading the WithNamedScalar when doing a query
 func (withNamedScalarConditions withNamedScalarConditions) preload() condition.Condition[namedscalar.WithNamedScalar] {
-	return condition.NewPreloadCondition[namedscalar.WithNamedScalar](withNamedScalarConditions.ID, withNamedScalarConditions.Name)
+	return condition.NewPreloadCondition[namedscalar.WithNamedScalar](withNamedScalarConditions.ID, withNamedScalarConditions.Name, withNamedScalarConditions.Favorite, withNamedScalarConditions.Second)
 }

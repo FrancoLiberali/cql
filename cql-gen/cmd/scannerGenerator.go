@@ -383,31 +383,9 @@ func (sg ScannerGenerator) classifyField(field Field) (scannerField, bool, error
 
 		return sf, ok, nil
 	case *types.Pointer:
-		// Pointer-to-basic: scan into the matching sql.Null* wrapper,
-		// assign pointer when valid, nil otherwise.
-		if basic, ok := t.Elem().(*types.Basic); ok {
-			sf, ok := classifyPointerToBasic(colName, dest, basic)
+		sf, ok := classifyPointer(colName, dest, t)
 
-			return sf, ok, nil
-		}
-
-		// Pointer-to-named (most commonly *model.UUID or *model.UIntID
-		// for nullable foreign keys): scan into the named type itself,
-		// then assign nil-or-pointer based on a zero-value sentinel.
-		if named, ok := t.Elem().(*types.Named); ok {
-			named := Type{Type: named}
-			switch named.String() {
-			case modelPath + "." + uuid:
-				return pointerUUIDField(colName, dest), true, nil
-			case modelPath + "." + uIntID:
-				return pointerUIntIDField(colName, dest), true, nil
-			case timeType:
-				return pointerTimeField(colName, dest), true, nil
-			}
-			// Unknown pointer-to-named — skip (gorm fallback handles).
-		}
-
-		return scannerField{}, false, nil
+		return sf, ok, nil
 	case *types.Slice:
 		if elem, ok := t.Elem().(*types.Basic); ok && elem.Kind() == types.Uint8 {
 			return classifyByteSlice(colName, dest), true, nil
@@ -417,6 +395,51 @@ func (sg ScannerGenerator) classifyField(field Field) (scannerField, bool, error
 	default:
 		return scannerField{}, false, nil
 	}
+}
+
+// classifyPointer classifies a pointer column (nullable field). Returns
+// ok=false to defer to gorm.
+func classifyPointer(colName string, dest *jen.Statement, t *types.Pointer) (scannerField, bool) {
+	// Pointer-to-basic: scan into the matching sql.Null* wrapper, assign
+	// pointer when valid, nil otherwise.
+	if basic, ok := t.Elem().(*types.Basic); ok {
+		return classifyPointerToBasic(colName, dest, basic)
+	}
+
+	named, ok := t.Elem().(*types.Named)
+	if !ok {
+		return scannerField{}, false
+	}
+
+	// Pointer-to-named (most commonly *model.UUID or *model.UIntID for
+	// nullable foreign keys): scan into the named type itself, then assign
+	// nil-or-pointer based on a zero-value sentinel.
+	namedType := Type{Type: named}
+
+	switch namedType.String() {
+	case modelPath + "." + uuid:
+		return pointerUUIDField(colName, dest), true
+	case modelPath + "." + uIntID:
+		return pointerUIntIDField(colName, dest), true
+	case timeType:
+		return pointerTimeField(colName, dest), true
+	}
+
+	// Pointer to a CQL model (relation) or a gorm custom type: leave to
+	// gorm/join handling — never scan a custom type raw and bypass its Scan.
+	// A plain named scalar (`*Color`) has neither, so scan it as its
+	// underlying kind.
+	if _, err := namedType.CQLModelStruct(); err == nil {
+		return scannerField{}, false
+	}
+
+	if namedType.IsGormCustomType() {
+		return scannerField{}, false
+	}
+
+	// Unknown pointer-to-named that isn't a named scalar falls through to
+	// classifyPointerToNamedScalar's ok=false (gorm fallback handles).
+	return classifyPointerToNamedScalar(colName, dest, namedType)
 }
 
 // destAccessor builds the `dest.X.Y.Z` jen statement chain for assigning to
@@ -575,46 +598,65 @@ func releaseNullFn(nullType string) scannerAssignFunc {
 }
 
 func classifyPointerToBasic(col string, dest *jen.Statement, t *types.Basic) (scannerField, bool) {
-	sf, ok, _ := classifyBasic(col, dest, t)
-	if !ok {
-		return scannerField{}, false
-	}
-
-	// Override the assign to set a pointer to the value when valid, nil otherwise.
 	innerKind := basicKindName(t.Kind())
 	if innerKind == "" {
 		return scannerField{}, false
 	}
 
-	nullType, valueAccessor := nullTypeFor(t.Kind())
+	return pointerNullField(col, dest, t.Kind(), castFn(innerKind))
+}
+
+// classifyPointerToNamedScalar handles `*Color` where Color is a named scalar
+// (underlying basic, no custom Scan/Value) — the nullable-FK-style pointer
+// twin of classifyNamedScalar.
+func classifyPointerToNamedScalar(col string, dest *jen.Statement, typeV Type) (scannerField, bool) {
+	basic, ok := typeV.Underlying().(*types.Basic)
+	if !ok {
+		return scannerField{}, false
+	}
+
+	return pointerNullField(col, dest, basic.Kind(), namedScalarCast(typeV))
+}
+
+// pointerNullField builds a scanner for a nullable (pointer) column: scan into
+// the sql.Null* wrapper for kind, then assign &value (via cast) when Valid,
+// nil otherwise. cast converts the wrapper's value to the pointed-to element
+// type (e.g. int(v.Int64) or namedscalar.Color(v.Int64)).
+func pointerNullField(
+	col string, dest *jen.Statement,
+	kind types.BasicKind, cast func(*jen.Statement) *jen.Statement,
+) (scannerField, bool) {
+	nullType, valueAccessor := nullTypeFor(kind)
 	if nullType == "" {
 		return scannerField{}, false
 	}
 
-	sf.assignFn = func(idx string) []jen.Code {
-		vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
-			jen.Id("values").Index(jen.Id(idx)).Assert(
-				jen.Op("*").Qual("database/sql", nullType),
-			),
-		)
-		notOk := jen.If(jen.Op("!").Id("ok")).Block(
-			jen.Return(jen.Qual("fmt", "Errorf").Call(
-				jen.Lit("cql scanner "+col+": bad type %T"),
-				jen.Id("values").Index(jen.Id(idx)),
-			)),
-		)
-		validBranch := jen.If(jen.Id("v").Dot("Valid")).Block(
-			jen.Id("tmp").Op(":=").Id(innerKind).Call(jen.Id("v").Dot(valueAccessor)),
-			dest.Clone().Op("=").Op("&").Id("tmp"),
-		).Else().Block(
-			dest.Clone().Op("=").Nil(),
-		)
+	return scannerField{
+		columnName: col,
+		valueExpr:  jen.Qual(conditionPath, "Acquire"+nullType).Call(),
+		assignFn: func(idx string) []jen.Code {
+			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+				jen.Id("values").Index(jen.Id(idx)).Assert(
+					jen.Op("*").Qual("database/sql", nullType),
+				),
+			)
+			notOk := jen.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(jen.Qual("fmt", "Errorf").Call(
+					jen.Lit("cql scanner "+col+": bad type %T"),
+					jen.Id("values").Index(jen.Id(idx)),
+				)),
+			)
+			validBranch := jen.If(jen.Id("v").Dot("Valid")).Block(
+				jen.Id("tmp").Op(":=").Add(cast(jen.Id("v").Dot(valueAccessor))),
+				dest.Clone().Op("=").Op("&").Id("tmp"),
+			).Else().Block(
+				dest.Clone().Op("=").Nil(),
+			)
 
-		return []jen.Code{vAssertion, notOk, validBranch}
-	}
-	sf.releaseFn = releaseNullFn(nullType)
-
-	return sf, true
+			return []jen.Code{vAssertion, notOk, validBranch}
+		},
+		releaseFn: releaseNullFn(nullType),
+	}, true
 }
 
 func nullTypeFor(k types.BasicKind) (string, string) {
@@ -688,7 +730,40 @@ func (sg ScannerGenerator) classifyNamed(col string, dest *jen.Statement, field 
 		return customScannerField(col, dest, field.Type), true
 	}
 
+	// Named scalar (e.g. `type Color int`, `type Status string`): no custom
+	// Scan/Value, so gorm stores it as its underlying kind. Scan into the
+	// matching sql.Null* wrapper and cast back to the named type — same as a
+	// bare basic column, only the cast target differs.
+	if sf, ok := classifyNamedScalar(col, dest, field.Type); ok {
+		return sf, true
+	}
+
 	return scannerField{}, false
+}
+
+// namedScalarCast converts a scanned wrapper value to the named type, e.g.
+// namedscalar.Color(v.Int64).
+func namedScalarCast(typeV Type) func(*jen.Statement) *jen.Statement {
+	return func(inner *jen.Statement) *jen.Statement {
+		return jen.Qual(typeV.Pkg().Path(), typeV.Name()).Call(inner)
+	}
+}
+
+// classifyNamedScalar handles a named type whose underlying type is a basic
+// scannable kind and which is NOT a gorm custom type. Returns ok=false for
+// anything else (named structs, unscannable kinds), leaving it to gorm.
+func classifyNamedScalar(col string, dest *jen.Statement, typeV Type) (scannerField, bool) {
+	basic, ok := typeV.Underlying().(*types.Basic)
+	if !ok {
+		return scannerField{}, false
+	}
+
+	nullType, accessor := nullTypeFor(basic.Kind())
+	if nullType == "" {
+		return scannerField{}, false
+	}
+
+	return nullValueField(col, dest, nullType, accessor, namedScalarCast(typeV)), true
 }
 
 func uintIDField(col string, dest *jen.Statement) scannerField {
@@ -1515,7 +1590,7 @@ func (sg ScannerGenerator) emitInitRewiring(file *File, scannerVar string) {
 	flatConditions := []condBinding{}
 
 	for _, f := range fields {
-		flatConditions = append(flatConditions, sg.flattenConditionBindings(f, "", "")...)
+		flatConditions = append(flatConditions, sg.flattenConditionBindings(file.destPkg, f, "", "")...)
 	}
 
 	// Register the scanner by type so a no-condition query (Query[T](ctx, db)
@@ -1559,7 +1634,7 @@ type condBinding struct {
 	param        *JenParam
 }
 
-func (sg ScannerGenerator) flattenConditionBindings(field Field, namePrefix, columnPrefix string) []condBinding {
+func (sg ScannerGenerator) flattenConditionBindings(destPkg string, field Field, namePrefix, columnPrefix string) []condBinding {
 	if field.Embedded {
 		embeddedStruct, ok := field.Type.Underlying().(*types.Struct)
 		if !ok {
@@ -1578,7 +1653,7 @@ func (sg ScannerGenerator) flattenConditionBindings(field Field, namePrefix, col
 			out := []condBinding{}
 
 			for _, sub := range subFields {
-				out = append(out, sg.flattenConditionBindings(sub, newNamePrefix, newColumnPrefix)...)
+				out = append(out, sg.flattenConditionBindings(destPkg, sub, newNamePrefix, newColumnPrefix)...)
 			}
 
 			return out
@@ -1587,7 +1662,7 @@ func (sg ScannerGenerator) flattenConditionBindings(field Field, namePrefix, col
 		// Base model — sub fields carry no prefix.
 		out := []condBinding{}
 		for _, sub := range subFields {
-			out = append(out, sg.flattenConditionBindings(sub, namePrefix, columnPrefix)...)
+			out = append(out, sg.flattenConditionBindings(destPkg, sub, namePrefix, columnPrefix)...)
 		}
 
 		return out
@@ -1616,7 +1691,7 @@ func (sg ScannerGenerator) flattenConditionBindings(field Field, namePrefix, col
 	}
 
 	param := NewJenParam()
-	classifyParam(unwrapped, param)
+	classifyParam(destPkg, unwrapped, param)
 
 	return []condBinding{{
 		field:        unwrapped,
@@ -1722,19 +1797,23 @@ func pickConstructor(field Field, nullableType, updatableType, notNullableType s
 // classifyParam mirrors condition.go's generate() switch enough to set the
 // isString / isBool / isNumeric / generic-type flags so we pick the right
 // NewXxxField constructor.
-func classifyParam(field Field, param *JenParam) {
+func classifyParam(destPkg string, field Field, param *JenParam) {
 	switch ft := field.GetType().(type) {
 	case *types.Basic:
 		param.ToBasicKind(ft)
 	case *types.Pointer:
 		inner := Field{Name: field.Name, Type: Type{Type: ft.Elem(), wasPointer: true}, Tags: field.Tags}
-		classifyParam(inner, param)
+		classifyParam(destPkg, inner, param)
 	case *types.Named:
 		switch {
 		case field.Type.IsSQLNullableType():
 			param.SQLToBasicType(field.Type)
 		case field.Type.IsGormCustomType() || field.TypeString() == timeType || field.IsModelID():
-			param.ToCustomType("", field.Type)
+			param.ToCustomType(destPkg, field.Type)
+		default:
+			if underlying, ok := field.Type.Underlying().(*types.Basic); ok {
+				param.ToNamedScalar(destPkg, field.Type, underlying)
+			}
 		}
 	case *types.Slice:
 		if elem, ok := ft.Elem().(*types.Basic); ok {

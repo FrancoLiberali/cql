@@ -323,6 +323,25 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 					return fmt.Errorf("cql scanner null_byte: bad type %T", values[i])
 				}
 				dest.NullByte = *v
+			case "favorite":
+				v, ok := values[i].(*sql.NullInt64)
+				if !ok {
+					return fmt.Errorf("cql scanner favorite: bad type %T", values[i])
+				}
+				if v.Valid {
+					dest.Favorite = models.Color(v.Int64)
+				}
+			case "ptr_color":
+				v, ok := values[i].(*sql.NullInt64)
+				if !ok {
+					return fmt.Errorf("cql scanner ptr_color: bad type %T", values[i])
+				}
+				if v.Valid {
+					tmp := models.Color(v.Int64)
+					dest.PtrColor = &tmp
+				} else {
+					dest.PtrColor = nil
+				}
 			}
 		}
 		return nil
@@ -398,6 +417,10 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 				condition.ReleaseNullInt32(values[i])
 			case "null_byte":
 				condition.ReleaseNullByte(values[i])
+			case "favorite":
+				condition.ReleaseNullInt64(values[i])
+			case "ptr_color":
+				condition.ReleaseNullInt64(values[i])
 			default:
 				condition.ReleaseNullSink(values[i])
 			}
@@ -475,6 +498,10 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 				values[i] = condition.AcquireNullInt32()
 			case "null_byte":
 				values[i] = condition.AcquireNullByte()
+			case "favorite":
+				values[i] = condition.AcquireNullInt64()
+			case "ptr_color":
+				values[i] = condition.AcquireNullInt64()
 			default:
 				values[i] = condition.AcquireNullSink()
 			}
@@ -519,4 +546,6 @@ func init() {
 	AllTypes.NullInt16 = condition.NewNullableNumericField[models.AllTypes, int16]("NullInt16", "", "", allTypesScanner)
 	AllTypes.NullInt32 = condition.NewNullableNumericField[models.AllTypes, int32]("NullInt32", "", "", allTypesScanner)
 	AllTypes.NullByte = condition.NewNullableNumericField[models.AllTypes, int8]("NullByte", "", "", allTypesScanner)
+	AllTypes.Favorite = condition.NewNumericField[models.AllTypes, models.Color]("Favorite", "", "", allTypesScanner)
+	AllTypes.PtrColor = condition.NewNullableNumericField[models.AllTypes, models.Color]("PtrColor", "", "", allTypesScanner)
 }

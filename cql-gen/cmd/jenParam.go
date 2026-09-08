@@ -75,6 +75,41 @@ func (param *JenParam) ToSlice() {
 	param.internalType.Index()
 }
 
+// ToNamedScalar classifies a named type whose underlying type is a basic
+// scannable kind (e.g. `type Color int`, `type Status string`). A numeric
+// underlying keeps the named type itself as the field's generic parameter
+// (NumericField[M, Color]); string/bool underlyings use the single-generic
+// String/Bool field, whose value type is fixed, so the named type isn't
+// preserved there. Returns false for kinds no SQL column can hold.
+func (param *JenParam) ToNamedScalar(destPkg string, typeV Type, underlying *types.Basic) bool {
+	switch underlying.Kind() {
+	case types.Int, types.Int8, types.Int16, types.Int32, types.Int64,
+		types.Uint, types.Uint8, types.Uint16, types.Uint32, types.Uint64,
+		types.Float32, types.Float64:
+		if !param.isSlice {
+			param.isNumeric = true
+		}
+
+		param.internalType.Qual(getRelativePackagePath(destPkg, typeV), typeV.Name())
+
+		return true
+	case types.String:
+		param.ToString()
+
+		return true
+	case types.Bool:
+		param.ToBool()
+
+		return true
+	case types.Invalid, types.Uintptr, types.Complex64, types.Complex128,
+		types.UnsafePointer, types.UntypedBool, types.UntypedInt, types.UntypedRune,
+		types.UntypedFloat, types.UntypedComplex, types.UntypedString, types.UntypedNil:
+		return false
+	}
+
+	return false
+}
+
 func (param JenParam) ToCustomType(destPkg string, typeV Type) {
 	param.internalType.Qual(
 		getRelativePackagePath(destPkg, typeV),

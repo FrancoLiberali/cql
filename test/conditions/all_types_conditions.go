@@ -43,14 +43,18 @@ type allTypesConditions struct {
 	NullInt16  condition.NullableNumericField[models.AllTypes, int16]
 	NullInt32  condition.NullableNumericField[models.AllTypes, int32]
 	NullByte   condition.NullableNumericField[models.AllTypes, int8]
+	Favorite   condition.NumericField[models.AllTypes, models.Color]
+	PtrColor   condition.NullableNumericField[models.AllTypes, models.Color]
 }
 
 var AllTypes = allTypesConditions{
+	Favorite:   condition.NewNumericField[models.AllTypes, models.Color]("Favorite", "", ""),
 	ID:         condition.NewField[models.AllTypes, model.UUID]("ID", "", ""),
 	NullByte:   condition.NewNullableNumericField[models.AllTypes, int8]("NullByte", "", ""),
 	NullInt16:  condition.NewNullableNumericField[models.AllTypes, int16]("NullInt16", "", ""),
 	NullInt32:  condition.NewNullableNumericField[models.AllTypes, int32]("NullInt32", "", ""),
 	PtrBool:    condition.NewNullableBoolField[models.AllTypes]("PtrBool", "", ""),
+	PtrColor:   condition.NewNullableNumericField[models.AllTypes, models.Color]("PtrColor", "", ""),
 	PtrFloat32: condition.NewNullableNumericField[models.AllTypes, float32]("PtrFloat32", "", ""),
 	PtrFloat64: condition.NewNullableNumericField[models.AllTypes, float64]("PtrFloat64", "", ""),
 	PtrInt:     condition.NewNullableNumericField[models.AllTypes, int]("PtrInt", "", ""),
@@ -84,5 +88,5 @@ var AllTypes = allTypesConditions{
 
 // Preload allows preloading the AllTypes when doing a query
 func (allTypesConditions allTypesConditions) preload() condition.Condition[models.AllTypes] {
-	return condition.NewPreloadCondition[models.AllTypes](allTypesConditions.ID, allTypesConditions.ValInt, allTypesConditions.ValInt8, allTypesConditions.ValInt16, allTypesConditions.ValInt32, allTypesConditions.ValInt64, allTypesConditions.ValUint, allTypesConditions.ValUint8, allTypesConditions.ValUint16, allTypesConditions.ValUint32, allTypesConditions.ValUint64, allTypesConditions.ValFloat32, allTypesConditions.ValFloat64, allTypesConditions.ValBool, allTypesConditions.ValString, allTypesConditions.ValTime, allTypesConditions.PtrInt, allTypesConditions.PtrInt8, allTypesConditions.PtrInt16, allTypesConditions.PtrInt32, allTypesConditions.PtrInt64, allTypesConditions.PtrUint, allTypesConditions.PtrUint8, allTypesConditions.PtrUint16, allTypesConditions.PtrUint32, allTypesConditions.PtrUint64, allTypesConditions.PtrFloat32, allTypesConditions.PtrFloat64, allTypesConditions.PtrBool, allTypesConditions.PtrString, allTypesConditions.PtrTime, allTypesConditions.NullInt16, allTypesConditions.NullInt32, allTypesConditions.NullByte)
+	return condition.NewPreloadCondition[models.AllTypes](allTypesConditions.ID, allTypesConditions.ValInt, allTypesConditions.ValInt8, allTypesConditions.ValInt16, allTypesConditions.ValInt32, allTypesConditions.ValInt64, allTypesConditions.ValUint, allTypesConditions.ValUint8, allTypesConditions.ValUint16, allTypesConditions.ValUint32, allTypesConditions.ValUint64, allTypesConditions.ValFloat32, allTypesConditions.ValFloat64, allTypesConditions.ValBool, allTypesConditions.ValString, allTypesConditions.ValTime, allTypesConditions.PtrInt, allTypesConditions.PtrInt8, allTypesConditions.PtrInt16, allTypesConditions.PtrInt32, allTypesConditions.PtrInt64, allTypesConditions.PtrUint, allTypesConditions.PtrUint8, allTypesConditions.PtrUint16, allTypesConditions.PtrUint32, allTypesConditions.PtrUint64, allTypesConditions.PtrFloat32, allTypesConditions.PtrFloat64, allTypesConditions.PtrBool, allTypesConditions.PtrString, allTypesConditions.PtrTime, allTypesConditions.NullInt16, allTypesConditions.NullInt32, allTypesConditions.NullByte, allTypesConditions.Favorite, allTypesConditions.PtrColor)
 }
