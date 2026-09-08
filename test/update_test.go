@@ -665,6 +665,45 @@ func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollection() {
 	}
 }
 
+// TestUpdateReturningWithPreloadCollectionNested covers the nested-collection
+// preload path on a non-Find (Returning) query. Unlike Find, Returning does not
+// strip the gorm preload, so collectionPreloadCondition.applyGormPreloadWithNested
+// actually runs its nested-preload closure (a bare Sellers.Preload() takes the
+// non-nested branch instead).
+func (ts *UpdateIntTestSuite) TestUpdateReturningWithPreloadCollectionNested() {
+	switch getDBDialector() {
+	// update returning only supported for postgres, sqlite, sqlserver
+	case cqlSQL.Postgres, cqlSQL.SQLite, cqlSQL.SQLServer:
+		company := ts.createCompany("ditrit")
+		university := ts.createUniversity("uni")
+		seller := ts.createSeller("1", company)
+		seller.University = university
+		ts.Require().NoError(ts.db.GormDB.Save(seller).Error)
+
+		companiesReturned := []models.Company{}
+		updated, err := cql.Update[models.Company](
+			context.Background(),
+			ts.db,
+			conditions.Company.Name.Is().Eq(cql.String("ditrit")),
+			conditions.Company.Sellers.Preload(
+				conditions.Seller.University().Preload(),
+			),
+		).Returning(&companiesReturned).Set(
+			conditions.Company.Name.Set().Eq(cql.String("orness")),
+		)
+		ts.Require().NoError(err)
+		ts.Equal(int64(1), updated)
+
+		ts.Len(companiesReturned, 1)
+		sellersPreloaded, err := companiesReturned[0].GetSellers()
+		ts.Require().NoError(err)
+		ts.Len(sellersPreloaded, 1)
+		universityPreloaded, err := sellersPreloaded[0].GetUniversity()
+		ts.Require().NoError(err)
+		ts.Equal(university.ID, universityPreloaded.ID)
+	}
+}
+
 func (ts *UpdateIntTestSuite) TestUpdateMultipleTables() {
 	// update join only supported for mysql
 	if getDBDialector() != cqlSQL.MySQL {
