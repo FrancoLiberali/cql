@@ -27,13 +27,9 @@ var companyScanner = &condition.Scanner[hasmany.Company]{
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},

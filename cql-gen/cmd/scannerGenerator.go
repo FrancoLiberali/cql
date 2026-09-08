@@ -569,16 +569,7 @@ func nullValueField(
 func releaseNullFn(nullType string) scannerAssignFunc {
 	return func(idx string) []jen.Code {
 		return []jen.Code{
-			jen.If(
-				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
-					jen.Id("values").Index(jen.Id(idx)).Assert(
-						jen.Op("*").Qual("database/sql", nullType),
-					),
-				),
-				jen.Id("ok"),
-			).Block(
-				jen.Qual(conditionPath, "Release"+nullType).Call(jen.Id("v")),
-			),
+			jen.Qual(conditionPath, "Release"+nullType).Call(jen.Id("values").Index(jen.Id(idx))),
 		}
 	}
 }
@@ -810,16 +801,7 @@ func uuidField(col string, dest *jen.Statement) scannerField {
 func releaseUUIDFn() scannerAssignFunc {
 	return func(idx string) []jen.Code {
 		return []jen.Code{
-			jen.If(
-				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
-					jen.Id("values").Index(jen.Id(idx)).Assert(
-						jen.Op("*").Qual(modelPath, uuid),
-					),
-				),
-				jen.Id("ok"),
-			).Block(
-				jen.Qual(conditionPath, "ReleaseUUID").Call(jen.Id("v")),
-			),
+			jen.Qual(conditionPath, "ReleaseUUID").Call(jen.Id("values").Index(jen.Id(idx))),
 		}
 	}
 }
@@ -968,20 +950,9 @@ func poolReleaseFor(typeV Type) scannerAssignFunc {
 		return nil
 	}
 
-	typeQual := jen.Qual(typeV.Pkg().Path(), typeV.Name())
-
 	return func(idx string) []jen.Code {
 		return []jen.Code{
-			jen.If(
-				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
-					jen.Id("values").Index(jen.Id(idx)).Assert(
-						jen.Op("*").Add(typeQual.Clone()),
-					),
-				),
-				jen.Id("ok"),
-			).Block(
-				jen.Qual(conditionPath, releaseName).Call(jen.Id("v")),
-			),
+			jen.Qual(conditionPath, releaseName).Call(jen.Id("values").Index(jen.Id(idx))),
 		}
 	}
 }
@@ -1114,14 +1085,7 @@ func buildReleaseValuesFn(fields []scannerField) *jen.Statement {
 
 	releaseCases = append(releaseCases,
 		jen.Default().Block(
-			jen.If(
-				jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
-					jen.Id("values").Index(jen.Id("i")).Assert(jen.Op("*").Qual(conditionPath, "NullSink")),
-				),
-				jen.Id("ok"),
-			).Block(
-				jen.Qual(conditionPath, "ReleaseNullSink").Call(jen.Id("v")),
-			),
+			jen.Qual(conditionPath, "ReleaseNullSink").Call(jen.Id("values").Index(jen.Id("i"))),
 		),
 	)
 

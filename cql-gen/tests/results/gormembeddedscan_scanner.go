@@ -51,25 +51,15 @@ var gormEmbeddedScanScanner = &condition.Scanner[gormembeddedscan.GormEmbeddedSc
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "top":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "foo_int":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "bar_int":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},

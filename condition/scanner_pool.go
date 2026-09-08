@@ -9,133 +9,82 @@ import (
 	"github.com/FrancoLiberali/cql/model"
 )
 
-// Per-type sync.Pools of scan destinations. Generated ScanValues acquires
-// wrappers via AcquireX; the runtime returns them via ReleaseX after
-// AssignValues has copied their contents into the destination model.
+// scanPool is a sync.Pool of *T scan destinations. Generated ScanValues
+// acquires a wrapper via one of the AcquireX helpers below; the runtime returns
+// it via the matching ReleaseX after AssignValues has copied its contents into
+// the destination model.
 //
-// This mirrors gorm's schema.normalPool pattern (gorm/schema/pool.go) — the
-// goal is the same: amortize per-cell allocation cost across all rows of
-// the result set. Pools are pointer-safe because sql.Null* are values and
-// AssignValues copies them out by value before Release is called.
+// This mirrors gorm's schema.normalPool pattern (gorm/schema/pool.go): amortize
+// per-cell allocation cost across all rows of the result set. Pooling is
+// pointer-safe because the pooled types are pure values and AssignValues copies
+// them out by value (e.g. dest.X = v.Bool, dest.ID = *uuid) before Release runs.
+type scanPool[T any] struct {
+	p sync.Pool
+}
+
+func newScanPool[T any]() *scanPool[T] {
+	return &scanPool[T]{p: sync.Pool{New: func() any { return new(T) }}}
+}
+
+// acquire returns a zeroed *T from the pool (the zero value of every pooled
+// type is its "empty" state, including model.NilUUID for model.UUID).
+func (pl *scanPool[T]) acquire() *T {
+	var zero T
+
+	v, _ := pl.p.Get().(*T)
+	*v = zero
+
+	return v
+}
+
+// release returns v to the pool. It takes any (rather than *T) so the generated
+// ReleaseValues can hand it the raw values[i] cell without a per-column type
+// assertion — the assertion lives here, once, instead of in every scanner.
+func (pl *scanPool[T]) release(v any) {
+	if t, ok := v.(*T); ok {
+		pl.p.Put(t)
+	}
+}
+
+// One pool per scanned cell type. Per-type static pools are required: a single
+// generic Acquire[T]() can't dispatch to the right pool without a per-call
+// reflect lookup, which would land on the per-row hot path.
 var (
-	nullBoolPool    = sync.Pool{New: func() any { return new(sql.NullBool) }}
-	nullStringPool  = sync.Pool{New: func() any { return new(sql.NullString) }}
-	nullInt16Pool   = sync.Pool{New: func() any { return new(sql.NullInt16) }}
-	nullInt32Pool   = sync.Pool{New: func() any { return new(sql.NullInt32) }}
-	nullInt64Pool   = sync.Pool{New: func() any { return new(sql.NullInt64) }}
-	nullBytePool    = sync.Pool{New: func() any { return new(sql.NullByte) }}
-	nullFloat64Pool = sync.Pool{New: func() any { return new(sql.NullFloat64) }}
-	nullTimePool    = sync.Pool{New: func() any { return new(sql.NullTime) }}
-	uuidPool        = sync.Pool{New: func() any { return new(model.UUID) }}
-	deletedAtPool   = sync.Pool{New: func() any { return new(gorm.DeletedAt) }}
-	nullSinkPool    = sync.Pool{New: func() any { return new(NullSink) }}
+	nullBoolPool    = newScanPool[sql.NullBool]()
+	nullStringPool  = newScanPool[sql.NullString]()
+	nullInt16Pool   = newScanPool[sql.NullInt16]()
+	nullInt32Pool   = newScanPool[sql.NullInt32]()
+	nullInt64Pool   = newScanPool[sql.NullInt64]()
+	nullBytePool    = newScanPool[sql.NullByte]()
+	nullFloat64Pool = newScanPool[sql.NullFloat64]()
+	nullTimePool    = newScanPool[sql.NullTime]()
+	uuidPool        = newScanPool[model.UUID]()
+	deletedAtPool   = newScanPool[gorm.DeletedAt]()
+	nullSinkPool    = newScanPool[NullSink]()
 )
 
-// AcquireNullBool returns a zeroed *sql.NullBool from the pool. Generated
-// ScanValues calls this in place of `new(sql.NullBool)`.
-func AcquireNullBool() *sql.NullBool {
-	v, _ := nullBoolPool.Get().(*sql.NullBool)
-	*v = sql.NullBool{}
+// The generated scanners call these by name (Acquire<Type> / Release<Type>) in
+// place of new(<Type>).
 
-	return v
-}
-
-// ReleaseNullBool returns the wrapper to its pool. Generated ReleaseValues
-// calls this after AssignValues has copied the cell's value into the model.
-// Safe because sql.Null* are pure values — AssignValues does `dest.X =
-// v.Bool`, leaving no pointer to v inside dest.
-func ReleaseNullBool(v *sql.NullBool) { nullBoolPool.Put(v) }
-
-func AcquireNullString() *sql.NullString {
-	v, _ := nullStringPool.Get().(*sql.NullString)
-	*v = sql.NullString{}
-
-	return v
-}
-
-func ReleaseNullString(v *sql.NullString) { nullStringPool.Put(v) }
-
-func AcquireNullInt16() *sql.NullInt16 {
-	v, _ := nullInt16Pool.Get().(*sql.NullInt16)
-	*v = sql.NullInt16{}
-
-	return v
-}
-
-func ReleaseNullInt16(v *sql.NullInt16) { nullInt16Pool.Put(v) }
-
-func AcquireNullInt32() *sql.NullInt32 {
-	v, _ := nullInt32Pool.Get().(*sql.NullInt32)
-	*v = sql.NullInt32{}
-
-	return v
-}
-
-func ReleaseNullInt32(v *sql.NullInt32) { nullInt32Pool.Put(v) }
-
-func AcquireNullInt64() *sql.NullInt64 {
-	v, _ := nullInt64Pool.Get().(*sql.NullInt64)
-	*v = sql.NullInt64{}
-
-	return v
-}
-
-func ReleaseNullInt64(v *sql.NullInt64) { nullInt64Pool.Put(v) }
-
-func AcquireNullByte() *sql.NullByte {
-	v, _ := nullBytePool.Get().(*sql.NullByte)
-	*v = sql.NullByte{}
-
-	return v
-}
-
-func ReleaseNullByte(v *sql.NullByte) { nullBytePool.Put(v) }
-
-func AcquireNullFloat64() *sql.NullFloat64 {
-	v, _ := nullFloat64Pool.Get().(*sql.NullFloat64)
-	*v = sql.NullFloat64{}
-
-	return v
-}
-
-func ReleaseNullFloat64(v *sql.NullFloat64) { nullFloat64Pool.Put(v) }
-
-func AcquireNullTime() *sql.NullTime {
-	v, _ := nullTimePool.Get().(*sql.NullTime)
-	*v = sql.NullTime{}
-
-	return v
-}
-
-func ReleaseNullTime(v *sql.NullTime) { nullTimePool.Put(v) }
-
-func AcquireUUID() *model.UUID {
-	v, _ := uuidPool.Get().(*model.UUID)
-	*v = model.NilUUID
-
-	return v
-}
-
-// ReleaseUUID returns the wrapper. Safe because AssignValues copies the
-// UUID by value (`dest.ID = *v`) — a [16]byte array — before Release runs.
-func ReleaseUUID(v *model.UUID) { uuidPool.Put(v) }
-
-// AcquireDeletedAt returns a zeroed *gorm.DeletedAt. NOTE: gorm.DeletedAt
-// contains a Time and a Valid bool — pure value, safe to pool.
-func AcquireDeletedAt() *gorm.DeletedAt {
-	v, _ := deletedAtPool.Get().(*gorm.DeletedAt)
-	*v = gorm.DeletedAt{}
-
-	return v
-}
-
-func ReleaseDeletedAt(v *gorm.DeletedAt) { deletedAtPool.Put(v) }
-
-// AcquireNullSink returns a NullSink (stateless — no reset needed).
-func AcquireNullSink() *NullSink {
-	v, _ := nullSinkPool.Get().(*NullSink)
-	return v
-}
-
-// ReleaseNullSink returns the sink to its pool.
-func ReleaseNullSink(v *NullSink) { nullSinkPool.Put(v) }
+func AcquireNullBool() *sql.NullBool       { return nullBoolPool.acquire() }
+func ReleaseNullBool(v any)                { nullBoolPool.release(v) }
+func AcquireNullString() *sql.NullString   { return nullStringPool.acquire() }
+func ReleaseNullString(v any)              { nullStringPool.release(v) }
+func AcquireNullInt16() *sql.NullInt16     { return nullInt16Pool.acquire() }
+func ReleaseNullInt16(v any)               { nullInt16Pool.release(v) }
+func AcquireNullInt32() *sql.NullInt32     { return nullInt32Pool.acquire() }
+func ReleaseNullInt32(v any)               { nullInt32Pool.release(v) }
+func AcquireNullInt64() *sql.NullInt64     { return nullInt64Pool.acquire() }
+func ReleaseNullInt64(v any)               { nullInt64Pool.release(v) }
+func AcquireNullByte() *sql.NullByte       { return nullBytePool.acquire() }
+func ReleaseNullByte(v any)                { nullBytePool.release(v) }
+func AcquireNullFloat64() *sql.NullFloat64 { return nullFloat64Pool.acquire() }
+func ReleaseNullFloat64(v any)             { nullFloat64Pool.release(v) }
+func AcquireNullTime() *sql.NullTime       { return nullTimePool.acquire() }
+func ReleaseNullTime(v any)                { nullTimePool.release(v) }
+func AcquireUUID() *model.UUID             { return uuidPool.acquire() }
+func ReleaseUUID(v any)                    { uuidPool.release(v) }
+func AcquireDeletedAt() *gorm.DeletedAt    { return deletedAtPool.acquire() }
+func ReleaseDeletedAt(v any)               { deletedAtPool.release(v) }
+func AcquireNullSink() *NullSink           { return nullSinkPool.acquire() }
+func ReleaseNullSink(v any)                { nullSinkPool.release(v) }

@@ -35,17 +35,11 @@ var universityScanner = &condition.Scanner[models.University]{
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			case "name":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},

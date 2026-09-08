@@ -122,53 +122,29 @@ var productNoTimestampsScanner = &condition.Scanner[models.ProductNoTimestamps]{
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			case "string_something_else":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			case "int":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "int_pointer":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "float":
-				if v, ok := values[i].(*sql.NullFloat64); ok {
-					condition.ReleaseNullFloat64(v)
-				}
+				condition.ReleaseNullFloat64(values[i])
 			case "null_float":
-				if v, ok := values[i].(*sql.NullFloat64); ok {
-					condition.ReleaseNullFloat64(v)
-				}
+				condition.ReleaseNullFloat64(values[i])
 			case "bool":
-				if v, ok := values[i].(*sql.NullBool); ok {
-					condition.ReleaseNullBool(v)
-				}
+				condition.ReleaseNullBool(values[i])
 			case "null_bool":
-				if v, ok := values[i].(*sql.NullBool); ok {
-					condition.ReleaseNullBool(v)
-				}
+				condition.ReleaseNullBool(values[i])
 			case "embedded_int":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "gorm_embedded_int":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "string2":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},

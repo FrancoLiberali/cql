@@ -331,145 +331,75 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			case "val_int":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_int8":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_int16":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_int32":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_int64":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_uint":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_uint8":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_uint16":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_uint32":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_uint64":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "val_float32":
-				if v, ok := values[i].(*sql.NullFloat64); ok {
-					condition.ReleaseNullFloat64(v)
-				}
+				condition.ReleaseNullFloat64(values[i])
 			case "val_float64":
-				if v, ok := values[i].(*sql.NullFloat64); ok {
-					condition.ReleaseNullFloat64(v)
-				}
+				condition.ReleaseNullFloat64(values[i])
 			case "val_bool":
-				if v, ok := values[i].(*sql.NullBool); ok {
-					condition.ReleaseNullBool(v)
-				}
+				condition.ReleaseNullBool(values[i])
 			case "val_string":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			case "val_time":
-				if v, ok := values[i].(*sql.NullTime); ok {
-					condition.ReleaseNullTime(v)
-				}
+				condition.ReleaseNullTime(values[i])
 			case "ptr_int":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_int8":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_int16":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_int32":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_int64":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_uint":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_uint8":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_uint16":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_uint32":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_uint64":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "ptr_float32":
-				if v, ok := values[i].(*sql.NullFloat64); ok {
-					condition.ReleaseNullFloat64(v)
-				}
+				condition.ReleaseNullFloat64(values[i])
 			case "ptr_float64":
-				if v, ok := values[i].(*sql.NullFloat64); ok {
-					condition.ReleaseNullFloat64(v)
-				}
+				condition.ReleaseNullFloat64(values[i])
 			case "ptr_bool":
-				if v, ok := values[i].(*sql.NullBool); ok {
-					condition.ReleaseNullBool(v)
-				}
+				condition.ReleaseNullBool(values[i])
 			case "ptr_string":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			case "ptr_time":
-				if v, ok := values[i].(*sql.NullTime); ok {
-					condition.ReleaseNullTime(v)
-				}
+				condition.ReleaseNullTime(values[i])
 			case "null_int16":
-				if v, ok := values[i].(*sql.NullInt16); ok {
-					condition.ReleaseNullInt16(v)
-				}
+				condition.ReleaseNullInt16(values[i])
 			case "null_int32":
-				if v, ok := values[i].(*sql.NullInt32); ok {
-					condition.ReleaseNullInt32(v)
-				}
+				condition.ReleaseNullInt32(values[i])
 			case "null_byte":
-				if v, ok := values[i].(*sql.NullByte); ok {
-					condition.ReleaseNullByte(v)
-				}
+				condition.ReleaseNullByte(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},

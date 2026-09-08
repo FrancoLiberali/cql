@@ -55,29 +55,17 @@ var childScanner = &condition.Scanner[models.Child]{
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			case "name":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			case "number":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "parent1_id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			case "parent2_id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},

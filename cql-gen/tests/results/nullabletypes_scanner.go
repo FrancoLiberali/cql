@@ -76,45 +76,25 @@ var nullableTypesScanner = &condition.Scanner[nullabletypes.NullableTypes]{
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*model.UUID); ok {
-					condition.ReleaseUUID(v)
-				}
+				condition.ReleaseUUID(values[i])
 			case "string":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			case "int64":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "int32":
-				if v, ok := values[i].(*sql.NullInt32); ok {
-					condition.ReleaseNullInt32(v)
-				}
+				condition.ReleaseNullInt32(values[i])
 			case "int16":
-				if v, ok := values[i].(*sql.NullInt16); ok {
-					condition.ReleaseNullInt16(v)
-				}
+				condition.ReleaseNullInt16(values[i])
 			case "byte":
-				if v, ok := values[i].(*sql.NullByte); ok {
-					condition.ReleaseNullByte(v)
-				}
+				condition.ReleaseNullByte(values[i])
 			case "float64":
-				if v, ok := values[i].(*sql.NullFloat64); ok {
-					condition.ReleaseNullFloat64(v)
-				}
+				condition.ReleaseNullFloat64(values[i])
 			case "bool":
-				if v, ok := values[i].(*sql.NullBool); ok {
-					condition.ReleaseNullBool(v)
-				}
+				condition.ReleaseNullBool(values[i])
 			case "time":
-				if v, ok := values[i].(*sql.NullTime); ok {
-					condition.ReleaseNullTime(v)
-				}
+				condition.ReleaseNullTime(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},

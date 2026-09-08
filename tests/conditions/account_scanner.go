@@ -65,33 +65,19 @@ var accountScanner = &condition.Scanner[models.Account]{
 		for i, c := range columns {
 			switch c {
 			case "id":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "created_at":
-				if v, ok := values[i].(*sql.NullTime); ok {
-					condition.ReleaseNullTime(v)
-				}
+				condition.ReleaseNullTime(values[i])
 			case "updated_at":
-				if v, ok := values[i].(*sql.NullTime); ok {
-					condition.ReleaseNullTime(v)
-				}
+				condition.ReleaseNullTime(values[i])
 			case "deleted_at":
-				if v, ok := values[i].(*gorm.DeletedAt); ok {
-					condition.ReleaseDeletedAt(v)
-				}
+				condition.ReleaseDeletedAt(values[i])
 			case "user_id":
-				if v, ok := values[i].(*sql.NullInt64); ok {
-					condition.ReleaseNullInt64(v)
-				}
+				condition.ReleaseNullInt64(values[i])
 			case "number":
-				if v, ok := values[i].(*sql.NullString); ok {
-					condition.ReleaseNullString(v)
-				}
+				condition.ReleaseNullString(values[i])
 			default:
-				if v, ok := values[i].(*condition.NullSink); ok {
-					condition.ReleaseNullSink(v)
-				}
+				condition.ReleaseNullSink(values[i])
 			}
 		}
 	},
