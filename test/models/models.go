@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -129,6 +130,45 @@ type ProductNoTimestamps struct {
 
 func (m ProductNoTimestamps) Equal(other ProductNoTimestamps) bool {
 	return m.ID == other.ID
+}
+
+// AllTypes exercises the fast scanner across every supported scalar type —
+// as a value and as a nullable pointer — so a round-trip test can prove each
+// generated scan/assign path materializes the value correctly.
+type AllTypes struct {
+	model.UUIDModel
+
+	ValInt     int
+	ValInt8    int8
+	ValInt16   int16
+	ValInt32   int32
+	ValInt64   int64
+	ValUint    uint
+	ValUint8   uint8
+	ValUint16  uint16
+	ValUint32  uint32
+	ValUint64  uint64
+	ValFloat32 float32
+	ValFloat64 float64
+	ValBool    bool
+	ValString  string
+	ValTime    time.Time
+
+	PtrInt     *int
+	PtrInt8    *int8
+	PtrInt16   *int16
+	PtrInt32   *int32
+	PtrInt64   *int64
+	PtrUint    *uint
+	PtrUint8   *uint8
+	PtrUint16  *uint16
+	PtrUint32  *uint32
+	PtrUint64  *uint64
+	PtrFloat32 *float32
+	PtrFloat64 *float64
+	PtrBool    *bool
+	PtrString  *string
+	PtrTime    *time.Time
 }
 
 type University struct {
