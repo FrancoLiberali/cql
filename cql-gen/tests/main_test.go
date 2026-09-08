@@ -462,6 +462,22 @@ func TestOverrideReferencesInverse(t *testing.T) {
 	})
 }
 
+// TestNamedScalarFallsBackToGorm asserts the safety net: a model with a column
+// type the fast scanner can't classify (a named scalar) gets conditions but NO
+// scanner, so its queries fall back to gorm instead of silently dropping the
+// column.
+func TestNamedScalarFallsBackToGorm(t *testing.T) {
+	doTest(t, "./namedscalar", []Comparison{
+		{
+			Have:            "with_named_scalar_conditions.go",
+			Expected:        "./results/namedscalar.go",
+			ScannerHave:     "with_named_scalar_scanner.go",
+			ExpectNoScanner: true,
+		},
+	})
+	CheckFileNotExists(t, "./namedscalar/cql.go")
+}
+
 type Comparison struct {
 	Have     string
 	Expected string

@@ -191,3 +191,26 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsNilPointers() {
 	ts.False(got.NullInt32.Valid)
 	ts.False(got.NullByte.Valid)
 }
+
+// TestUnsupportedColumnFallsBackToGorm is the safety net for the fast scanner:
+// models.WithUnsupportedColumn has a column type the scanner can't classify
+// (models.Color, a named scalar), so no scanner is generated and the query
+// must fall back to gorm. The unsupported column must round-trip — a partial
+// fast scanner would silently drop it (leaving the zero value).
+func (ts *ScannerTypesIntTestSuite) TestUnsupportedColumnFallsBackToGorm() {
+	in := &models.WithUnsupportedColumn{
+		Name:     "acme",
+		Favorite: models.ColorBlue,
+	}
+
+	create(&ts.testSuite, in)
+
+	got, err := cql.Query[models.WithUnsupportedColumn](
+		context.Background(),
+		ts.db,
+	).First()
+	ts.Require().NoError(err)
+
+	ts.Equal("acme", got.Name)
+	ts.Equal(models.ColorBlue, got.Favorite)
+}

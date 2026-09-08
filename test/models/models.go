@@ -178,6 +178,28 @@ type AllTypes struct {
 	NullByte  sql.NullByte
 }
 
+// Color is a named scalar type the fast scanner can't classify (it's not a
+// model ID, time.Time, sql.Null* wrapper, or gorm custom type). A model with
+// such a column must fall back to gorm rather than silently drop it.
+type Color int
+
+const (
+	ColorRed Color = iota + 1
+	ColorGreen
+	ColorBlue
+)
+
+// WithUnsupportedColumn holds a named-scalar (Color) column that the fast
+// scanner doesn't support, so no scanner is generated for it and its queries
+// fall back to gorm's reflective scan — exercised by
+// TestUnsupportedColumnFallsBackToGorm.
+type WithUnsupportedColumn struct {
+	model.UUIDModel
+
+	Name     string
+	Favorite Color
+}
+
 type University struct {
 	model.UUIDModel
 
