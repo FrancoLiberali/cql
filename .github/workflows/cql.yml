@@ -135,6 +135,10 @@ jobs:
           workflow: gen.yml
           workflow_conclusion: success
           name: coverage_gen
+          # gen.yml / lint.yml only run on cql-gen/** or cqllint/** changes;
+          # when this PR doesn't touch them the last run's artifact may be
+          # expired. Don't fail SonarCloud over a missing sub-coverage report.
+          if_no_artifact_found: warn
       - name: Download lint line coverage report
         id: download-lint-artifact
         uses: dawidd6/action-download-artifact@v6
@@ -142,6 +146,7 @@ jobs:
           workflow: lint.yml
           workflow_conclusion: success
           name: coverage_lint
+          if_no_artifact_found: warn
       - name: SonarCloud Scan
         uses: sonarsource/sonarcloud-github-action@master
         env:
