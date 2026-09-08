@@ -10,11 +10,9 @@ on:
       - cqllint/**
       - docs/**
 
+# Least privilege at the workflow level; write scopes are granted per-job below.
 permissions:
-  id-token: write
   contents: read
-  actions: read
-  checks: write
 
 jobs:
   branch-naming-rules:
@@ -54,6 +52,9 @@ jobs:
     name: test
     needs: [check-style]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write # dorny/test-reporter creates a check run
     strategy:
       fail-fast: false
       matrix:
@@ -67,7 +68,7 @@ jobs:
           go-version: '1.23'
           cache: true
       - name: Install gotestsum
-        run: go install gotest.tools/gotestsum@latest
+        run: go install gotest.tools/gotestsum@v1.13.0
       - name: Start containers
         run: docker compose -f "docker/${{ matrix.db }}/docker-compose.yml" up -d
         if: ${{ matrix.db != 'sqlite' }}
@@ -118,6 +119,10 @@ jobs:
     name: SonarCloud
     needs: [test]
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      actions: read # dawidd6/action-download-artifact reads other workflows' runs
+      id-token: write # OIDC for the SonarQube scan action
     steps:
       - uses: actions/checkout@v3
         with:
