@@ -139,6 +139,9 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsEveryScalarTypeWithVal
 func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsNilPointers() {
 	in := &models.AllTypes{
 		ValString: "no pointers",
+		// a non-pointer time.Time value must be valid: mysql strict mode
+		// rejects the zero time ('0000-00-00') on insert.
+		ValTime: time.Date(2021, 3, 14, 15, 9, 26, 0, time.UTC),
 	}
 
 	create(&ts.testSuite, in)
