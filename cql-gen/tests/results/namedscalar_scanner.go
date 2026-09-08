@@ -46,6 +46,44 @@ var withNamedScalarScanner = &condition.Scanner[namedscalar.WithNamedScalar]{
 				} else {
 					dest.Second = nil
 				}
+			case "mood":
+				v, ok := values[i].(*sql.NullString)
+				if !ok {
+					return fmt.Errorf("cql scanner mood: bad type %T", values[i])
+				}
+				if v.Valid {
+					dest.Mood = namedscalar.Mood(v.String)
+				}
+			case "alt_mood":
+				v, ok := values[i].(*sql.NullString)
+				if !ok {
+					return fmt.Errorf("cql scanner alt_mood: bad type %T", values[i])
+				}
+				if v.Valid {
+					tmp := namedscalar.Mood(v.String)
+					dest.AltMood = &tmp
+				} else {
+					dest.AltMood = nil
+				}
+			case "active":
+				v, ok := values[i].(*sql.NullBool)
+				if !ok {
+					return fmt.Errorf("cql scanner active: bad type %T", values[i])
+				}
+				if v.Valid {
+					dest.Active = namedscalar.Switch(v.Bool)
+				}
+			case "alt_active":
+				v, ok := values[i].(*sql.NullBool)
+				if !ok {
+					return fmt.Errorf("cql scanner alt_active: bad type %T", values[i])
+				}
+				if v.Valid {
+					tmp := namedscalar.Switch(v.Bool)
+					dest.AltActive = &tmp
+				} else {
+					dest.AltActive = nil
+				}
 			}
 		}
 		return nil
@@ -61,6 +99,14 @@ var withNamedScalarScanner = &condition.Scanner[namedscalar.WithNamedScalar]{
 				condition.ReleaseNullInt64(values[i])
 			case "second":
 				condition.ReleaseNullInt64(values[i])
+			case "mood":
+				condition.ReleaseNullString(values[i])
+			case "alt_mood":
+				condition.ReleaseNullString(values[i])
+			case "active":
+				condition.ReleaseNullBool(values[i])
+			case "alt_active":
+				condition.ReleaseNullBool(values[i])
 			default:
 				condition.ReleaseNullSink(values[i])
 			}
@@ -78,6 +124,14 @@ var withNamedScalarScanner = &condition.Scanner[namedscalar.WithNamedScalar]{
 				values[i] = condition.AcquireNullInt64()
 			case "second":
 				values[i] = condition.AcquireNullInt64()
+			case "mood":
+				values[i] = condition.AcquireNullString()
+			case "alt_mood":
+				values[i] = condition.AcquireNullString()
+			case "active":
+				values[i] = condition.AcquireNullBool()
+			case "alt_active":
+				values[i] = condition.AcquireNullBool()
 			default:
 				values[i] = condition.AcquireNullSink()
 			}
@@ -92,4 +146,8 @@ func init() {
 	WithNamedScalar.Name = condition.NewStringField[namedscalar.WithNamedScalar]("Name", "", "", withNamedScalarScanner)
 	WithNamedScalar.Favorite = condition.NewNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Favorite", "", "", withNamedScalarScanner)
 	WithNamedScalar.Second = condition.NewNullableNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Second", "", "", withNamedScalarScanner)
+	WithNamedScalar.Mood = condition.NewStringField[namedscalar.WithNamedScalar]("Mood", "", "", withNamedScalarScanner)
+	WithNamedScalar.AltMood = condition.NewNullableStringField[namedscalar.WithNamedScalar]("AltMood", "", "", withNamedScalarScanner)
+	WithNamedScalar.Active = condition.NewBoolField[namedscalar.WithNamedScalar]("Active", "", "", withNamedScalarScanner)
+	WithNamedScalar.AltActive = condition.NewNullableBoolField[namedscalar.WithNamedScalar]("AltActive", "", "", withNamedScalarScanner)
 }

@@ -477,6 +477,21 @@ func TestNamedScalarIsFastScanned(t *testing.T) {
 	CheckFileNotExists(t, "./namedscalar/cql.go")
 }
 
+// TestScannerTypesKitchenSink exercises the fast-scan generator paths the
+// narrower fixtures miss: a []byte column, time.Time value + pointer, and
+// database/sql nullable wrappers used directly as fields.
+func TestScannerTypesKitchenSink(t *testing.T) {
+	doTest(t, "./scannertypes", []Comparison{
+		{
+			Have:            "scanner_types_conditions.go",
+			Expected:        "./results/scannertypes.go",
+			ScannerHave:     "scanner_types_scanner.go",
+			ScannerExpected: "./results/scannertypes_scanner.go",
+		},
+	})
+	CheckFileNotExists(t, "./scannertypes/cql.go")
+}
+
 // TestUnsupportedColumnFallsBackToGorm asserts the safety net: a model with a
 // column the fast scanner genuinely can't classify (a []string via gorm's json
 // serializer) gets conditions but NO scanner, so its queries fall back to gorm

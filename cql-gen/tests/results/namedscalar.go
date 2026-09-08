@@ -8,20 +8,28 @@ import (
 )
 
 type withNamedScalarConditions struct {
-	ID       condition.Field[namedscalar.WithNamedScalar, model.UUID]
-	Name     condition.StringField[namedscalar.WithNamedScalar]
-	Favorite condition.NumericField[namedscalar.WithNamedScalar, namedscalar.Color]
-	Second   condition.NullableNumericField[namedscalar.WithNamedScalar, namedscalar.Color]
+	ID        condition.Field[namedscalar.WithNamedScalar, model.UUID]
+	Name      condition.StringField[namedscalar.WithNamedScalar]
+	Favorite  condition.NumericField[namedscalar.WithNamedScalar, namedscalar.Color]
+	Second    condition.NullableNumericField[namedscalar.WithNamedScalar, namedscalar.Color]
+	Mood      condition.StringField[namedscalar.WithNamedScalar]
+	AltMood   condition.NullableStringField[namedscalar.WithNamedScalar]
+	Active    condition.BoolField[namedscalar.WithNamedScalar]
+	AltActive condition.NullableBoolField[namedscalar.WithNamedScalar]
 }
 
 var WithNamedScalar = withNamedScalarConditions{
-	Favorite: condition.NewNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Favorite", "", ""),
-	ID:       condition.NewField[namedscalar.WithNamedScalar, model.UUID]("ID", "", ""),
-	Name:     condition.NewStringField[namedscalar.WithNamedScalar]("Name", "", ""),
-	Second:   condition.NewNullableNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Second", "", ""),
+	Active:    condition.NewBoolField[namedscalar.WithNamedScalar]("Active", "", ""),
+	AltActive: condition.NewNullableBoolField[namedscalar.WithNamedScalar]("AltActive", "", ""),
+	AltMood:   condition.NewNullableStringField[namedscalar.WithNamedScalar]("AltMood", "", ""),
+	Favorite:  condition.NewNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Favorite", "", ""),
+	ID:        condition.NewField[namedscalar.WithNamedScalar, model.UUID]("ID", "", ""),
+	Mood:      condition.NewStringField[namedscalar.WithNamedScalar]("Mood", "", ""),
+	Name:      condition.NewStringField[namedscalar.WithNamedScalar]("Name", "", ""),
+	Second:    condition.NewNullableNumericField[namedscalar.WithNamedScalar, namedscalar.Color]("Second", "", ""),
 }
 
 // Preload allows preloading the WithNamedScalar when doing a query
 func (withNamedScalarConditions withNamedScalarConditions) preload() condition.Condition[namedscalar.WithNamedScalar] {
-	return condition.NewPreloadCondition[namedscalar.WithNamedScalar](withNamedScalarConditions.ID, withNamedScalarConditions.Name, withNamedScalarConditions.Favorite, withNamedScalarConditions.Second)
+	return condition.NewPreloadCondition[namedscalar.WithNamedScalar](withNamedScalarConditions.ID, withNamedScalarConditions.Name, withNamedScalarConditions.Favorite, withNamedScalarConditions.Second, withNamedScalarConditions.Mood, withNamedScalarConditions.AltMood, withNamedScalarConditions.Active, withNamedScalarConditions.AltActive)
 }

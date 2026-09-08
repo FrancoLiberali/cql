@@ -206,6 +206,26 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsNilPointers() {
 	ts.False(got.NullByte.Valid)
 }
 
+// TestFastScanRoundTripsCustomScannerType round-trips a gorm custom type
+// (models.MultiString, which implements sql.Scanner + driver.Valuer) through
+// the fast scanner. This exercises the NullableScanner wrapper's Scan on a
+// non-nil value — the path taken for any user-defined scannable column.
+func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsCustomScannerType() {
+	in := &models.Product{}
+	in.MultiString = models.MultiString{"alpha", "beta"}
+
+	create(&ts.testSuite, in)
+
+	// no conditions: resolved from the registry, so this takes the fast path
+	// and the custom column is scanned through NullableScanner.
+	got, err := cql.Query[models.Product](
+		context.Background(),
+		ts.db,
+	).First()
+	ts.Require().NoError(err)
+	ts.Equal(models.MultiString{"alpha", "beta"}, got.MultiString)
+}
+
 // TestUnsupportedColumnFallsBackToGorm is the safety net for the fast scanner:
 // models.WithUnsupportedColumn has a column the scanner can't classify (a
 // []string persisted via gorm's json serializer), so no scanner is generated
