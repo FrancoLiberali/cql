@@ -70,6 +70,7 @@ var ownedOwnerJoinScanner = &condition.RelationScanner[belongsto.Owned, belongst
 }
 
 func init() {
+	condition.RegisterScanner(ownedScanner)
 	Owned.ID = condition.NewField[belongsto.Owned, model.UUID]("ID", "", "", ownedScanner)
 	Owned.OwnerID = condition.NewUpdatableField[belongsto.Owned, model.UUID]("OwnerID", "", "", ownedScanner)
 }

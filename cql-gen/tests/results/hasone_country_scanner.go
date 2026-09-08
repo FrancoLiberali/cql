@@ -58,5 +58,6 @@ var countryCapitalJoinScanner = &condition.RelationScanner[hasone.Country, hason
 }
 
 func init() {
+	condition.RegisterScanner(countryScanner)
 	Country.ID = condition.NewField[hasone.Country, model.UUID]("ID", "", "", countryScanner)
 }

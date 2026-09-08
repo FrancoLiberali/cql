@@ -98,11 +98,6 @@ var sellerScanner = &condition.Scanner[models.Seller]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(sellerScanner)
-}
-
 var sellerCompanyJoinScanner = &condition.RelationScanner[models.Seller, models.Company]{
 	ChildScanner: companyScanner,
 	Mount: func(p *models.Seller, c *models.Company) {
@@ -125,6 +120,7 @@ var sellerUniversityJoinScanner = &condition.RelationScanner[models.Seller, mode
 }
 
 func init() {
+	condition.RegisterScanner(sellerScanner)
 	Seller.ID = condition.NewField[models.Seller, model.UUID]("ID", "", "", sellerScanner)
 	Seller.Name = condition.NewStringField[models.Seller]("Name", "", "", sellerScanner)
 	Seller.CompanyID = condition.NewNullableField[models.Seller, model.UUID]("CompanyID", "", "", sellerScanner)

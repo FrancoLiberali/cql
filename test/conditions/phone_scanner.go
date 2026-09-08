@@ -120,11 +120,6 @@ var phoneScanner = &condition.Scanner[models.Phone]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(phoneScanner)
-}
-
 var phoneBrandJoinScanner = &condition.RelationScanner[models.Phone, models.Brand]{
 	ChildScanner: brandScanner,
 	Mount: func(p *models.Phone, c *models.Brand) {
@@ -134,6 +129,7 @@ var phoneBrandJoinScanner = &condition.RelationScanner[models.Phone, models.Bran
 }
 
 func init() {
+	condition.RegisterScanner(phoneScanner)
 	Phone.ID = condition.NewField[models.Phone, model.UIntID]("ID", "", "", phoneScanner)
 	Phone.CreatedAt = condition.NewField[models.Phone, time.Time]("CreatedAt", "", "", phoneScanner)
 	Phone.UpdatedAt = condition.NewField[models.Phone, time.Time]("UpdatedAt", "", "", phoneScanner)

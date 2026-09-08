@@ -94,6 +94,7 @@ var gormEmbeddedScanScanner = &condition.Scanner[gormembeddedscan.GormEmbeddedSc
 }
 
 func init() {
+	condition.RegisterScanner(gormEmbeddedScanScanner)
 	GormEmbeddedScan.ID = condition.NewField[gormembeddedscan.GormEmbeddedScan, model.UIntID]("ID", "", "", gormEmbeddedScanScanner)
 	GormEmbeddedScan.Top = condition.NewNumericField[gormembeddedscan.GormEmbeddedScan, int]("Top", "", "", gormEmbeddedScanScanner)
 	GormEmbeddedScan.FooInt = condition.NewNumericField[gormembeddedscan.GormEmbeddedScan, int]("Int", "", "foo_", gormEmbeddedScanScanner)

@@ -67,8 +67,6 @@ var universityScanner = &condition.Scanner[models.University]{
 
 func init() {
 	condition.RegisterScanner(universityScanner)
-}
-func init() {
 	University.ID = condition.NewField[models.University, model.UUID]("ID", "", "", universityScanner)
 	University.Name = condition.NewStringField[models.University]("Name", "", "", universityScanner)
 }

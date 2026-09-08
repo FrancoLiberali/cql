@@ -81,11 +81,6 @@ var employeeScanner = &condition.Scanner[models.Employee]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(employeeScanner)
-}
-
 var employeeBossJoinScanner = &condition.RelationScanner[models.Employee, models.Employee]{
 	ChildScanner: employeeScanner,
 	Mount: func(p *models.Employee, c *models.Employee) {
@@ -98,6 +93,7 @@ var employeeBossJoinScanner = &condition.RelationScanner[models.Employee, models
 }
 
 func init() {
+	condition.RegisterScanner(employeeScanner)
 	Employee.ID = condition.NewField[models.Employee, model.UUID]("ID", "", "", employeeScanner)
 	Employee.Name = condition.NewStringField[models.Employee]("Name", "", "", employeeScanner)
 	Employee.BossID = condition.NewNullableField[models.Employee, model.UUID]("BossID", "", "", employeeScanner)

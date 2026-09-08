@@ -212,8 +212,6 @@ var productNoTimestampsScanner = &condition.Scanner[models.ProductNoTimestamps]{
 
 func init() {
 	condition.RegisterScanner(productNoTimestampsScanner)
-}
-func init() {
 	ProductNoTimestamps.ID = condition.NewField[models.ProductNoTimestamps, model.UUID]("ID", "", "", productNoTimestampsScanner)
 	ProductNoTimestamps.String = condition.NewStringField[models.ProductNoTimestamps]("String", "string_something_else", "", productNoTimestampsScanner)
 	ProductNoTimestamps.Int = condition.NewNumericField[models.ProductNoTimestamps, int]("Int", "", "", productNoTimestampsScanner)

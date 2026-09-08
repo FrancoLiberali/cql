@@ -64,11 +64,6 @@ var countryScanner = &condition.Scanner[models.Country]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(countryScanner)
-}
-
 var countryCapitalJoinScanner = &condition.RelationScanner[models.Country, models.City]{
 	ChildScanner: cityScanner,
 	Mount: func(p *models.Country, c *models.City) {
@@ -78,6 +73,7 @@ var countryCapitalJoinScanner = &condition.RelationScanner[models.Country, model
 }
 
 func init() {
+	condition.RegisterScanner(countryScanner)
 	Country.ID = condition.NewField[models.Country, model.UUID]("ID", "", "", countryScanner)
 	Country.Name = condition.NewStringField[models.Country]("Name", "", "", countryScanner)
 }

@@ -78,6 +78,7 @@ var sellerCompanyJoinScanner = &condition.RelationScanner[hasmany.Seller, hasman
 }
 
 func init() {
+	condition.RegisterScanner(sellerScanner)
 	Seller.ID = condition.NewField[hasmany.Seller, model.UUID]("ID", "", "", sellerScanner)
 	Seller.CompanyID = condition.NewNullableField[hasmany.Seller, model.UUID]("CompanyID", "", "", sellerScanner)
 }

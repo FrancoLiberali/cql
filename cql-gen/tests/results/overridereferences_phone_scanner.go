@@ -73,6 +73,7 @@ var phoneBrandJoinScanner = &condition.RelationScanner[overridereferences.Phone,
 }
 
 func init() {
+	condition.RegisterScanner(phoneScanner)
 	Phone.ID = condition.NewField[overridereferences.Phone, model.UUID]("ID", "", "", phoneScanner)
 	Phone.BrandName = condition.NewStringField[overridereferences.Phone]("BrandName", "", "", phoneScanner)
 }

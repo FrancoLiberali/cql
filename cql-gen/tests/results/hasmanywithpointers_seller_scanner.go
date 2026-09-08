@@ -78,6 +78,7 @@ var sellerInPointersCompanyJoinScanner = &condition.RelationScanner[hasmanywithp
 }
 
 func init() {
+	condition.RegisterScanner(sellerInPointersScanner)
 	SellerInPointers.ID = condition.NewField[hasmanywithpointers.SellerInPointers, model.UUID]("ID", "", "", sellerInPointersScanner)
 	SellerInPointers.CompanyID = condition.NewNullableField[hasmanywithpointers.SellerInPointers, model.UUID]("CompanyID", "", "", sellerInPointersScanner)
 }

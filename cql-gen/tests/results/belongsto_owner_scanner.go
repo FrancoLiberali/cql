@@ -51,5 +51,6 @@ var ownerScanner = &condition.Scanner[belongsto.Owner]{
 }
 
 func init() {
+	condition.RegisterScanner(ownerScanner)
 	Owner.ID = condition.NewField[belongsto.Owner, model.UUID]("ID", "", "", ownerScanner)
 }

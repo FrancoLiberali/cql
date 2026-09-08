@@ -63,6 +63,7 @@ var customTypeScanner = &condition.Scanner[customtype.CustomType]{
 }
 
 func init() {
+	condition.RegisterScanner(customTypeScanner)
 	CustomType.ID = condition.NewField[customtype.CustomType, model.UUID]("ID", "", "", customTypeScanner)
 	CustomType.Custom = condition.NewUpdatableField[customtype.CustomType, customtype.MultiString]("Custom", "", "", customTypeScanner)
 }

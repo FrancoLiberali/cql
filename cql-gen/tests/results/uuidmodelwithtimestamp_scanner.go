@@ -67,6 +67,7 @@ var uuidModelWithTimestampScanner = &condition.Scanner[uuidmodelwithtimestamp.UU
 }
 
 func init() {
+	condition.RegisterScanner(uuidModelWithTimestampScanner)
 	UUIDModelWithTimestamp.ID = condition.NewField[uuidmodelwithtimestamp.UUIDModelWithTimestamp, model.UUID]("ID", "", "", uuidModelWithTimestampScanner)
 	UUIDModelWithTimestamp.CreatedAt = condition.NewField[uuidmodelwithtimestamp.UUIDModelWithTimestamp, time.Time]("CreatedAt", "", "", uuidModelWithTimestampScanner)
 }

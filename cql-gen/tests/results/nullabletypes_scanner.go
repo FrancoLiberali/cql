@@ -149,6 +149,7 @@ var nullableTypesScanner = &condition.Scanner[nullabletypes.NullableTypes]{
 }
 
 func init() {
+	condition.RegisterScanner(nullableTypesScanner)
 	NullableTypes.ID = condition.NewField[nullabletypes.NullableTypes, model.UUID]("ID", "", "", nullableTypesScanner)
 	NullableTypes.String = condition.NewNullableStringField[nullabletypes.NullableTypes]("String", "", "", nullableTypesScanner)
 	NullableTypes.Int64 = condition.NewNullableNumericField[nullabletypes.NullableTypes, int64]("Int64", "", "", nullableTypesScanner)

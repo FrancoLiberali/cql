@@ -66,6 +66,7 @@ var brandScanner = &condition.Scanner[overridereferences.Brand]{
 }
 
 func init() {
+	condition.RegisterScanner(brandScanner)
 	Brand.ID = condition.NewField[overridereferences.Brand, model.UUID]("ID", "", "", brandScanner)
 	Brand.Name = condition.NewStringField[overridereferences.Brand]("Name", "", "", brandScanner)
 }

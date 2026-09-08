@@ -254,8 +254,6 @@ var productScanner = &condition.Scanner[models.Product]{
 
 func init() {
 	condition.RegisterScanner(productScanner)
-}
-func init() {
 	Product.ID = condition.NewField[models.Product, model.UUID]("ID", "", "", productScanner)
 	Product.CreatedAt = condition.NewField[models.Product, time.Time]("CreatedAt", "", "", productScanner)
 	Product.UpdatedAt = condition.NewField[models.Product, time.Time]("UpdatedAt", "", "", productScanner)

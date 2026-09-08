@@ -291,14 +291,28 @@ func (sg ScannerGenerator) classifyAll(fields []Field) ([]scannerField, error) {
 			return nil, err
 		}
 
-		if !ok {
-			// Field is a relation, an unsupported-but-valid-SQL type, or
-			// otherwise outside fast-scan scope. Skip just this field;
-			// keep going so other fields still get scan cases.
+		if ok {
+			out = append(out, sf)
 			continue
 		}
 
-		out = append(out, sf)
+		// classifyField produced no scan case. A relation to another CQL model
+		// is genuinely not a column (it's materialized via preloads / HasMany
+		// loaders), so it's safe to skip and keep scanning the rest. Anything
+		// else maps to a real column the fast scanner doesn't support yet:
+		// emitting a partial scanner would SILENTLY DROP that column, so bail
+		// out entirely (return nil) and let the model fall back to gorm's
+		// reflective scan — correct, if slower.
+		if isRelationField(f) {
+			continue
+		}
+
+		log.Logger.Debugf(
+			"Scanner skipped for %s: field %s (%s) maps to a column the fast scanner doesn't support; falling back to gorm",
+			sg.object.Name(), f.Name, f.Type.String(),
+		)
+
+		return nil, nil
 	}
 
 	if len(out) == 0 {
@@ -306,6 +320,28 @@ func (sg ScannerGenerator) classifyAll(fields []Field) ([]scannerField, error) {
 	}
 
 	return out, nil
+}
+
+// isRelationField reports whether the field is an association to another CQL
+// model — directly, or via pointer / slice / pointer-to-slice. Such fields are
+// not columns (they're loaded through preloads / HasMany loaders), so the
+// scanner skips them rather than treating them as unsupported columns.
+func isRelationField(field Field) bool {
+	t := field.Type.Type
+
+	for {
+		switch typed := t.(type) {
+		case *types.Pointer:
+			t = typed.Elem()
+		case *types.Slice:
+			t = typed.Elem()
+		case *types.Named:
+			_, err := (Type{Type: typed}).CQLModelStruct()
+			return err == nil
+		default:
+			return false
+		}
+	}
 }
 
 // classifyField determines the scan/assign code for one field. Returns:
@@ -1003,15 +1039,6 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 			},
 		),
 	)
-
-	// Register the scanner by type so no-condition queries can still take the
-	// fast-scan path (Query[T](ctx, db).Find() carries no condition to resolve
-	// the scanner from).
-	file.Add(
-		jen.Func().Id("init").Params().Block(
-			jen.Qual(conditionPath, "RegisterScanner").Call(jen.Id(varName)),
-		),
-	)
 }
 
 // buildScanValuesFn emits the ScanValues closure: a per-column switch that
@@ -1527,7 +1554,11 @@ func (sg ScannerGenerator) emitInitRewiring(file *File, scannerVar string) {
 		flatConditions = append(flatConditions, sg.flattenConditionBindings(f, "", "")...)
 	}
 
-	stmts := []jen.Code{}
+	// Register the scanner by type so a no-condition query (Query[T](ctx, db)
+	// .Find()) can still resolve it and take the fast-scan path.
+	stmts := []jen.Code{
+		jen.Qual(conditionPath, "RegisterScanner").Call(jen.Id(scannerVar)),
+	}
 
 	for _, b := range flatConditions {
 		stmts = append(stmts, b.rebindStmt(file.destPkg, sg.objectType, scannerVar))

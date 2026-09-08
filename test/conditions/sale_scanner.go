@@ -149,11 +149,6 @@ var saleScanner = &condition.Scanner[models.Sale]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(saleScanner)
-}
-
 var saleProductJoinScanner = &condition.RelationScanner[models.Sale, models.Product]{
 	ChildScanner: productScanner,
 	Mount: func(p *models.Sale, c *models.Product) {
@@ -173,6 +168,7 @@ var saleSellerJoinScanner = &condition.RelationScanner[models.Sale, models.Selle
 }
 
 func init() {
+	condition.RegisterScanner(saleScanner)
 	Sale.ID = condition.NewField[models.Sale, model.UUID]("ID", "", "", saleScanner)
 	Sale.CreatedAt = condition.NewField[models.Sale, time.Time]("CreatedAt", "", "", saleScanner)
 	Sale.UpdatedAt = condition.NewField[models.Sale, time.Time]("UpdatedAt", "", "", saleScanner)

@@ -79,6 +79,7 @@ var companySellersHasManyLoader = &condition.HasManyLoader[hasmany.Company, hasm
 }
 
 func init() {
+	condition.RegisterScanner(companyScanner)
 	Company.ID = condition.NewField[hasmany.Company, model.UUID]("ID", "", "", companyScanner)
 	Company.Sellers = Company.Sellers.WithParentScanner(companyScanner)
 }

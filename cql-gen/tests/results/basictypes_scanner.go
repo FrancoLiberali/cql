@@ -262,6 +262,7 @@ var basicTypesScanner = &condition.Scanner[basictypes.BasicTypes]{
 }
 
 func init() {
+	condition.RegisterScanner(basicTypesScanner)
 	BasicTypes.ID = condition.NewField[basictypes.BasicTypes, model.UUID]("ID", "", "", basicTypesScanner)
 	BasicTypes.Bool = condition.NewBoolField[basictypes.BasicTypes]("Bool", "", "", basicTypesScanner)
 	BasicTypes.Int = condition.NewNumericField[basictypes.BasicTypes, int]("Int", "", "", basicTypesScanner)

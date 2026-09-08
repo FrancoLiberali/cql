@@ -107,11 +107,6 @@ var saleNoTimestampsScanner = &condition.Scanner[models.SaleNoTimestamps]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(saleNoTimestampsScanner)
-}
-
 var saleNoTimestampsProductJoinScanner = &condition.RelationScanner[models.SaleNoTimestamps, models.ProductNoTimestamps]{
 	ChildScanner: productNoTimestampsScanner,
 	Mount: func(p *models.SaleNoTimestamps, c *models.ProductNoTimestamps) {
@@ -131,6 +126,7 @@ var saleNoTimestampsSellerJoinScanner = &condition.RelationScanner[models.SaleNo
 }
 
 func init() {
+	condition.RegisterScanner(saleNoTimestampsScanner)
 	SaleNoTimestamps.ID = condition.NewField[models.SaleNoTimestamps, model.UUID]("ID", "", "", saleNoTimestampsScanner)
 	SaleNoTimestamps.Code = condition.NewNumericField[models.SaleNoTimestamps, int]("Code", "", "", saleNoTimestampsScanner)
 	SaleNoTimestamps.Description = condition.NewStringField[models.SaleNoTimestamps]("Description", "", "", saleNoTimestampsScanner)

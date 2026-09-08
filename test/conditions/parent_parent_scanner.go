@@ -81,8 +81,6 @@ var parentParentScanner = &condition.Scanner[models.ParentParent]{
 
 func init() {
 	condition.RegisterScanner(parentParentScanner)
-}
-func init() {
 	ParentParent.ID = condition.NewField[models.ParentParent, model.UUID]("ID", "", "", parentParentScanner)
 	ParentParent.Name = condition.NewStringField[models.ParentParent]("Name", "", "", parentParentScanner)
 	ParentParent.Number = condition.NewNumericField[models.ParentParent, int]("Number", "", "", parentParentScanner)

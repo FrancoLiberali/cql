@@ -72,6 +72,7 @@ var companyWithPointersSellersHasManyLoader = &condition.HasManyLoader[hasmanywi
 }
 
 func init() {
+	condition.RegisterScanner(companyWithPointersScanner)
 	CompanyWithPointers.ID = condition.NewField[hasmanywithpointers.CompanyWithPointers, model.UUID]("ID", "", "", companyWithPointersScanner)
 	CompanyWithPointers.Sellers = CompanyWithPointers.Sellers.WithParentScanner(companyWithPointersScanner)
 }

@@ -58,5 +58,6 @@ var userCreditCardJoinScanner = &condition.RelationScanner[overrideforeignkeyinv
 }
 
 func init() {
+	condition.RegisterScanner(userScanner)
 	User.ID = condition.NewField[overrideforeignkeyinverse.User, model.UUID]("ID", "", "", userScanner)
 }

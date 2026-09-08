@@ -78,6 +78,7 @@ var employeeBossJoinScanner = &condition.RelationScanner[selfreferential.Employe
 }
 
 func init() {
+	condition.RegisterScanner(employeeScanner)
 	Employee.ID = condition.NewField[selfreferential.Employee, model.UUID]("ID", "", "", employeeScanner)
 	Employee.BossID = condition.NewNullableField[selfreferential.Employee, model.UUID]("BossID", "", "", employeeScanner)
 }

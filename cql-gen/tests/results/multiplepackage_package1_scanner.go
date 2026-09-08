@@ -59,5 +59,6 @@ var package1Package2JoinScanner = &condition.RelationScanner[package1.Package1, 
 }
 
 func init() {
+	condition.RegisterScanner(package1Scanner)
 	Package1.ID = condition.NewField[package1.Package1, model.UUID]("ID", "", "", package1Scanner)
 }

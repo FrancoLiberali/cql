@@ -73,6 +73,7 @@ var bicycleOwnerJoinScanner = &condition.RelationScanner[overrideforeignkey.Bicy
 }
 
 func init() {
+	condition.RegisterScanner(bicycleScanner)
 	Bicycle.ID = condition.NewField[overrideforeignkey.Bicycle, model.UUID]("ID", "", "", bicycleScanner)
 	Bicycle.OwnerSomethingID = condition.NewStringField[overrideforeignkey.Bicycle]("OwnerSomethingID", "", "", bicycleScanner)
 }

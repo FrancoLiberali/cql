@@ -168,11 +168,6 @@ var userScanner = &condition.Scanner[models.User]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(userScanner)
-}
-
 var userAccountJoinScanner = &condition.RelationScanner[models.User, models.Account]{
 	ChildScanner: accountScanner,
 	Mount: func(p *models.User, c *models.Account) {
@@ -215,6 +210,7 @@ var userNamedPetJoinScanner = &condition.RelationScanner[models.User, models.Pet
 }
 
 func init() {
+	condition.RegisterScanner(userScanner)
 	User.ID = condition.NewField[models.User, model.UIntID]("ID", "", "", userScanner)
 	User.CreatedAt = condition.NewField[models.User, time.Time]("CreatedAt", "", "", userScanner)
 	User.UpdatedAt = condition.NewField[models.User, time.Time]("UpdatedAt", "", "", userScanner)

@@ -51,5 +51,6 @@ var personScanner = &condition.Scanner[overrideforeignkey.Person]{
 }
 
 func init() {
+	condition.RegisterScanner(personScanner)
 	Person.ID = condition.NewField[overrideforeignkey.Person, model.UUID]("ID", "", "", personScanner)
 }

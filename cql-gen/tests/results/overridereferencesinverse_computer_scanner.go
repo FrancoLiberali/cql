@@ -73,6 +73,7 @@ var computerProcessorJoinScanner = &condition.RelationScanner[overridereferences
 }
 
 func init() {
+	condition.RegisterScanner(computerScanner)
 	Computer.ID = condition.NewField[overridereferencesinverse.Computer, model.UUID]("ID", "", "", computerScanner)
 	Computer.Name = condition.NewStringField[overridereferencesinverse.Computer]("Name", "", "", computerScanner)
 }

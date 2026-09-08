@@ -65,11 +65,6 @@ var companyNoTimestampsScanner = &condition.Scanner[models.CompanyNoTimestamps]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(companyNoTimestampsScanner)
-}
-
 var companyNoTimestampsSellersHasManyLoader = &condition.HasManyLoader[models.CompanyNoTimestamps, models.SellerNoTimestamps]{
 	BuildQuery: func(tx *gorm.DB, parentIDs []any, nested []condition.Condition[models.SellerNoTimestamps]) (*condition.Query[models.SellerNoTimestamps], error) {
 		typedIDs := make([]condition.ValueOfType[model.UUID], len(parentIDs))
@@ -99,6 +94,7 @@ var companyNoTimestampsSellersHasManyLoader = &condition.HasManyLoader[models.Co
 }
 
 func init() {
+	condition.RegisterScanner(companyNoTimestampsScanner)
 	CompanyNoTimestamps.ID = condition.NewField[models.CompanyNoTimestamps, model.UUID]("ID", "", "", companyNoTimestampsScanner)
 	CompanyNoTimestamps.Name = condition.NewStringField[models.CompanyNoTimestamps]("Name", "", "", companyNoTimestampsScanner)
 	CompanyNoTimestamps.Sellers = CompanyNoTimestamps.Sellers.WithParentScanner(companyNoTimestampsScanner)

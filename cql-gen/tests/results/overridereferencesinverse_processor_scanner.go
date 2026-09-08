@@ -66,6 +66,7 @@ var processorScanner = &condition.Scanner[overridereferencesinverse.Processor]{
 }
 
 func init() {
+	condition.RegisterScanner(processorScanner)
 	Processor.ID = condition.NewField[overridereferencesinverse.Processor, model.UUID]("ID", "", "", processorScanner)
 	Processor.ComputerName = condition.NewStringField[overridereferencesinverse.Processor]("ComputerName", "", "", processorScanner)
 }

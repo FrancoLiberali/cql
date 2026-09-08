@@ -63,6 +63,7 @@ var package2Scanner = &condition.Scanner[package2.Package2]{
 }
 
 func init() {
+	condition.RegisterScanner(package2Scanner)
 	Package2.ID = condition.NewField[package2.Package2, model.UUID]("ID", "", "", package2Scanner)
 	Package2.Package1ID = condition.NewUpdatableField[package2.Package2, model.UUID]("Package1ID", "", "", package2Scanner)
 }

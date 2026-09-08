@@ -19,9 +19,9 @@ var scannerRegistry = map[reflect.Type]any{}
 // by resolving the scanner by type. Generated *_scanner.go files call this
 // from init().
 func RegisterScanner[T model.Model](s *Scanner[T]) {
-	var zero T
-
-	scannerRegistry[reflect.TypeOf(zero)] = s
+	// reflect.TypeFor[T]() reads T's type with no value boxing — a big model is
+	// never copied into an interface just to key the map.
+	scannerRegistry[reflect.TypeFor[T]()] = s
 }
 
 type Query[T model.Model] struct {
@@ -230,8 +230,7 @@ func resolveScanner[T model.Model](conditions []Condition[T]) *Scanner[T] {
 
 	// No condition carried the scanner (e.g. a no-condition query) — fall back
 	// to the per-type registry populated by generated init()s.
-	var zero T
-	if s, ok := scannerRegistry[reflect.TypeOf(zero)].(*Scanner[T]); ok {
+	if s, ok := scannerRegistry[reflect.TypeFor[T]()].(*Scanner[T]); ok {
 		return s
 	}
 

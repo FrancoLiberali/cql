@@ -67,6 +67,7 @@ var uIntModelWithTimestampScanner = &condition.Scanner[uintmodelwithtimestamp.UI
 }
 
 func init() {
+	condition.RegisterScanner(uIntModelWithTimestampScanner)
 	UIntModelWithTimestamp.ID = condition.NewField[uintmodelwithtimestamp.UIntModelWithTimestamp, model.UIntID]("ID", "", "", uIntModelWithTimestampScanner)
 	UIntModelWithTimestamp.CreatedAt = condition.NewField[uintmodelwithtimestamp.UIntModelWithTimestamp, time.Time]("CreatedAt", "", "", uIntModelWithTimestampScanner)
 }

@@ -61,11 +61,6 @@ var parent2Scanner = &condition.Scanner[models.Parent2]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(parent2Scanner)
-}
-
 var parent2ParentParentJoinScanner = &condition.RelationScanner[models.Parent2, models.ParentParent]{
 	ChildScanner: parentParentScanner,
 	Mount: func(p *models.Parent2, c *models.ParentParent) {
@@ -75,6 +70,7 @@ var parent2ParentParentJoinScanner = &condition.RelationScanner[models.Parent2, 
 }
 
 func init() {
+	condition.RegisterScanner(parent2Scanner)
 	Parent2.ID = condition.NewField[models.Parent2, model.UUID]("ID", "", "", parent2Scanner)
 	Parent2.ParentParentID = condition.NewUpdatableField[models.Parent2, model.UUID]("ParentParentID", "", "", parent2Scanner)
 }

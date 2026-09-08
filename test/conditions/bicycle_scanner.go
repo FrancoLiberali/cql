@@ -78,11 +78,6 @@ var bicycleScanner = &condition.Scanner[models.Bicycle]{
 		return values, nil
 	},
 }
-
-func init() {
-	condition.RegisterScanner(bicycleScanner)
-}
-
 var bicycleOwnerJoinScanner = &condition.RelationScanner[models.Bicycle, models.Person]{
 	ChildScanner: personScanner,
 	Mount: func(p *models.Bicycle, c *models.Person) {
@@ -92,6 +87,7 @@ var bicycleOwnerJoinScanner = &condition.RelationScanner[models.Bicycle, models.
 }
 
 func init() {
+	condition.RegisterScanner(bicycleScanner)
 	Bicycle.ID = condition.NewField[models.Bicycle, model.UUID]("ID", "", "", bicycleScanner)
 	Bicycle.Name = condition.NewStringField[models.Bicycle]("Name", "", "", bicycleScanner)
 	Bicycle.OwnerName = condition.NewStringField[models.Bicycle]("OwnerName", "", "", bicycleScanner)

@@ -63,6 +63,7 @@ var creditCardScanner = &condition.Scanner[overrideforeignkeyinverse.CreditCard]
 }
 
 func init() {
+	condition.RegisterScanner(creditCardScanner)
 	CreditCard.ID = condition.NewField[overrideforeignkeyinverse.CreditCard, model.UUID]("ID", "", "", creditCardScanner)
 	CreditCard.UserReference = condition.NewUpdatableField[overrideforeignkeyinverse.CreditCard, model.UUID]("UserReference", "", "", creditCardScanner)
 }

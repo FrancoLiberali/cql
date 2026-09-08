@@ -555,8 +555,6 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 
 func init() {
 	condition.RegisterScanner(allTypesScanner)
-}
-func init() {
 	AllTypes.ID = condition.NewField[models.AllTypes, model.UUID]("ID", "", "", allTypesScanner)
 	AllTypes.ValInt = condition.NewNumericField[models.AllTypes, int]("ValInt", "", "", allTypesScanner)
 	AllTypes.ValInt8 = condition.NewNumericField[models.AllTypes, int8]("ValInt8", "", "", allTypesScanner)

@@ -66,6 +66,7 @@ var columnDefinitionScanner = &condition.Scanner[columndefinition.ColumnDefiniti
 }
 
 func init() {
+	condition.RegisterScanner(columnDefinitionScanner)
 	ColumnDefinition.ID = condition.NewField[columndefinition.ColumnDefinition, model.UUID]("ID", "", "", columnDefinitionScanner)
 	ColumnDefinition.String = condition.NewStringField[columndefinition.ColumnDefinition]("String", "string_something_else", "", columnDefinitionScanner)
 }

@@ -52,5 +52,6 @@ var uintModelScanner = &condition.Scanner[uintmodel.UintModel]{
 }
 
 func init() {
+	condition.RegisterScanner(uintModelScanner)
 	UintModel.ID = condition.NewField[uintmodel.UintModel, model.UIntID]("ID", "", "", uintModelScanner)
 }
