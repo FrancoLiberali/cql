@@ -169,6 +169,13 @@ type AllTypes struct {
 	PtrBool    *bool
 	PtrString  *string
 	PtrTime    *time.Time
+
+	// database/sql nullable wrappers used directly as fields — these
+	// exercise the sql.NullInt16 / NullInt32 / NullByte scan pools that the
+	// sized int/uint value fields (which scan via NullInt64) never touch.
+	NullInt16 sql.NullInt16
+	NullInt32 sql.NullInt32
+	NullByte  sql.NullByte
 }
 
 type University struct {

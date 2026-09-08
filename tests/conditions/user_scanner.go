@@ -59,6 +59,17 @@ var userScanner = &condition.Scanner[models.User]{
 				if v.Valid {
 					dest.Age = uint(v.Int64)
 				}
+			case "birthday":
+				v, ok := values[i].(*sql.NullTime)
+				if !ok {
+					return fmt.Errorf("cql scanner birthday: bad type %T", values[i])
+				}
+				if v.Valid {
+					tmp := v.Time
+					dest.Birthday = &tmp
+				} else {
+					dest.Birthday = nil
+				}
 			case "company_id":
 				v, ok := values[i].(*sql.NullInt64)
 				if !ok {
@@ -109,6 +120,10 @@ var userScanner = &condition.Scanner[models.User]{
 				if v, ok := values[i].(*sql.NullInt64); ok {
 					condition.ReleaseNullInt64(v)
 				}
+			case "birthday":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
 			case "company_id":
 				if v, ok := values[i].(*sql.NullInt64); ok {
 					condition.ReleaseNullInt64(v)
@@ -140,6 +155,8 @@ var userScanner = &condition.Scanner[models.User]{
 				values[i] = condition.AcquireNullString()
 			case "age":
 				values[i] = condition.AcquireNullInt64()
+			case "birthday":
+				values[i] = condition.AcquireNullTime()
 			case "company_id":
 				values[i] = condition.AcquireNullInt64()
 			case "active":
@@ -151,6 +168,11 @@ var userScanner = &condition.Scanner[models.User]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(userScanner)
+}
+
 var userAccountJoinScanner = &condition.RelationScanner[models.User, models.Account]{
 	ChildScanner: accountScanner,
 	Mount: func(p *models.User, c *models.Account) {

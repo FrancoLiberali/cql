@@ -125,6 +125,9 @@ var petScanner = &condition.Scanner[models.Pet]{
 }
 
 func init() {
+	condition.RegisterScanner(petScanner)
+}
+func init() {
 	Pet.ID = condition.NewField[models.Pet, model.UIntID]("ID", "", "", petScanner)
 	Pet.CreatedAt = condition.NewField[models.Pet, time.Time]("CreatedAt", "", "", petScanner)
 	Pet.UpdatedAt = condition.NewField[models.Pet, time.Time]("UpdatedAt", "", "", petScanner)

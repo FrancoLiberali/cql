@@ -102,6 +102,11 @@ var childScanner = &condition.Scanner[models.Child]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(childScanner)
+}
+
 var childParent1JoinScanner = &condition.RelationScanner[models.Child, models.Parent1]{
 	ChildScanner: parent1Scanner,
 	Mount: func(p *models.Child, c *models.Parent1) {

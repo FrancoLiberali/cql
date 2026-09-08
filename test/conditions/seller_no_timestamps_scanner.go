@@ -98,6 +98,11 @@ var sellerNoTimestampsScanner = &condition.Scanner[models.SellerNoTimestamps]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(sellerNoTimestampsScanner)
+}
+
 var sellerNoTimestampsCompanyNoTimestampsJoinScanner = &condition.RelationScanner[models.SellerNoTimestamps, models.CompanyNoTimestamps]{
 	ChildScanner: companyNoTimestampsScanner,
 	Mount: func(p *models.SellerNoTimestamps, c *models.CompanyNoTimestamps) {

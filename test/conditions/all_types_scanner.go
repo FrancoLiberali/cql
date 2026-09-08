@@ -294,6 +294,35 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 				} else {
 					dest.PtrString = nil
 				}
+			case "ptr_time":
+				v, ok := values[i].(*sql.NullTime)
+				if !ok {
+					return fmt.Errorf("cql scanner ptr_time: bad type %T", values[i])
+				}
+				if v.Valid {
+					tmp := v.Time
+					dest.PtrTime = &tmp
+				} else {
+					dest.PtrTime = nil
+				}
+			case "null_int16":
+				v, ok := values[i].(*sql.NullInt16)
+				if !ok {
+					return fmt.Errorf("cql scanner null_int16: bad type %T", values[i])
+				}
+				dest.NullInt16 = *v
+			case "null_int32":
+				v, ok := values[i].(*sql.NullInt32)
+				if !ok {
+					return fmt.Errorf("cql scanner null_int32: bad type %T", values[i])
+				}
+				dest.NullInt32 = *v
+			case "null_byte":
+				v, ok := values[i].(*sql.NullByte)
+				if !ok {
+					return fmt.Errorf("cql scanner null_byte: bad type %T", values[i])
+				}
+				dest.NullByte = *v
 			}
 		}
 		return nil
@@ -421,6 +450,22 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 				if v, ok := values[i].(*sql.NullString); ok {
 					condition.ReleaseNullString(v)
 				}
+			case "ptr_time":
+				if v, ok := values[i].(*sql.NullTime); ok {
+					condition.ReleaseNullTime(v)
+				}
+			case "null_int16":
+				if v, ok := values[i].(*sql.NullInt16); ok {
+					condition.ReleaseNullInt16(v)
+				}
+			case "null_int32":
+				if v, ok := values[i].(*sql.NullInt32); ok {
+					condition.ReleaseNullInt32(v)
+				}
+			case "null_byte":
+				if v, ok := values[i].(*sql.NullByte); ok {
+					condition.ReleaseNullByte(v)
+				}
 			default:
 				if v, ok := values[i].(*condition.NullSink); ok {
 					condition.ReleaseNullSink(v)
@@ -492,6 +537,14 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 				values[i] = condition.AcquireNullBool()
 			case "ptr_string":
 				values[i] = condition.AcquireNullString()
+			case "ptr_time":
+				values[i] = condition.AcquireNullTime()
+			case "null_int16":
+				values[i] = condition.AcquireNullInt16()
+			case "null_int32":
+				values[i] = condition.AcquireNullInt32()
+			case "null_byte":
+				values[i] = condition.AcquireNullByte()
 			default:
 				values[i] = condition.AcquireNullSink()
 			}
@@ -500,6 +553,9 @@ var allTypesScanner = &condition.Scanner[models.AllTypes]{
 	},
 }
 
+func init() {
+	condition.RegisterScanner(allTypesScanner)
+}
 func init() {
 	AllTypes.ID = condition.NewField[models.AllTypes, model.UUID]("ID", "", "", allTypesScanner)
 	AllTypes.ValInt = condition.NewNumericField[models.AllTypes, int]("ValInt", "", "", allTypesScanner)
@@ -532,4 +588,7 @@ func init() {
 	AllTypes.PtrBool = condition.NewNullableBoolField[models.AllTypes]("PtrBool", "", "", allTypesScanner)
 	AllTypes.PtrString = condition.NewNullableStringField[models.AllTypes]("PtrString", "", "", allTypesScanner)
 	AllTypes.PtrTime = condition.NewNullableField[models.AllTypes, time.Time]("PtrTime", "", "", allTypesScanner)
+	AllTypes.NullInt16 = condition.NewNullableNumericField[models.AllTypes, int16]("NullInt16", "", "", allTypesScanner)
+	AllTypes.NullInt32 = condition.NewNullableNumericField[models.AllTypes, int32]("NullInt32", "", "", allTypesScanner)
+	AllTypes.NullByte = condition.NewNullableNumericField[models.AllTypes, int8]("NullByte", "", "", allTypesScanner)
 }

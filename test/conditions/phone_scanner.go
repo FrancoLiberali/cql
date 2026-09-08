@@ -120,6 +120,11 @@ var phoneScanner = &condition.Scanner[models.Phone]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(phoneScanner)
+}
+
 var phoneBrandJoinScanner = &condition.RelationScanner[models.Phone, models.Brand]{
 	ChildScanner: brandScanner,
 	Mount: func(p *models.Phone, c *models.Brand) {

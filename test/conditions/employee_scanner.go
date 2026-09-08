@@ -81,6 +81,11 @@ var employeeScanner = &condition.Scanner[models.Employee]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(employeeScanner)
+}
+
 var employeeBossJoinScanner = &condition.RelationScanner[models.Employee, models.Employee]{
 	ChildScanner: employeeScanner,
 	Mount: func(p *models.Employee, c *models.Employee) {

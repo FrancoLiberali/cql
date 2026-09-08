@@ -1,10 +1,28 @@
 package condition
 
 import (
+	"reflect"
+
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql/model"
 )
+
+// scannerRegistry maps a model type to its generated *Scanner[T]. It is
+// written only from the init() functions cql-gen emits in each *_scanner.go
+// (which all run before main, single-threaded), and read-only afterwards, so a
+// plain map is safe for the concurrent reads that happen during queries.
+var scannerRegistry = map[reflect.Type]any{}
+
+// RegisterScanner records the per-model Scanner so a Query built without any
+// conditions (e.g. Query[T](ctx, db).Find()) can still take the fast-scan path
+// by resolving the scanner by type. Generated *_scanner.go files call this
+// from init().
+func RegisterScanner[T model.Model](s *Scanner[T]) {
+	var zero T
+
+	scannerRegistry[reflect.TypeOf(zero)] = s
+}
 
 type Query[T model.Model] struct {
 	cqlQuery *CQLQuery
@@ -208,6 +226,13 @@ func resolveScanner[T model.Model](conditions []Condition[T]) *Scanner[T] {
 		if s, ok := sp.getScannerErased().(*Scanner[T]); ok && s != nil {
 			return s
 		}
+	}
+
+	// No condition carried the scanner (e.g. a no-condition query) — fall back
+	// to the per-type registry populated by generated init()s.
+	var zero T
+	if s, ok := scannerRegistry[reflect.TypeOf(zero)].(*Scanner[T]); ok {
+		return s
 	}
 
 	return nil

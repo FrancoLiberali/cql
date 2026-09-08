@@ -98,6 +98,11 @@ var sellerScanner = &condition.Scanner[models.Seller]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(sellerScanner)
+}
+
 var sellerCompanyJoinScanner = &condition.RelationScanner[models.Seller, models.Company]{
 	ChildScanner: companyScanner,
 	Mount: func(p *models.Seller, c *models.Company) {

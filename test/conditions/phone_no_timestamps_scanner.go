@@ -78,6 +78,11 @@ var phoneNoTimestampsScanner = &condition.Scanner[models.PhoneNoTimestamps]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(phoneNoTimestampsScanner)
+}
+
 var phoneNoTimestampsBrandJoinScanner = &condition.RelationScanner[models.PhoneNoTimestamps, models.Brand]{
 	ChildScanner: brandScanner,
 	Mount: func(p *models.PhoneNoTimestamps, c *models.Brand) {

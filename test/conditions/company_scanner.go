@@ -106,6 +106,11 @@ var companyScanner = &condition.Scanner[models.Company]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(companyScanner)
+}
+
 var companySellersHasManyLoader = &condition.HasManyLoader[models.Company, models.Seller]{
 	BuildQuery: func(tx *gorm.DB, parentIDs []any, nested []condition.Condition[models.Seller]) (*condition.Query[models.Seller], error) {
 		typedIDs := make([]condition.ValueOfType[model.UUID], len(parentIDs))

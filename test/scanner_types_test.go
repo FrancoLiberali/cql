@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"database/sql"
 	"math"
 	"time"
 
@@ -72,10 +73,16 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsEveryScalarTypeWithVal
 		PtrBool:    &bp,
 		PtrString:  &sp,
 		PtrTime:    &tp,
+
+		NullInt16: sql.NullInt16{Int16: 1616, Valid: true},
+		NullInt32: sql.NullInt32{Int32: 323232, Valid: true},
+		NullByte:  sql.NullByte{Byte: 200, Valid: true},
 	}
 
 	create(&ts.testSuite, in)
 
+	// no conditions: the scanner is resolved by type from the registry, so
+	// this still takes the fast-scan path.
 	got, err := cql.Query[models.AllTypes](
 		context.Background(),
 		ts.db,
@@ -130,6 +137,11 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsEveryScalarTypeWithVal
 	ts.Equal(*in.PtrString, *got.PtrString)
 	ts.Require().NotNil(got.PtrTime)
 	ts.WithinDuration(*in.PtrTime, *got.PtrTime, time.Second)
+
+	// sql.Null* wrapper fields (scanned via the NullInt16/32/Byte pools)
+	ts.Equal(in.NullInt16, got.NullInt16)
+	ts.Equal(in.NullInt32, got.NullInt32)
+	ts.Equal(in.NullByte, got.NullByte)
 }
 
 // TestFastScanRoundTripsNilPointers inserts a row whose every pointer field is
@@ -173,4 +185,9 @@ func (ts *ScannerTypesIntTestSuite) TestFastScanRoundTripsNilPointers() {
 	ts.Nil(got.PtrBool)
 	ts.Nil(got.PtrString)
 	ts.Nil(got.PtrTime)
+
+	// zero sql.Null* wrappers round-trip as NULL (Valid == false)
+	ts.False(got.NullInt16.Valid)
+	ts.False(got.NullInt32.Valid)
+	ts.False(got.NullByte.Valid)
 }

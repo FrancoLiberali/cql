@@ -66,6 +66,9 @@ var brandScanner = &condition.Scanner[models.Brand]{
 }
 
 func init() {
+	condition.RegisterScanner(brandScanner)
+}
+func init() {
 	Brand.ID = condition.NewField[models.Brand, model.UIntID]("ID", "", "", brandScanner)
 	Brand.Name = condition.NewStringField[models.Brand]("Name", "", "", brandScanner)
 }

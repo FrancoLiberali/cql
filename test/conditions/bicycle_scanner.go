@@ -78,6 +78,11 @@ var bicycleScanner = &condition.Scanner[models.Bicycle]{
 		return values, nil
 	},
 }
+
+func init() {
+	condition.RegisterScanner(bicycleScanner)
+}
+
 var bicycleOwnerJoinScanner = &condition.RelationScanner[models.Bicycle, models.Person]{
 	ChildScanner: personScanner,
 	Mount: func(p *models.Bicycle, c *models.Person) {

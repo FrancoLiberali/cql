@@ -365,6 +365,8 @@ func (sg ScannerGenerator) classifyField(field Field) (scannerField, bool, error
 				return pointerUUIDField(colName, dest), true, nil
 			case modelPath + "." + uIntID:
 				return pointerUIntIDField(colName, dest), true, nil
+			case timeType:
+				return pointerTimeField(colName, dest), true, nil
 			}
 			// Unknown pointer-to-named — skip (gorm fallback handles).
 		}
@@ -810,6 +812,36 @@ func timeField(col string, dest *jen.Statement) scannerField {
 	}
 }
 
+// pointerTimeField scans a *time.Time column into a pooled sql.NullTime,
+// assigning &time when valid and nil otherwise — the pointer counterpart of
+// timeField.
+func pointerTimeField(col string, dest *jen.Statement) scannerField {
+	return scannerField{
+		columnName: col,
+		valueExpr:  jen.Qual(conditionPath, "AcquireNullTime").Call(),
+		assignFn: func(idx string) []jen.Code {
+			vAssertion := jen.List(jen.Id("v"), jen.Id("ok")).Op(":=").Add(
+				jen.Id("values").Index(jen.Id(idx)).Assert(jen.Op("*").Qual("database/sql", "NullTime")),
+			)
+			notOk := jen.If(jen.Op("!").Id("ok")).Block(
+				jen.Return(jen.Qual("fmt", "Errorf").Call(
+					jen.Lit("cql scanner "+col+": bad type %T"),
+					jen.Id("values").Index(jen.Id(idx)),
+				)),
+			)
+			validBranch := jen.If(jen.Id("v").Dot("Valid")).Block(
+				jen.Id("tmp").Op(":=").Id("v").Dot("Time"),
+				dest.Clone().Op("=").Op("&").Id("tmp"),
+			).Else().Block(
+				dest.Clone().Op("=").Nil(),
+			)
+
+			return []jen.Code{vAssertion, notOk, validBranch}
+		},
+		releaseFn: releaseNullFn("NullTime"),
+	}
+}
+
 func nullableTypeField(col string, dest *jen.Statement, typeV Type) scannerField {
 	typeQual := jen.Qual(typeV.Pkg().Path(), typeV.Name())
 
@@ -969,6 +1001,15 @@ func (sg ScannerGenerator) emitScannerVar(file *File, objectQual *jen.Statement,
 				jen.Id("AssignValues"):  buildAssignValuesFn(objectQual, fields),
 				jen.Id("ReleaseValues"): buildReleaseValuesFn(fields),
 			},
+		),
+	)
+
+	// Register the scanner by type so no-condition queries can still take the
+	// fast-scan path (Query[T](ctx, db).Find() carries no condition to resolve
+	// the scanner from).
+	file.Add(
+		jen.Func().Id("init").Params().Block(
+			jen.Qual(conditionPath, "RegisterScanner").Call(jen.Id(varName)),
 		),
 	)
 }

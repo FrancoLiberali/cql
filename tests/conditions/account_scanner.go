@@ -120,6 +120,9 @@ var accountScanner = &condition.Scanner[models.Account]{
 }
 
 func init() {
+	condition.RegisterScanner(accountScanner)
+}
+func init() {
 	Account.ID = condition.NewField[models.Account, model.UIntID]("ID", "", "", accountScanner)
 	Account.CreatedAt = condition.NewField[models.Account, time.Time]("CreatedAt", "", "", accountScanner)
 	Account.UpdatedAt = condition.NewField[models.Account, time.Time]("UpdatedAt", "", "", accountScanner)
