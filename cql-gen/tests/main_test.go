@@ -340,6 +340,26 @@ func TestHasMany(t *testing.T) {
 	})
 }
 
+// TestHasManyUintParent covers the has-many loader generator branches specific
+// to a UInt-keyed parent (parentPKIsUUID=false, parentPKTypeName -> UIntID,
+// childFKExtractor -> NilUIntID) that the UUID-parent fixtures don't reach.
+func TestHasManyUintParent(t *testing.T) {
+	doTest(t, "./hasmanyuint", []Comparison{
+		{
+			Have:            "company_uint_conditions.go",
+			Expected:        "./results/hasmanyuint_company.go",
+			ScannerHave:     "company_uint_scanner.go",
+			ScannerExpected: "./results/hasmanyuint_company_scanner.go",
+		},
+		{
+			Have:            "seller_uint_conditions.go",
+			Expected:        "./results/hasmanyuint_seller.go",
+			ScannerHave:     "seller_uint_scanner.go",
+			ScannerExpected: "./results/hasmanyuint_seller_scanner.go",
+		},
+	})
+}
+
 func TestHasManyWithPointers(t *testing.T) {
 	doTest(t, "./hasmanywithpointers", []Comparison{
 		{
