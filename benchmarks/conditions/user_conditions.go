@@ -4,7 +4,7 @@ package conditions
 import (
 	condition "github.com/FrancoLiberali/cql/condition"
 	model "github.com/FrancoLiberali/cql/model"
-	models "github.com/FrancoLiberali/cql/tests/models"
+	models "github.com/FrancoLiberali/cql/benchmarks/models"
 	"time"
 )
 

@@ -16,7 +16,7 @@
 //
 // Shares openDB / newUser from benchmark_test.go (same package).
 
-package tests_test
+package benchmarks_test
 
 import (
 	"context"
@@ -24,8 +24,8 @@ import (
 	"testing"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/tests/conditions"
-	"github.com/FrancoLiberali/cql/tests/models"
+	"github.com/FrancoLiberali/cql/benchmarks/conditions"
+	"github.com/FrancoLiberali/cql/benchmarks/models"
 )
 
 // -- helpers ---------------------------------------------------------

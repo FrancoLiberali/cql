@@ -15,7 +15,7 @@
 //
 // Shape parity with gorm:
 //
-//	gorm/tests/benchmark_test.go       cql/tests/benchmark_test.go
+//	gorm/tests/benchmark_test.go       cql/benchmarks/benchmark_test.go
 //	--------------------------------   --------------------------------
 //	BenchmarkCreate
 //	BenchmarkFind (PK, 1 row)          BenchmarkFind
@@ -24,7 +24,7 @@
 //	BenchmarkScanSlicePointer
 //	BenchmarkUpdate
 //	BenchmarkDelete
-package tests_test
+package benchmarks_test
 
 import (
 	"context"
@@ -36,8 +36,8 @@ import (
 	gormlogger "gorm.io/gorm/logger"
 
 	"github.com/FrancoLiberali/cql"
-	"github.com/FrancoLiberali/cql/tests/conditions"
-	"github.com/FrancoLiberali/cql/tests/models"
+	"github.com/FrancoLiberali/cql/benchmarks/conditions"
+	"github.com/FrancoLiberali/cql/benchmarks/models"
 )
 
 func openDB(b *testing.B) *cql.DB {
