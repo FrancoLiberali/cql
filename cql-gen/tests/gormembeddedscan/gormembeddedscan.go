@@ -16,7 +16,7 @@ type Inner struct {
 type GormEmbeddedScan struct {
 	model.UIntModel
 
-	Top  int
-	Foo  Inner `gorm:"embedded;embeddedPrefix:foo_"`
-	Bar  Inner `gorm:"embedded;embeddedPrefix:bar_"`
+	Top int
+	Foo Inner `gorm:"embedded;embeddedPrefix:foo_"`
+	Bar Inner `gorm:"embedded;embeddedPrefix:bar_"`
 }

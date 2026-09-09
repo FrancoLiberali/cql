@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/spf13/viper"
@@ -111,15 +112,29 @@ func TestBasicTypes(t *testing.T) {
 // implementing sql.Scanner + driver.Valuer (see TestCustomType) — that path
 // bypasses this check.
 func TestUnsupportedBasicTypes(t *testing.T) {
+	// The first field in the model is UIntptr, so the panic names it (it
+	// panics on the first offending field encountered).
+	expectPanicWithError(t, "field UIntptr", "unsupported_basic_types_conditions.go", func() {
+		doTest(t, "./unsupportedbasictypes", nil)
+	})
+}
+
+// expectPanicWithError runs fn and asserts it panics with an error whose
+// message contains want. staleFile is removed first: scanner validation panics
+// before any conditions file is written, so nothing should be on disk, but this
+// defends against a stale partial file if that ever changes. Shared by the
+// negative generation tests (TestUnsupportedBasicTypes, TestGormEmbedded).
+func expectPanicWithError(t *testing.T, want, staleFile string, fn func()) {
+	t.Helper()
+
 	defer func() {
-		// Scanner validation runs before conditions are written, so no
-		// stale file should be on disk — but defensively clean up if
-		// behavior ever changes.
-		RemoveFile("unsupported_basic_types_conditions.go")
+		if staleFile != "" {
+			RemoveFile(staleFile)
+		}
 
 		r := recover()
 		if r == nil {
-			t.Fatal("expected cql-gen to panic on UnsupportedBasicTypes")
+			t.Fatalf("expected cql-gen to panic with an error containing %q", want)
 		}
 
 		err, _ := r.(error)
@@ -127,27 +142,12 @@ func TestUnsupportedBasicTypes(t *testing.T) {
 			t.Fatalf("expected error panic, got %T: %v", r, r)
 		}
 
-		// The first field in the model is UIntptr, so the panic should
-		// name it (panics on the first offending field encountered).
-		const want = "field UIntptr"
-		if !containsSub(err.Error(), want) {
+		if !strings.Contains(err.Error(), want) {
 			t.Fatalf("panic message %q should contain %q", err.Error(), want)
 		}
 	}()
 
-	doTest(t, "./unsupportedbasictypes", nil)
-}
-
-// containsSub is strings.Contains spelled out to avoid reshuffling this
-// file's import block. Used by TestUnsupportedBasicTypes' panic check.
-func containsSub(s, sub string) bool {
-	for i := 0; i+len(sub) <= len(s); i++ {
-		if s[i:i+len(sub)] == sub {
-			return true
-		}
-	}
-
-	return false
+	fn()
 }
 
 func TestBasicPointers(t *testing.T) {
@@ -171,65 +171,43 @@ func TestBasicSlicesPointer(t *testing.T) {
 	CheckFileNotExists(t, "./basicslicespointer/cql.go")
 }
 
-// TestGoEmbedded covers the negative case for Go-style anonymous embeds:
-// both top-level Int and ToBeEmbedded.Int resolve to column "int". cql-gen's
-// scanner generator refuses to emit because the duplicate switch case
-// wouldn't compile AND gorm would reject the table at AutoMigrate. The
-// conditions file is still emitted (cql-gen historically accepts ambiguous
-// models there).
+// TestGoEmbedded covers the negative case for Go-style anonymous embeds: both
+// top-level Int and ToBeEmbedded.Int resolve to column "int". The scanner
+// generator refuses to emit because the duplicate switch case wouldn't compile
+// AND gorm would reject the table at AutoMigrate. Scanner validation runs
+// before the conditions file is written, so generation panics with a
+// DuplicateColumnError naming column "int" and no file is emitted.
 func TestGoEmbedded(t *testing.T) {
-	defer func() {
-		RemoveFile("go_embedded_conditions.go")
-
-		r := recover()
-		if r == nil {
-			t.Fatal("expected cql-gen to panic on GoEmbedded (column \"int\" collision)")
-		}
-
-		err, _ := r.(error)
-		if err == nil {
-			t.Fatalf("expected error panic, got %T: %v", r, r)
-		}
-
-		const want = "column \"int\""
-		if !containsSub(err.Error(), want) {
-			t.Fatalf("panic message %q should contain %q", err.Error(), want)
-		}
-	}()
-
-	doTest(t, "./goembedded", []Comparison{
-		{Have: "go_embedded_conditions.go", Expected: "./results/goembedded.go"},
+	expectPanicWithError(t, `column "int"`, "go_embedded_conditions.go", func() {
+		doTest(t, "./goembedded", nil)
 	})
+}
+
+// TestGoEmbeddedScan is the positive case for Go-style anonymous embeds: Inner
+// is embedded with no column collision, so cql-gen emits conditions and a
+// scanner that threads the Go access path to the promoted field.
+func TestGoEmbeddedScan(t *testing.T) {
+	doTest(t, "./goembeddedscan", []Comparison{
+		{
+			Have:            "go_embedded_scan_conditions.go",
+			Expected:        "./results/goembeddedscan.go",
+			ScannerHave:     "go_embedded_scan_scanner.go",
+			ScannerExpected: "./results/goembeddedscan_scanner.go",
+		},
+	})
+	CheckFileNotExists(t, "./goembeddedscan/cql.go")
 }
 
 // TestGormEmbedded covers the negative case for gorm:"embedded": two fields
 // (top-level Int and GormEmbeddedNoPrefix.Int with no prefix) resolve to the
-// same column "int". cql-gen now refuses to generate the scanner for such a
-// model because (a) the duplicate case wouldn't compile and (b) gorm itself
-// would reject the table at AutoMigrate. The conditions file is still
-// emitted (cql-gen historically accepts ambiguous models there).
+// same column "int". cql-gen refuses to generate the scanner for such a model
+// because (a) the duplicate case wouldn't compile and (b) gorm itself would
+// reject the table at AutoMigrate. Scanner validation runs before the
+// conditions file is written, so generation panics with a DuplicateColumnError
+// naming column "int" and no file is emitted.
 func TestGormEmbedded(t *testing.T) {
-	defer func() {
-		RemoveFile("gorm_embedded_conditions.go")
-
-		r := recover()
-		if r == nil {
-			t.Fatal("expected cql-gen to panic on GormEmbedded (column \"int\" collision)")
-		}
-
-		err, _ := r.(error)
-		if err == nil {
-			t.Fatalf("expected error panic, got %T: %v", r, r)
-		}
-
-		const want = "column \"int\""
-		if !containsSub(err.Error(), want) {
-			t.Fatalf("panic message %q should contain %q", err.Error(), want)
-		}
-	}()
-
-	doTest(t, "./gormembedded", []Comparison{
-		{Have: "gorm_embedded_conditions.go", Expected: "./results/gormembedded.go"},
+	expectPanicWithError(t, `column "int"`, "gorm_embedded_conditions.go", func() {
+		doTest(t, "./gormembedded", nil)
 	})
 }
 
@@ -594,8 +572,9 @@ func checkFilesEqual(t *testing.T, file1, file2 string) {
 	// generated one (file1). Run `UPDATE_GOLDEN=1 go test ./...` after changing
 	// the generator, then re-run without it to confirm.
 	if os.Getenv("UPDATE_GOLDEN") != "" {
+		// file1/file2 are the test's own Comparison paths, not external input.
 		if data, err := os.ReadFile(file1); err == nil {
-			if err := os.WriteFile(file2, data, 0o600); err != nil {
+			if err := os.WriteFile(file2, data, 0o600); err != nil { //nolint:gosec // G703: test-controlled golden path
 				t.Fatal(err)
 			}
 		}
