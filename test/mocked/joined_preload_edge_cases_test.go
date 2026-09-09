@@ -1,4 +1,4 @@
-package cql
+package mocked
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -63,7 +64,7 @@ func TestJoinedPreloadFastScan_SameModelTwiceUnderDifferentRelations(t *testing.
 		),
 	)
 
-	children, err := Query[models.Child](
+	children, err := cql.Query[models.Child](
 		context.Background(),
 		db,
 		conditions.Child.Parent1(
@@ -122,7 +123,7 @@ func TestJoinedPreloadFastScan_SelfReferentialDeep(t *testing.T) {
 		),
 	)
 
-	employees, err := Query[models.Employee](
+	employees, err := cql.Query[models.Employee](
 		context.Background(),
 		db,
 		conditions.Employee.Boss(

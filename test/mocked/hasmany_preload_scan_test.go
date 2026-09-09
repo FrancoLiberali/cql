@@ -1,4 +1,4 @@
-package cql
+package mocked
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
+	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -51,7 +52,7 @@ func TestHasManyPreloadFastScan_Basic(t *testing.T) {
 				AddRow(newUUID("33333333-3333-3333-3333-333333333333"), "carol", companyB, nil),
 		)
 
-	companies, err := Query[models.Company](
+	companies, err := cql.Query[models.Company](
 		context.Background(),
 		db,
 		conditions.Company.Sellers.Preload(),
@@ -79,7 +80,7 @@ func TestHasManyPreloadFastScan_Basic(t *testing.T) {
 // "nesting" shape for HasMany: Company.Sellers.Preload(Seller.University().Preload()).
 // The inner Seller.University() is a JoinCondition that flows through
 // HasManyLoader.BuildQuery as the `nested` slice, becoming a condition on
-// the internal Query[Seller]. That Query[Seller] then registers its own
+// the internal cql.Query[Seller]. That cql.Query[Seller] then registers its own
 // activeJoin for University and runs a single JOIN-style child SELECT.
 //
 // Validates that the whole chain stays on the fast path: one main query +
@@ -117,7 +118,7 @@ func TestHasManyPreloadFastScan_WithNestedJoinedPreload(t *testing.T) {
 				AddRow(newUUID("33333333-3333-3333-3333-333333333333"), "carol", companyB, uniX, uniX, "MIT"),
 		)
 
-	companies, err := Query[models.Company](
+	companies, err := cql.Query[models.Company](
 		context.Background(),
 		db,
 		conditions.Company.Sellers.Preload(
@@ -189,7 +190,7 @@ func TestHasManyPreloadFastScan_First(t *testing.T) {
 				AddRow(newUUID("22222222-2222-2222-2222-222222222222"), "bob", companyA, nil),
 		)
 
-	company, err := Query[models.Company](
+	company, err := cql.Query[models.Company](
 		context.Background(),
 		db,
 		conditions.Company.Sellers.Preload(),
@@ -218,7 +219,7 @@ func TestHasManyPreloadFastScan_EmptyParentSet(t *testing.T) {
 
 	// NO second query mocked — loader must skip when parents is empty.
 
-	companies, err := Query[models.Company](
+	companies, err := cql.Query[models.Company](
 		context.Background(),
 		db,
 		conditions.Company.Sellers.Preload(),

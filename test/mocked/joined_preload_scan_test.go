@@ -1,4 +1,4 @@
-package cql
+package mocked
 
 import (
 	"context"
@@ -9,6 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"gorm.io/driver/postgres"
 
+	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -16,13 +17,13 @@ import (
 // joinedPreloadDB wires sqlmock + gorm + cql exactly the same way
 // scanner_fast_path_test.go does, so the assertions focus on the new
 // joined-preload behavior.
-func joinedPreloadDB(t *testing.T) (*DB, sqlmock.Sqlmock, func()) {
+func joinedPreloadDB(t *testing.T) (*cql.DB, sqlmock.Sqlmock, func()) {
 	t.Helper()
 
 	conn, mock, err := sqlmock.New()
 	require.NoError(t, err)
 
-	db, err := Open(postgres.New(postgres.Config{Conn: conn}))
+	db, err := cql.Open(postgres.New(postgres.Config{Conn: conn}))
 	require.NoError(t, err)
 
 	return db, mock, func() { conn.Close() }
@@ -59,7 +60,7 @@ func TestJoinedPreloadFastScan_DirectBelongsTo(t *testing.T) {
 			),
 		)
 
-	phones, err := Query[models.Phone](
+	phones, err := cql.Query[models.Phone](
 		context.Background(),
 		db,
 		phoneBrandJoin().Preload(),
@@ -96,7 +97,7 @@ func TestJoinedPreloadFastScan_LeftJoinNoMatch(t *testing.T) {
 			),
 		)
 
-	phones, err := Query[models.Phone](
+	phones, err := cql.Query[models.Phone](
 		context.Background(),
 		db,
 		phoneBrandJoin().Preload(),
@@ -136,11 +137,11 @@ func TestJoinedPreloadFastScan_PreloadPlusFilterOnChild(t *testing.T) {
 			),
 		)
 
-	phones, err := Query[models.Phone](
+	phones, err := cql.Query[models.Phone](
 		context.Background(),
 		db,
 		phoneBrandJoin(
-			conditions.Brand.Name.Is().Eq(String("acme")),
+			conditions.Brand.Name.Is().Eq(cql.String("acme")),
 		).Preload(),
 	).Find()
 
@@ -202,7 +203,7 @@ func TestJoinedPreloadFastScan_Nested(t *testing.T) {
 			),
 		)
 
-	sales, err := Query[models.Sale](
+	sales, err := cql.Query[models.Sale](
 		context.Background(),
 		db,
 		conditions.Sale.Seller(
@@ -256,11 +257,11 @@ func TestJoinedPreloadFastScan_JoinWithoutPreload(t *testing.T) {
 			),
 		)
 
-	phones, err := Query[models.Phone](
+	phones, err := cql.Query[models.Phone](
 		context.Background(),
 		db,
 		phoneBrandJoin(
-			conditions.Brand.Name.Is().Eq(String("acme")),
+			conditions.Brand.Name.Is().Eq(cql.String("acme")),
 		), // NO .Preload() — pure filter
 	).Find()
 

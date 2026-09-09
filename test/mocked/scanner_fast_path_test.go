@@ -1,4 +1,4 @@
-package cql
+package mocked
 
 import (
 	"context"
@@ -10,6 +10,7 @@ import (
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 
+	"github.com/FrancoLiberali/cql"
 	"github.com/FrancoLiberali/cql/test/conditions"
 	"github.com/FrancoLiberali/cql/test/models"
 )
@@ -23,13 +24,13 @@ import (
 // Any query built from those fields will pick up the scanner in
 // resolveScanner and dispatch findWith/firstWith/takeWith/lastWith.
 
-func openMockedDB(t *testing.T) (*DB, sqlmock.Sqlmock, func()) {
+func openMockedDB(t *testing.T) (*cql.DB, sqlmock.Sqlmock, func()) {
 	t.Helper()
 
 	conn, mock, err := sqlmock.New()
 	require.NoError(t, err)
 
-	db, err := Open(postgres.New(postgres.Config{Conn: conn}))
+	db, err := cql.Open(postgres.New(postgres.Config{Conn: conn}))
 	require.NoError(t, err)
 
 	return db, mock, func() { conn.Close() }
@@ -47,10 +48,10 @@ func TestScannerFastPath_Find(t *testing.T) {
 				AddRow(2, "acme"),
 		)
 
-	brands, err := Query[models.Brand](
+	brands, err := cql.Query[models.Brand](
 		context.Background(),
 		db,
-		conditions.Brand.Name.Is().Eq(String("acme")),
+		conditions.Brand.Name.Is().Eq(cql.String("acme")),
 	).Find()
 
 	require.NoError(t, err)
@@ -74,10 +75,10 @@ func TestScannerFastPath_First(t *testing.T) {
 			sqlmock.NewRows([]string{"id", "name"}).AddRow(7, "acme"),
 		)
 
-	brand, err := Query[models.Brand](
+	brand, err := cql.Query[models.Brand](
 		context.Background(),
 		db,
-		conditions.Brand.Name.Is().Eq(String("acme")),
+		conditions.Brand.Name.Is().Eq(cql.String("acme")),
 	).First()
 
 	require.NoError(t, err)
@@ -96,10 +97,10 @@ func TestScannerFastPath_FirstReturnsErrRecordNotFound(t *testing.T) {
 		WithArgs("missing", 1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}))
 
-	_, err := Query[models.Brand](
+	_, err := cql.Query[models.Brand](
 		context.Background(),
 		db,
-		conditions.Brand.Name.Is().Eq(String("missing")),
+		conditions.Brand.Name.Is().Eq(cql.String("missing")),
 	).First()
 
 	require.ErrorIs(t, err, gorm.ErrRecordNotFound)
@@ -114,10 +115,10 @@ func TestScannerFastPath_Take(t *testing.T) {
 		WithArgs("acme", 1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(42, "acme"))
 
-	brand, err := Query[models.Brand](
+	brand, err := cql.Query[models.Brand](
 		context.Background(),
 		db,
-		conditions.Brand.Name.Is().Eq(String("acme")),
+		conditions.Brand.Name.Is().Eq(cql.String("acme")),
 	).Take()
 
 	require.NoError(t, err)
@@ -135,10 +136,10 @@ func TestScannerFastPath_Last(t *testing.T) {
 		WithArgs("acme", 1).
 		WillReturnRows(sqlmock.NewRows([]string{"id", "name"}).AddRow(99, "acme"))
 
-	brand, err := Query[models.Brand](
+	brand, err := cql.Query[models.Brand](
 		context.Background(),
 		db,
-		conditions.Brand.Name.Is().Eq(String("acme")),
+		conditions.Brand.Name.Is().Eq(cql.String("acme")),
 	).Last()
 
 	require.NoError(t, err)
@@ -162,10 +163,10 @@ func TestScannerFastPath_ToleratesUnknownColumn(t *testing.T) {
 				AddRow(1, "acme", "ignored"),
 		)
 
-	brands, err := Query[models.Brand](
+	brands, err := cql.Query[models.Brand](
 		context.Background(),
 		db,
-		conditions.Brand.Name.Is().Eq(String("acme")),
+		conditions.Brand.Name.Is().Eq(cql.String("acme")),
 	).Find()
 
 	require.NoError(t, err)
