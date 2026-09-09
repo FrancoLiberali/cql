@@ -18,16 +18,16 @@ var sellerInPointersScanner = &condition.Scanner[hasmanywithpointers.SellerInPoi
 					return fmt.Errorf("cql scanner id: bad type %T", values[i])
 				}
 				dest.ID = *v
-			case "company_id":
+			case "company_with_pointers_id":
 				v, ok := values[i].(*model.UUID)
 				if !ok {
-					return fmt.Errorf("cql scanner company_id: bad type %T", values[i])
+					return fmt.Errorf("cql scanner company_with_pointers_id: bad type %T", values[i])
 				}
 				if *v == model.NilUUID {
-					dest.CompanyID = nil
+					dest.CompanyWithPointersID = nil
 				} else {
 					tmp := *v
-					dest.CompanyID = &tmp
+					dest.CompanyWithPointersID = &tmp
 				}
 			}
 		}
@@ -38,7 +38,7 @@ var sellerInPointersScanner = &condition.Scanner[hasmanywithpointers.SellerInPoi
 			switch c {
 			case "id":
 				condition.ReleaseUUID(values[i])
-			case "company_id":
+			case "company_with_pointers_id":
 				condition.ReleaseUUID(values[i])
 			default:
 				condition.ReleaseNullSink(values[i])
@@ -51,7 +51,7 @@ var sellerInPointersScanner = &condition.Scanner[hasmanywithpointers.SellerInPoi
 			switch c {
 			case "id":
 				values[i] = condition.AcquireUUID()
-			case "company_id":
+			case "company_with_pointers_id":
 				values[i] = condition.AcquireUUID()
 			default:
 				values[i] = condition.AcquireNullSink()
@@ -60,19 +60,19 @@ var sellerInPointersScanner = &condition.Scanner[hasmanywithpointers.SellerInPoi
 		return values, nil
 	},
 }
-var sellerInPointersCompanyJoinScanner = &condition.RelationScanner[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers]{
+var sellerInPointersCompanyWithPointersJoinScanner = &condition.RelationScanner[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers]{
 	ChildScanner: companyWithPointersScanner,
 	Mount: func(p *hasmanywithpointers.SellerInPointers, c *hasmanywithpointers.CompanyWithPointers) {
-		p.Company = c
+		p.CompanyWithPointers = c
 	},
-	RelationField: "Company",
+	RelationField: "CompanyWithPointers",
 	SetNil: func(p *hasmanywithpointers.SellerInPointers) {
-		p.Company = nil
+		p.CompanyWithPointers = nil
 	},
 }
 
 func init() {
 	condition.RegisterScanner(sellerInPointersScanner)
 	SellerInPointers.ID = condition.NewField[hasmanywithpointers.SellerInPointers, model.UUID]("ID", "", "", sellerInPointersScanner)
-	SellerInPointers.CompanyID = condition.NewNullableField[hasmanywithpointers.SellerInPointers, model.UUID]("CompanyID", "", "", sellerInPointersScanner)
+	SellerInPointers.CompanyWithPointersID = condition.NewNullableField[hasmanywithpointers.SellerInPointers, model.UUID]("CompanyWithPointersID", "", "", sellerInPointersScanner)
 }

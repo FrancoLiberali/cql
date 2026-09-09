@@ -19,16 +19,16 @@ var sellerUintScanner = &condition.Scanner[hasmanyuint.SellerUint]{
 					return fmt.Errorf("cql scanner id: bad type %T", values[i])
 				}
 				dest.ID = model.UIntID(v.Int64)
-			case "company_id":
+			case "company_uint_id":
 				v, ok := values[i].(*sql.NullInt64)
 				if !ok {
-					return fmt.Errorf("cql scanner company_id: bad type %T", values[i])
+					return fmt.Errorf("cql scanner company_uint_id: bad type %T", values[i])
 				}
 				if v.Valid {
 					tmp := model.UIntID(v.Int64)
-					dest.CompanyID = &tmp
+					dest.CompanyUintID = &tmp
 				} else {
-					dest.CompanyID = nil
+					dest.CompanyUintID = nil
 				}
 			}
 		}
@@ -39,7 +39,7 @@ var sellerUintScanner = &condition.Scanner[hasmanyuint.SellerUint]{
 			switch c {
 			case "id":
 				condition.ReleaseNullInt64(values[i])
-			case "company_id":
+			case "company_uint_id":
 				condition.ReleaseNullInt64(values[i])
 			default:
 				condition.ReleaseNullSink(values[i])
@@ -52,7 +52,7 @@ var sellerUintScanner = &condition.Scanner[hasmanyuint.SellerUint]{
 			switch c {
 			case "id":
 				values[i] = condition.AcquireNullInt64()
-			case "company_id":
+			case "company_uint_id":
 				values[i] = condition.AcquireNullInt64()
 			default:
 				values[i] = condition.AcquireNullSink()
@@ -61,19 +61,19 @@ var sellerUintScanner = &condition.Scanner[hasmanyuint.SellerUint]{
 		return values, nil
 	},
 }
-var sellerUintCompanyJoinScanner = &condition.RelationScanner[hasmanyuint.SellerUint, hasmanyuint.CompanyUint]{
+var sellerUintCompanyUintJoinScanner = &condition.RelationScanner[hasmanyuint.SellerUint, hasmanyuint.CompanyUint]{
 	ChildScanner: companyUintScanner,
 	Mount: func(p *hasmanyuint.SellerUint, c *hasmanyuint.CompanyUint) {
-		p.Company = c
+		p.CompanyUint = c
 	},
-	RelationField: "Company",
+	RelationField: "CompanyUint",
 	SetNil: func(p *hasmanyuint.SellerUint) {
-		p.Company = nil
+		p.CompanyUint = nil
 	},
 }
 
 func init() {
 	condition.RegisterScanner(sellerUintScanner)
 	SellerUint.ID = condition.NewField[hasmanyuint.SellerUint, model.UIntID]("ID", "", "", sellerUintScanner)
-	SellerUint.CompanyID = condition.NewNullableField[hasmanyuint.SellerUint, model.UIntID]("CompanyID", "", "", sellerUintScanner)
+	SellerUint.CompanyUintID = condition.NewNullableField[hasmanyuint.SellerUint, model.UIntID]("CompanyUintID", "", "", sellerUintScanner)
 }

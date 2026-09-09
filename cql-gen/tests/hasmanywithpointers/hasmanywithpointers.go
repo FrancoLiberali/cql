@@ -13,6 +13,9 @@ type CompanyWithPointers struct {
 type SellerInPointers struct {
 	model.UUIDModel
 
-	Company   *CompanyWithPointers
-	CompanyID *model.UUID // Company HasMany Seller
+	// FK named after the parent model, per gorm's has-many convention, so the
+	// generated has-many loader and conditions agree (cql-gen derives the FK
+	// as <ParentModel>ID).
+	CompanyWithPointers   *CompanyWithPointers
+	CompanyWithPointersID *model.UUID
 }

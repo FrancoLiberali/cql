@@ -7,21 +7,21 @@ import (
 	model "github.com/FrancoLiberali/cql/model"
 )
 
-func (sellerUintConditions sellerUintConditions) Company(conditions ...condition.Condition[hasmanyuint.CompanyUint]) condition.JoinCondition[hasmanyuint.SellerUint] {
-	return condition.NewJoinCondition[hasmanyuint.SellerUint, hasmanyuint.CompanyUint](conditions, "Company", "CompanyID", sellerUintConditions.preload(), "ID", CompanyUint.preload(), sellerUintCompanyJoinScanner)
+func (sellerUintConditions sellerUintConditions) CompanyUint(conditions ...condition.Condition[hasmanyuint.CompanyUint]) condition.JoinCondition[hasmanyuint.SellerUint] {
+	return condition.NewJoinCondition[hasmanyuint.SellerUint, hasmanyuint.CompanyUint](conditions, "CompanyUint", "CompanyUintID", sellerUintConditions.preload(), "ID", CompanyUint.preload(), sellerUintCompanyUintJoinScanner)
 }
 
 type sellerUintConditions struct {
-	ID        condition.Field[hasmanyuint.SellerUint, model.UIntID]
-	CompanyID condition.NullableField[hasmanyuint.SellerUint, model.UIntID]
+	ID            condition.Field[hasmanyuint.SellerUint, model.UIntID]
+	CompanyUintID condition.NullableField[hasmanyuint.SellerUint, model.UIntID]
 }
 
 var SellerUint = sellerUintConditions{
-	CompanyID: condition.NewNullableField[hasmanyuint.SellerUint, model.UIntID]("CompanyID", "", ""),
-	ID:        condition.NewField[hasmanyuint.SellerUint, model.UIntID]("ID", "", ""),
+	CompanyUintID: condition.NewNullableField[hasmanyuint.SellerUint, model.UIntID]("CompanyUintID", "", ""),
+	ID:            condition.NewField[hasmanyuint.SellerUint, model.UIntID]("ID", "", ""),
 }
 
 // Preload allows preloading the SellerUint when doing a query
 func (sellerUintConditions sellerUintConditions) preload() condition.Condition[hasmanyuint.SellerUint] {
-	return condition.NewPreloadCondition[hasmanyuint.SellerUint](sellerUintConditions.ID, sellerUintConditions.CompanyID)
+	return condition.NewPreloadCondition[hasmanyuint.SellerUint](sellerUintConditions.ID, sellerUintConditions.CompanyUintID)
 }

@@ -57,7 +57,10 @@ var companyUintSellersHasManyLoader = &condition.HasManyLoader[hasmanyuint.Compa
 		return condition.NewQuery[hasmanyuint.SellerUint](tx, conds...), nil
 	},
 	ChildFK: func(c *hasmanyuint.SellerUint) any {
-		return nil
+		if c.CompanyUintID == nil {
+			return model.NilUIntID
+		}
+		return *c.CompanyUintID
 	},
 	CollectionField: "Sellers",
 	Mount: func(p *hasmanyuint.CompanyUint, children []*hasmanyuint.SellerUint) {

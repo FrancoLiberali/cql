@@ -15,6 +15,8 @@ type CompanyUint struct {
 type SellerUint struct {
 	model.UIntModel
 
-	Company   *CompanyUint
-	CompanyID *model.UIntID // nullable FK -> childFKExtractor's NilUIntID path
+	// FK named after the parent model (CompanyUint -> CompanyUintID), per
+	// gorm's has-many convention, so the generated loader and conditions agree.
+	CompanyUint   *CompanyUint
+	CompanyUintID *model.UIntID // nullable FK -> childFKExtractor's NilUIntID path
 }

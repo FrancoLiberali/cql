@@ -7,21 +7,21 @@ import (
 	model "github.com/FrancoLiberali/cql/model"
 )
 
-func (sellerInPointersConditions sellerInPointersConditions) Company(conditions ...condition.Condition[hasmanywithpointers.CompanyWithPointers]) condition.JoinCondition[hasmanywithpointers.SellerInPointers] {
-	return condition.NewJoinCondition[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers](conditions, "Company", "CompanyID", sellerInPointersConditions.preload(), "ID", CompanyWithPointers.preload(), sellerInPointersCompanyJoinScanner)
+func (sellerInPointersConditions sellerInPointersConditions) CompanyWithPointers(conditions ...condition.Condition[hasmanywithpointers.CompanyWithPointers]) condition.JoinCondition[hasmanywithpointers.SellerInPointers] {
+	return condition.NewJoinCondition[hasmanywithpointers.SellerInPointers, hasmanywithpointers.CompanyWithPointers](conditions, "CompanyWithPointers", "CompanyWithPointersID", sellerInPointersConditions.preload(), "ID", CompanyWithPointers.preload(), sellerInPointersCompanyWithPointersJoinScanner)
 }
 
 type sellerInPointersConditions struct {
-	ID        condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]
-	CompanyID condition.NullableField[hasmanywithpointers.SellerInPointers, model.UUID]
+	ID                    condition.Field[hasmanywithpointers.SellerInPointers, model.UUID]
+	CompanyWithPointersID condition.NullableField[hasmanywithpointers.SellerInPointers, model.UUID]
 }
 
 var SellerInPointers = sellerInPointersConditions{
-	CompanyID: condition.NewNullableField[hasmanywithpointers.SellerInPointers, model.UUID]("CompanyID", "", ""),
-	ID:        condition.NewField[hasmanywithpointers.SellerInPointers, model.UUID]("ID", "", ""),
+	CompanyWithPointersID: condition.NewNullableField[hasmanywithpointers.SellerInPointers, model.UUID]("CompanyWithPointersID", "", ""),
+	ID:                    condition.NewField[hasmanywithpointers.SellerInPointers, model.UUID]("ID", "", ""),
 }
 
 // Preload allows preloading the SellerInPointers when doing a query
 func (sellerInPointersConditions sellerInPointersConditions) preload() condition.Condition[hasmanywithpointers.SellerInPointers] {
-	return condition.NewPreloadCondition[hasmanywithpointers.SellerInPointers](sellerInPointersConditions.ID, sellerInPointersConditions.CompanyID)
+	return condition.NewPreloadCondition[hasmanywithpointers.SellerInPointers](sellerInPointersConditions.ID, sellerInPointersConditions.CompanyWithPointersID)
 }

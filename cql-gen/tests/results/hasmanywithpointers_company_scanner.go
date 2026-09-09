@@ -56,7 +56,10 @@ var companyWithPointersSellersHasManyLoader = &condition.HasManyLoader[hasmanywi
 		return condition.NewQuery[hasmanywithpointers.SellerInPointers](tx, conds...), nil
 	},
 	ChildFK: func(c *hasmanywithpointers.SellerInPointers) any {
-		return nil
+		if c.CompanyWithPointersID == nil {
+			return model.NilUUID
+		}
+		return *c.CompanyWithPointersID
 	},
 	CollectionField: "Sellers",
 	Mount: func(p *hasmanywithpointers.CompanyWithPointers, children []*hasmanywithpointers.SellerInPointers) {

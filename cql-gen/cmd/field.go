@@ -97,6 +97,18 @@ func (field Field) getFKReferencesAttribute() string {
 }
 
 // Get name of the attribute of field's object that is a foreign key to the object
+//
+// TODO: this assumes the child's FK is named after the PARENT TYPE
+// (<ParentType>ID), but gorm derives a belongsTo FK from the RELATION FIELD
+// name (<field>ID). They only coincide when the child's belongsTo field is
+// named exactly like the parent type. For role-named relations — e.g.
+// `Author *User` (FK AuthorID, not UserID) — the has-many loader, collection
+// and join FK references disagree with the conditions field the generator
+// emits, producing code that doesn't compile (see the aligned-on-purpose
+// hasmanyuint / hasmanywithpointers fixtures, and cql-gen/TODO.md). Fix:
+// resolve the FK from the child's belongsTo field to this parent (its
+// getFKAttribute), falling back to <ParentType>ID only when no such field
+// exists.
 func (field Field) getRelatedTypeFKAttribute(structName string) string {
 	foreignKeyTag, isPresent := field.Tags[foreignKeyTagName]
 	if isPresent {

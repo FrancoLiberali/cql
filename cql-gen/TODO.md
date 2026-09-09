@@ -43,6 +43,33 @@ conditions for `Company`, then the User conditions/scanner reference
 types to full cql models, or teach cql-gen to skip fields whose target
 type has no conditions.
 
+## Role-named belongsTo foreign keys (non-aligned FK)
+
+`Field.getRelatedTypeFKAttribute` derives a has-many / collection / join FK as
+`<ParentType>ID`, but gorm derives a belongsTo FK from the RELATION FIELD name
+(`<field>ID`). They coincide only when the child's belongsTo field is named
+exactly like the parent type.
+
+For role-named relations — e.g. a `Post` with `Author *User` (FK `AuthorID`,
+not `UserID`), parent `User` has-many `Posts` — cql-gen emits a has-many loader
+that references `Post.UserID.Is().In(...)` and a `ChildFK` that looks up a
+`UserID` field, while the conditions struct only has `AuthorID`. The generated
+`results`/conditions package then does not compile (loader) and the collection
+FK string is wrong at runtime.
+
+This is the same root cause as the self-referential "FK naming" note above
+(`ManagerID` vs `UserID`).
+
+Because of this, the has-many test fixtures (`hasmany`, `hasmanywithpointers`,
+`hasmanyuint`) are deliberately kept name-aligned (child belongsTo field named
+after the parent type). The new `go build ./cql-gen/tests/...` CI step compiles
+the golden `results` package so a regression of this kind is caught (the golden
+test only byte-compares, which is how it slipped through before).
+
+Fix: resolve the FK from the child's belongsTo field to this parent (its
+`getFKAttribute`), falling back to `<ParentType>ID` only when the child has no
+such relation field.
+
 ## Suggested resolutions
 
 - Add `gorm:"polymorphic:"` tag detection → generate `OwnerID`/`OwnerType`

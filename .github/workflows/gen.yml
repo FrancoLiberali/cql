@@ -43,6 +43,12 @@ jobs:
         with:
           go-version: '1.23'
           cache: true
+      # Compile the generated golden files (fixtures + results package). The
+      # golden tests only byte-compare, so a generator change that produces
+      # non-compiling code (e.g. a has-many loader referencing an FK field the
+      # conditions struct never defines) would otherwise pass unnoticed.
+      - name: Compile generated golden results
+        run: go build ./cql-gen/tests/...
       - name: Run tests
         run: go test ./cql-gen/tests -coverpkg=./cql-gen/... -coverprofile=coverage_gen.out -v
       - uses: actions/upload-artifact@v4
