@@ -8,7 +8,7 @@ import (
 )
 
 func (userConditions userConditions) CreditCard(conditions ...condition.Condition[overrideforeignkeyinverse.CreditCard]) condition.JoinCondition[overrideforeignkeyinverse.User] {
-	return condition.NewJoinCondition[overrideforeignkeyinverse.User, overrideforeignkeyinverse.CreditCard](conditions, "CreditCard", "ID", userConditions.preload(), "UserReference", CreditCard.preload())
+	return condition.NewJoinCondition[overrideforeignkeyinverse.User, overrideforeignkeyinverse.CreditCard](conditions, "CreditCard", "ID", userConditions.preload(), "UserReference", CreditCard.preload(), userCreditCardJoinScanner)
 }
 
 type userConditions struct {

@@ -14,9 +14,16 @@ type DB struct {
 	withLoggerFromContext *LoggerFromContext
 }
 
-// gormDBWithContext return a gormdb with changed context to ctx
+// gormDBWithContext return a gormdb with changed context to ctx.
+//
+// Uses WithContextLight (fork addition) instead of gorm's stock
+// WithContext: the stock method dispatches through Session, which calls
+// Statement.clone — a full copy of Clauses/Preloads maps and a
+// Settings.Range copy of an empty statement. WithContextLight takes the
+// getInstance clone=1 path directly, saving those allocations on the hot
+// query entry.
 func (db *DB) gormDBWithContext(ctx context.Context) *gorm.DB {
-	withContext := db.GormDB.WithContext(ctx)
+	withContext := db.GormDB.WithContextLight(ctx)
 
 	if db.withLoggerFromContext != nil {
 		newLogger := db.withLoggerFromContext.getLoggerFunc(ctx)

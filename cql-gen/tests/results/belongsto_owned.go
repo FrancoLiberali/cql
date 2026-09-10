@@ -8,7 +8,7 @@ import (
 )
 
 func (ownedConditions ownedConditions) Owner(conditions ...condition.Condition[belongsto.Owner]) condition.JoinCondition[belongsto.Owned] {
-	return condition.NewJoinCondition[belongsto.Owned, belongsto.Owner](conditions, "Owner", "OwnerID", ownedConditions.preload(), "ID", Owner.preload())
+	return condition.NewJoinCondition[belongsto.Owned, belongsto.Owner](conditions, "Owner", "OwnerID", ownedConditions.preload(), "ID", Owner.preload(), ownedOwnerJoinScanner)
 }
 
 type ownedConditions struct {

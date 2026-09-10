@@ -46,9 +46,13 @@ func (deleteS *Delete[T]) Limit(limit int) *Delete[T] {
 //
 // warning: in mysql preloads are not allowed
 func (deleteS *Delete[T]) Returning(dest *[]T) *Delete[T] {
+	deleteS.query.cqlQuery.flushPending()
+
 	gormDB := deleteS.query.cqlQuery.gormDB
 
 	if deleteS.secondaryQuery != nil {
+		deleteS.secondaryQuery.cqlQuery.flushPending()
+
 		gormDB = deleteS.secondaryQuery.cqlQuery.gormDB
 	}
 
@@ -101,9 +105,17 @@ func NewDelete[T model.Model](tx *gorm.DB, conditions []Condition[T]) *Delete[T]
 		// as soft delete is implemented with UPDATE, conditions can be applied directly to primary query
 		primaryQuery = NewQuery(tx, conditions...)
 	} else {
-		// for DELETE statements, a secondary query is necessary
+		// for DELETE statements, a secondary query is necessary.
+		//
+		// StartQuery's fast-path consumes a WithContextLight template on
+		// first use, so the second NewQuery can't reuse the same tx.
+		// Rather than falling back to Session (which allocates a Config
+		// copy + goes through the slower clone-into-fresh-statement
+		// path), grab a second lightweight template off the same context
+		// and root ConnPool so both queries take the promotion fast path.
+		ctx := tx.Statement.Context
 		primaryQuery = NewQuery[T](tx)
-		secondaryQuery = NewQuery(tx, conditions...)
+		secondaryQuery = NewQuery(tx.WithContextLight(ctx), conditions...)
 	}
 
 	if err != nil {

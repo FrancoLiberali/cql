@@ -6,6 +6,6 @@ import preload "github.com/FrancoLiberali/cql/preload"
 func (m CompanyWithPointers) GetSellers() ([]*SellerInPointers, error) {
 	return preload.VerifyCollectionLoaded[*SellerInPointers](m.Sellers)
 }
-func (m SellerInPointers) GetCompany() (*CompanyWithPointers, error) {
-	return preload.VerifyPointerLoaded[CompanyWithPointers](m.CompanyID, m.Company)
+func (m SellerInPointers) GetCompanyWithPointers() (*CompanyWithPointers, error) {
+	return preload.VerifyPointerLoaded[CompanyWithPointers](m.CompanyWithPointersID, m.CompanyWithPointers)
 }

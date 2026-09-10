@@ -37,6 +37,8 @@ const (
 	uuidModelWithTimestamps = "UUIDModelWithTimestamps"
 	uIntModel               = "UIntModel"
 	uIntModelWithTimestamps = "UIntModelWithTimestamps"
+	// go stdlib
+	timeType = "time.Time"
 )
 
 const preloadMethod = "preload"
@@ -145,7 +147,7 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 			objectType,
 			field,
 		)
-	case field.Type.IsGormCustomType() || field.TypeString() == "time.Time" || field.IsModelID():
+	case field.Type.IsGormCustomType() || field.TypeString() == timeType || field.IsModelID():
 		// field is a Gorm Custom type (implements Scanner and Valuer interfaces)
 		// or a named type supported by gorm (time.Time)
 		// or a cql id (uuid or uintid)
@@ -155,6 +157,16 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 			field,
 		)
 	default:
+		// a named scalar (e.g. `type Color int`) with no custom Scan/Value:
+		// gorm stores it as its underlying kind, so we expose a condition
+		// field typed by that kind (numeric named scalars keep the named type).
+		if underlying, ok := field.Type.Underlying().(*types.Basic); ok &&
+			condition.param.ToNamedScalar(condition.destPkg, field.Type, underlying) {
+			condition.createField(objectType, field)
+
+			return
+		}
+
 		log.Logger.Debugf("struct field type not handled: %s", field.TypeString())
 	}
 }
@@ -331,6 +343,11 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 		t1, t2,
 	)
 
+	// Reference the per-relation scanner var that scannerGenerator emits
+	// alongside this file. Both generators agree on the naming convention
+	// in scannerGenerator.relationScannerVarName.
+	relationScannerRef := jen.Id(relationScannerVarName(objectType.Name(), field.Name))
+
 	condition.ConditionMethod = createMethod(condition.modelType, conditionName).Params(
 		jen.Id("conditions").Op("...").Add(ormT2Condition),
 	).Add(
@@ -344,6 +361,7 @@ func (condition *Condition) generateJoin(objectType Type, field Field, t1Field, 
 				jen.Id(condition.modelType).Dot(preloadMethod).Call(),
 				jen.Lit(t2Field),
 				jen.Id(field.Type.Name()).Dot(preloadMethod).Call(),
+				relationScannerRef,
 			),
 		),
 	)
@@ -369,6 +387,11 @@ func (condition *Condition) createCollection(objectType Type, field Field) {
 		),
 	)
 
+	// Reference the per-relation HasMany loader var emitted alongside this
+	// file by ScannerGenerator. Naming convention shared via
+	// hasManyLoaderVarName.
+	loaderRef := jen.Id(hasManyLoaderVarName(objectType.Name(), field.Name))
+
 	condition.FieldDefinition = jen.Qual(
 		conditionPath, cqlNewCollection,
 	).Types(
@@ -378,6 +401,7 @@ func (condition *Condition) createCollection(objectType Type, field Field) {
 		jen.Lit(field.Name),
 		jen.Lit(field.getFKReferencesAttribute()),
 		jen.Lit(field.getRelatedTypeFKAttribute(objectType.Name())),
+		loaderRef,
 	)
 
 	condition.FieldIsCollection = true

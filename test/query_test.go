@@ -2,6 +2,7 @@ package test
 
 import (
 	"context"
+	"time"
 
 	"github.com/google/go-cmp/cmp"
 	"gorm.io/gorm"
@@ -404,4 +405,27 @@ func (ts *QueryIntTestSuite) TestOffsetAndLimitWorkTogether() {
 	ts.Require().NoError(err)
 
 	EqualList(&ts.Suite, []*models.Product{product2}, products)
+}
+
+// TestWhereConditionOverNamedScalarType exercises a WHERE condition built on a
+// named-scalar column (models.Color). cql-gen generates a
+// NumericField[AllTypes, Color] for it, so it must be usable to filter rows by
+// Color value end-to-end.
+func (ts *QueryIntTestSuite) TestWhereConditionOverNamedScalarType() {
+	// a non-pointer time.Time must be valid: mysql strict mode rejects the
+	// zero time ('0000-00-00') on insert.
+	validTime := time.Date(2021, 3, 14, 15, 9, 26, 0, time.UTC)
+
+	create(&ts.testSuite, &models.AllTypes{ValString: "blue-row", ValTime: validTime, Favorite: models.ColorBlue})
+	create(&ts.testSuite, &models.AllTypes{ValString: "red-row", ValTime: validTime, Favorite: models.ColorRed})
+
+	// only the blue row matches the named-scalar condition.
+	got, err := cql.Query[models.AllTypes](
+		context.Background(),
+		ts.db,
+		conditions.AllTypes.Favorite.Is().Eq(cql.Int(int(models.ColorBlue))),
+	).First()
+	ts.Require().NoError(err)
+	ts.Equal("blue-row", got.ValString)
+	ts.Equal(models.ColorBlue, got.Favorite)
 }

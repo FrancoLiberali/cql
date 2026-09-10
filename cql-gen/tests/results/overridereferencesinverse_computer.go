@@ -8,7 +8,7 @@ import (
 )
 
 func (computerConditions computerConditions) Processor(conditions ...condition.Condition[overridereferencesinverse.Processor]) condition.JoinCondition[overridereferencesinverse.Computer] {
-	return condition.NewJoinCondition[overridereferencesinverse.Computer, overridereferencesinverse.Processor](conditions, "Processor", "Name", computerConditions.preload(), "ComputerName", Processor.preload())
+	return condition.NewJoinCondition[overridereferencesinverse.Computer, overridereferencesinverse.Processor](conditions, "Processor", "Name", computerConditions.preload(), "ComputerName", Processor.preload(), computerProcessorJoinScanner)
 }
 
 type computerConditions struct {

@@ -30,6 +30,12 @@ func (condition fieldCondition[TObject, TAtribute]) affectsDeletedAt() bool {
 	return condition.FieldIdentifier.fieldName() == deletedAtField
 }
 
+// getScannerErased exposes the Field's scanner so Query[T] can pick it up
+// when this condition is the first scanner-bearing condition in the query.
+func (condition fieldCondition[TObject, TAtribute]) getScannerErased() any {
+	return condition.FieldIdentifier.getScannerErased()
+}
+
 func (condition fieldCondition[TObject, TAtribute]) getSQL(query *CQLQuery, table Table) (string, []any, error) {
 	fieldSQL, fieldValues, err := condition.FieldIdentifier.ToSQLForTable(query, table)
 	if err != nil {

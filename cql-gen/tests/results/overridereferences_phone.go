@@ -8,7 +8,7 @@ import (
 )
 
 func (phoneConditions phoneConditions) Brand(conditions ...condition.Condition[overridereferences.Brand]) condition.JoinCondition[overridereferences.Phone] {
-	return condition.NewJoinCondition[overridereferences.Phone, overridereferences.Brand](conditions, "Brand", "BrandName", phoneConditions.preload(), "Name", Brand.preload())
+	return condition.NewJoinCondition[overridereferences.Phone, overridereferences.Brand](conditions, "Brand", "BrandName", phoneConditions.preload(), "Name", Brand.preload(), phoneBrandJoinScanner)
 }
 
 type phoneConditions struct {

@@ -5,6 +5,7 @@ import (
 	"database/sql/driver"
 	"fmt"
 	"strings"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/schema"
@@ -129,6 +130,82 @@ type ProductNoTimestamps struct {
 
 func (m ProductNoTimestamps) Equal(other ProductNoTimestamps) bool {
 	return m.ID == other.ID
+}
+
+// AllTypes exercises the fast scanner across every supported scalar type —
+// as a value and as a nullable pointer — so a round-trip test can prove each
+// generated scan/assign path materializes the value correctly.
+type AllTypes struct {
+	model.UUIDModel
+
+	ValInt     int
+	ValInt8    int8
+	ValInt16   int16
+	ValInt32   int32
+	ValInt64   int64
+	ValUint    uint
+	ValUint8   uint8
+	ValUint16  uint16
+	ValUint32  uint32
+	ValUint64  uint64
+	ValFloat32 float32
+	ValFloat64 float64
+	ValBool    bool
+	ValString  string
+	ValTime    time.Time
+
+	PtrInt     *int
+	PtrInt8    *int8
+	PtrInt16   *int16
+	PtrInt32   *int32
+	PtrInt64   *int64
+	PtrUint    *uint
+	PtrUint8   *uint8
+	PtrUint16  *uint16
+	PtrUint32  *uint32
+	PtrUint64  *uint64
+	PtrFloat32 *float32
+	PtrFloat64 *float64
+	PtrBool    *bool
+	PtrString  *string
+	PtrTime    *time.Time
+
+	// database/sql nullable wrappers used directly as fields — these
+	// exercise the sql.NullInt16 / NullInt32 / NullByte scan pools that the
+	// sized int/uint value fields (which scan via NullInt64) never touch.
+	NullInt16 sql.NullInt16
+	NullInt32 sql.NullInt32
+	NullByte  sql.NullByte
+
+	// named scalars (underlying int): stored as their underlying kind, so the
+	// scanner reads them via NullInt64 and casts back to Color — value and
+	// nullable-pointer variants.
+	Favorite Color
+	PtrColor *Color
+}
+
+// Color is a named scalar type: no custom Scan/Value, so gorm stores it as its
+// underlying int. The fast scanner classifies it via its underlying kind and
+// casts the scanned value back to Color, so a plain named scalar takes the
+// fast path (no gorm fallback).
+type Color int
+
+const (
+	ColorRed Color = iota + 1
+	ColorGreen
+	ColorBlue
+)
+
+// WithUnsupportedColumn holds a column the fast scanner genuinely can't
+// classify: a []string persisted through gorm's json serializer. There's no
+// static Scan/Value and the value lives in a JSON text column, so no scanner
+// is generated and its queries fall back to gorm's reflective scan — the
+// safety net exercised by TestUnsupportedColumnFallsBackToGorm.
+type WithUnsupportedColumn struct {
+	model.UUIDModel
+
+	Name string
+	Tags []string `gorm:"serializer:json"`
 }
 
 type University struct {

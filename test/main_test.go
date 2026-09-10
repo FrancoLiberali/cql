@@ -55,6 +55,7 @@ func TestCQL(t *testing.T) {
 	suite.Run(t, NewFunctionsIntTestSuite(db))
 	suite.Run(t, NewInsertIntTestSuite(db))
 	suite.Run(t, NewTransactionIntTestSuite(db))
+	suite.Run(t, NewScannerTypesIntTestSuite(db))
 }
 
 func NewDBConnection() (*cql.DB, error) {

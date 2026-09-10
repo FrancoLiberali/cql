@@ -74,3 +74,9 @@ func Time(value time.Time) condition.Value[time.Time] {
 func UUID(value model.UUID) condition.Value[model.UUID] {
 	return condition.UUID(value)
 }
+
+// UIntID wraps a plain uint as the typed model.UIntID value CQL's DSL
+// expects for primary keys on UIntModel-based models. Mirrors UUID above.
+func UIntID(value uint) condition.Value[model.UIntID] {
+	return condition.UIntID(model.UIntID(value))
+}

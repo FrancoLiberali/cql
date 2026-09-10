@@ -28,6 +28,7 @@ func Select[TResults any](
 	var allValues []any
 
 	cqlQuery := query.getCQLQuery()
+	cqlQuery.flushPending()
 
 	for _, selection := range selections {
 		sql, values, err := selection.ToSQL(cqlQuery)

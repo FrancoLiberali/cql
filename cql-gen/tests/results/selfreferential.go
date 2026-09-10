@@ -8,7 +8,7 @@ import (
 )
 
 func (employeeConditions employeeConditions) Boss(conditions ...condition.Condition[selfreferential.Employee]) condition.JoinCondition[selfreferential.Employee] {
-	return condition.NewJoinCondition[selfreferential.Employee, selfreferential.Employee](conditions, "Boss", "BossID", employeeConditions.preload(), "ID", Employee.preload())
+	return condition.NewJoinCondition[selfreferential.Employee, selfreferential.Employee](conditions, "Boss", "BossID", employeeConditions.preload(), "ID", Employee.preload(), employeeBossJoinScanner)
 }
 
 type employeeConditions struct {

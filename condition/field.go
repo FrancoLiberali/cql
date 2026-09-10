@@ -2,6 +2,7 @@ package condition
 
 import (
 	"reflect"
+	"strings"
 
 	"github.com/FrancoLiberali/cql/model"
 	"github.com/FrancoLiberali/cql/sql"
@@ -15,6 +16,11 @@ type IField interface {
 	columnSQL(query *CQLQuery, table Table) string
 	getModelType() reflect.Type
 	getAppearance() (uint, bool)
+	// getScannerErased returns *Scanner[TModel] as any (TModel is not
+	// visible at the IField interface level). Nil if no scanner is wired
+	// — i.e. when the field wasn't constructed by cql-gen output, or the
+	// generated file predates scanner emission.
+	getScannerErased() any
 }
 
 type FieldOfModel[T model.Model] interface {
@@ -35,6 +41,12 @@ type Field[TModel model.Model, TAttribute any] struct {
 	appearance         uint
 	appearanceSelected bool
 	functions          []functionAndValues
+	// scanner is the per-model fast-scan dispatcher, wired by cql-gen.
+	// Shared by pointer across every Field on the same conditions struct,
+	// so propagation through Condition values only costs a pointer copy.
+	// nil when the field wasn't built by scanner-aware generated code, in
+	// which case Query[T] falls back to the gorm scan path.
+	scanner *Scanner[TModel]
 }
 
 func (field Field[TModel, TAttribute]) getModel() TModel {
@@ -56,12 +68,14 @@ func (field Field[TModel, TAttribute]) IsUnsafe() UnsafeFieldIs[TModel, TAttribu
 // Appearance allows to choose which number of appearance use
 // when field's model is joined more than once.
 func (field Field[TModel, TAttribute]) Appearance(number uint) Field[TModel, TAttribute] {
-	newField := NewField[TModel, TAttribute](
-		field.name, field.column, field.columnPrefix,
-	)
-
-	newField.appearanceSelected = true
-	newField.appearance = number
+	newField := Field[TModel, TAttribute]{
+		name:               field.name,
+		column:             field.column,
+		columnPrefix:       field.columnPrefix,
+		appearanceSelected: true,
+		appearance:         number,
+		scanner:            field.scanner,
+	}
 
 	return newField
 }
@@ -90,6 +104,10 @@ func (field Field[TModel, TAttribute]) fieldName() string {
 
 // Returns the name of the column in which the field is saved in the table
 func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) string {
+	if name, ok := field.schemaColumnName(table); ok {
+		return name
+	}
+
 	columnName := field.column
 	if columnName == "" {
 		columnName = query.ColumnName(table, field.name)
@@ -97,6 +115,47 @@ func (field Field[TModel, TAttribute]) columnName(query *CQLQuery, table Table) 
 
 	// add column prefix and table name once we know the column name
 	return field.columnPrefix + columnName
+}
+
+// schemaColumnName resolves the column name directly from gorm's parsed
+// schema when available, returning (name, true) on a hit. This is a fast
+// path: gorm's DBName is precomputed with any embedded-prefix applied, so it
+// skips the per-call NamingStrategy allocations (strings.Split +
+// Replacer.Replace). columnPrefix is already baked into DBName by gorm, so we
+// must NOT prepend it again.
+func (field Field[TModel, TAttribute]) schemaColumnName(table Table) (string, bool) {
+	if field.column != "" || table.Schema == nil {
+		return "", false
+	}
+
+	if field.columnPrefix == "" {
+		// No prefix — top-level field OR field promoted from an anonymous
+		// embed (e.g. User.ID coming from an anonymously-embedded
+		// model.UIntModelWithTimestamps). Gorm distinguishes these via
+		// EmbeddedBindNames: only NAMED embeds (`X SomeType `gorm:"embedded"``)
+		// prepend the outer name; anonymous embeds keep EmbeddedBindNames at
+		// length 1. So EmbeddedBindNames == 1 is the right guard — it accepts
+		// promoted embedded fields whose DBName is unprefixed (matches what our
+		// fallback would compute) and rejects prefixed embeds where DBName has
+		// a prefix we must not miss.
+		if f := table.Schema.LookUpField(field.name); f != nil && len(f.EmbeddedBindNames) == 1 {
+			return f.DBName, true
+		}
+
+		return "", false
+	}
+
+	// Prefixed — the field lives inside an embedded struct. Iterate to find
+	// the schema Field with matching Go name whose DBName starts with the CQL
+	// columnPrefix. Embedded structs typically have few fields, so the scan is
+	// cheap.
+	for _, f := range table.Schema.Fields {
+		if f.Name == field.name && strings.HasPrefix(f.DBName, field.columnPrefix) {
+			return f.DBName, true
+		}
+	}
+
+	return "", false
 }
 
 // Returns the SQL to get the value of the field in the table
@@ -157,12 +216,34 @@ func (field Field[TModel, TAttribute]) GetValue() TAttribute {
 	return *new(TAttribute)
 }
 
-func NewField[TModel model.Model, TAttribute any](name, column, columnPrefix string) Field[TModel, TAttribute] {
-	return Field[TModel, TAttribute]{
+// getScannerErased returns the per-model Scanner pointer as any so it can
+// be carried through the non-generic IField interface. Returns a true nil
+// (not a typed nil) when no scanner is wired, so caller's type assertion
+// returns ok=false cleanly.
+func (field Field[TModel, TAttribute]) getScannerErased() any {
+	if field.scanner == nil {
+		return nil
+	}
+
+	return field.scanner
+}
+
+// NewField builds a Field. The optional scanner is shared by pointer across
+// every field on a model's conditions struct; cql-gen output passes it on
+// every constructor call. Hand-written callers may omit it (the fast scan
+// path simply falls back to gorm).
+func NewField[TModel model.Model, TAttribute any](name, column, columnPrefix string, scanner ...*Scanner[TModel]) Field[TModel, TAttribute] {
+	f := Field[TModel, TAttribute]{
 		name:         name,
 		column:       column,
 		columnPrefix: columnPrefix,
 	}
+
+	if len(scanner) > 0 {
+		f.scanner = scanner[0]
+	}
+
+	return f
 }
 
 type UpdatableField[TModel model.Model, TAttribute any] struct {
@@ -179,9 +260,9 @@ func (field UpdatableField[TModel, TAttribute]) Appearance(number uint) Updatabl
 	return UpdatableField[TModel, TAttribute]{Field: field.Field.Appearance(number)}
 }
 
-func NewUpdatableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) UpdatableField[TModel, TAttribute] {
+func NewUpdatableField[TModel model.Model, TAttribute any](name, column, columnPrefix string, scanner ...*Scanner[TModel]) UpdatableField[TModel, TAttribute] {
 	return UpdatableField[TModel, TAttribute]{
-		Field: NewField[TModel, TAttribute](name, column, columnPrefix),
+		Field: NewField[TModel, TAttribute](name, column, columnPrefix, scanner...),
 	}
 }
 
@@ -201,9 +282,9 @@ func (field NullableField[TModel, TAttribute]) Appearance(number uint) NullableF
 	}
 }
 
-func NewNullableField[TModel model.Model, TAttribute any](name, column, columnPrefix string) NullableField[TModel, TAttribute] {
+func NewNullableField[TModel model.Model, TAttribute any](name, column, columnPrefix string, scanner ...*Scanner[TModel]) NullableField[TModel, TAttribute] {
 	return NullableField[TModel, TAttribute]{
-		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix),
+		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix, scanner...),
 	}
 }
 
@@ -228,9 +309,9 @@ func (boolField BoolField[TModel]) Appearance(number uint) BoolField[TModel] {
 	}
 }
 
-func NewBoolField[TModel model.Model](name, column, columnPrefix string) BoolField[TModel] {
+func NewBoolField[TModel model.Model](name, column, columnPrefix string, scanner ...*Scanner[TModel]) BoolField[TModel] {
 	return BoolField[TModel]{
-		UpdatableField: NewUpdatableField[TModel, bool](name, column, columnPrefix),
+		UpdatableField: NewUpdatableField[TModel, bool](name, column, columnPrefix, scanner...),
 	}
 }
 
@@ -250,9 +331,9 @@ func (boolField NullableBoolField[TModel]) Appearance(number uint) NullableBoolF
 	}
 }
 
-func NewNullableBoolField[TModel model.Model](name, column, columnPrefix string) NullableBoolField[TModel] {
+func NewNullableBoolField[TModel model.Model](name, column, columnPrefix string, scanner ...*Scanner[TModel]) NullableBoolField[TModel] {
 	return NullableBoolField[TModel]{
-		BoolField: NewBoolField[TModel](name, column, columnPrefix),
+		BoolField: NewBoolField[TModel](name, column, columnPrefix, scanner...),
 	}
 }
 
@@ -300,9 +381,9 @@ func (stringField StringField[TModel]) Appearance(number uint) StringField[TMode
 	}
 }
 
-func NewStringField[TModel model.Model](name, column, columnPrefix string) StringField[TModel] {
+func NewStringField[TModel model.Model](name, column, columnPrefix string, scanner ...*Scanner[TModel]) StringField[TModel] {
 	return StringField[TModel]{
-		UpdatableField: NewUpdatableField[TModel, string](name, column, columnPrefix),
+		UpdatableField: NewUpdatableField[TModel, string](name, column, columnPrefix, scanner...),
 	}
 }
 
@@ -322,9 +403,9 @@ func (stringField NullableStringField[TModel]) Appearance(number uint) NullableS
 	}
 }
 
-func NewNullableStringField[TModel model.Model](name, column, columnPrefix string) NullableStringField[TModel] {
+func NewNullableStringField[TModel model.Model](name, column, columnPrefix string, scanner ...*Scanner[TModel]) NullableStringField[TModel] {
 	return NullableStringField[TModel]{
-		StringField: NewStringField[TModel](name, column, columnPrefix),
+		StringField: NewStringField[TModel](name, column, columnPrefix, scanner...),
 	}
 }
 
@@ -440,9 +521,9 @@ type NumericField[TModel model.Model, TAttribute Numeric] struct {
 func NewNumericField[
 	TModel model.Model,
 	TAttribute Numeric,
-](name, column, columnPrefix string) NumericField[TModel, TAttribute] {
+](name, column, columnPrefix string, scanner ...*Scanner[TModel]) NumericField[TModel, TAttribute] {
 	return NumericField[TModel, TAttribute]{
-		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix),
+		UpdatableField: NewUpdatableField[TModel, TAttribute](name, column, columnPrefix, scanner...),
 	}
 }
 
@@ -577,8 +658,8 @@ func (field NullableNumericField[TModel, TAttribute]) Appearance(number uint) Nu
 func NewNullableNumericField[
 	TModel model.Model,
 	TAttribute Numeric,
-](name, column, columnPrefix string) NullableNumericField[TModel, TAttribute] {
+](name, column, columnPrefix string, scanner ...*Scanner[TModel]) NullableNumericField[TModel, TAttribute] {
 	return NullableNumericField[TModel, TAttribute]{
-		NumericField: NewNumericField[TModel, TAttribute](name, column, columnPrefix),
+		NumericField: NewNumericField[TModel, TAttribute](name, column, columnPrefix, scanner...),
 	}
 }

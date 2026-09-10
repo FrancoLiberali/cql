@@ -1,13 +1,32 @@
 package condition
 
 import (
+	"reflect"
+
 	"gorm.io/gorm"
 
 	"github.com/FrancoLiberali/cql/model"
 )
 
+// scannerRegistry maps a model type to its generated *Scanner[T]. It is
+// written only from the init() functions cql-gen emits in each *_scanner.go
+// (which all run before main, single-threaded), and read-only afterwards, so a
+// plain map is safe for the concurrent reads that happen during queries.
+var scannerRegistry = map[reflect.Type]any{}
+
+// RegisterScanner records the per-model Scanner so a Query built without any
+// conditions (e.g. Query[T](ctx, db).Find()) can still take the fast-scan path
+// by resolving the scanner by type. Generated *_scanner.go files call this
+// from init().
+func RegisterScanner[T model.Model](s *Scanner[T]) {
+	// reflect.TypeFor[T]() reads T's type with no value boxing — a big model is
+	// never copied into an interface just to key the map.
+	scannerRegistry[reflect.TypeFor[T]()] = s
+}
+
 type Query[T model.Model] struct {
 	cqlQuery *CQLQuery
+	scanner  *Scanner[T]
 	err      error
 }
 
@@ -94,6 +113,12 @@ func (query *Query[T]) First() (*T, error) {
 		return nil, query.err
 	}
 
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var model *T
+
+		return model, firstWith[T](query.cqlQuery, &model, query.scanner)
+	}
+
 	var model *T
 
 	return model, query.cqlQuery.First(&model)
@@ -106,6 +131,12 @@ func (query *Query[T]) Take() (*T, error) {
 		return nil, query.err
 	}
 
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var model *T
+
+		return model, takeWith[T](query.cqlQuery, &model, query.scanner)
+	}
+
 	var model *T
 
 	return model, query.cqlQuery.Take(&model)
@@ -116,6 +147,12 @@ func (query *Query[T]) Take() (*T, error) {
 func (query *Query[T]) Last() (*T, error) {
 	if query.err != nil {
 		return nil, query.err
+	}
+
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var model *T
+
+		return model, lastWith[T](query.cqlQuery, &model, query.scanner)
 	}
 
 	var model *T
@@ -147,6 +184,12 @@ func (query *Query[T]) Find() ([]*T, error) {
 		return nil, query.err
 	}
 
+	if query.scanner != nil && canUseFastScan(query.cqlQuery) {
+		var models []*T
+
+		return models, findWith[T](query.cqlQuery, &models, query.scanner)
+	}
+
 	var models []*T
 
 	return models, query.cqlQuery.Find(&models)
@@ -164,6 +207,32 @@ func NewQuery[T model.Model](tx *gorm.DB, conditions ...Condition[T]) *Query[T] 
 
 	return &Query[T]{
 		cqlQuery: gormQuery,
+		scanner:  resolveScanner[T](conditions),
 		err:      err,
 	}
+}
+
+// resolveScanner walks the conditions once at query construction looking for
+// the first one that carries a *Scanner[T]. All conditions built from the
+// generated conditions struct share the same scanner pointer, so the first
+// match is enough.
+func resolveScanner[T model.Model](conditions []Condition[T]) *Scanner[T] {
+	for _, c := range conditions {
+		sp, ok := c.(scannerProvider)
+		if !ok {
+			continue
+		}
+
+		if s, ok := sp.getScannerErased().(*Scanner[T]); ok && s != nil {
+			return s
+		}
+	}
+
+	// No condition carried the scanner (e.g. a no-condition query) — fall back
+	// to the per-type registry populated by generated init()s.
+	if s, ok := scannerRegistry[reflect.TypeFor[T]()].(*Scanner[T]); ok {
+		return s
+	}
+
+	return nil
 }

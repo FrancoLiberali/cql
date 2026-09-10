@@ -13,9 +13,14 @@ type Update[T model.Model] struct {
 
 // Set allows updating multiple attributes of the same table.
 func (update *Update[T]) Set(sets ...*Set[T]) (int64, error) {
-	setsAsInterface := []ISet{}
-	for _, set := range sets {
-		setsAsInterface = append(setsAsInterface, set)
+	// Pre-size the interface slice to len(sets). The old `[]ISet{}` +
+	// per-item append grew through 3-4 capacity doublings on the
+	// typical 7-column Update (0 -> 1 -> 2 -> 4 -> 8), each doubling
+	// allocating a fresh backing array. One make() sized to the exact
+	// target skips them.
+	setsAsInterface := make([]ISet, len(sets))
+	for i, set := range sets {
+		setsAsInterface[i] = set
 	}
 
 	return update.unsafeSet(setsAsInterface, "Set")

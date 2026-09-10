@@ -19,6 +19,16 @@ Once you have started your project with `go init`, you must add the dependency t
 
     go get github.com/FrancoLiberali/cql@latest
 
+cql relies on a fork of gorm, so you must add the following ``replace`` directive to your
+project's ``go.mod`` for cql to compile:
+
+.. code-block:: bash
+
+    go mod edit -replace gorm.io/gorm=github.com/FrancoLiberali/gorm@v1.31.3
+
+This also makes gorm's standard drivers (``gorm.io/driver/sqlite``, ``gorm.io/driver/postgres``,
+``gorm.io/driver/mysql``, ``gorm.io/driver/sqlserver``) use the fork, so no extra changes are needed for them.
+
 Create a package for your :ref:`models <cql/concepts:model>`, for example:
 
 .. code-block:: go

@@ -25,6 +25,24 @@ type Field struct {
 	Embedded     bool
 	Tags         GormTags
 	ColumnPrefix string
+
+	// GoAnonymous is true for Go-style embedded struct fields (the field
+	// has no name, only a type — e.g. `model.UUIDModelWithTimestamps` in a
+	// struct literal). Inner fields of such embeds are PROMOTED, so they
+	// are accessible directly as dest.X. Distinguished from `Embedded`,
+	// which is set for ANY embedding including named gorm-tagged fields
+	// like `GormEmbedded ToBeGormEmbedded `gorm:"embedded"`` where the
+	// inner field is accessed as dest.GormEmbedded.X.
+	GoAnonymous bool
+
+	// AccessPath is the chain of Go field names from the model root to
+	// this leaf. Top-level fields have AccessPath == [Field.Name].
+	// Fields under a Go-anonymous embed inherit the parent's path
+	// unchanged (promotion). Fields under a named gorm-embedded struct
+	// prepend the parent's Go name. The scanner generator uses this to
+	// emit dest.A.B.C-style assignments — without it, gorm-embedded
+	// columns silently land on the wrong field.
+	AccessPath []string
 }
 
 func (field Field) CompleteName() string {
@@ -79,6 +97,18 @@ func (field Field) getFKReferencesAttribute() string {
 }
 
 // Get name of the attribute of field's object that is a foreign key to the object
+//
+// TODO: this assumes the child's FK is named after the PARENT TYPE
+// (<ParentType>ID), but gorm derives a belongsTo FK from the RELATION FIELD
+// name (<field>ID). They only coincide when the child's belongsTo field is
+// named exactly like the parent type. For role-named relations — e.g.
+// `Author *User` (FK AuthorID, not UserID) — the has-many loader, collection
+// and join FK references disagree with the conditions field the generator
+// emits, producing code that doesn't compile (see the aligned-on-purpose
+// hasmanyuint / hasmanywithpointers fixtures, and cql-gen/TODO.md). Fix:
+// resolve the FK from the child's belongsTo field to this parent (its
+// getFKAttribute), falling back to <ParentType>ID only when no such field
+// exists.
 func (field Field) getRelatedTypeFKAttribute(structName string) string {
 	foreignKeyTag, isPresent := field.Tags[foreignKeyTagName]
 	if isPresent {
@@ -137,14 +167,15 @@ func getStructFields(structType *types.Struct) ([]Field, error) {
 	fields := []Field{}
 
 	// Iterate over struct fields
-	for i := 0; i < numFields; i++ {
+	for i := range numFields {
 		fieldObject := structType.Field(i)
 		gormTags := getGormTags(structType.Tag(i))
 		fields = append(fields, Field{
-			Name:     fieldObject.Name(),
-			Type:     Type{Type: fieldObject.Type()},
-			Embedded: fieldObject.Embedded() || gormTags.hasEmbedded(),
-			Tags:     gormTags,
+			Name:        fieldObject.Name(),
+			Type:        Type{Type: fieldObject.Type()},
+			Embedded:    fieldObject.Embedded() || gormTags.hasEmbedded(),
+			GoAnonymous: fieldObject.Embedded(),
+			Tags:        gormTags,
 		})
 	}
 

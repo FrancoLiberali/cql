@@ -24,6 +24,12 @@ type JoinCondition[T model.Model] interface {
 }
 
 // Condition that joins T with any other model
+//
+// The optional `relationScanner` (variadic for back-compat with hand-written
+// callers) is the per-relation mounter cql-gen emits alongside the
+// per-model scanner. When non-nil AND the user calls .Preload(), applyTo
+// registers it on the query so findWith materializes joined columns
+// directly into the parent's relation field — no gorm reflection.
 func NewJoinCondition[T1, T2 model.Model](
 	conditions []Condition[T2],
 	relationField string,
@@ -31,8 +37,9 @@ func NewJoinCondition[T1, T2 model.Model](
 	t1PreloadCondition Condition[T1],
 	t2Field string,
 	t2PreloadCondition Condition[T2],
+	relationScanner ...*RelationScanner[T1, T2],
 ) JoinCondition[T1] {
-	return joinConditionImpl[T1, T2]{
+	jc := joinConditionImpl[T1, T2]{
 		Conditions:         conditions,
 		RelationField:      relationField,
 		T1Field:            t1Field,
@@ -41,6 +48,12 @@ func NewJoinCondition[T1, T2 model.Model](
 		T2PreloadCondition: t2PreloadCondition,
 		T2Preload:          false,
 	}
+
+	if len(relationScanner) > 0 {
+		jc.relationScanner = relationScanner[0]
+	}
+
+	return jc
 }
 
 // Implementation of join condition
@@ -53,6 +66,11 @@ type joinConditionImpl[T1, T2 model.Model] struct {
 	T1PreloadCondition Condition[T1] // Condition to preload T1 in case T2 any nested object is preloaded by user
 	T2PreloadCondition Condition[T2] // Condition to preload T2
 	T2Preload          bool          // Indicates if T2PreloadCondition must be applied
+
+	// relationScanner is the per-relation fast-scan mounter, wired by
+	// cql-gen output. nil when this condition was built outside generated
+	// code; in that case .Preload() still works through the gorm fallback.
+	relationScanner *RelationScanner[T1, T2]
 }
 
 func (condition joinConditionImpl[T1, T2]) Preload() JoinCondition[T1] {
@@ -119,6 +137,25 @@ func (condition joinConditionImpl[T1, T2]) applyTo(query *CQLQuery, t1Table Tabl
 		if err != nil {
 			return err
 		}
+	}
+
+	// Register the per-relation fast-scan mounter when generated code
+	// supplied one. parentAlias is "" for top-level joins (mount onto the
+	// main row T) and the parent's alias for nested joins.
+	//
+	// Trigger is makesPreload() — not just T2Preload — because a nested
+	// preload (e.g. `Boss(Boss().Preload())` without `.Preload()` on the
+	// outer) still pulls T2's columns into the SELECT via the inner
+	// applyTo's T1PreloadCondition. The runtime needs to mount those
+	// columns onto the parent regardless of whether the user wrote
+	// .Preload() on this specific level.
+	if condition.makesPreload() && condition.relationScanner != nil {
+		parentAlias := ""
+		if !t1Table.IsInitial() {
+			parentAlias = t1Table.Alias
+		}
+
+		registerActiveJoin[T1, T2](query, t2Table.Alias, parentAlias, condition.relationScanner)
 	}
 
 	// apply nested joins

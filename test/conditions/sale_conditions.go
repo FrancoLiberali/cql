@@ -9,10 +9,10 @@ import (
 )
 
 func (saleConditions saleConditions) Product(conditions ...condition.Condition[models.Product]) condition.JoinCondition[models.Sale] {
-	return condition.NewJoinCondition[models.Sale, models.Product](conditions, "Product", "ProductID", saleConditions.preload(), "ID", Product.preload())
+	return condition.NewJoinCondition[models.Sale, models.Product](conditions, "Product", "ProductID", saleConditions.preload(), "ID", Product.preload(), saleProductJoinScanner)
 }
 func (saleConditions saleConditions) Seller(conditions ...condition.Condition[models.Seller]) condition.JoinCondition[models.Sale] {
-	return condition.NewJoinCondition[models.Sale, models.Seller](conditions, "Seller", "SellerID", saleConditions.preload(), "ID", Seller.preload())
+	return condition.NewJoinCondition[models.Sale, models.Seller](conditions, "Seller", "SellerID", saleConditions.preload(), "ID", Seller.preload(), saleSellerJoinScanner)
 }
 
 type saleConditions struct {

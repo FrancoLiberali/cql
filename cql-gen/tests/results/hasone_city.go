@@ -8,7 +8,7 @@ import (
 )
 
 func (cityConditions cityConditions) Country(conditions ...condition.Condition[hasone.Country]) condition.JoinCondition[hasone.City] {
-	return condition.NewJoinCondition[hasone.City, hasone.Country](conditions, "Country", "CountryID", cityConditions.preload(), "ID", Country.preload())
+	return condition.NewJoinCondition[hasone.City, hasone.Country](conditions, "Country", "CountryID", cityConditions.preload(), "ID", Country.preload(), cityCountryJoinScanner)
 }
 
 type cityConditions struct {

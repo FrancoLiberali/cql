@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-	"sync"
 	"time"
 
 	"gorm.io/gorm"
@@ -20,6 +19,35 @@ type CQLQuery struct {
 	concernedModels map[reflect.Type][]Table
 	initialTable    Table
 	selectClause    clause.Expr
+	// hasJoinedSelects is set when AddSelectField runs for a non-initial
+	// table — i.e. a joined preload pulled columns from a related table.
+	// On its own this disables the fast path; activeJoins lifts that gate
+	// for relations that registered a RelationScanner.
+	hasJoinedSelects bool
+	// activeJoins is the runtime registry of join scanners (one per
+	// preloaded relation alias). Populated by joinConditionImpl.applyTo
+	// when a generated builder passes its RelationScanner through. Used
+	// by findWith to dispatch joined columns through generated mounters
+	// instead of falling back to gorm's reflective scan.
+	activeJoins []*activeJoin
+	// activeHasMany is the runtime registry of HasMany loaders.
+	// Populated by collectionPreloadCondition.applyTo when a generated
+	// Collection passes its HasManyLoader through. Each loader runs ONE
+	// SELECT child WHERE fk IN (parent_ids) after the main scan and
+	// mounts the grouped children onto their parents.
+	activeHasMany []*activeHasMany
+	// pendingWhereExprs accumulates WHERE fragments locally instead of
+	// dispatching a gormDB.Where per condition. Each gormDB chainable
+	// call otherwise pays for AddClause's map lookup + merge logic; by
+	// batching we do that work exactly once, right before Rows() runs.
+	pendingWhereExprs []clause.Expression
+	// softDeleteColumnName is the initial model's soft-delete column
+	// (empty if the model has no soft delete). flushPending bakes
+	// `<table>.<col> IS NULL` into the WHERE unless Statement.Unscoped
+	// is set — meaning either the caller opted out via Unscoped() or a
+	// user condition already filtered on DeletedAt (see
+	// ApplyWhereCondition, which calls Unscoped() in that case).
+	softDeleteColumnName string
 }
 
 // Order specify order when retrieving models from database.
@@ -101,6 +129,7 @@ func (query *CQLQuery) Having(sql string, args ...any) {
 
 // Count returns the amount of models that fulfill the conditions
 func (query *CQLQuery) Count() (int64, error) {
+	query.flushPending()
 	query.cleanSelects()
 
 	var count int64
@@ -110,21 +139,25 @@ func (query *CQLQuery) Count() (int64, error) {
 
 // First finds the first record ordered by primary key, matching given conditions
 func (query *CQLQuery) First(dest any) error {
+	query.flushPending()
 	return query.gormDB.First(dest).Error
 }
 
 // Take finds the first record returned by the database in no specified order, matching given conditions
 func (query *CQLQuery) Take(dest any) error {
+	query.flushPending()
 	return query.gormDB.Take(dest).Error
 }
 
 // Last finds the last record ordered by primary key, matching given conditions
 func (query *CQLQuery) Last(dest any) error {
+	query.flushPending()
 	return query.gormDB.Last(dest).Error
 }
 
 // Find finds all models matching given conditions
 func (query *CQLQuery) Find(dest any) error {
+	query.flushPending()
 	return query.gormDB.Find(dest).Error
 }
 
@@ -160,6 +193,10 @@ func (query *CQLQuery) AddSelectField(table Table, fieldID IField, addAs bool) {
 	}
 
 	query.AddSelect(columnName)
+
+	if !table.IsInitial() {
+		query.hasJoinedSelects = true
+	}
 }
 
 func (query *CQLQuery) getSelectAlias(table Table, fieldID IField) string {
@@ -180,6 +217,82 @@ func (query *CQLQuery) Unscoped() {
 
 func (query *CQLQuery) Where(whereQuery interface{}, args ...interface{}) {
 	query.gormDB = query.gormDB.Where(whereQuery, args...)
+}
+
+// WhereRaw accumulates a WHERE fragment locally. flushPending pushes the
+// batch into the gorm Statement once, right before execution. This trades
+// N gormDB.WhereRaw chainable calls (each doing AddClause map lookup +
+// merge with the existing WHERE clause) for a single AddClause call.
+// Measured impact: 4.5% wall-clock + 17 fewer allocs at 5 conditions;
+// noise at 1 condition.
+func (query *CQLQuery) WhereRaw(sql string, args []any) {
+	query.pendingWhereExprs = append(query.pendingWhereExprs,
+		clause.Expr{SQL: sql, Vars: args})
+}
+
+// SQL-builder pre-grow coefficients used by flushPending's size estimate.
+const (
+	sqlGrowBaseBytes     = 100
+	sqlGrowBytesPerWhere = 40
+	sqlGrowBytesPerJoin  = 120
+)
+
+// flushPending pushes accumulated pending state (WHEREs + the model's
+// soft-delete filter) into the underlying gorm Statement. Called by
+// findWith / scanOne right before executing the query. Since
+// StartQuery already produced a clean gormDB with clone == 0, mutating
+// its Statement directly is safe and skips a getInstance + AddClause
+// round-trip per condition.
+//
+//nolint:funcorder // kept next to the WhereRaw accumulation helpers it flushes
+func (query *CQLQuery) flushPending() {
+	// Bake the initial model's soft-delete filter now (deferred from
+	// NewGormQuery so we can consult Statement.Unscoped, which
+	// ApplyWhereCondition sets when a user condition already targets
+	// DeletedAt). Setting the soft_delete_enabled marker lets gorm's
+	// SoftDeleteQueryClause.ModifyStatement skip its own OR-conditions
+	// walk + clause.Eq/clause.Column/sql.NullString allocs + a
+	// separate AddClause on every query — the biggest single
+	// contributor to per-query allocs on the alloc profile.
+	if query.softDeleteColumnName != "" && !query.gormDB.Statement.Unscoped {
+		query.pendingWhereExprs = append(query.pendingWhereExprs, clause.Expr{
+			SQL: query.initialTable.Alias + "." + query.softDeleteColumnName + " IS NULL",
+		})
+		query.gormDB.Statement.Clauses["soft_delete_enabled"] = clause.Clause{}
+	}
+
+	if len(query.pendingWhereExprs) > 0 {
+		query.gormDB.Statement.AddClause(clause.Where{
+			Exprs: query.pendingWhereExprs,
+		})
+		query.pendingWhereExprs = nil
+	}
+
+	// Pre-grow the SQL builder based on what we know about the query
+	// shape. Upstream BuildQuerySQL does Grow(100) but a typical CQL
+	// query is well over that (SELECT t.* FROM t + soft-delete WHERE +
+	// ORDER BY + LIMIT is ~110 chars alone), which forces the
+	// strings.Builder to reallocate mid-render. Estimating avoids the
+	// realloc for the common shapes and stays close to actual size on
+	// larger ones — over-shooting by a bit is cheap; a realloc is not.
+	//
+	// Coefficients: base covers "SELECT t.* FROM `t`" + basic clauses
+	// (~100), each WHERE fragment averages ~40 chars once the table
+	// qualifier, operator and placeholder are folded in, and each raw
+	// JOIN string is ~120 chars with the ON-clause and soft-delete tail.
+	stmt := query.gormDB.Statement
+	if stmt.SQL.Len() == 0 && stmt.SQL.Cap() == 0 {
+		estimate := sqlGrowBaseBytes
+
+		if c, ok := stmt.Clauses["WHERE"]; ok {
+			if w, ok := c.Expression.(clause.Where); ok {
+				estimate += len(w.Exprs) * sqlGrowBytesPerWhere
+			}
+		}
+
+		estimate += len(stmt.Joins) * sqlGrowBytesPerJoin
+		stmt.SQL.Grow(estimate)
+	}
 }
 
 func (query *CQLQuery) Joins(joinQuery string, isLeftJoin bool, args ...interface{}) {
@@ -242,32 +355,49 @@ func (query CQLQuery) Dialector() sql.Dialector {
 
 func NewGormQuery(db *gorm.DB, initialModel model.Model, initialTable Table) *CQLQuery {
 	query := &CQLQuery{
-		gormDB:          db.Model(&initialModel).Select(initialTable.Name + ".*"),
+		// StartQuery batches Model + Select into a single getInstance()
+		// clone (saves ~1 *DB + *Statement + map + slice alloc vs the
+		// chainable `db.Model(&m).Select("t.*")` form).
+		gormDB:          db.StartQuery(&initialModel, []string{initialTable.Name + ".*"}),
 		concernedModels: map[reflect.Type][]Table{},
 		initialTable:    initialTable,
 	}
 
 	query.AddConcernedModel(initialModel, initialTable)
 
+	// Remember the initial model's soft-delete column so flushPending
+	// can bake `<table>.<col> IS NULL` into our WHERE right before
+	// executing (unless the caller went Unscoped or a condition already
+	// filtered on DeletedAt — both signaled via Statement.Unscoped).
+	// Baking it locally + setting the `soft_delete_enabled` marker on
+	// gorm's Statement lets us skip gorm's SoftDeleteQueryClause.
+	// ModifyStatement entirely — that callback was the heaviest single
+	// contributor to per-query allocs on the profile (~6% flat + cum).
+	query.softDeleteColumnName = initialModel.SoftDeleteColumnName()
+
 	return query
 }
 
-// Get the name of the table in "db" in which the data for "entity" is saved
-// returns error is table name can not be found by gorm,
-// probably because the type of "entity" is not registered using AddModel
-func getTableName(db *gorm.DB, entity any) (string, error) {
-	schemaName, err := schema.Parse(entity, &sync.Map{}, db.NamingStrategy)
-	if err != nil {
-		return "", err
+// Get the parsed schema for "entity" via gorm's Statement.Parse so the
+// schema hits db.cacheStore — the same sync.Map gorm's own callbacks
+// reuse. The previous implementation passed a throwaway &sync.Map{} per
+// call, which forced a fresh regex-heavy inflection.Plural pass on every
+// query (~10% of CPU on 1-row Find loops). The returned schema also pins
+// per-field DBName lookups so ColumnName skips NamingStrategy.
+func getTableSchema(db *gorm.DB, entity any) (*schema.Schema, error) {
+	stmt := &gorm.Statement{DB: db}
+	if err := stmt.Parse(entity); err != nil {
+		return nil, err
 	}
 
-	return schemaName.Table, nil
+	return stmt.Schema, nil
 }
 
 // available for: postgres, sqlite, sqlserver
 //
 // warning: in sqlite, sqlserver preloads are not allowed
 func (query *CQLQuery) Returning(dest any) error {
+	query.flushPending()
 	query.gormDB = query.gormDB.Model(dest)
 
 	switch query.Dialector() {
@@ -303,6 +433,8 @@ func (query *CQLQuery) cleanSelects() {
 
 // Find finds all models matching given conditions
 func (query *CQLQuery) Update(sets []ISet) (int64, error) {
+	query.flushPending()
+
 	updateMap := map[string]any{}
 
 	query.cleanSelects()
@@ -410,21 +542,35 @@ func (query *CQLQuery) joinsToFrom() {
 	query.gormDB.Statement.Joins = nil
 }
 
+// rawScalarValuer is implemented by simple Value types (Value[T],
+// NumericValue[T], BoolValue) that always return "" for the SQL part
+// and a single element in ToSQL's []any. Bypassing ToSQL for them
+// skips the per-call []any{v} slice allocation — one saved alloc per
+// column on the Update hot path.
+type rawScalarValuer interface {
+	RawScalarValue() any
+}
+
 func getUpdateValue(query *CQLQuery, set ISet) (any, error) {
-	if value := set.getValue(); value != nil {
-		valueSQL, valueValues, err := set.getValue().ToSQL(query)
-		if err != nil {
-			return nil, err
-		}
-
-		if valueSQL != "" {
-			return gorm.Expr(valueSQL, valueValues...), nil
-		}
-
-		return valueValues[0], nil
+	value := set.getValue()
+	if value == nil {
+		return nil, nil //nolint:nilnil // is necessary
 	}
 
-	return nil, nil //nolint:nilnil // is necessary
+	if scalar, ok := value.(rawScalarValuer); ok {
+		return scalar.RawScalarValue(), nil
+	}
+
+	valueSQL, valueValues, err := value.ToSQL(query)
+	if err != nil {
+		return nil, err
+	}
+
+	if valueSQL != "" {
+		return gorm.Expr(valueSQL, valueValues...), nil
+	}
+
+	return valueValues[0], nil
 }
 
 // Splits a JOIN statement into the table name, table alias and ON statement
@@ -445,6 +591,8 @@ func splitJoin(joinStatement string) (string, string, string) {
 }
 
 func (query *CQLQuery) SoftDelete(softDeleteColumnName string) (int64, error) {
+	query.flushPending()
+
 	switch query.Dialector() {
 	case sql.Postgres, sql.SQLServer, sql.SQLite: // support UPDATE SET FROM
 		query.joinsToFrom()
@@ -472,6 +620,9 @@ func (query *CQLQuery) SoftDelete(softDeleteColumnName string) (int64, error) {
 }
 
 func (query *CQLQuery) Delete(cqlSubQuery *CQLQuery) (int64, error) {
+	query.flushPending()
+	cqlSubQuery.flushPending()
+
 	var deleteTx *gorm.DB
 
 	if len(cqlSubQuery.gormDB.Statement.Joins) > 0 {

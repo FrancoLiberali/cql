@@ -8,10 +8,10 @@ import (
 )
 
 func (childConditions childConditions) Parent1(conditions ...condition.Condition[models.Parent1]) condition.JoinCondition[models.Child] {
-	return condition.NewJoinCondition[models.Child, models.Parent1](conditions, "Parent1", "Parent1ID", childConditions.preload(), "ID", Parent1.preload())
+	return condition.NewJoinCondition[models.Child, models.Parent1](conditions, "Parent1", "Parent1ID", childConditions.preload(), "ID", Parent1.preload(), childParent1JoinScanner)
 }
 func (childConditions childConditions) Parent2(conditions ...condition.Condition[models.Parent2]) condition.JoinCondition[models.Child] {
-	return condition.NewJoinCondition[models.Child, models.Parent2](conditions, "Parent2", "Parent2ID", childConditions.preload(), "ID", Parent2.preload())
+	return condition.NewJoinCondition[models.Child, models.Parent2](conditions, "Parent2", "Parent2ID", childConditions.preload(), "ID", Parent2.preload(), childParent2JoinScanner)
 }
 
 type childConditions struct {

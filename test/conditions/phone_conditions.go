@@ -9,7 +9,7 @@ import (
 )
 
 func (phoneConditions phoneConditions) Brand(conditions ...condition.Condition[models.Brand]) condition.JoinCondition[models.Phone] {
-	return condition.NewJoinCondition[models.Phone, models.Brand](conditions, "Brand", "BrandID", phoneConditions.preload(), "ID", Brand.preload())
+	return condition.NewJoinCondition[models.Phone, models.Brand](conditions, "Brand", "BrandID", phoneConditions.preload(), "ID", Brand.preload(), phoneBrandJoinScanner)
 }
 
 type phoneConditions struct {

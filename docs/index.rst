@@ -17,6 +17,7 @@ For more details see: :doc:`/cql/type_safety`.
    cql/declaring_models
    cql/connecting_to_a_database
    cql/type_safety
+   cql/performance
 
 .. toctree::
    :caption: Tools

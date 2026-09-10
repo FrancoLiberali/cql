@@ -8,7 +8,7 @@ import (
 )
 
 func (bicycleConditions bicycleConditions) Owner(conditions ...condition.Condition[overrideforeignkey.Person]) condition.JoinCondition[overrideforeignkey.Bicycle] {
-	return condition.NewJoinCondition[overrideforeignkey.Bicycle, overrideforeignkey.Person](conditions, "Owner", "OwnerSomethingID", bicycleConditions.preload(), "ID", Person.preload())
+	return condition.NewJoinCondition[overrideforeignkey.Bicycle, overrideforeignkey.Person](conditions, "Owner", "OwnerSomethingID", bicycleConditions.preload(), "ID", Person.preload(), bicycleOwnerJoinScanner)
 }
 
 type bicycleConditions struct {

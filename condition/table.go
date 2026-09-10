@@ -2,6 +2,7 @@ package condition
 
 import (
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 
 	"github.com/FrancoLiberali/cql/model"
 )
@@ -10,6 +11,10 @@ type Table struct {
 	Name    string
 	Alias   string
 	Initial bool
+	// Schema is the parsed gorm schema for this table's model, pinned so
+	// column-name lookups skip the per-query NamingStrategy allocations.
+	// Populated by NewTable / DeliverTable via getTableSchema (cache-shared).
+	Schema *schema.Schema
 }
 
 // SQLName returns the name that must be used in a sql query to use this table:
@@ -29,8 +34,7 @@ func (t Table) IsInitial() bool {
 
 // Returns the related Table corresponding to the model
 func (t Table) DeliverTable(query *CQLQuery, model model.Model, relationName string) (Table, error) {
-	// get the name of the table for the model
-	tableName, err := getTableName(query.gormDB, model)
+	sch, err := getTableSchema(query.gormDB, model)
 	if err != nil {
 		return Table{}, err
 	}
@@ -43,21 +47,23 @@ func (t Table) DeliverTable(query *CQLQuery, model model.Model, relationName str
 	}
 
 	return Table{
-		Name:    tableName,
+		Name:    sch.Table,
 		Alias:   tableAlias,
 		Initial: false,
+		Schema:  sch,
 	}, nil
 }
 
 func NewTable(db *gorm.DB, model model.Model) (Table, error) {
-	initialTableName, err := getTableName(db, model)
+	sch, err := getTableSchema(db, model)
 	if err != nil {
 		return Table{}, err
 	}
 
 	return Table{
-		Name:    initialTableName,
-		Alias:   initialTableName,
+		Name:    sch.Table,
+		Alias:   sch.Table,
 		Initial: true,
+		Schema:  sch,
 	}, nil
 }
