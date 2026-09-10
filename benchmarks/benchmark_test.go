@@ -29,6 +29,7 @@ package benchmarks_test
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"testing"
 	"time"
 
@@ -43,7 +44,7 @@ import (
 func openDB(b *testing.B) *cql.DB {
 	b.Helper()
 
-	db, err := cql.Open(sqlite.Open(":memory:"), &cql.Config{
+	db, err := cql.Open(sqlite.Open(filepath.Join(b.TempDir(), "bench.db")), &cql.Config{
 		Logger: gormlogger.Default.LogMode(gormlogger.Silent),
 	})
 	if err != nil {

@@ -13,11 +13,12 @@ Benchmarks
 
 The CQL benchmarks live in ``cql/benchmarks`` and mirror gorm's own
 ``gorm/tests/benchmark_test.go`` shapes (same ``users`` table layout); the gorm
-figures come from running that gorm suite, and the gorm-gen figures from a
-generated DAO over the same table. All were produced on the same machine,
-against an in-memory SQLite database, with ``go test -bench``. The numbers are
-relative — what matters is CQL versus the alternatives on the *same* run, not
-the absolute nanoseconds.
+figures come from running that suite against **upstream gorm v1.31.2** (not
+CQL's fork), and the gorm-gen figures from `gorm-gen <https://github.com/go-gorm/gen>`_
+itself — a DAO it generated over the same table, also on gorm v1.31.2. All were
+produced on the same machine, against an on-disk SQLite database, with
+``go test -bench``. The numbers are relative — what matters is CQL versus the
+alternatives on the *same* run, not the absolute nanoseconds.
 
 Reading 10,000 rows (``.Find()`` into a slice)
 ----------------------------------------------
@@ -31,14 +32,14 @@ This is where the generated scanner pays off:
      - Time
      - Allocations
    * - **CQL**
-     - **14.5 ms**
-     - **119,882**
+     - **13.9 ms**
+     - **119,883**
    * - gorm
-     - 18.0 ms
-     - 190,091
+     - 17.6 ms
+     - 190,094
    * - gorm-gen
-     - 18.3 ms
-     - 190,138
+     - 18.6 ms
+     - 189,786
 
 CQL is about **20% faster** and does about **37% fewer allocations** than gorm,
 because it never falls back to reflection while materialising the rows.
@@ -53,18 +54,18 @@ Reading a single row by primary key (``.First()``)
      - Time
      - Allocations
    * - **CQL**
-     - **7.0 µs**
+     - **10.8 µs**
      - **95**
    * - gorm
-     - 7.1 µs
-     - 94
+     - 10.1 µs
+     - 96
    * - gorm-gen
-     - 8.0 µs
-     - 106
+     - 11.6 µs
+     - 102
 
-For a single row the per-query cost dominates, so CQL matches gorm and is a bit
-faster than gorm-gen. The scanner's advantage grows with the number of rows
-returned — the common case for list queries.
+For a single row the per-query cost dominates and all three land within a
+handful of microseconds of each other. The scanner's advantage shows up once a
+query returns many rows — the common case for list queries.
 
 Why gorm-gen tracks gorm
 ========================
