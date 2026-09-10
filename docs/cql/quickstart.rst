@@ -24,7 +24,7 @@ project's ``go.mod`` for cql to compile:
 
 .. code-block:: bash
 
-    go mod edit -replace gorm.io/gorm=github.com/FrancoLiberali/gorm@v1.31.1
+    go mod edit -replace gorm.io/gorm=github.com/FrancoLiberali/gorm@v1.31.3
 
 This also makes gorm's standard drivers (``gorm.io/driver/sqlite``, ``gorm.io/driver/postgres``,
 ``gorm.io/driver/mysql``, ``gorm.io/driver/sqlserver``) use the fork, so no extra changes are needed for them.
