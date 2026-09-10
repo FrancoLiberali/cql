@@ -67,6 +67,11 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenNothingMatchConditions() {
 func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 	product := ts.createProduct("", 0, 0, false, nil)
 
+	// mysql stores timestamps as datetime(3) (millisecond precision), so
+	// without a gap the update's UpdatedAt can land in the same millisecond
+	// as the create and the NotEqual assertion below flakes.
+	time.Sleep(time.Millisecond)
+
 	updated, err := cql.Update[models.Product](
 		context.Background(),
 		ts.db,
@@ -92,6 +97,11 @@ func (ts *UpdateIntTestSuite) TestUpdateWhenAModelMatchConditions() {
 func (ts *UpdateIntTestSuite) TestUpdateWhenMultipleModelsMatchConditions() {
 	product1 := ts.createProduct("1", 0, 0, false, nil)
 	product2 := ts.createProduct("2", 0, 0, false, nil)
+
+	// mysql stores timestamps as datetime(3) (millisecond precision), so
+	// without a gap the update's UpdatedAt can land in the same millisecond
+	// as product2's create and the NotEqual assertions below flake.
+	time.Sleep(time.Millisecond)
 
 	updated, err := cql.Update[models.Product](
 		context.Background(),
