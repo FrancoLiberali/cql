@@ -15,3 +15,5 @@ require (
 )
 
 replace github.com/FrancoLiberali/cql => ./../../../../../..
+
+replace gorm.io/gorm => github.com/FrancoLiberali/gorm v1.31.3
