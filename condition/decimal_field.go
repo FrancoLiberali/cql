@@ -14,12 +14,12 @@ import (
 // sql.Scanner at runtime, as for any custom column type.
 //
 // It is intentionally loose: DecimalField is only ever emitted by cql-gen,
-// which decides a column is a decimal from its DB type (a `type:decimal` /
-// `type:numeric` gorm tag, or a known-decimal-type allowlist) — NOT from the Go
-// type's shape. So the constraint does not need to prove "is a decimal"; that
-// guarantee lives in the generator. This keeps any decimal library usable with
-// no wrapper, regardless of its arithmetic method names — CQL evaluates the
-// arithmetic in SQL and never calls Go-side Add/Sub/Mul/Div.
+// which decides a column is a decimal from its DB type — a `type:decimal` /
+// `type:numeric` gorm tag — NOT from the Go type's shape. So the constraint
+// does not need to prove "is a decimal"; that guarantee lives in the generator.
+// This keeps any decimal library usable with no wrapper, regardless of its
+// arithmetic method names — CQL evaluates the arithmetic in SQL and never calls
+// Go-side Add/Sub/Mul/Div.
 //
 // (Structs can never satisfy the Numeric constraint — constraints.Integer |
 // constraints.Float admits only basic types — which is why decimal columns
