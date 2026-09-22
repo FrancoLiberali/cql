@@ -10,10 +10,3 @@ use (
 	./cqllint/pkg/analyzer/testdata/src/not_concerned
 	./cqllint/pkg/analyzer/testdata/src/repeated
 )
-
-// The cql library uses methods only present in the gorm fork. A module-level
-// replace (as in ./go.mod) does not propagate to other workspace modules, so
-// cqllint's analyzer — which type-checks cql source when analyzing its testdata
-// — would resolve upstream gorm and fail. A workspace-wide replace fixes it for
-// every module at once.
-replace gorm.io/gorm => github.com/FrancoLiberali/gorm v1.31.3

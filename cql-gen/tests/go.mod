@@ -47,3 +47,9 @@ require (
 replace github.com/FrancoLiberali/cql/cql-gen => ./..
 
 replace github.com/FrancoLiberali/cql => ./../..
+
+// The generated conditions this module compiles pull in cql/condition, which
+// uses gorm-fork-only methods. A module replace does not reach through the cql
+// require above, so this consumer needs its own — matching the root module and
+// the cqllint testdata modules.
+replace gorm.io/gorm => github.com/FrancoLiberali/gorm v1.31.3
