@@ -440,8 +440,9 @@ func (r *Runner) findErrorIsDynamicForCall(conditionCall *ast.CallExpr) {
 			return
 		}
 
-		if conditionSelector.Sel.Name == "ValueInto" {
-			newModels := getModelsFromExpr(conditionCall.Args[0])
+		if conditionSelector.Sel.Name == "Into" {
+			// selection is <field>.Into(func(...)); the field is the receiver.
+			newModels := getModelsFromExpr(conditionSelector.X)
 			r.addPositionsToReport(newModels)
 
 			return

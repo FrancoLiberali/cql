@@ -11,13 +11,12 @@ var errIntoTypeMismatch = errors.New("into: scanned value is not of the expected
 // intoSelection is the strict, pointer-form Selection produced by the Into
 // methods below.
 //
-// Unlike ValueIntoSelection (the closure form, func(value, *result)), it binds
-// the selected value straight into a field of the per-row result through
-// selector, which returns the ADDRESS of that field. The destination must be
-// exactly TValue, so no conversion is ever needed: the database driver scans
-// into a TValue scratch of the correct type — an *int for an int column, not
-// the float64 the numeric value abstraction would otherwise impose — and it is
-// copied into the destination.
+// It binds the selected value straight into a field of the per-row result
+// through selector, which returns the ADDRESS of that field. The destination
+// must be exactly TValue, so no conversion is ever needed: the database driver
+// scans into a TValue scratch of the correct type — an *int for an int column,
+// not the float64 the numeric value abstraction would otherwise impose — and it
+// is copied into the destination.
 type intoSelection[TValue any, TResults any] struct {
 	value    IValue
 	selector func(*TResults) *TValue

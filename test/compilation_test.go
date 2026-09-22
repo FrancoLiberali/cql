@@ -363,9 +363,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			).GroupBy(
 				conditions.Product.Int,
 			),
-			cql.ValueInto(conditions.Product.Int.Aggregate().All(), func(value float64, result *Result) {
-				result.Aggregation1 = int(value)
-			}),
+			conditions.Product.Int.Aggregate().All().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 		)`,
 			Error: `conditions.Product.Int.Aggregate().All undefined (type condition.NumericFieldAggregation has no field or method All)`,
 		},
@@ -381,9 +379,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			).Having(
 				conditions.Product.Int.Aggregate().Max().Eq(cql.String("13")),
 			),
-			cql.ValueInto(conditions.Product.Int.Aggregate().Max(), func(value float64, result *Result) {
-				result.Aggregation1 = int(value)
-			}),
+			conditions.Product.Int.Aggregate().Max().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 		)`,
 			Error: `cannot use cql.String("13") (value of struct type condition.Value[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.Value[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
@@ -399,9 +395,7 @@ func TestGroupByCompilationErrors(t *testing.T) {
 			).Having(
 				conditions.Product.Int.Aggregate().Max().Eq(conditions.Product.String.Aggregate().Min()),
 			),
-			cql.ValueInto(conditions.Product.Int.Aggregate().Max(), func(value float64, result *Result) {
-				result.Aggregation1 = int(value)
-			}),
+			conditions.Product.Int.Aggregate().Max().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 		)`,
 			Error: ` cannot use conditions.Product.String.Aggregate().Min() (value of struct type condition.AggregationResult[string]) as condition.ValueOfType[float64] value in argument to conditions.Product.Int.Aggregate().Max().Eq: condition.AggregationResult[string] does not implement condition.ValueOfType[float64] (wrong type for method GetValue)`,
 		},
@@ -531,29 +525,24 @@ func TestSelectCompilationErrors(t *testing.T) {
 						context.Background(),
 						db,
 					),
-					cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt) {
-						result.Int = int(value)
-					}),
-					cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt2) {
-						result.Int = int(value)
-					}),
+					conditions.Product.Int.Into(func(result *ResultInt) *int { return &result.Int }),
+					conditions.Product.Int.Into(func(result *ResultInt2) *int { return &result.Int }),
 				)
 			`,
-			Error: `in call to cql.Select, type *cql.ValueIntoSelection[float64, ResultInt2] of cql.ValueInto(conditions.Product.Int, func(value float64, result *ResultInt2) {…}) does not match inferred type condition.Selection[ResultInt] for condition.Selection[TResults]`,
+			Error: `does not match inferred type condition.Selection[ResultInt] for condition.Selection[TResults]`,
 		},
 		{
-			Name: "value not the same time of the query",
+			Name: "value bound into a destination of the wrong type",
 			Code: `
 				_, _ = cql.Select(
 					cql.Query[models.Product](
 						context.Background(),
 						db,
 					),
-					cql.ValueInto(conditions.Product.Int, func(value string, result *ResultInt) {
-					}),
+					conditions.Product.String.Into(func(result *ResultInt) *int { return &result.Int }),
 				)
 			`,
-			Error: `in call to cql.ValueInto, type func(value string, result *ResultInt) of func(value string, result *ResultInt) {} does not match inferred type func(float64, *TResults) for func(TValue, *TResults)`,
+			Error: `does not match inferred type func(*ResultInt) *string for func(*TResults) *string`,
 		},
 	}
 
