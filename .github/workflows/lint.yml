@@ -19,7 +19,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.23'
+          go-version: '1.27'
           cache: true
           cache-dependency-path: go.sum
       - name: lint
@@ -41,7 +41,7 @@ jobs:
           fetch-depth: 0
       - uses: actions/setup-go@v5
         with:
-          go-version: '1.25'
+          go-version: '1.27'
       - name: Mod download
         run: go mod download
       - name: Mod download cqllint

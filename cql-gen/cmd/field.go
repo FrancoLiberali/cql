@@ -3,6 +3,7 @@ package cmd
 import (
 	"errors"
 	"go/types"
+	"strings"
 
 	"github.com/elliotchance/pie/v2"
 )
@@ -51,6 +52,27 @@ func (field Field) CompleteName() string {
 
 func (field Field) IsModelID() bool {
 	return pie.Contains(modelIDs, field.TypeString())
+}
+
+// IsDecimal reports whether the field should be exposed as a DecimalField: its
+// gorm `type:` tag maps the column to an exact decimal type (decimal/numeric).
+//
+// Detection is tag-only and per-column, which is authoritative: precision and
+// scale live on the column, not the Go type, so real decimal columns always
+// carry the tag. The Go type's shape is deliberately not inspected —
+// condition.Decimal only requires driver.Valuer, and the generator is the sole
+// gatekeeper of decimal-ness, so any decimal library works with no allowlist to
+// maintain. A column without the tag falls back to a plain Field (comparisons
+// and exact Into still work, just no arithmetic).
+func (field Field) IsDecimal() bool {
+	typeTag, isPresent := field.Tags[typeTagName]
+	if !isPresent {
+		return false
+	}
+
+	lowered := strings.ToLower(strings.TrimSpace(typeTag))
+
+	return strings.HasPrefix(lowered, "decimal") || strings.HasPrefix(lowered, "numeric")
 }
 
 func (field Field) IsUpdatable() bool {

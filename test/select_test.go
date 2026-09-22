@@ -388,6 +388,52 @@ func (ts *SelectIntTestSuite) TestSelectFromNotJoinedModelReturnsError() {
 	ts.ErrorContains(err, "field's model is not concerned by the query (not joined); not concerned model: models.Product")
 }
 
+// TestSelectIntoPointerFormStrict exercises the Go 1.27 pointer-form .Into:
+//   - a plain int column binds straight into an int field (no float64 detour,
+//     no int(value) conversion at the call site);
+//   - a string column binds into a string field;
+//   - an aggregation binds into its honest float64 field.
+func (ts *SelectIntTestSuite) TestSelectIntoPointerFormStrict() {
+	ts.createProduct("a", 2, 0, false, nil)
+	ts.createProduct("b", 1, 0, false, nil)
+	ts.createProduct("c", 3, 0, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			context.Background(),
+			ts.db,
+		).Ascending(conditions.Product.Int),
+		conditions.Product.Int.Into(func(r *Result) *int { return &r.Int }),
+		conditions.Product.String.Into(func(r *Result) *string { return &r.String }),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []Result{
+		{Int: 1, String: "b"},
+		{Int: 2, String: "a"},
+		{Int: 3, String: "c"},
+	}, results)
+}
+
+func (ts *SelectIntTestSuite) TestSelectIntoPointerFormAggregation() {
+	ts.createProduct("1", 4, 0, false, nil)
+	ts.createProduct("2", 1, 0, false, nil)
+	ts.createProduct("5", 1, 0, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			context.Background(),
+			ts.db,
+		),
+		conditions.Product.Int.Aggregate().Sum().Into(func(r *Result) *float64 { return &r.Aggregation3 }),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []Result{
+		{Aggregation3: 6},
+	}, results)
+}
+
 func (ts *SelectIntTestSuite) TestSelectAggregations() {
 	ts.createProduct("1", 4, 0, false, nil)
 	ts.createProduct("2", 1, 1, false, nil)
