@@ -28,6 +28,15 @@ func (c *Cents) Scan(src any) error {
 		*c = Cents(v)
 	case int:
 		*c = Cents(v)
+	case float64:
+		// sqlite returns AVG(numeric) as a float. Cents is integer-valued, so
+		// accept only a whole number.
+		n := int64(v)
+		if float64(n) != v {
+			return fmt.Errorf("%w: non-integer %v", errUnsupportedCentsScan, v)
+		}
+
+		*c = Cents(n)
 	case []byte:
 		// postgres/mysql deliver NUMERIC as text.
 		return c.scanText(string(v))

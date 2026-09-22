@@ -118,3 +118,70 @@ func (ts *SelectIntTestSuite) TestDecimalFieldLibraryArithmetic() {
 	ts.Require().Len(results, 1)
 	ts.True(results[0].Total.Equal(decimal.RequireFromString("5")))
 }
+
+func cents(v models.Cents) condition.Value[models.Cents] {
+	return condition.Value[models.Cents]{Value: v}
+}
+
+// selectBalance runs a single-column select and returns the one result.
+func (ts *SelectIntTestSuite) selectBalanceExpr(sel condition.Selection[centsResult]) models.Cents {
+	results, err := cql.Select(cql.Query[models.Bank](context.Background(), ts.db), sel)
+	ts.Require().NoError(err)
+	ts.Require().Len(results, 1)
+
+	return results[0].Total
+}
+
+func into(r *centsResult) *models.Cents { return &r.Total }
+
+// The remaining DecimalField operators, each run as real SQL.
+
+func (ts *SelectIntTestSuite) TestDecimalFieldMinus() {
+	ts.createBank(30, decimal.Zero)
+	ts.Equal(models.Cents(25), ts.selectBalanceExpr(conditions.Bank.Balance.Minus(cents(5)).Into(into)))
+}
+
+func (ts *SelectIntTestSuite) TestDecimalFieldTimes() {
+	ts.createBank(10, decimal.Zero)
+	ts.Equal(models.Cents(30), ts.selectBalanceExpr(conditions.Bank.Balance.Times(cents(3)).Into(into)))
+}
+
+func (ts *SelectIntTestSuite) TestDecimalFieldDivided() {
+	ts.createBank(20, decimal.Zero)
+	ts.Equal(models.Cents(5), ts.selectBalanceExpr(conditions.Bank.Balance.Divided(cents(4)).Into(into)))
+}
+
+// Chaining beyond the first operation exercises the NotUpdatableDecimalField
+// operators: ((10+10+5-3)*2)/4 = 11.
+func (ts *SelectIntTestSuite) TestDecimalFieldChainedArithmetic() {
+	ts.createBank(10, decimal.Zero)
+
+	expr := conditions.Bank.Balance.
+		Plus(cents(10)).
+		Plus(cents(5)).
+		Minus(cents(3)).
+		Times(cents(2)).
+		Divided(cents(4)).
+		Into(into)
+	ts.Equal(models.Cents(11), ts.selectBalanceExpr(expr))
+}
+
+// Aggregating an arithmetic expression covers NotUpdatableDecimalField.Aggregate:
+// SUM(balance + 1) over {10, 20} = 32.
+func (ts *SelectIntTestSuite) TestDecimalFieldExpressionSum() {
+	ts.createBank(10, decimal.Zero)
+	ts.createBank(20, decimal.Zero)
+
+	expr := conditions.Bank.Balance.Plus(cents(1)).Aggregate().Sum().Into(into)
+	ts.Equal(models.Cents(32), ts.selectBalanceExpr(expr))
+}
+
+// Min / Max / Average over {10, 20}.
+func (ts *SelectIntTestSuite) TestDecimalFieldAggregations() {
+	ts.createBank(10, decimal.Zero)
+	ts.createBank(20, decimal.Zero)
+
+	ts.Equal(models.Cents(10), ts.selectBalanceExpr(conditions.Bank.Balance.Aggregate().Min().Into(into)))
+	ts.Equal(models.Cents(20), ts.selectBalanceExpr(conditions.Bank.Balance.Aggregate().Max().Into(into)))
+	ts.Equal(models.Cents(15), ts.selectBalanceExpr(conditions.Bank.Balance.Aggregate().Average().Into(into)))
+}

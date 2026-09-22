@@ -434,6 +434,25 @@ func (ts *SelectIntTestSuite) TestSelectIntoPointerFormAggregation() {
 	}, results)
 }
 
+// A numeric arithmetic expression binds *float64 (SQL widens); covers the
+// NotUpdatableNumericField.Into path.
+func (ts *SelectIntTestSuite) TestSelectIntoPointerFormNumericExpression() {
+	ts.createProduct("1", 10, 0, false, nil)
+
+	results, err := cql.Select(
+		cql.Query[models.Product](
+			context.Background(),
+			ts.db,
+		),
+		conditions.Product.Int.Plus(cql.Int(1)).Into(func(r *Result) *float64 { return &r.Aggregation3 }),
+	)
+
+	ts.Require().NoError(err)
+	EqualList(&ts.Suite, []Result{
+		{Aggregation3: 11},
+	}, results)
+}
+
 func (ts *SelectIntTestSuite) TestSelectAggregations() {
 	ts.createProduct("1", 4, 0, false, nil)
 	ts.createProduct("2", 1, 1, false, nil)
