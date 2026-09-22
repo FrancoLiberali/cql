@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/shopspring/decimal"
 
@@ -40,6 +41,17 @@ func (c *Cents) Scan(src any) error {
 }
 
 func (c *Cents) scanText(s string) error {
+	// A DECIMAL column can come back with a fractional part — e.g. mysql renders
+	// "balance + 5" as "15.000...0". Cents is integer-valued, so accept an
+	// all-zero fraction and reject a real one.
+	if dot := strings.IndexByte(s, '.'); dot >= 0 {
+		if strings.Trim(s[dot+1:], "0") != "" {
+			return fmt.Errorf("%w: non-integer %q", errUnsupportedCentsScan, s)
+		}
+
+		s = s[:dot]
+	}
+
 	n, err := strconv.ParseInt(s, 10, 64)
 	if err != nil {
 		return fmt.Errorf("%w: %q", errUnsupportedCentsScan, s)
@@ -56,7 +68,7 @@ func (c *Cents) scanText(s string) error {
 type Bank struct {
 	model.UUIDModel
 
-	Balance Cents           `gorm:"type:numeric"`
+	Balance Cents           `gorm:"type:numeric(19,0)"`
 	Rate    decimal.Decimal `gorm:"type:decimal(19,4)"`
 }
 
