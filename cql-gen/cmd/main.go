@@ -128,7 +128,20 @@ func generateConditionsForObject(destPkg string, object types.Object) {
 
 // Load package information from paths
 func loadPackages(paths []string) []*packages.Package {
-	cfg := &packages.Config{Mode: packages.NeedTypes}
+	// Type-check from source (NeedSyntax|NeedImports|NeedDeps) instead of
+	// reading compiled export data. NeedTypes alone makes packages.Load decode
+	// each dependency's gc export data, whose format version advances with the
+	// Go toolchain; a mismatch there fails with "export data version N is
+	// greater than maximum supported version M". Loading from source sidesteps
+	// that entirely and keeps generation working across toolchains.
+	cfg := &packages.Config{
+		Mode: packages.NeedName |
+			packages.NeedTypes |
+			packages.NeedTypesInfo |
+			packages.NeedSyntax |
+			packages.NeedImports |
+			packages.NeedDeps,
+	}
 
 	pkgs, err := packages.Load(cfg, paths...)
 	if err != nil {

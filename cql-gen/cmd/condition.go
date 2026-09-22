@@ -26,6 +26,7 @@ const (
 	cqlNullableStringField  = "NullableStringField"
 	cqlNumericField         = "NumericField"
 	cqlNullableNumericField = "NullableNumericField"
+	cqlDecimalField         = "DecimalField"
 	cqlNewField             = "New"
 	cqlCollection           = "Collection"
 	cqlNewCollection        = "NewCollection"
@@ -140,6 +141,11 @@ func (condition *Condition) generateForNamedType(objectType Type, field Field) {
 	case err == nil:
 		// field is a cql model
 		condition.generateForCQLModel(objectType, field)
+	case field.IsDecimal():
+		// field maps to a DECIMAL/NUMERIC column and its Go type supports
+		// closed arithmetic -> expose exact decimal arithmetic & aggregation.
+		condition.param.ToCustomType(condition.destPkg, field.Type)
+		condition.createDecimalField(objectType, field)
 	case field.Type.IsSQLNullableType():
 		// field is a sql nullable type (sql.NullBool, sql.NullInt, etc.)
 		condition.param.SQLToBasicType(field.Type)
@@ -237,6 +243,38 @@ func (condition *Condition) createField(objectType Type, field Field) {
 		fieldQual,
 	)
 
+	condition.FieldDefinition = newFieldQual.Call(fieldName, fieldColumn, fieldColumnPrefix)
+}
+
+// createDecimalField emits a DecimalField[Model, TDecimal] plus its
+// NewDecimalField constructor. TDecimal is the column's Go type, captured in
+// condition.param by the ToCustomType call at the dispatch site.
+func (condition *Condition) createDecimalField(objectType Type, field Field) {
+	fieldName := jen.Lit(field.Name)
+	fieldColumn := jen.Lit("")
+	fieldColumnPrefix := jen.Lit("")
+
+	if columnName := field.getColumnName(); columnName != "" {
+		fieldColumn = jen.Lit(columnName)
+	}
+
+	if field.ColumnPrefix != "" {
+		fieldColumnPrefix = jen.Lit(field.ColumnPrefix)
+	}
+
+	objectTypeQual := jen.Qual(
+		getRelativePackagePath(condition.destPkg, objectType),
+		objectType.Name(),
+	)
+
+	fieldQual := jen.Qual(conditionPath, cqlDecimalField).Types(
+		objectTypeQual, condition.param.GenericType(),
+	)
+	newFieldQual := jen.Qual(conditionPath, cqlNewField+cqlDecimalField).Types(
+		objectTypeQual, condition.param.GenericType(),
+	)
+
+	condition.FieldType = jen.Id(condition.FieldName).Add(fieldQual)
 	condition.FieldDefinition = newFieldQual.Call(fieldName, fieldColumn, fieldColumnPrefix)
 }
 
