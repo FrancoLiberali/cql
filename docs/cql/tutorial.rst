@@ -429,12 +429,8 @@ we can perform this query as follows:
                 conditions.Country.Name.Is().Eq(cql.String("France")),
             ),
         ),
-        cql.ValueInto(conditions.City.Name, func(value string, result *CityAndCountryNames) {
-            result.CityName = value
-        }),
-        cql.ValueInto(conditions.Country.Name, func(value string, result *CityAndCountryNames) {
-            result.CountryName = value
-        ),
+        conditions.City.Name.Into(func(result *CityAndCountryNames) *string { return &result.CityName }),
+        conditions.Country.Name.Into(func(result *CityAndCountryNames) *string { return &result.CountryName }),
     )
 
 We can run this tutorial with `make tutorial_11` and we will obtain the following result:

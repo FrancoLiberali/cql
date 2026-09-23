@@ -4,11 +4,12 @@ Select
 
 If you only want certain attributes from the models as query results, cql provides cql.Select.
 
-This function allows us to take the results of a query received by parameter and select only certain attributes, 
+This function allows us to take the results of a query received by parameter and select only certain attributes,
 both from the main query model and from the joined models.
 
-To perform this selection, the cql.ValueInto function is used, which receives the field to be selected and 
-a function to save that field in the results list.
+To perform this selection, the ``Into`` method of the selected field (or aggregation) is used. It receives a
+function that, given a pointer to a result, returns the address of the attribute where the selected value will
+be stored.
 
 Example 1: Select only one field from the main model
 
@@ -34,9 +35,7 @@ Example 1: Select only one field from the main model
             db,
             conditions.MyModel.Value1.Is().Eq(cql.Int64(4)),
         ),
-        cql.ValueInto(conditions.MyModel.Value1, func(value float64, result *Results) {
-            result.Value1 = int64(value)
-        }),
+        conditions.MyModel.Value1.Into(func(result *Results) *int64 { return &result.Value1 }),
     )
 
 Example 2: Select more than one field from the main model
@@ -48,12 +47,12 @@ Example 2: Select more than one field from the main model
         model.UUIDModel
 
         Value1 int64
-        Value2 String
+        Value2 string
     }
 
     type Results struct {
         Value1 int64
-        Value2 String
+        Value2 string
     }
 
 .. code-block:: go
@@ -64,12 +63,8 @@ Example 2: Select more than one field from the main model
             db,
             conditions.MyModel.Value1.Is().Eq(cql.Int64(4)),
         ),
-        cql.ValueInto(conditions.MyModel.Value1, func(value float64, result *Results) {
-            result.Value1 = int64(value)
-        }),
-        cql.ValueInto(conditions.MyModel.Value2, func(value string, result *Results) {
-            result.Value2 = value
-        }),
+        conditions.MyModel.Value1.Into(func(result *Results) *int64 { return &result.Value1 }),
+        conditions.MyModel.Value2.Into(func(result *Results) *string { return &result.Value2 }),
     )
 
 Joins
@@ -97,7 +92,7 @@ It is possible to select different attributes from the different entities joined
 
     type Results struct {
         Value1 int64
-        Name String
+        Name   string
     }
 
 .. code-block:: go
@@ -109,12 +104,8 @@ It is possible to select different attributes from the different entities joined
             conditions.MyModel.Value1.Is().Eq(cql.Int64(4)),
             conditions.MyModel.Related(),
         ),
-        cql.ValueInto(conditions.MyModel.Value1, func(value float64, result *Results) {
-            result.Value1 = int64(value)
-        }),
-        cql.ValueInto(conditions.MyOtherModel.Name, func(value string, result *Results) {
-            result.Name = value
-        }),
+        conditions.MyModel.Value1.Into(func(result *Results) *int64 { return &result.Value1 }),
+        conditions.MyOtherModel.Name.Into(func(result *Results) *string { return &result.Name }),
     )
 
 Functions
@@ -122,6 +113,11 @@ Functions
 
 cql supports applying functions to selected values before retrieving them, either with static values or with other attributes.
 For more details on the available functions, please consult :ref:`functions <cql/query:functions>`.
+
+.. note::
+
+    A numeric arithmetic expression follows SQL's type promotion, so its result is bound as ``float64``
+    (see :ref:`Type safety <cql/select:type safety>` below). The destination attribute must therefore be a ``float64``.
 
 Example 1: Function with static value
 
@@ -137,7 +133,7 @@ In this case, we will add 2 to the values obtained.
     }
 
     type Results struct {
-        Value1 int64
+        Value1 float64
     }
 
 .. code-block:: go
@@ -148,9 +144,7 @@ In this case, we will add 2 to the values obtained.
             db,
             conditions.MyModel.Value1.Is().Eq(cql.Int64(4)),
         ),
-        cql.ValueInto(conditions.MyModel.Value1.Plus(cql.Int64(2)), func(value float64, result *Results) {
-            result.Value1 = int64(value)
-        }),
+        conditions.MyModel.Value1.Plus(cql.Int64(2)).Into(func(result *Results) *float64 { return &result.Value1 }),
     )
 
 Example 2: Function with other attribute
@@ -168,7 +162,7 @@ In this case, we will add two attributes.
     }
 
     type Results struct {
-        Value1PlusValue2 int64
+        Value1PlusValue2 float64
     }
 
 .. code-block:: go
@@ -179,9 +173,7 @@ In this case, we will add two attributes.
             db,
             conditions.MyModel.Value1.Is().Eq(cql.Int64(4)),
         ),
-        cql.ValueInto(conditions.MyModel.Value1.Plus(conditions.MyModel.Value2), func(value float64, result *Results) {
-            result.Value1PlusValue2 = int64(value)
-        }),
+        conditions.MyModel.Value1.Plus(conditions.MyModel.Value2).Into(func(result *Results) *float64 { return &result.Value1PlusValue2 }),
     )
 
 Aggregations
@@ -208,6 +200,11 @@ For boolean attributes, the following aggregations are also available:
 - Any: returns true if at least one value is true.
 - None: returns true if all values are false.
 
+.. note::
+
+    Numeric aggregations (Sum, Average, Min, Max, Count, ...) are bound as ``float64``, so the destination
+    attribute must be a ``float64``.
+
 Example:
 
 .. code-block:: go
@@ -221,8 +218,8 @@ Example:
     }
 
     type Results struct {
-        Value1Sum int64
-        Value2Max int64
+        Value1Sum float64
+        Value2Max float64
     }
 
 .. code-block:: go
@@ -233,12 +230,8 @@ Example:
             db,
             conditions.MyModel.Value1.Is().Eq(cql.Int64(4)),
         ),
-        cql.ValueInto(conditions.MyModel.Value1.Aggregate().Sum(), func(value float64, result *Results) {
-            result.Value1Sum = int64(value)
-        }),
-        cql.ValueInto(conditions.MyModel.Value2.Aggregate().Max(), func(value float64, result *Results) {
-            result.Value2Max = int64(value)
-        }),
+        conditions.MyModel.Value1.Aggregate().Sum().Into(func(result *Results) *float64 { return &result.Value1Sum }),
+        conditions.MyModel.Value2.Aggregate().Max().Into(func(result *Results) *float64 { return &result.Value2Max }),
     )
 
 .. warning::
@@ -253,9 +246,12 @@ Select, in addition to inheriting the type safety of Query, adds a new layer of 
 Selection type
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-cql.ValueInto ensures that the type of the selected attribute is stored in a result of the correct type.
+``Into`` ensures at compile time that the selected value is stored in an attribute of the correct type: the
+function you pass must return the address of an attribute whose type matches the selected value.
 
-Note that selections of all numeric types are of type float64, which must then be cast to the desired type if it is different.
+A plain column binds its own Go type (an ``int64`` column into an ``int64`` attribute, a ``string`` column into a
+``string`` attribute, and so on). Only numeric expressions (``Plus``, ``Minus``, ...) and numeric aggregations widen
+to ``float64``; for those the destination attribute must be a ``float64``.
 
 .. code-block:: go
     :caption: Model
@@ -280,14 +276,12 @@ Note that selections of all numeric types are of type float64, which must then b
             context.Background(),
             db,
         ),
-        cql.ValueInto(conditions.MyModel.Value1, func(value float64, result *Results) {
-            result.Value1 = int64(value)
-        }),
+        conditions.MyModel.Value1.Into(func(result *Results) *int64 { return &result.Value1 }),
     )
 
 .. code-block:: go
     :class: with-errors
-    :caption: Incorrect 1
+    :caption: Incorrect
     :emphasize-lines: 6
     :linenos:
 
@@ -296,41 +290,18 @@ Note that selections of all numeric types are of type float64, which must then b
             context.Background(),
             db,
         ),
-        cql.ValueInto(conditions.MyModel.Value2, func(value float64, result *Results) {
-            result.Value1 = value
-        }),
+        conditions.MyModel.Value2.Into(func(result *Results) *int64 { return &result.Value1 }),
     )
 
-In this case, the compilation error will be:
+In this case, ``Value2`` is a ``string`` column, so ``Into`` expects a function returning ``*string``. The
+compilation error will be:
 
 .. code-block:: none
 
-    in call to cql.ValueInto, type func(value float64, result *Results) of (func(value float64, result *ResultInt) literal)
-    does not match inferred type func(string, *TResults) for func(TValue, *TResults)
+    type func(result *Results) *int64 of (func(result *Results) *int64 literal)
+    does not match inferred type func(*Results) *string for func(*TResults) *string
 
-.. code-block:: go
-    :class: with-errors
-    :caption: Incorrect 2
-    :emphasize-lines: 7
-    :linenos:
-
-    results, err := cql.Select(
-        cql.Query[MyModel](
-            context.Background(),
-            db,
-        ),
-        cql.ValueInto(conditions.MyModel.Value2, func(value string, result *Results) {
-            result.Value1 = value
-        }),
-    )
-
-In this case, the compilation error will be:
-
-.. code-block:: none
-
-    cannot use value (variable of type string) as int64 value in assignment
-
-ValueInto functions
+Into functions
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 As in cql.Query, the functions applied to the selected values are type-safe.
@@ -347,7 +318,7 @@ As in cql.Query, the functions applied to the selected values are type-safe.
     }
 
     type Results struct {
-        Value1 int64
+        Value1 float64
     }
 
 .. code-block:: go
@@ -359,9 +330,7 @@ As in cql.Query, the functions applied to the selected values are type-safe.
             context.Background(),
             db,
         ),
-        cql.ValueInto(conditions.MyModel.Value1.Plus(conditions.MyModel.Value3), func(value float64, result *Results) {
-            result.Value1 = int64(value)
-        }),
+        conditions.MyModel.Value1.Plus(conditions.MyModel.Value3).Into(func(result *Results) *float64 { return &result.Value1 }),
     )
 
 .. code-block:: go
@@ -375,23 +344,21 @@ As in cql.Query, the functions applied to the selected values are type-safe.
             context.Background(),
             db,
         ),
-        cql.ValueInto(conditions.MyModel.Value1.Plus(conditions.MyModel.Value2), func(value float64, result *Results) {
-            result.Value1 = value
-        }),
+        conditions.MyModel.Value1.Plus(conditions.MyModel.Value2).Into(func(result *Results) *float64 { return &result.Value1 }),
     )
 
 In this case, the compilation error will be:
 
 .. code-block:: none
 
-    cannot use conditions.MyModel.Value2 (variable of struct type condition.StringField[MyModel]) 
-    as condition.ValueOfType[float64] value in argument to conditions.MyModel.Value1.Plus: condition.StringField[MyModel] 
+    cannot use conditions.MyModel.Value2 (variable of struct type condition.StringField[MyModel])
+    as condition.ValueOfType[float64] value in argument to conditions.MyModel.Value1.Plus: condition.StringField[MyModel]
     does not implement condition.ValueOfType[float64] (wrong type for method GetValue)
 
 Type safety limitations and cqllint
 ------------------------------------------------
 
-Once again, similar to cql.Query, cql.ValueInto is not safe at compile time to determine whether 
+Once again, similar to cql.Query, ``Into`` is not safe at compile time to determine whether
 the values selected or used in functions are joined in the query, as in the following examples:
 
 .. code-block:: go
@@ -405,9 +372,7 @@ the values selected or used in functions are joined in the query, as in the foll
             context.Background(),
             db,
         ),
-        cql.ValueInto(conditions.MyOtherModel.Value1, func(value float64, result *Results) {
-            result.Value1 = value
-        }),
+        conditions.MyOtherModel.Value1.Into(func(result *Results) *float64 { return &result.Value1 }),
     )
 
 .. code-block:: go
@@ -421,9 +386,7 @@ the values selected or used in functions are joined in the query, as in the foll
             context.Background(),
             db,
         ),
-        cql.ValueInto(conditions.MyModel.Value1.Plus(conditions.MyOtherModel.Value2), func(value float64, result *Results) {
-            result.Value1 = value
-        }),
+        conditions.MyModel.Value1.Plus(conditions.MyOtherModel.Value2).Into(func(result *Results) *float64 { return &result.Value1 }),
     )
 
 .. code-block:: go
@@ -437,9 +400,7 @@ the values selected or used in functions are joined in the query, as in the foll
             context.Background(),
             db,
         ),
-        cql.ValueInto(conditions.MyOtherModel.Value1.Aggregate().Sum(), func(value float64, result *Results) {
-            result.Value1 = value
-        }),
+        conditions.MyOtherModel.Value1.Aggregate().Sum().Into(func(result *Results) *float64 { return &result.Value1 }),
     )
 
 Which would generate the following error at runtime:
