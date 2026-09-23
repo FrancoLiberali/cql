@@ -26,10 +26,11 @@ func NewGroupByIntTestSuite(
 
 type Result struct {
 	Int          int
+	Int2         int
 	Float        float64
 	String       string
-	Aggregation1 int
-	Aggregation2 int
+	Aggregation1 float64
+	Aggregation2 float64
 	Aggregation3 float64
 	Aggregation4 bool
 	Aggregation5 string
@@ -45,9 +46,7 @@ func (ts *GroupByIntTestSuite) TestGroupByNoSelect() {
 			context.Background(),
 			ts.db,
 		).GroupBy(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
 	)
 
 	ts.Require().NoError(err)
@@ -60,9 +59,7 @@ func (ts *GroupByIntTestSuite) TestGroupByFieldNotPresentReturnsError() {
 			context.Background(),
 			ts.db,
 		).GroupBy(conditions.Sale.SellerID),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
 	)
 
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
@@ -80,9 +77,7 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsNoSelect() {
 			ts.db,
 			conditions.Product.Int.Is().Eq(cql.Int(1)),
 		).GroupBy(conditions.Product.Int),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
 	)
 
 	ts.Require().NoError(err)
@@ -97,12 +92,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectFieldNotPresentReturnsError() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Sale.ID.Aggregate().Count(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Sale.ID.Aggregate().Count().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.ErrorIs(err, cql.ErrFieldModelNotConcerned)
@@ -121,12 +112,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectSum() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -145,12 +132,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCount() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Count().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -171,12 +154,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountWithNulls() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.IntPointer.Aggregate().Count(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.IntPointer.Aggregate().Count().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -197,12 +176,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectCountAll() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(cql.CountAll(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		cql.CountAll().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -221,12 +196,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAverage() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float.Aggregate().Average(), func(value float64, result *Result) {
-			result.Aggregation3 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Float.Aggregate().Average().Into(func(result *Result) *float64 { return &result.Aggregation3 }),
 	)
 
 	ts.Require().NoError(err)
@@ -245,12 +216,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMin() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float.Aggregate().Min(), func(value float64, result *Result) {
-			result.Aggregation3 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Float.Aggregate().Min().Into(func(result *Result) *float64 { return &result.Aggregation3 }),
 	)
 
 	ts.Require().NoError(err)
@@ -269,12 +236,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMinForNotNumericField() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.String.Aggregate().Min(), func(value string, result *Result) {
-			result.Aggregation5 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.String.Aggregate().Min().Into(func(result *Result) *string { return &result.Aggregation5 }),
 	)
 
 	ts.Require().NoError(err)
@@ -293,12 +256,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMax() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float.Aggregate().Max(), func(value float64, result *Result) {
-			result.Aggregation3 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Float.Aggregate().Max().Into(func(result *Result) *float64 { return &result.Aggregation3 }),
 	)
 
 	ts.Require().NoError(err)
@@ -317,12 +276,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMaxForNotNumericField() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.String.Aggregate().Max(), func(value string, result *Result) {
-			result.Aggregation5 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.String.Aggregate().Max().Into(func(result *Result) *string { return &result.Aggregation5 }),
 	)
 
 	ts.Require().NoError(err)
@@ -343,12 +298,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAll() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Bool.Aggregate().All(), func(value bool, result *Result) {
-			result.Aggregation4 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Bool.Aggregate().All().Into(func(result *Result) *bool { return &result.Aggregation4 }),
 	)
 
 	ts.Require().NoError(err)
@@ -369,12 +320,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAny() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Bool.Aggregate().Any(), func(value bool, result *Result) {
-			result.Aggregation4 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Bool.Aggregate().Any().Into(func(result *Result) *bool { return &result.Aggregation4 }),
 	)
 
 	ts.Require().NoError(err)
@@ -395,12 +342,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectNone() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Bool.Aggregate().None(), func(value bool, result *Result) {
-			result.Aggregation4 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Bool.Aggregate().None().Into(func(result *Result) *bool { return &result.Aggregation4 }),
 	)
 
 	ts.Require().NoError(err)
@@ -425,12 +368,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectAnd() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.IntPointer.Aggregate().And(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.IntPointer.Aggregate().And().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	switch getDBDialector() {
@@ -461,12 +400,8 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectOr() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.IntPointer.Aggregate().Or(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.IntPointer.Aggregate().Or().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	switch getDBDialector() {
@@ -491,15 +426,9 @@ func (ts *GroupByIntTestSuite) TestGroupBySelectMoreThanOne() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation2 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Count().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation2 }),
 	)
 
 	ts.Require().NoError(err)
@@ -521,15 +450,9 @@ func (ts *GroupByIntTestSuite) TestGroupByMoreThanOne() {
 			conditions.Product.Int,
 			conditions.Product.Float,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float, func(value float64, result *Result) {
-			result.Float = value
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Float.Into(func(result *Result) *float64 { return &result.Float }),
+		conditions.Product.Int.Aggregate().Count().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -555,18 +478,10 @@ func (ts *GroupByIntTestSuite) TestGroupByMoreThanOneSelectMoreThanOne() {
 		).GroupBy(
 			conditions.Product.Int, conditions.Product.Float,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float, func(value float64, result *Result) {
-			result.Float = value
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Count(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation3 = value
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Float.Into(func(result *Result) *float64 { return &result.Float }),
+		conditions.Product.Int.Aggregate().Count().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
+		conditions.Product.Float.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation3 }),
 	)
 
 	ts.Require().NoError(err)
@@ -597,12 +512,8 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedField() {
 			).GroupBy(
 				conditions.Product.Int,
 			),
-			cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-				result.Int = int(value)
-			}),
-			cql.ValueInto(conditions.Sale.Code.Aggregate().Sum(), func(value float64, result *Result) {
-				result.Aggregation1 = int(value)
-			}),
+			conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+			conditions.Sale.Code.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 		)
 
 		ts.Require().NoError(err)
@@ -629,12 +540,8 @@ func (ts *GroupByIntTestSuite) TestGroupByWithJoinedFieldInSelect() {
 		).GroupBy(
 			conditions.Sale.Code,
 		),
-		cql.ValueInto(conditions.Sale.Code, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Sale.Code.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -663,12 +570,8 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedFieldAndWithJoinedFieldInSelect(
 			).GroupBy(
 				conditions.Product.Int,
 			),
-			cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-				result.Int = int(value)
-			}),
-			cql.ValueInto(conditions.Product.Float.Aggregate().Sum(), func(value float64, result *Result) {
-				result.Aggregation3 = value
-			}),
+			conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+			conditions.Product.Float.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation3 }),
 		)
 
 		ts.Require().NoError(err)
@@ -692,12 +595,8 @@ func (ts *GroupByIntTestSuite) TestGroupByFieldPresentInMultipleTables() {
 		).GroupBy(
 			conditions.Seller.Name,
 		),
-		cql.ValueInto(conditions.Seller.Name, func(value string, result *Result) {
-			result.String = value
-		}),
-		cql.ValueInto(conditions.Company.Name.Aggregate().Count(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Seller.Name.Into(func(result *Result) *string { return &result.String }),
+		conditions.Company.Name.Aggregate().Count().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -721,9 +620,7 @@ func (ts *GroupByIntTestSuite) TestGroupByJoinedMultipleTimesFieldReturnsError()
 		).GroupBy(
 			conditions.ParentParent.Name,
 		),
-		cql.ValueInto(conditions.ParentParent.Name, func(value string, result *Result) {
-			result.String = value
-		}),
+		conditions.ParentParent.Name.Into(func(result *Result) *string { return &result.String }),
 	)
 
 	ts.ErrorIs(err, cql.ErrAppearanceMustBeSelected)
@@ -744,12 +641,8 @@ func (ts *GroupByIntTestSuite) TestGroupByWithConditionsBefore() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -771,12 +664,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithSameCondition() {
 		).Having(
 			conditions.Product.Int.Aggregate().Sum().Eq(cql.Int(2)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -845,12 +734,8 @@ func (ts *GroupByIntTestSuite) internalTestGroupByHavingWithDifferentCondition(v
 		).Having(
 			conditions.Product.Int.Aggregate().Count().Eq(value),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -872,12 +757,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNum
 		).Having(
 			conditions.Product.Int.Aggregate().Count().Eq(conditions.Product.Int.Aggregate().Sum()),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -899,12 +780,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationNum
 		).Having(
 			conditions.Product.Int.Aggregate().Sum().Eq(conditions.Product.Float.Aggregate().Sum()),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -932,12 +809,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithComparisonWithAggregationOfA
 		).Having(
 			conditions.Product.Float.Aggregate().Sum().Eq(conditions.Sale.ID.Aggregate().Count()),
 		),
-		cql.ValueInto(conditions.Sale.Code, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Sale.Code.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Float.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -962,12 +835,8 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHaving() {
 			conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
 			conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -992,12 +861,8 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithAndConnection() {
 				conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
 			),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1023,12 +888,8 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithOrConnection() {
 				conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(1)),
 			),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1056,12 +917,8 @@ func (ts *GroupByIntTestSuite) TestGroupByWithNotConnection() {
 				conditions.Product.Int.Aggregate().Count().Eq(cql.Int(2)),
 			),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1091,12 +948,8 @@ func (ts *GroupByIntTestSuite) TestGroupByWithNotConnectionMultiple() {
 				conditions.Product.Float.Aggregate().Sum().Eq(cql.Int(2)),
 			),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1121,12 +974,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingBoolean() {
 		).Having(
 			conditions.Product.Bool.Aggregate().All().Eq(cql.Bool(true)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1149,12 +998,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingBooleanCompareWithAnotherAggrega
 		).Having(
 			conditions.Product.Bool.Aggregate().All().Eq(conditions.Product.Bool.Aggregate().Any()),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1180,12 +1025,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingOtherType() {
 		).Having(
 			conditions.Product.String.Aggregate().Max().Eq(cql.String("4")),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1208,12 +1049,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingOtherTypeCompareWithAnotherAggre
 		).Having(
 			conditions.Product.String.Aggregate().Max().Eq(conditions.Product.String.Aggregate().Min()),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1236,12 +1073,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingNotEq() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().NotEq(cql.Float64(2.0)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1264,12 +1097,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLt() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().Lt(cql.Float64(2.0)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1292,12 +1121,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLtOrEq() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().LtOrEq(cql.Float64(2.0)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1320,12 +1145,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingGt() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().Gt(cql.Float64(2.0)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1348,12 +1169,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingGtOrEq() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().GtOrEq(cql.Float64(2.0)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1376,12 +1193,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingIn() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().In([]float64{2.0, 3.0}),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1404,12 +1217,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingNotIn() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().NotIn([]float64{2.0, 3.0}),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1432,12 +1241,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingLike() {
 		).Having(
 			conditions.Product.String.Aggregate().Max().Like("_4"),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1460,12 +1265,8 @@ func (ts *GroupByIntTestSuite) TestGroupByHavingWithField() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1489,15 +1290,9 @@ func (ts *GroupByIntTestSuite) TestGroupByMultipleHavingWithField() {
 		).Having(
 			conditions.Product.Float.Aggregate().Max().Eq(conditions.Product.Int),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Float, func(value float64, result *Result) {
-			result.Float = value
-		}),
-		cql.ValueInto(conditions.Product.Int.Aggregate().Sum(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Float.Into(func(result *Result) *float64 { return &result.Float }),
+		conditions.Product.Int.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1519,12 +1314,8 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateAfterFunction() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(123)).Aggregate().Max(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Plus(cql.Int(123)).Aggregate().Max().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1546,12 +1337,8 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateAfterFunctionDynamic() {
 		).GroupBy(
 			conditions.Product.Int,
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Plus(conditions.Product.Int).Aggregate().Max(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Plus(conditions.Product.Int).Aggregate().Max().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1575,12 +1362,8 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateHavingAfterFunction() {
 		).Having(
 			conditions.Product.Int.Plus(cql.Int(12)).Aggregate().Max().Eq(cql.Int(13)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Plus(cql.Int(123)).Aggregate().Max(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Plus(cql.Int(123)).Aggregate().Max().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)
@@ -1603,12 +1386,8 @@ func (ts *GroupByIntTestSuite) TestGroupByAggregateHavingAfterFunctionDynamic() 
 		).Having(
 			conditions.Product.Int.Plus(conditions.Product.Float).Aggregate().Max().Eq(cql.Int(2)),
 		),
-		cql.ValueInto(conditions.Product.Int, func(value float64, result *Result) {
-			result.Int = int(value)
-		}),
-		cql.ValueInto(conditions.Product.Int.Plus(conditions.Product.Int).Aggregate().Max(), func(value float64, result *Result) {
-			result.Aggregation1 = int(value)
-		}),
+		conditions.Product.Int.Into(func(result *Result) *int { return &result.Int }),
+		conditions.Product.Int.Plus(conditions.Product.Int).Aggregate().Max().Into(func(result *Result) *float64 { return &result.Aggregation1 }),
 	)
 
 	ts.Require().NoError(err)

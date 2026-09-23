@@ -1,11 +1,12 @@
 module github.com/FrancoLiberali/cql/cql-gen/cmd/gen/conditions/tests
 
-go 1.24.0
+go 1.27.0
 
 require (
 	github.com/FrancoLiberali/cql v0.0.1
 	github.com/FrancoLiberali/cql/cql-gen v0.0.1
 	github.com/spf13/viper v1.21.0
+	gorm.io/gorm v1.30.0
 	gotest.tools v2.2.0+incompatible
 )
 
@@ -25,6 +26,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rogpeppe/go-internal v1.12.0 // indirect
 	github.com/sagikazarmark/locafero v0.11.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/sourcegraph/conc v0.3.1-0.20240121214520-5f936abd7ae8 // indirect
@@ -38,11 +40,16 @@ require (
 	golang.org/x/mod v0.29.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
 	golang.org/x/sys v0.37.0 // indirect
-	golang.org/x/text v0.28.0 // indirect
+	golang.org/x/text v0.30.0 // indirect
 	golang.org/x/tools v0.38.0 // indirect
-	gorm.io/gorm v1.30.0 // indirect
 )
 
 replace github.com/FrancoLiberali/cql/cql-gen => ./..
 
 replace github.com/FrancoLiberali/cql => ./../..
+
+// The generated conditions this module compiles pull in cql/condition, which
+// uses gorm-fork-only methods. A module replace does not reach through the cql
+// require above, so this consumer needs its own — matching the root module and
+// the cqllint testdata modules.
+replace gorm.io/gorm => github.com/FrancoLiberali/gorm v1.31.3

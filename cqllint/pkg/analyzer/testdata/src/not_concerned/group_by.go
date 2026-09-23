@@ -213,9 +213,7 @@ func testGroupBySelectSameModel() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(conditions.Brand.Name.Aggregate().Max(), func(value string, result *Result) {
-			result.AggregationString = value
-		}),
+		conditions.Brand.Name.Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }),
 	)
 }
 
@@ -228,9 +226,7 @@ func testGroupBySelectJoinedModel() {
 		).GroupBy(
 			conditions.Phone.Name,
 		),
-		cql.ValueInto(conditions.Brand.Name.Aggregate().Max(), func(value string, result *Result) {
-			result.AggregationString = value
-		}),
+		conditions.Brand.Name.Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }),
 	)
 }
 
@@ -243,9 +239,7 @@ func testGroupBySelectNotJoined() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(conditions.City.Name.Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
-			result.AggregationString = value
-		}),
+		conditions.City.Name.Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -260,9 +254,7 @@ func testGroupBySelectJoinedModelInVariable() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(value, func(value string, result *Result) {
-			result.AggregationString = value
-		}),
+		value.Into(func(result *Result) *string { return &result.AggregationString }),
 	)
 }
 
@@ -277,9 +269,7 @@ func testGroupBySelectNotJoinedInVariable() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(field.Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
-			result.AggregationString = value
-		}),
+		field.Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -292,9 +282,7 @@ func testGroupBySelectJoinedWithFunction() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) {
-			result.AggregationString = value
-		}),
+		conditions.Brand.Name.Concat(cql.String("asd")).Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }),
 	)
 }
 
@@ -309,9 +297,7 @@ func testGroupBySelectJoinedWithFunctionVariable() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(value, func(value string, result *Result) {
-			result.AggregationString = value
-		}),
+		value.Into(func(result *Result) *string { return &result.AggregationString }),
 	)
 }
 
@@ -326,9 +312,7 @@ func testGroupBySelectJoinedWithFunctionOverVariable() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(value.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) {
-			result.AggregationString = value
-		}),
+		value.Concat(cql.String("asd")).Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }),
 	)
 }
 
@@ -341,9 +325,7 @@ func testGroupBySelectNotJoinedWithFunction() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
-			result.AggregationString = value
-		}),
+		conditions.City.Name.Concat(cql.String("asd")).Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -358,9 +340,7 @@ func testGroupBySelectNotJoinedWithFunctionVariable() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(value.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
-			result.AggregationString = value
-		}),
+		value.Concat(cql.String("asd")).Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -375,9 +355,7 @@ func testGroupBySelectNotJoinedWithFunctionOverVariable() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(value.Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
-			result.AggregationString = value
-		}),
+		value.Concat(cql.String("asd")).Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -390,9 +368,7 @@ func testGroupBySelectNotJoinedWithTwoFunctions() {
 		).GroupBy(
 			conditions.Brand.Name,
 		),
-		cql.ValueInto(conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd")).Aggregate().Max(), func(value string, result *Result) { // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
-			result.AggregationString = value
-		}),
+		conditions.City.Name.Concat(cql.String("asd")).Concat(cql.String("asd")).Aggregate().Max().Into(func(result *Result) *string { return &result.AggregationString }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 

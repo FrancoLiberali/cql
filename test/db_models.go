@@ -32,6 +32,7 @@ var ListOfTables = []any{
 	models.Child{},
 	models.AllTypes{},
 	models.WithUnsupportedColumn{},
+	models.Bank{},
 }
 
 func CleanDB(db *cql.DB) {

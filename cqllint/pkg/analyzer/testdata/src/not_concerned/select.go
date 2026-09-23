@@ -52,7 +52,7 @@ func testSelectMainModel() {
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.Brand.Name, func(_ string, _ *Result) {}),
+		conditions.Brand.Name.Into(func(_ *Result) *string { return nil }),
 	)
 }
 
@@ -64,7 +64,7 @@ func testSelectJoinedModel() {
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.Brand.Name, func(_ string, _ *Result) {}),
+		conditions.Brand.Name.Into(func(_ *Result) *string { return nil }),
 	)
 }
 
@@ -75,7 +75,7 @@ func testSelectNotJoinedModel() {
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.City.Name, func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Into(func(_ *Result) *string { return nil }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -86,8 +86,8 @@ func testSelectNotJoinedModelSecond() {
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.Brand.Name, func(_ string, _ *Result) {}),
-		cql.ValueInto(conditions.City.Name, func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.Brand.Name.Into(func(_ *Result) *string { return nil }),
+		conditions.City.Name.Into(func(_ *Result) *string { return nil }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -99,7 +99,7 @@ func testSelectJoinedModelWithFunction() {
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.Brand.Name.Concat(cql.String("asd")), func(_ string, _ *Result) {}),
+		conditions.Brand.Name.Concat(cql.String("asd")).Into(func(_ *Result) *string { return nil }),
 	)
 }
 
@@ -110,7 +110,7 @@ func testSelectNotJoinedModelWithFunction() {
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(conditions.City.Name.Concat(cql.String("asd")), func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Concat(cql.String("asd")).Into(func(_ *Result) *string { return nil }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
@@ -124,7 +124,7 @@ func testSelectJoinedModelInVar() {
 			conditions.Phone.Brand(),
 			conditions.Phone.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(value, func(_ string, _ *Result) {}),
+		value.Into(func(_ *Result) *string { return nil }),
 	)
 }
 
@@ -137,13 +137,13 @@ func testSelectNotJoinedModelInVar() {
 			db,
 			conditions.Brand.Name.Is().Eq(conditions.Brand.Name),
 		),
-		cql.ValueInto(value, func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		value.Into(func(_ *Result) *string { return nil }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 }
 
 func testSelectJoinedModelInListInVar() {
 	selects := []condition.Selection[Result]{
-		cql.ValueInto(conditions.Brand.Name, func(_ string, _ *Result) {}),
+		conditions.Brand.Name.Into(func(_ *Result) *string { return nil }),
 	}
 
 	cql.Select(
@@ -159,7 +159,7 @@ func testSelectJoinedModelInListInVar() {
 
 func testSelectNotJoinedModelInListInVar() {
 	selects := []condition.Selection[Result]{
-		cql.ValueInto(conditions.City.Name, func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Into(func(_ *Result) *string { return nil }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	}
 
 	cql.Select(
@@ -178,7 +178,7 @@ func testSelectNotJoinedModelInListWithAppend() {
 
 	selects = append(
 		selects,
-		cql.ValueInto(conditions.City.Name, func(_ string, _ *Result) {}), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
+		conditions.City.Name.Into(func(_ *Result) *string { return nil }), // want "github.com/FrancoLiberali/cql/test/models.City is not joined by the query"
 	)
 
 	cql.Select(

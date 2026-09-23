@@ -87,6 +87,18 @@ func TestUUIDModelWithTimestamps(t *testing.T) {
 	CheckFileNotExists(t, "./uuidmodelwithtimestamps/cql.go")
 }
 
+func TestDecimalColumn(t *testing.T) {
+	doTest(t, "./decimalcolumn", []Comparison{
+		{
+			Have:            "wallet_conditions.go",
+			Expected:        "./results/decimalcolumn.go",
+			ScannerHave:     "wallet_scanner.go",
+			ScannerExpected: "./results/decimalcolumn_scanner.go",
+		},
+	})
+	CheckFileNotExists(t, "./decimalcolumn/cql.go")
+}
+
 // BasicTypes is the happy-path fixture for every Go basic type that
 // round-trips through SQL via gorm. Both conditions and scanner are emitted
 // and compared against goldens.

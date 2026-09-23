@@ -1757,6 +1757,13 @@ func (b condBinding) rebindStmt(destPkg string, objectType Type, scannerVar stri
 	var newFieldQual *jen.Statement
 
 	switch {
+	case b.field.IsDecimal():
+		// DecimalField has no nullable/not-updatable variants; rebind with the
+		// same NewDecimalField the conditions generator used.
+		newFieldQual = jen.Qual(conditionPath, cqlNewField+cqlDecimalField).Types(
+			objectQual,
+			b.param.GenericType(),
+		)
 	case b.param.isString:
 		newFieldQual = pickConstructor(b.field, cqlNullableStringField, cqlStringField, cqlStringField).Types(objectQual)
 	case b.param.isBool:

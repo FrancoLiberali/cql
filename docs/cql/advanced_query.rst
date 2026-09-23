@@ -207,7 +207,7 @@ Example:
     type Result struct {
         Name      string
         LastName  string
-        SumStatus int
+        SumStatus float64
     }
 
 .. code-block:: go
@@ -220,12 +220,8 @@ Example:
         ).GroupBy(
             conditions.MyModel.Name,
         ),
-        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
-            result.Name = value
-        }),
-        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
-            result.SumStatus = int(value)
-        }),
+        conditions.MyModel.Name.Into(func(result *Result) *string { return &result.Name }),
+        conditions.MyModel.Status.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.SumStatus }),
     )
 
 .. code-block:: go
@@ -239,15 +235,9 @@ Example:
             conditions.MyModel.Name,
             conditions.MyModel.LastName,
         ),
-        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
-            result.Name = value
-        }),
-        cql.ValueInto(conditions.MyModel.LastName, func(value string, result *Result) {
-            result.LastName = value
-        }),
-        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
-            result.SumStatus = int(value)
-        }),
+        conditions.MyModel.Name.Into(func(result *Result) *string { return &result.Name }),
+        conditions.MyModel.LastName.Into(func(result *Result) *string { return &result.LastName }),
+        conditions.MyModel.Status.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.SumStatus }),
     )
 
 .. code-block:: go
@@ -262,12 +252,8 @@ Example:
         ).Having(
             conditions.MyModel.Status.Aggregate().Count().Gt(cql.Int(2)),
         ),
-        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
-            result.Name = value
-        }),
-        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
-            result.SumStatus = int(value)
-        }),
+        conditions.MyModel.Name.Into(func(result *Result) *string { return &result.Name }),
+        conditions.MyModel.Status.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.SumStatus }),
     )
 
 Appearance

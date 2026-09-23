@@ -15,6 +15,7 @@ const (
 	foreignKeyTagName     GormTag = "foreignKey"
 	referencesTagName     GormTag = "references"
 	notNullTagName        GormTag = "not null"
+	typeTagName           GormTag = "type"
 )
 
 type GormTags map[GormTag]string

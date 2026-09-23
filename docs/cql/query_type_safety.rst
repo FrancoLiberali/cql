@@ -317,12 +317,8 @@ time to terminate if the fields used are part of the query, as in the following 
         ).GroupBy(
             conditions.MyModel.Name,
         ),
-        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
-            result.Name = value
-        }),
-        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
-            result.SumStatus = int(value)
-        }),
+        conditions.MyModel.Name.Into(func(result *Result) *string { return &result.Name }),
+        conditions.MyModel.Status.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.SumStatus }),
     )
 
 .. code-block:: go
@@ -338,12 +334,8 @@ time to terminate if the fields used are part of the query, as in the following 
         ).GroupBy(
             conditions.MyOtherModel.Name,
         ),
-        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
-            result.Name = value
-        }),
-        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
-            result.SumStatus = int(value)
-        }),
+        conditions.MyModel.Name.Into(func(result *Result) *string { return &result.Name }),
+        conditions.MyModel.Status.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.SumStatus }),
     )
 
 Which would generate the following error of type cql.ErrFieldModelNotConcerned at runtime:
@@ -367,12 +359,8 @@ Which would generate the following error of type cql.ErrFieldModelNotConcerned a
         ).Having(
             conditions.MyOtherModel.Status.Aggregate().Count().Gt(cql.Int(2)),
         ),
-        cql.ValueInto(conditions.MyModel.Name, func(value string, result *Result) {
-            result.Name = value
-        }),
-        cql.ValueInto(conditions.MyModel.Status.Aggregate().Sum(), func(value float64, result *Result) {
-            result.SumStatus = int(value)
-        }),
+        conditions.MyModel.Name.Into(func(result *Result) *string { return &result.Name }),
+        conditions.MyModel.Status.Aggregate().Sum().Into(func(result *Result) *float64 { return &result.SumStatus }),
     )
 
 Which would generate the following error of type cql.ErrFieldModelNotConcerned at runtime:
